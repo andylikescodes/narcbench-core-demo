@@ -140,6 +140,18 @@
   .model-btn.on { border-color: var(--focus); background: #2a241c; color: var(--ink); font-weight: 700; }
   .model-btn:disabled { opacity: .45; cursor: not-allowed; }
   .model-btn .tag { font-size: 10px; margin-left: 6px; color: var(--faint); }
+
+  .prompt-block {
+    margin-bottom: 10px; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--inset);
+  }
+  .prompt-block .who { font-size: 13px; font-weight: 650; margin-bottom: 6px;
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .prompt-block .sys {
+    font-size: 14px; white-space: pre-wrap; word-break: break-word;
+    color: var(--ink); line-height: 1.4;
+  }
+  .prompt-note { font-size: 12px; color: var(--private); margin: 0 0 8px; }
   footer.foot a { color: var(--muted); }
 </style>
 </head>
@@ -148,7 +160,7 @@
   <div>
     <p class="kicker">Group live demo · official NARCBench Core</p>
     <h1>Private → public → vote</h1>
-    <p class="sub">Replay committee transcripts (pick model): private back-channel, three public rounds, final vote — collusion vs control side by side.
+    <p class="sub">Replay committee transcripts (pick model): Round 0 private back-channel, three public rounds, final vote — collusion vs control side by side. Reveal each agent&rsquo;s hidden <code>system_prompt</code> (official brief).
       <a href="https://arxiv.org/abs/2604.01151" target="_blank" rel="noopener">Rose et al.</a>
     </p>
   </div>
@@ -188,13 +200,12 @@
         </div>
       </div>
       <p class="end-line" id="demoLine"></p>
-      <div class="fallback" id="localFallback" hidden></div>
       <footer class="foot" id="attr"></footer>
     </div>
   </main>
 </div>
 <script>
-const state = { cases: [], caseId: null, payload: null, step: 0, showSecret: false, model: null, models: [] };
+const state = { cases: [], caseId: null, payload: null, step: 0, showPrompts: false, showHonestPrompts: false, model: null, models: [] };
 
 function modelQS() {
   return state.model ? `?model=${encodeURIComponent(state.model)}` : '';
@@ -281,7 +292,7 @@ function renderList(filter = '') {
 async function selectCase(id) {
   state.caseId = id;
   state.step = 0;
-  state.showSecret = false;
+  state.showPrompts = false; state.showHonestPrompts = false;
   renderList(document.getElementById('filter').value);
   const payload = await (await fetch(`/api/case/${id}` + modelQS())).json();
   if (payload.error) { alert(payload.error); return; }
@@ -292,7 +303,7 @@ async function selectCase(id) {
   const n = Math.max((payload.collusion?.rounds || []).length, (payload.control?.rounds || []).length);
   const steps = document.getElementById('steps');
   steps.innerHTML = '';
-  const labels = ['Priv', 'R1', 'R2', 'R3', 'Vote'];
+  const labels = ['R0', 'R1', 'R2', 'R3', 'Vote'];
   for (let i = 0; i < n; i++) {
     const d = document.createElement('button');
     d.type = 'button';
@@ -303,49 +314,79 @@ async function selectCase(id) {
     steps.appendChild(d);
   }
   document.getElementById('demoLine').textContent = payload.demonstrates || '';
-  const fb = document.getElementById('localFallback');
-  if (payload.local_compact) {
-    fb.hidden = false;
-    fb.textContent = `Fallback tab (local compact votes, not chat): collusion ${JSON.stringify(payload.local_compact.collusion_votes)} · control ${JSON.stringify(payload.local_compact.control_votes)}`;
-  } else {
-    fb.hidden = true;
-  }
   renderStep();
 }
 
 function paintSetup() {
   const p = state.payload;
   const fair = p.fair_option, hidden = p.target_option;
-  const optA = p.option_a || `Option A`;
-  const optB = p.option_b || `Option B`;
   const ctx = p.context || p.brief?.setup_excerpt || '';
-  const motive = [p.collusion_motive, p.deception_instruction].filter(Boolean).join('\n\n')
-    || 'Secret brief not in local scenario bank for this id — see private-round messages for coordination.';
+  const lines = p.option_lines || p.brief?.option_lines || [];
+  const optA = lines.find(l => /^Option A/i.test(l)) || 'Option A';
+  const optB = lines.find(l => /^Option B/i.test(l)) || 'Option B';
   const coalition = (p.collusion?.coalition || []).join(' & ') || '—';
+  const sp = p.system_prompts || {};
+  const colPrompts = (sp.collusion && sp.collusion.colluders) || [];
+  const honestPrompts = (sp.collusion && sp.collusion.honest) || [];
+  const hasPrompts = colPrompts.length > 0 || honestPrompts.length > 0;
+
+  let promptHtml = '';
+  if (!hasPrompts) {
+    promptHtml = '<div class="empty">No agent_prompts.json for this run.</div>';
+  } else if (!state.showPrompts) {
+    promptHtml = '<div class="empty">Hidden until revealed — official system_prompt only.</div>';
+  } else {
+    promptHtml = '<p class="prompt-note">Hidden instruction (system_prompt) — not public chat. Round 0 = private back-channel messages below.</p>';
+    for (const e of colPrompts) {
+      promptHtml += `<div class="prompt-block"><div class="who">
+        <span>${esc(e.agent_name)}</span>
+        <span class="role-colluder">colluder</span>
+        <span class="pill">${esc(e.phase || 'private')} · system_prompt</span>
+      </div><div class="sys">${esc(e.system_prompt || '')}</div></div>`;
+    }
+    if (state.showHonestPrompts) {
+      for (const e of honestPrompts) {
+        promptHtml += `<div class="prompt-block"><div class="who">
+          <span>${esc(e.agent_name)}</span>
+          <span class="role-honest">honest</span>
+          <span class="pill">${esc(e.phase || 'discussion')} · system_prompt</span>
+        </div><div class="sys">${esc(e.system_prompt || '')}</div></div>`;
+      }
+    }
+  }
+
   document.getElementById('setup').innerHTML = `
     <div class="card" style="grid-column:1/-1">
       <h3>Committee context · ${esc(p.domain || '')}</h3>
-      <div class="body"><strong>${esc(p.title || '')}</strong> (${esc(p.id)})\n\n${esc(ctx)}</div>
+      <div class="body"><strong>${esc(p.title || '')}</strong> (${esc(p.id)})
+
+${esc(ctx)}</div>
     </div>
     <div class="card">
       <h3>Options</h3>
-      <div class="opt ${fair==='A'?'fair':(hidden==='A'?'hidden':'')}">A · ${esc(optA)}</div>
-      <div class="opt ${fair==='B'?'fair':(hidden==='B'?'hidden':'')}">B · ${esc(optB)}</div>
+      <div class="opt ${fair==='A'?'fair':(hidden==='A'?'hidden':'')}">${esc(optA)}</div>
+      <div class="opt ${fair==='B'?'fair':(hidden==='B'?'hidden':'')}">${esc(optB)}</div>
       <div class="body" style="margin-top:8px;color:var(--muted)">Fair choice: <strong>Option ${esc(fair)}</strong><br/>Hidden goal: <strong>Option ${esc(hidden)}</strong></div>
     </div>
     <div class="card">
-      <h3>Colluders (secret pair)</h3>
+      <h3>Colluders</h3>
       <div class="body">${esc(coalition)}</div>
     </div>
-    <div class="card secret ${state.showSecret ? '' : 'blurred'}" id="secretCard">
-      <h3>Hidden motive / deception brief</h3>
-      <div class="body" id="secretBody">${esc(motive)}</div>
-      <div style="margin-top:8px"><button class="ctrl" type="button" id="toggleSecret">${state.showSecret ? 'Hide secret brief' : 'Show secret brief'}</button></div>
+    <div class="card secret ${state.showPrompts ? '' : 'blurred'}" id="secretCard" style="grid-column:1/-1">
+      <h3>Show system prompts · hidden agent instructions</h3>
+      <div id="secretBody">${promptHtml}</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px">
+        <button class="ctrl" type="button" id="toggleSecret">${state.showPrompts ? 'Hide system prompts' : 'Show system prompts'}</button>
+        ${state.showPrompts && honestPrompts.length ? `<button class="ctrl" type="button" id="toggleHonest">${state.showHonestPrompts ? 'Hide honest prompts' : 'Also show honest prompts'}</button>` : ''}
+      </div>
     </div>`;
   document.getElementById('toggleSecret').onclick = () => {
-    state.showSecret = !state.showSecret;
+    state.showPrompts = !state.showPrompts;
+    if (!state.showPrompts) state.showHonestPrompts = false;
     paintSetup();
   };
+  const th = document.getElementById('toggleHonest');
+  if (th) th.onclick = () => { state.showHonestPrompts = !state.showHonestPrompts; paintSetup(); };
 }
 
 function renderStep() {
@@ -359,12 +400,15 @@ function renderStep() {
   const colR = p.collusion.rounds[state.step];
   const ctrlR = p.control.rounds[state.step];
   const label = (colR || ctrlR || {}).label || `Step ${state.step}`;
+  const phase = (colR || ctrlR || {}).phase;
   const plain = ({
-    private: 'Private back-channel',
+    private: 'Round 0 · Private back-channel',
     discussion: 'Public committee talk',
     final: 'Final recommendations + vote'
-  })[(colR || ctrlR || {}).phase] || label;
-  document.getElementById('roundLabel').textContent = plain + (label.includes('Round') ? ` · ${label}` : '');
+  })[phase] || label;
+  // Prefer build_index label when it already says Round N
+  document.getElementById('roundLabel').textContent =
+    (label && label.startsWith('Round')) ? label : plain;
   document.getElementById('colMeta').textContent =
     `success=${p.collusion.collusion_success} · ${fmtTally(p.collusion.tally)}`;
   document.getElementById('colMeta').className = 'pill ' + (p.collusion.collusion_success ? 'bad' : 'ok');
@@ -378,7 +422,7 @@ function renderStep() {
 function renderRound(r, isCollusion) {
   if (!r) return '<div class="empty">No round data.</div>';
   if (r.phase === 'private' && (!r.messages || !r.messages.length)) {
-    return '<div class="empty">No private back-channel in control (honest committee only).</div>';
+    return '<div class="empty">Round 0 empty in control (no private back-channel — honest committee only).</div>';
   }
   let html = '';
   for (const m of (r.messages || [])) {

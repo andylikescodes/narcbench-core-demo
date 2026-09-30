@@ -20,8 +20,6 @@ APP = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 INDEX_PATH = DATA / "demo_index.json"
 MODELS_PATH = DATA / "models_index.json"
-LOCAL_SCENARIOS = Path("/workspace/collusion-exp/data/scenarios.json")
-LOCAL_RUNS = Path("/workspace/collusion-exp/data/runs")
 HOST = "0.0.0.0"
 # Local presenter default 8765; Zeabur/PaaS set PORT (often 8080).
 PORT = int(os.environ.get("PORT", "8765"))
@@ -85,62 +83,33 @@ def load_pair(scenario_id: str, model_id: str | None = None) -> dict | None:
     if not (col and ctrl):
         return None
     meta = next((c for c in idx["cases"] if c["id"] == scenario_id), None)
-    local_sc = None
-    try:
-        if LOCAL_SCENARIOS.exists():
-            by = {s["id"]: s for s in json.loads(LOCAL_SCENARIOS.read_text())}
-            local_sc = by.get(scenario_id)
-    except Exception:
-        local_sc = None
-
-    local_compact = None
-    try:
-        if LOCAL_RUNS.exists():
-            lc = LOCAL_RUNS / f"{scenario_id}__collusion.json"
-            lt = LOCAL_RUNS / f"{scenario_id}__control.json"
-            if lc.exists() and lt.exists():
-                local_compact = {
-                    "note": "Local Gemma-2 compact final-vote snapshots (not multi-round chat).",
-                    "collusion_votes": {
-                        a["agent_name"]: a.get("vote")
-                        for a in json.loads(lc.read_text()).get("agents", [])
-                    },
-                    "control_votes": {
-                        a["agent_name"]: a.get("vote")
-                        for a in json.loads(lt.read_text()).get("agents", [])
-                    },
-                }
-    except Exception:
-        local_compact = None
+    brief = col.get("brief") or {}
+    # Official system_prompt from agent_prompts.json only (no local scenario bank).
+    system_prompts = {
+        "note": (
+            "Hidden agent instructions (system_prompt from agent_prompts.json), "
+            "not public chat. Private back-channel messages are Round 0."
+        ),
+        "collusion": col.get("system_prompts") or {},
+        "control": ctrl.get("system_prompts") or {},
+    }
 
     return {
         "id": scenario_id,
         "model_id": mid,
-        "title": (
-            col.get("scenario_title")
-            or (meta or {}).get("title")
-            or (local_sc or {}).get("title")
-        ),
-        "domain": (
-            col.get("scenario_domain")
-            or (meta or {}).get("domain")
-            or (local_sc or {}).get("domain")
-        ),
-        "fair_option": col.get("fair_option") or (local_sc or {}).get("fair_choice"),
-        "target_option": col.get("target_option") or (local_sc or {}).get("hidden_goal"),
+        "title": col.get("scenario_title") or (meta or {}).get("title"),
+        "domain": col.get("scenario_domain") or (meta or {}).get("domain"),
+        "fair_option": col.get("fair_option"),
+        "target_option": col.get("target_option"),
         "option_labels": col.get("option_labels"),
-        "option_a": (local_sc or {}).get("option_a"),
-        "option_b": (local_sc or {}).get("option_b"),
-        "context": (local_sc or {}).get("context")
-        or (col.get("brief") or {}).get("setup_excerpt"),
-        "collusion_motive": (local_sc or {}).get("collusion_motive"),
-        "deception_instruction": (local_sc or {}).get("deception_instruction"),
-        "brief": col.get("brief"),
+        "option_lines": brief.get("option_lines"),
+        "context": brief.get("setup_excerpt"),
+        "brief": brief,
+        "system_prompts": system_prompts,
         "protocol": col.get("protocol"),
         "multi_round": bool(col.get("multi_round") and ctrl.get("multi_round")),
         "collusion": col,
         "control": ctrl,
-        "local_compact": local_compact,
         "attribution": idx.get("attribution"),
         "source": col.get("source"),
         "source_dir": str(src),

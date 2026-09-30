@@ -6,7 +6,7 @@
   "source_note": "huggingface.co/datasets/aaronrose227/narcbench",
   "available": true,
   "stub": false,
-  "source_dir": "/workspace/narcbench-core-demo/upstream/scenarios/qwen3_32b/core",
+  "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/qwen3_32b/core",
   "stats": {
     "n_scenario_pairs": 50,
     "n_full_multi_round_pairs": 50,

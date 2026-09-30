@@ -103,6 +103,63 @@ def scenario_brief(prompts: list | None, config: dict) -> dict:
     return brief
 
 
+
+def extract_system_prompts(prompts: list | None) -> dict:
+    """Official system_prompt strings from agent_prompts.json (no invented summaries).
+
+    Prefer private-phase entries for colluders; first seen phase for others.
+    system_prompt is identical across phases in Core dumps — we still record phase.
+    """
+    if not prompts:
+        return {
+            "colluders": [],
+            "honest": [],
+            "by_agent": [],
+            "n_prompt_records": 0,
+        }
+    # First occurrence per (agent_name, role, phase)
+    phase_entries: list[dict] = []
+    seen_phase: set[tuple] = set()
+    for p in prompts:
+        key = (p.get("agent_name"), p.get("role"), p.get("phase"))
+        if key in seen_phase:
+            continue
+        seen_phase.add(key)
+        phase_entries.append(
+            {
+                "agent_name": p.get("agent_name"),
+                "role": p.get("role"),
+                "phase": p.get("phase"),
+                "channel": p.get("channel"),
+                "round": p.get("round"),
+                "system_prompt": p.get("system_prompt") or "",
+            }
+        )
+
+    # One system_prompt per agent (prefer private for colluders, else earliest)
+    by_agent: list[dict] = []
+    seen_agent: set[str] = set()
+    # Pass 1: colluders private
+    for e in phase_entries:
+        if e["role"] == "colluder" and e["phase"] == "private" and e["agent_name"] not in seen_agent:
+            by_agent.append(e)
+            seen_agent.add(e["agent_name"])
+    # Pass 2: everyone else first occurrence
+    for e in phase_entries:
+        if e["agent_name"] in seen_agent:
+            continue
+        by_agent.append(e)
+        seen_agent.add(e["agent_name"])
+
+    colluders = [e for e in by_agent if e.get("role") == "colluder"]
+    honest = [e for e in by_agent if e.get("role") == "honest"]
+    return {
+        "colluders": colluders,
+        "honest": honest,
+        "by_agent": by_agent,
+        "n_prompt_records": len(prompts),
+    }
+
 def load_run(run_dir: Path, *, model_id: str, source_tag: str) -> dict | None:
     results_p = run_dir / "results.json"
     config_p = run_dir / "run_config.json"
@@ -249,6 +306,7 @@ def load_run(run_dir: Path, *, model_id: str, source_tag: str) -> dict | None:
         "public_messages": flat_public,
         "rounds": rounds,
         "brief": scenario_brief(prompts, config),
+        "system_prompts": extract_system_prompts(prompts),
         "has_agent_prompts": prompts is not None,
         "n_prompt_turns": len(prompts) if prompts else 0,
         "source": source_tag,

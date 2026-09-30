@@ -103,4 +103,5 @@ python3 app/server.py   # still http://127.0.0.1:8765/
 
 - Gemma model picker entries stay **stubs** until real `core/` runs exist; Qwen is fully available.
 - No RunPod / GPU needed for this host — transcripts are baked into the image.
+- Viewer shows official **`system_prompt`** from `agent_prompts.json` (Show system prompts). Round 0 = private back-channel.
 - Attribution: Rose et al. NARCBench; HF `aaronrose227/narcbench`.

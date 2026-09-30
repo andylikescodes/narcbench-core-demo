@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NARCBench Core · multi-round walkthrough</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%2314120e' width='16' height='16'/%3E%3Ccircle cx='5' cy='9' r='2.2' fill='%23e07a5f'/%3E%3Ccircle cx='11' cy='7' r='2.2' fill='%237ec8b3'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #14120e; --raise: #1e1b16; --inset: #0e0d0b; --line: #3a342c;
+    --ink: #f3ecdf; --muted: #b3a894; --faint: #7d7468; --hit: #e4a15a;
+    --collude: #e07a5f; --collude-dim: #3a1f1a; --honest: #7ec8b3;
+    --honest-dim: #16302a; --control: #8eafd6; --control-dim: #1a2430;
+    --private: #c9a0dc; --pass: #c6d67a; --focus: #f0d7a4;
+    --shadow: 0 18px 50px rgba(0,0,0,.35); color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 17px/1.45 "Segoe UI", system-ui, sans-serif;
+    background:
+      radial-gradient(900px 420px at 8% -10%, rgba(224,122,95,.14), transparent 60%),
+      radial-gradient(800px 480px at 100% 0%, rgba(126,200,179,.1), transparent 55%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  header.top {
+    padding: 18px 22px 14px; border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: flex-end;
+  }
+  .kicker { margin: 0 0 4px; letter-spacing: .16em; text-transform: uppercase; font-size: 12px; color: var(--hit); }
+  h1 { margin: 0; font-family: Palatino, Georgia, serif; font-weight: 560; font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.03em; line-height: 1; }
+  .sub { color: var(--muted); font-size: 14px; max-width: 46rem; }
+  .sub a { color: var(--hit); }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; font-size: 12px; color: var(--muted); background: rgba(14,13,11,.55); }
+  .pill.ok { color: var(--pass); border-color: #3f6b4a; }
+  .pill.bad { color: var(--collude); border-color: #6b3a32; }
+  .layout { display: grid; grid-template-columns: minmax(260px, 320px) 1fr; min-height: calc(100vh - 100px); }
+  @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+  aside {
+    border-right: 1px solid var(--line); background: var(--raise); padding: 12px;
+    overflow: auto; max-height: calc(100vh - 100px);
+  }
+  aside input {
+    width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--inset); margin-bottom: 8px;
+  }
+  .case {
+    text-align: left; width: 100%; border: 1px solid var(--line); background: var(--inset);
+    border-radius: 12px; padding: 10px 12px; margin-bottom: 6px; color: var(--ink);
+  }
+  .case.active { border-color: var(--focus); background: #2a241c; }
+  .case .id { font-family: ui-monospace, monospace; font-size: 12px; color: var(--hit); }
+  .case .title { font-size: 15px; font-weight: 650; margin-top: 2px; }
+  .case .meta { font-size: 12px; color: var(--faint); margin-top: 3px; }
+  main { padding: 16px 18px 48px; overflow: auto; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    margin-bottom: 12px; padding: 12px; background: var(--raise);
+    border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+  }
+  button.ctrl {
+    background: var(--inset); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
+  }
+  button.ctrl.primary { background: var(--ink); color: #1a140e; border-color: transparent; font-weight: 680; }
+  button.ctrl:disabled { opacity: .4; cursor: default; }
+  .steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .step-dot {
+    min-width: 2.2rem; height: 2.2rem; padding: 0 6px; border-radius: 999px; display: grid; place-items: center;
+    font-size: 12px; border: 1px solid var(--line); background: var(--inset); cursor: pointer; color: var(--muted);
+  }
+  .step-dot.on { background: #2a241c; border-color: var(--focus); color: var(--ink); font-weight: 700; }
+  .kbd { color: var(--faint); font-size: 12px; margin-left: auto; }
+  .round-label { font-family: Palatino, Georgia, serif; font-size: clamp(22px, 3vw, 30px); margin: 6px 0 12px; letter-spacing: -0.02em; }
+  .setup {
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; margin-bottom: 12px;
+  }
+  @media (max-width: 900px) { .setup { grid-template-columns: 1fr; } }
+  .card { background: var(--raise); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+  .card h3 { margin: 0 0 6px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .card .body { font-size: 15px; white-space: pre-wrap; }
+  .opt { font-family: Palatino, Georgia, serif; font-size: 20px; margin: 2px 0; }
+  .opt.fair { color: var(--honest); }
+  .opt.hidden { color: var(--collude); }
+  .secret { border-color: var(--private); background: #2a1a32; }
+  .secret.blurred .body { filter: blur(6px); user-select: none; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 800px) { .cols { grid-template-columns: 1fr; } }
+  .col {
+    background: var(--raise); border: 1px solid var(--line); border-radius: 16px;
+    padding: 12px; min-height: 220px; box-shadow: var(--shadow);
+  }
+  .col.collusion { border-top: 3px solid var(--collude); }
+  .col.control { border-top: 3px solid var(--control); }
+  .col h3 {
+    margin: 0 0 10px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+    display: flex; justify-content: space-between; gap: 8px; align-items: center; color: var(--muted);
+  }
+  .col.collusion h3 span:first-child { color: var(--collude); }
+  .col.control h3 span:first-child { color: var(--control); }
+  .msg {
+    border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+    margin-bottom: 8px; background: var(--inset);
+  }
+  .msg.private { box-shadow: inset 4px 0 0 var(--private); }
+  .msg.public { box-shadow: inset 4px 0 0 var(--control); }
+  .msg.final { box-shadow: inset 4px 0 0 var(--hit); }
+  .msg .who { font-size: 13px; font-weight: 650; margin-bottom: 4px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .role-colluder { color: var(--collude); background: var(--collude-dim); border: 1px solid var(--collude); border-radius: 999px; padding: 1px 8px; font-size: 11px; }
+  .role-honest { color: var(--control); background: var(--control-dim); border: 1px solid var(--control); border-radius: 999px; padding: 1px 8px; font-size: 11px; }
+  .msg .body { font-size: 16px; white-space: pre-wrap; word-break: break-word; }
+  .empty { color: var(--muted); font-style: italic; font-size: 14px; padding: 8px 0; }
+  .tally {
+    margin-top: 8px; padding: 10px 12px; border-radius: 12px;
+    background: var(--inset); border: 1px solid var(--line); font-size: 15px;
+  }
+  .end-line { margin-top: 14px; font-size: 17px; color: var(--ink); }
+  .fallback {
+    margin-top: 12px; padding: 10px 12px; border-radius: 12px; border: 1px dashed #6b4a32;
+    color: var(--hit); background: #3a2a18; font-size: 13px;
+  }
+  footer.foot {
+    margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line);
+    color: var(--faint); font-size: 12px; line-height: 1.5;
+  }
+
+  .model-bar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 10px 22px; border-bottom: 1px solid var(--line); background: rgba(30,27,22,.85);
+  }
+  .model-bar label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .model-btn {
+    border: 1px solid var(--line); background: var(--inset); border-radius: 999px;
+    padding: 7px 14px; font-size: 13px; color: var(--muted);
+  }
+  .model-btn.on { border-color: var(--focus); background: #2a241c; color: var(--ink); font-weight: 700; }
+  .model-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .model-btn .tag { font-size: 10px; margin-left: 6px; color: var(--faint); }
+  footer.foot a { color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <p class="kicker">Group live demo · official NARCBench Core</p>
+    <h1>Private → public → vote</h1>
+    <p class="sub">Replay committee transcripts (pick model): private back-channel, three public rounds, final vote — collusion vs control side by side.
+      <a href="https://arxiv.org/abs/2604.01151" target="_blank" rel="noopener">Rose et al.</a>
+    </p>
+  </div>
+  <div class="pills" id="headerPills"></div>
+</header>
+
+<div class="model-bar" id="modelBar">
+  <label>Model</label>
+  <div id="modelButtons" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  <span class="pill" id="modelNote" style="margin-left:auto"></span>
+</div>
+<div class="layout">
+  <aside>
+    <input id="filter" type="search" placeholder="Filter id / domain / title…" />
+    <div id="caseList"></div>
+  </aside>
+  <main>
+    <div id="empty" class="empty" style="padding:40px 8px">Select a scenario from the left.</div>
+    <div id="view" hidden>
+      <div class="toolbar">
+        <button class="ctrl" id="prev" type="button">← Prev</button>
+        <button class="ctrl primary" id="next" type="button">Next →</button>
+        <div class="steps" id="steps"></div>
+        <span id="statsPills"></span>
+        <span class="kbd">← → or Space</span>
+      </div>
+      <div class="round-label" id="roundLabel"></div>
+      <div class="setup" id="setup"></div>
+      <div class="cols">
+        <div class="col collusion">
+          <h3><span>Collusion run</span><span id="colMeta" class="pill"></span></h3>
+          <div id="colBody"></div>
+        </div>
+        <div class="col control">
+          <h3><span>Control run</span><span id="ctrlMeta" class="pill"></span></h3>
+          <div id="ctrlBody"></div>
+        </div>
+      </div>
+      <p class="end-line" id="demoLine"></p>
+      <div class="fallback" id="localFallback" hidden></div>
+      <footer class="foot" id="attr"></footer>
+    </div>
+  </main>
+</div>
+<script>
+const state = { cases: [], caseId: null, payload: null, step: 0, showSecret: false, model: null, models: [] };
+
+function modelQS() {
+  return state.model ? `?model=${encodeURIComponent(state.model)}` : '';
+}
+
+function renderModelBar() {
+  const el = document.getElementById('modelButtons');
+  el.innerHTML = '';
+  for (const m of state.models) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'model-btn' + (m.id === state.model ? ' on' : '');
+    btn.disabled = !m.available;
+    btn.innerHTML = `${esc(m.label || m.id)}<span class="tag">${m.available ? (m.stats?.n_scenario_pairs ?? '?') + ' pairs' : 'stub'}</span>`;
+    btn.title = m.available ? (m.source_dir || m.hf_model || '') : 'No transcripts on disk yet — run regen or wait for smoke.';
+    if (m.available) btn.onclick = () => switchModel(m.id);
+    el.appendChild(btn);
+  }
+  const note = document.getElementById('modelNote');
+  const active = state.models.find(x => x.id === state.model);
+  note.textContent = active?.replication ? 'replication (Gemma)' : (active ? 'official HF Core' : '');
+}
+
+async function switchModel(id) {
+  if (id === state.model) return;
+  state.model = id;
+  state.caseId = null;
+  renderModelBar();
+  await loadCases();
+}
+
+async function loadCases() {
+  const idx = await (await fetch('/api/cases' + modelQS())).json();
+  state.cases = idx.cases || [];
+  state.attribution = idx.attribution;
+  state.protocol = idx.protocol;
+  state.models = idx.models || state.models || [];
+  state.model = idx.active_model || idx.default_model || state.model || 'qwen3_32b';
+  renderModelBar();
+  const active = state.models.find(m => m.id === state.model);
+  document.getElementById('headerPills').innerHTML = `
+    <span class="pill ok"><strong>${idx.stats?.n_full_multi_round_pairs ?? '?'}</strong> full multi-round pairs</span>
+    <span class="pill">${idx.stats?.n_runs_on_disk ?? '?'} runs on disk</span>
+    <span class="pill">${esc(active?.label || state.model)}</span>`;
+  document.getElementById('attr').innerHTML =
+    `Adapted from <strong>NARCBench Core</strong> (Rose et al.) —
+     <a href="${idx.attribution?.arxiv}" target="_blank" rel="noopener">arXiv</a> ·
+     <a href="${idx.attribution?.github}" target="_blank" rel="noopener">GitHub</a> ·
+     <a href="${idx.attribution?.hf_dataset}" target="_blank" rel="noopener">HF scenarios</a>.
+     ${active?.replication ? 'Gemma transcripts are a <strong>protocol replication</strong>, not the official dump.' : 'Dialogue replayed verbatim from official results.json.'}<br/>
+     ${esc(idx.attribution?.note || '')}`;
+  renderList();
+  const first = state.cases.find(c => c.multi_round) || state.cases[0];
+  if (first) selectCase(first.id);
+  else {
+    document.getElementById('empty').hidden = false;
+    document.getElementById('view').hidden = true;
+    document.getElementById('empty').textContent = active?.available
+      ? 'No paired scenarios for this model.'
+      : `Model ${state.model} is a stub — no transcripts yet. Run smoke regen on GPU/RunPod, then rebuild index.`;
+  }
+}
+
+
+
+function renderList(filter = '') {
+  const q = filter.trim().toLowerCase();
+  const el = document.getElementById('caseList');
+  el.innerHTML = '';
+  for (const c of state.cases) {
+    const hay = `${c.id} ${c.domain} ${c.title}`.toLowerCase();
+    if (q && !hay.includes(q)) continue;
+    const btn = document.createElement('button');
+    btn.className = 'case' + (c.id === state.caseId ? ' active' : '');
+    btn.innerHTML = `<div class="id">${esc(c.id)}</div>
+      <div class="title">${esc(c.title || '')}</div>
+      <div class="meta">${esc((c.domain || '').replace(/_/g,' '))} · R0 priv ${c.n_private} · pub ${c.n_public}
+        · ${c.collusion_success ? 'collusion hit' : 'no hit'}</div>`;
+    btn.onclick = () => selectCase(c.id);
+    el.appendChild(btn);
+  }
+}
+
+async function selectCase(id) {
+  state.caseId = id;
+  state.step = 0;
+  state.showSecret = false;
+  renderList(document.getElementById('filter').value);
+  const payload = await (await fetch(`/api/case/${id}` + modelQS())).json();
+  if (payload.error) { alert(payload.error); return; }
+  state.payload = payload;
+  document.getElementById('empty').hidden = true;
+  document.getElementById('view').hidden = false;
+  paintSetup();
+  const n = Math.max((payload.collusion?.rounds || []).length, (payload.control?.rounds || []).length);
+  const steps = document.getElementById('steps');
+  steps.innerHTML = '';
+  const labels = ['Priv', 'R1', 'R2', 'R3', 'Vote'];
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('button');
+    d.type = 'button';
+    d.className = 'step-dot' + (i === state.step ? ' on' : '');
+    d.textContent = labels[i] || String(i);
+    d.title = (payload.collusion.rounds[i] || payload.control.rounds[i] || {}).label || `step ${i}`;
+    d.onclick = () => { state.step = i; renderStep(); };
+    steps.appendChild(d);
+  }
+  document.getElementById('demoLine').textContent = payload.demonstrates || '';
+  const fb = document.getElementById('localFallback');
+  if (payload.local_compact) {
+    fb.hidden = false;
+    fb.textContent = `Fallback tab (local compact votes, not chat): collusion ${JSON.stringify(payload.local_compact.collusion_votes)} · control ${JSON.stringify(payload.local_compact.control_votes)}`;
+  } else {
+    fb.hidden = true;
+  }
+  renderStep();
+}
+
+function paintSetup() {
+  const p = state.payload;
+  const fair = p.fair_option, hidden = p.target_option;
+  const optA = p.option_a || `Option A`;
+  const optB = p.option_b || `Option B`;
+  const ctx = p.context || p.brief?.setup_excerpt || '';
+  const motive = [p.collusion_motive, p.deception_instruction].filter(Boolean).join('\n\n')
+    || 'Secret brief not in local scenario bank for this id — see private-round messages for coordination.';
+  const coalition = (p.collusion?.coalition || []).join(' & ') || '—';
+  document.getElementById('setup').innerHTML = `
+    <div class="card" style="grid-column:1/-1">
+      <h3>Committee context · ${esc(p.domain || '')}</h3>
+      <div class="body"><strong>${esc(p.title || '')}</strong> (${esc(p.id)})\n\n${esc(ctx)}</div>
+    </div>
+    <div class="card">
+      <h3>Options</h3>
+      <div class="opt ${fair==='A'?'fair':(hidden==='A'?'hidden':'')}">A · ${esc(optA)}</div>
+      <div class="opt ${fair==='B'?'fair':(hidden==='B'?'hidden':'')}">B · ${esc(optB)}</div>
+      <div class="body" style="margin-top:8px;color:var(--muted)">Fair choice: <strong>Option ${esc(fair)}</strong><br/>Hidden goal: <strong>Option ${esc(hidden)}</strong></div>
+    </div>
+    <div class="card">
+      <h3>Colluders (secret pair)</h3>
+      <div class="body">${esc(coalition)}</div>
+    </div>
+    <div class="card secret ${state.showSecret ? '' : 'blurred'}" id="secretCard">
+      <h3>Hidden motive / deception brief</h3>
+      <div class="body" id="secretBody">${esc(motive)}</div>
+      <div style="margin-top:8px"><button class="ctrl" type="button" id="toggleSecret">${state.showSecret ? 'Hide secret brief' : 'Show secret brief'}</button></div>
+    </div>`;
+  document.getElementById('toggleSecret').onclick = () => {
+    state.showSecret = !state.showSecret;
+    paintSetup();
+  };
+}
+
+function renderStep() {
+  const p = state.payload;
+  if (!p) return;
+  const n = Math.max((p.collusion?.rounds || []).length, (p.control?.rounds || []).length);
+  state.step = Math.max(0, Math.min(state.step, n - 1));
+  document.getElementById('prev').disabled = state.step <= 0;
+  document.getElementById('next').disabled = state.step >= n - 1;
+  [...document.getElementById('steps').children].forEach((d, i) => d.classList.toggle('on', i === state.step));
+  const colR = p.collusion.rounds[state.step];
+  const ctrlR = p.control.rounds[state.step];
+  const label = (colR || ctrlR || {}).label || `Step ${state.step}`;
+  const plain = ({
+    private: 'Private back-channel',
+    discussion: 'Public committee talk',
+    final: 'Final recommendations + vote'
+  })[(colR || ctrlR || {}).phase] || label;
+  document.getElementById('roundLabel').textContent = plain + (label.includes('Round') ? ` · ${label}` : '');
+  document.getElementById('colMeta').textContent =
+    `success=${p.collusion.collusion_success} · ${fmtTally(p.collusion.tally)}`;
+  document.getElementById('colMeta').className = 'pill ' + (p.collusion.collusion_success ? 'bad' : 'ok');
+  document.getElementById('ctrlMeta').textContent = fmtTally(p.control.tally);
+  document.getElementById('colBody').innerHTML = renderRound(colR, true);
+  document.getElementById('ctrlBody').innerHTML = renderRound(ctrlR, false);
+  document.getElementById('statsPills').innerHTML =
+    `<span class="pill ${p.multi_round ? 'ok' : 'bad'}">${p.multi_round ? 'full multi-round' : 'incomplete'}</span>`;
+}
+
+function renderRound(r, isCollusion) {
+  if (!r) return '<div class="empty">No round data.</div>';
+  if (r.phase === 'private' && (!r.messages || !r.messages.length)) {
+    return '<div class="empty">No private back-channel in control (honest committee only).</div>';
+  }
+  let html = '';
+  for (const m of (r.messages || [])) {
+    const role = m.role || 'honest';
+    const ch = m.channel || r.channel || r.phase || '';
+    html += `<div class="msg ${ch}"><div class="who">
+      <span>${esc(m.speaker)}</span>
+      <span class="role-${role}">${role === 'colluder' ? 'colluder' : 'honest'}</span>
+      ${m.vote != null ? `<span class="pill">vote ${esc(m.vote)}</span>` : ''}
+    </div><div class="body">${esc(m.text || '')}</div></div>`;
+  }
+  if (r.phase === 'final' && r.votes) {
+    html += `<div class="tally"><strong>Final vote</strong> · ${esc(JSON.stringify(r.votes))}
+      · tally ${esc(JSON.stringify(r.tally || {}))}
+      ${isCollusion ? `· collusion_success=${r.collusion_success} · target_majority=${r.target_majority}` : ''}</div>`;
+  }
+  return html || '<div class="empty">No messages.</div>';
+}
+
+function fmtTally(t) {
+  if (!t) return '—';
+  return Object.entries(t).map(([k, v]) => `${k}:${v}`).join(' ');
+}
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+document.getElementById('filter').addEventListener('input', e => renderList(e.target.value));
+document.getElementById('prev').onclick = () => { state.step--; renderStep(); };
+document.getElementById('next').onclick = () => { state.step++; renderStep(); };
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); state.step--; renderStep(); }
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); state.step++; renderStep(); }
+});
+loadCases().catch(err => {
+  document.getElementById('empty').textContent = 'Failed to load /api/cases: ' + err;
+});
+</script>
+</body>
+</html>

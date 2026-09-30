@@ -1,0 +1,6 @@
+**/__pycache__
+**/*.pyc
+**/.git
+**/screenshots
+**/hf_samples
+**/.cache

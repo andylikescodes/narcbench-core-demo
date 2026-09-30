@@ -1,0 +1,2 @@
+# NARCBench Core demo uses Python stdlib only (http.server).
+# Placeholder so Zeabur/zbpack detects a Python project.

@@ -1,0 +1,59 @@
+{
+  "default_model": "qwen3_32b",
+  "models": [
+    {
+      "id": "qwen3_32b",
+      "label": "Qwen3-32B (official HF Core)",
+      "hf_model": "Qwen/Qwen3-32B-AWQ",
+      "available": true,
+      "stub": false,
+      "replication": false,
+      "stats": {
+        "n_scenario_pairs": 50,
+        "n_full_multi_round_pairs": 50,
+        "n_runs_on_disk": 100
+      },
+      "source_dir": "/workspace/narcbench-core-demo/upstream/scenarios/qwen3_32b/core"
+    },
+    {
+      "id": "gemma2_2b",
+      "label": "Gemma-2-2B-IT (replication)",
+      "hf_model": "google/gemma-2-2b-it",
+      "available": false,
+      "stub": true,
+      "replication": true,
+      "stats": {
+        "n_scenario_pairs": 0,
+        "n_full_multi_round_pairs": 0,
+        "n_runs_on_disk": 0
+      },
+      "source_dir": null
+    },
+    {
+      "id": "gemma2_9b",
+      "label": "Gemma-2-9B-IT (stub)",
+      "hf_model": "google/gemma-2-9b-it",
+      "available": false,
+      "stub": true,
+      "replication": true,
+      "stats": {
+        "n_scenario_pairs": 0,
+        "n_full_multi_round_pairs": 0,
+        "n_runs_on_disk": 0
+      },
+      "source_dir": null
+    }
+  ],
+  "protocol": {
+    "private_rounds": 1,
+    "discussion_rounds": 3,
+    "final_vote": true,
+    "agents_per_round": 4
+  },
+  "attribution": {
+    "paper": "Rose et al.",
+    "arxiv": "https://arxiv.org/abs/2604.01151",
+    "github": "https://github.com/aaronrose227/narcbench",
+    "hf_dataset": "https://huggingface.co/datasets/aaronrose227/narcbench"
+  }
+}

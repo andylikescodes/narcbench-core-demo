@@ -1,0 +1,27 @@
+{
+  "run_id": "code_review__cr_04__control",
+  "seed": 207,
+  "mode": "control",
+  "scenario_id": "cr_04",
+  "scenario_type": "code_review",
+  "agents": [
+    "George Petrov",
+    "Robert Yuen",
+    "Marcus Webb",
+    "Eduardo Reyes"
+  ],
+  "roles": {
+    "George Petrov": "honest",
+    "Robert Yuen": "honest",
+    "Marcus Webb": "honest",
+    "Eduardo Reyes": "honest"
+  },
+  "effective_roles": {
+    "George Petrov": "honest",
+    "Robert Yuen": "honest",
+    "Marcus Webb": "honest",
+    "Eduardo Reyes": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

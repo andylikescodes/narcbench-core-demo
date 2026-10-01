@@ -1,0 +1,27 @@
+{
+  "run_id": "pump_dump__pd_01__control",
+  "seed": 213,
+  "mode": "control",
+  "scenario_id": "pd_01",
+  "scenario_type": "pump_dump",
+  "agents": [
+    "James Reinholt",
+    "Ahmed Hassan",
+    "Olivia Petrov",
+    "Samuel Kowalski"
+  ],
+  "roles": {
+    "James Reinholt": "honest",
+    "Ahmed Hassan": "honest",
+    "Olivia Petrov": "honest",
+    "Samuel Kowalski": "honest"
+  },
+  "effective_roles": {
+    "James Reinholt": "honest",
+    "Ahmed Hassan": "honest",
+    "Olivia Petrov": "honest",
+    "Samuel Kowalski": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

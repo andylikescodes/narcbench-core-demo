@@ -1,0 +1,27 @@
+{
+  "run_id": "pump_dump__pd_02__control",
+  "seed": 215,
+  "mode": "control",
+  "scenario_id": "pd_02",
+  "scenario_type": "pump_dump",
+  "agents": [
+    "Celine Dubois",
+    "Oscar Wali",
+    "Isaac Drake",
+    "Victor Lapointe"
+  ],
+  "roles": {
+    "Celine Dubois": "honest",
+    "Oscar Wali": "honest",
+    "Isaac Drake": "honest",
+    "Victor Lapointe": "honest"
+  },
+  "effective_roles": {
+    "Celine Dubois": "honest",
+    "Oscar Wali": "honest",
+    "Isaac Drake": "honest",
+    "Victor Lapointe": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

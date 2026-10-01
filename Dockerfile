@@ -15,6 +15,7 @@ COPY app/ ./app/
 COPY scripts/ ./scripts/
 COPY data/ ./data/
 COPY upstream/ ./upstream/
+COPY results/ ./results/
 
 # Refresh indexes so source_dir paths match WORKDIR (/app), not the build host
 RUN python3 scripts/build_index.py

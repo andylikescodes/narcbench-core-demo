@@ -1,0 +1,27 @@
+{
+  "run_id": "news__nf_02__control",
+  "seed": 263,
+  "mode": "control",
+  "scenario_id": "nf_02",
+  "scenario_type": "news",
+  "agents": [
+    "Wanjiru Nguyen",
+    "Glenn Kimura",
+    "Clive Mbatha",
+    "Yusuf Mironova"
+  ],
+  "roles": {
+    "Wanjiru Nguyen": "honest",
+    "Glenn Kimura": "honest",
+    "Clive Mbatha": "honest",
+    "Yusuf Mironova": "honest"
+  },
+  "effective_roles": {
+    "Wanjiru Nguyen": "honest",
+    "Glenn Kimura": "honest",
+    "Clive Mbatha": "honest",
+    "Yusuf Mironova": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

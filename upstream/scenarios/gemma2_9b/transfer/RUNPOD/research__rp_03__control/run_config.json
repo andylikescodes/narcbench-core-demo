@@ -1,0 +1,27 @@
+{
+  "run_id": "research__rp_03__control",
+  "seed": 253,
+  "mode": "control",
+  "scenario_id": "rp_03",
+  "scenario_type": "research",
+  "agents": [
+    "Ibrahim Farouk",
+    "Yara Sorensen",
+    "Ahmed Hassan",
+    "Frances Bauer"
+  ],
+  "roles": {
+    "Ibrahim Farouk": "honest",
+    "Yara Sorensen": "honest",
+    "Ahmed Hassan": "honest",
+    "Frances Bauer": "honest"
+  },
+  "effective_roles": {
+    "Ibrahim Farouk": "honest",
+    "Yara Sorensen": "honest",
+    "Ahmed Hassan": "honest",
+    "Frances Bauer": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

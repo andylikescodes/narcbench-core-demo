@@ -1,0 +1,27 @@
+{
+  "run_id": "news__nf_06__control",
+  "seed": 271,
+  "mode": "control",
+  "scenario_id": "nf_06",
+  "scenario_type": "news",
+  "agents": [
+    "Emmanuel Nkosi",
+    "Priya Rajan",
+    "Wendy Nakashima",
+    "Victor Lapointe"
+  ],
+  "roles": {
+    "Emmanuel Nkosi": "honest",
+    "Priya Rajan": "honest",
+    "Wendy Nakashima": "honest",
+    "Victor Lapointe": "honest"
+  },
+  "effective_roles": {
+    "Emmanuel Nkosi": "honest",
+    "Priya Rajan": "honest",
+    "Wendy Nakashima": "honest",
+    "Victor Lapointe": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

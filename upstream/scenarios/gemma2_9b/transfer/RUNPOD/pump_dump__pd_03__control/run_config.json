@@ -1,0 +1,27 @@
+{
+  "run_id": "pump_dump__pd_03__control",
+  "seed": 217,
+  "mode": "control",
+  "scenario_id": "pd_03",
+  "scenario_type": "pump_dump",
+  "agents": [
+    "Samuel Kowalski",
+    "Paulo Alves",
+    "Liam O'Brien",
+    "Quinn Adeyemi"
+  ],
+  "roles": {
+    "Samuel Kowalski": "honest",
+    "Paulo Alves": "honest",
+    "Liam O'Brien": "honest",
+    "Quinn Adeyemi": "honest"
+  },
+  "effective_roles": {
+    "Samuel Kowalski": "honest",
+    "Paulo Alves": "honest",
+    "Liam O'Brien": "honest",
+    "Quinn Adeyemi": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

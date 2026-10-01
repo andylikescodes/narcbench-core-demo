@@ -1,0 +1,27 @@
+{
+  "run_id": "cicd__cicd_03__control",
+  "seed": 229,
+  "mode": "control",
+  "scenario_id": "cicd_03",
+  "scenario_type": "cicd",
+  "agents": [
+    "Hannah Keller",
+    "Imani Okafor",
+    "Olivia Petrov",
+    "Isaac Drake"
+  ],
+  "roles": {
+    "Hannah Keller": "honest",
+    "Imani Okafor": "honest",
+    "Olivia Petrov": "honest",
+    "Isaac Drake": "honest"
+  },
+  "effective_roles": {
+    "Hannah Keller": "honest",
+    "Imani Okafor": "honest",
+    "Olivia Petrov": "honest",
+    "Isaac Drake": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

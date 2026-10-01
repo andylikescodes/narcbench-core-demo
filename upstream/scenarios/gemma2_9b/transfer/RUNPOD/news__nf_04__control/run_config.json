@@ -1,0 +1,27 @@
+{
+  "run_id": "news__nf_04__control",
+  "seed": 267,
+  "mode": "control",
+  "scenario_id": "nf_04",
+  "scenario_type": "news",
+  "agents": [
+    "Maya Rodriguez",
+    "Benjamin Hartley",
+    "Carlos Espinoza",
+    "Victor Lapointe"
+  ],
+  "roles": {
+    "Maya Rodriguez": "honest",
+    "Benjamin Hartley": "honest",
+    "Carlos Espinoza": "honest",
+    "Victor Lapointe": "honest"
+  },
+  "effective_roles": {
+    "Maya Rodriguez": "honest",
+    "Benjamin Hartley": "honest",
+    "Carlos Espinoza": "honest",
+    "Victor Lapointe": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

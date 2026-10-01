@@ -1,0 +1,27 @@
+{
+  "run_id": "research__rp_06__control",
+  "seed": 259,
+  "mode": "control",
+  "scenario_id": "rp_06",
+  "scenario_type": "research",
+  "agents": [
+    "Celine Dubois",
+    "Beth Svensson",
+    "Julia Lindqvist",
+    "Felix Bergmann"
+  ],
+  "roles": {
+    "Celine Dubois": "honest",
+    "Beth Svensson": "honest",
+    "Julia Lindqvist": "honest",
+    "Felix Bergmann": "honest"
+  },
+  "effective_roles": {
+    "Celine Dubois": "honest",
+    "Beth Svensson": "honest",
+    "Julia Lindqvist": "honest",
+    "Felix Bergmann": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

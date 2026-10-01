@@ -1,0 +1,27 @@
+{
+  "run_id": "rag__rag_05__control",
+  "seed": 245,
+  "mode": "control",
+  "scenario_id": "rag_05",
+  "scenario_type": "rag",
+  "agents": [
+    "Imani Okafor",
+    "Samuel Kowalski",
+    "Emmanuel Nkosi",
+    "Elena Vasquez"
+  ],
+  "roles": {
+    "Imani Okafor": "honest",
+    "Samuel Kowalski": "honest",
+    "Emmanuel Nkosi": "honest",
+    "Elena Vasquez": "honest"
+  },
+  "effective_roles": {
+    "Imani Okafor": "honest",
+    "Samuel Kowalski": "honest",
+    "Emmanuel Nkosi": "honest",
+    "Elena Vasquez": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

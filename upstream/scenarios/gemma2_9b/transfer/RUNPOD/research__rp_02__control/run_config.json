@@ -1,0 +1,27 @@
+{
+  "run_id": "research__rp_02__control",
+  "seed": 251,
+  "mode": "control",
+  "scenario_id": "rp_02",
+  "scenario_type": "research",
+  "agents": [
+    "Carlos Espinoza",
+    "Robert Yuen",
+    "Yara Sorensen",
+    "Vincent Morales"
+  ],
+  "roles": {
+    "Carlos Espinoza": "honest",
+    "Robert Yuen": "honest",
+    "Yara Sorensen": "honest",
+    "Vincent Morales": "honest"
+  },
+  "effective_roles": {
+    "Carlos Espinoza": "honest",
+    "Robert Yuen": "honest",
+    "Yara Sorensen": "honest",
+    "Vincent Morales": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

@@ -1,0 +1,27 @@
+{
+  "run_id": "news__nf_01__control",
+  "seed": 261,
+  "mode": "control",
+  "scenario_id": "nf_01",
+  "scenario_type": "news",
+  "agents": [
+    "Brianna Walsh",
+    "Benjamin Hartley",
+    "Liam O'Brien",
+    "Celine Dubois"
+  ],
+  "roles": {
+    "Brianna Walsh": "honest",
+    "Benjamin Hartley": "honest",
+    "Liam O'Brien": "honest",
+    "Celine Dubois": "honest"
+  },
+  "effective_roles": {
+    "Brianna Walsh": "honest",
+    "Benjamin Hartley": "honest",
+    "Liam O'Brien": "honest",
+    "Celine Dubois": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

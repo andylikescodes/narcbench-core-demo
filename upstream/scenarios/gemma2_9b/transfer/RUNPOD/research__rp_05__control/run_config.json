@@ -1,0 +1,27 @@
+{
+  "run_id": "research__rp_05__control",
+  "seed": 257,
+  "mode": "control",
+  "scenario_id": "rp_05",
+  "scenario_type": "research",
+  "agents": [
+    "Uma Patel",
+    "Ahmed Hassan",
+    "Grace Mensah",
+    "Rachel Kim"
+  ],
+  "roles": {
+    "Uma Patel": "honest",
+    "Ahmed Hassan": "honest",
+    "Grace Mensah": "honest",
+    "Rachel Kim": "honest"
+  },
+  "effective_roles": {
+    "Uma Patel": "honest",
+    "Ahmed Hassan": "honest",
+    "Grace Mensah": "honest",
+    "Rachel Kim": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

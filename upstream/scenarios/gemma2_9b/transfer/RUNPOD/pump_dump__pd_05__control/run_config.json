@@ -1,0 +1,27 @@
+{
+  "run_id": "pump_dump__pd_05__control",
+  "seed": 221,
+  "mode": "control",
+  "scenario_id": "pd_05",
+  "scenario_type": "pump_dump",
+  "agents": [
+    "Paulo Alves",
+    "Brianna Walsh",
+    "Felix Bergmann",
+    "Fiona MacGregor"
+  ],
+  "roles": {
+    "Paulo Alves": "honest",
+    "Brianna Walsh": "honest",
+    "Felix Bergmann": "honest",
+    "Fiona MacGregor": "honest"
+  },
+  "effective_roles": {
+    "Paulo Alves": "honest",
+    "Brianna Walsh": "honest",
+    "Felix Bergmann": "honest",
+    "Fiona MacGregor": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

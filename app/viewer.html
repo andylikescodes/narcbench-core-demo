@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NARCBench Core · multi-round walkthrough</title>
+<title>NARCBench · Core walkthrough & Transfer FULL hard</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%2314120e' width='16' height='16'/%3E%3Ccircle cx='5' cy='9' r='2.2' fill='%23e07a5f'/%3E%3Ccircle cx='11' cy='7' r='2.2' fill='%237ec8b3'/%3E%3C/svg%3E" />
 <style>
   :root {
@@ -153,9 +153,99 @@
   }
   .prompt-note { font-size: 12px; color: var(--private); margin: 0 0 8px; }
   footer.foot a { color: var(--muted); }
+
+  .mode-bar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 10px 22px; border-bottom: 1px solid var(--line); background: rgba(20,18,14,.92);
+  }
+  .mode-bar label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin-right: 4px; }
+  .mode-btn {
+    border: 1px solid var(--line); background: var(--inset); border-radius: 999px;
+    padding: 8px 16px; font-size: 13px; color: var(--muted);
+  }
+  .mode-btn.on { border-color: var(--focus); background: #2a241c; color: var(--ink); font-weight: 700; }
+  .mode-btn .hint { font-size: 10px; margin-left: 6px; color: var(--faint); }
+  #coreRoot[hidden], #transferRoot[hidden] { display: none !important; }
+  .xfer-wrap { max-width: 1100px; margin: 0 auto; padding: 18px 22px 56px; }
+  .verdict-banner {
+    background: linear-gradient(135deg, #2a1a18, #1e2a24);
+    border: 1px solid #5a3a32; border-radius: 16px; padding: 18px 20px;
+    box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  .verdict-banner h2 {
+    margin: 0 0 8px; font-family: Palatino, Georgia, serif; font-size: clamp(22px, 3vw, 30px);
+    letter-spacing: -0.02em; color: var(--collude);
+  }
+  .verdict-banner p { margin: 0 0 10px; color: var(--ink); font-size: 16px; line-height: 1.45; }
+  .verdict-banner ul { margin: 0; padding-left: 1.2rem; color: var(--muted); font-size: 14px; }
+  .verdict-banner li { margin: 4px 0; }
+  .proto-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px; margin-bottom: 16px;
+  }
+  .proto-card {
+    background: var(--raise); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;
+  }
+  .proto-card .lbl { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .proto-card .val { margin-top: 4px; font-size: 15px; color: var(--ink); word-break: break-word; }
+  .proto-card .val.mono { font-family: ui-monospace, monospace; font-size: 13px; color: var(--hit); }
+  .arm-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px; margin-bottom: 18px;
+  }
+  .arm-card {
+    background: var(--raise); border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px; box-shadow: var(--shadow);
+  }
+  .arm-card.weak { border-top: 3px solid var(--collude); }
+  .arm-card.strong { border-top: 3px solid var(--pass); }
+  .arm-card h3 { margin: 0 0 4px; font-size: 15px; }
+  .arm-card .short { font-size: 12px; color: var(--faint); margin-bottom: 10px; }
+  .arm-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric-box {
+    background: var(--inset); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px;
+  }
+  .metric-box .lbl { font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
+  .metric-box .num { font-family: Palatino, Georgia, serif; font-size: 26px; letter-spacing: -0.02em; }
+  .metric-box .num.full { color: var(--pass); }
+  .metric-box .num.smoke { color: var(--muted); }
+  .arm-detail { margin-top: 10px; font-size: 12px; color: var(--faint); line-height: 1.45; }
+  .xfer-table-wrap {
+    overflow: auto; border: 1px solid var(--line); border-radius: 14px;
+    background: var(--raise); margin-bottom: 16px;
+  }
+  table.xfer {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+  }
+  table.xfer th, table.xfer td {
+    padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left;
+  }
+  table.xfer th { color: var(--faint); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; background: var(--inset); }
+  table.xfer td.num { font-family: ui-monospace, monospace; text-align: right; }
+  table.xfer tr:last-child td { border-bottom: none; }
+  table.xfer .hi { color: var(--pass); font-weight: 700; }
+  table.xfer .lo { color: var(--collude); }
+  .caveat {
+    margin-top: 8px; padding: 12px 14px; border-radius: 12px;
+    border: 1px dashed #6b4a32; background: #2a2218; color: var(--hit); font-size: 13px; line-height: 1.45;
+  }
+  .md-block {
+    margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+    background: var(--inset); border: 1px solid var(--line);
+    font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap;
+    color: var(--muted); max-height: 320px; overflow: auto;
+  }
 </style>
 </head>
 <body>
+<div class="mode-bar" id="modeBar">
+  <label>View</label>
+  <button type="button" class="mode-btn" id="modeCore" data-view="core">Core walkthrough<span class="hint">transcripts</span></button>
+  <button type="button" class="mode-btn" id="modeTransfer" data-view="transfer">Transfer FULL hard<span class="hint">n=72 metrics</span></button>
+  <span class="pill" id="modeNote" style="margin-left:auto">Deep link: <code>/?view=transfer</code></span>
+</div>
+
+<div id="coreRoot">
 <header class="top">
   <div>
     <p class="kicker">Group live demo · official NARCBench Core</p>
@@ -204,8 +294,25 @@
     </div>
   </main>
 </div>
+</div><!-- /coreRoot -->
+
+<div id="transferRoot" hidden>
+  <header class="top">
+    <div>
+      <p class="kicker">Core → Transfer · Gemma-2-9B-IT</p>
+      <h1>Transfer FULL hard</h1>
+      <p class="sub">Zero-shot probes trained on Core discussion, evaluated on Transfer final.
+        Smoke n=12 vs FULL n=72 primary AUROC. Activations stay on the extract pod — not shipped here.</p>
+    </div>
+    <div class="pills" id="xferPills"></div>
+  </header>
+  <div class="xfer-wrap" id="xferBody">
+    <div class="empty" id="xferLoading">Loading /api/transfer/full-hard…</div>
+  </div>
+</div>
+
 <script>
-const state = { cases: [], caseId: null, payload: null, step: 0, showPrompts: false, showHonestPrompts: false, model: null, models: [] };
+const state = { cases: [], caseId: null, payload: null, step: 0, showPrompts: false, showHonestPrompts: false, model: null, models: [], view: 'core', transfer: null };
 
 function modelQS() {
   return state.model ? `?model=${encodeURIComponent(state.model)}` : '';
@@ -460,9 +567,124 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') { e.preventDefault(); state.step--; renderStep(); }
   if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); state.step++; renderStep(); }
 });
-loadCases().catch(err => {
-  document.getElementById('empty').textContent = 'Failed to load /api/cases: ' + err;
-});
+function fmtAuroc(x) {
+  if (x == null || Number.isNaN(Number(x))) return '—';
+  return Number(x).toFixed(3);
+}
+
+function setView(view, { push = true } = {}) {
+  state.view = view === 'transfer' ? 'transfer' : 'core';
+  document.getElementById('coreRoot').hidden = state.view !== 'core';
+  document.getElementById('transferRoot').hidden = state.view !== 'transfer';
+  document.getElementById('modeCore').classList.toggle('on', state.view === 'core');
+  document.getElementById('modeTransfer').classList.toggle('on', state.view === 'transfer');
+  if (push) {
+    const url = new URL(location.href);
+    if (state.view === 'transfer') url.searchParams.set('view', 'transfer');
+    else url.searchParams.delete('view');
+    history.replaceState({}, '', url);
+  }
+  if (state.view === 'transfer') loadTransfer().catch(err => {
+    document.getElementById('xferBody').innerHTML =
+      `<div class="empty">Failed to load transfer metrics: ${esc(String(err))}</div>`;
+  });
+}
+
+async function loadTransfer() {
+  const el = document.getElementById('xferBody');
+  el.innerHTML = '<div class="empty">Loading /api/transfer/full-hard…</div>';
+  const data = await (await fetch('/api/transfer/full-hard')).json();
+  if (!data.ok) {
+    el.innerHTML = `<div class="empty">${esc(data.error || 'missing transfer package')}</div>`;
+    return;
+  }
+  state.transfer = data;
+  document.getElementById('xferPills').innerHTML = `
+    <span class="pill ok"><strong>n=${esc(data.n_transfer_runs)}</strong> FULL</span>
+    <span class="pill">smoke n=${esc(data.n_smoke)}</span>
+    <span class="pill">${esc(data.n_samples)} samples</span>
+    <span class="pill">${esc(data.model)}</span>
+    <span class="pill">layers ${(data.layers || []).join('–')}</span>`;
+
+  const arms = data.arms || [];
+  const cards = arms.map(a => {
+    const weak = (a.key || '').includes('j_only');
+    const peak = fmtAuroc(a.auroc_peak_suspicion);
+    const split = fmtAuroc(a.auroc_deception_split);
+    const asym = fmtAuroc(a.auroc_asymmetry_probe);
+    return `<div class="arm-card ${weak ? 'weak' : 'strong'}">
+      <h3>${esc(a.label)}</h3>
+      <div class="short">${esc(a.short || '')}</div>
+      <div class="arm-metrics">
+        <div class="metric-box"><div class="lbl">Smoke n=12</div><div class="num smoke">${fmtAuroc(a.smoke_primary)}</div></div>
+        <div class="metric-box"><div class="lbl">FULL n=72</div><div class="num full">${fmtAuroc(a.full_primary)}</div></div>
+      </div>
+      <div class="arm-detail">Peak ${peak} · Split ${split} · Asym ${asym}
+        ${(a.layers && a.layers.length) ? ` · layers ${a.layers.join(',')}` : ''}</div>
+    </div>`;
+  }).join('');
+
+  const rows = arms.map(a => {
+    const cls = (a.key || '').includes('j_only') ? 'lo' : 'hi';
+    return `<tr>
+      <td>${esc(a.label)}</td>
+      <td class="num">${fmtAuroc(a.smoke_primary)}</td>
+      <td class="num ${cls}">${fmtAuroc(a.full_primary)}</td>
+      <td class="num">${fmtAuroc(a.auroc_peak_suspicion)}</td>
+      <td class="num">${fmtAuroc(a.auroc_deception_split)}</td>
+      <td class="num">${fmtAuroc(a.auroc_asymmetry_probe)}</td>
+    </tr>`;
+  }).join('');
+
+  const bullets = (data.verdict_bullets || []).map(b => `<li>${esc(b)}</li>`).join('');
+
+  el.innerHTML = `
+    <div class="verdict-banner">
+      <h2>Verdict</h2>
+      <p>${esc(data.verdict_plain || data.verdict || '')}</p>
+      <ul>${bullets}</ul>
+      <p style="margin-top:10px;font-size:12px;color:var(--faint)">API code: <code>${esc(data.verdict || '')}</code></p>
+    </div>
+    <div class="proto-grid">
+      <div class="proto-card"><div class="lbl">Protocol</div><div class="val">${esc(data.protocol_plain || data.protocol || '')}</div></div>
+      <div class="proto-card"><div class="lbl">Train run (Core discussion)</div><div class="val mono">${esc(data.core_train_run || '')}</div></div>
+      <div class="proto-card"><div class="lbl">Model</div><div class="val">${esc(data.model || '')}</div></div>
+      <div class="proto-card"><div class="lbl">Extract pod</div><div class="val mono">${esc(data.extract_pod_id || '')}</div></div>
+      <div class="proto-card"><div class="lbl">n / samples</div><div class="val">FULL n=${esc(data.n_transfer_runs)} · ${esc(data.n_samples)} act samples</div></div>
+      <div class="proto-card"><div class="lbl">Layers</div><div class="val mono">${esc((data.layers || []).join(', '))}</div></div>
+    </div>
+    <h2 style="font-family:Palatino,Georgia,serif;font-size:22px;margin:8px 0 12px;letter-spacing:-0.02em">Arms · smoke vs FULL primary AUROC</h2>
+    <div class="arm-grid">${cards}</div>
+    <div class="xfer-table-wrap">
+      <table class="xfer">
+        <thead><tr>
+          <th>Arm</th><th>Smoke n=12</th><th>FULL n=72</th><th>Peak</th><th>Split</th><th>Asym</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="caveat">${esc(data.activations_note || '')}<br/>${esc(data.transcripts_note || '')}</div>
+    ${data.markdown ? `<details style="margin-top:14px"><summary style="cursor:pointer;color:var(--muted)">TRANSFER_FULL_HARD_METRICS.md</summary><div class="md-block">${esc(data.markdown)}</div></details>` : ''}
+    <footer class="foot" style="margin-top:18px">Updated ${esc(data.updated || '')} · package under <code>results/transfer/</code></footer>
+  `;
+}
+
+document.getElementById('modeCore').onclick = () => setView('core');
+document.getElementById('modeTransfer').onclick = () => setView('transfer');
+
+(function boot() {
+  const params = new URLSearchParams(location.search);
+  const initial = (params.get('view') || '').toLowerCase() === 'transfer' ? 'transfer' : 'core';
+  setView(initial, { push: false });
+  if (initial === 'core') {
+    loadCases().catch(err => {
+      document.getElementById('empty').textContent = 'Failed to load /api/cases: ' + err;
+    });
+  } else {
+    // Still warm Core indexes in background so switching back is instant
+    loadCases().catch(() => {});
+  }
+})();
 </script>
 </body>
 </html>

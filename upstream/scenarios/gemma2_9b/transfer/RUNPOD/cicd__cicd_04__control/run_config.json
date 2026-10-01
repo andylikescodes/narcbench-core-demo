@@ -1,0 +1,27 @@
+{
+  "run_id": "cicd__cicd_04__control",
+  "seed": 231,
+  "mode": "control",
+  "scenario_id": "cicd_04",
+  "scenario_type": "cicd",
+  "agents": [
+    "Eduardo Reyes",
+    "Benjamin Hartley",
+    "Imani Okafor",
+    "Clive Mbatha"
+  ],
+  "roles": {
+    "Eduardo Reyes": "honest",
+    "Benjamin Hartley": "honest",
+    "Imani Okafor": "honest",
+    "Clive Mbatha": "honest"
+  },
+  "effective_roles": {
+    "Eduardo Reyes": "honest",
+    "Benjamin Hartley": "honest",
+    "Imani Okafor": "honest",
+    "Clive Mbatha": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

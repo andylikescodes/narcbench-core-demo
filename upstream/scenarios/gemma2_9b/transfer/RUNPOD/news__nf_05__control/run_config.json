@@ -1,0 +1,27 @@
+{
+  "run_id": "news__nf_05__control",
+  "seed": 269,
+  "mode": "control",
+  "scenario_id": "nf_05",
+  "scenario_type": "news",
+  "agents": [
+    "Celine Dubois",
+    "Benjamin Hartley",
+    "Glenn Kimura",
+    "Elena Vasquez"
+  ],
+  "roles": {
+    "Celine Dubois": "honest",
+    "Benjamin Hartley": "honest",
+    "Glenn Kimura": "honest",
+    "Elena Vasquez": "honest"
+  },
+  "effective_roles": {
+    "Celine Dubois": "honest",
+    "Benjamin Hartley": "honest",
+    "Glenn Kimura": "honest",
+    "Elena Vasquez": "honest"
+  },
+  "coalition": [],
+  "collusion_active": false
+}

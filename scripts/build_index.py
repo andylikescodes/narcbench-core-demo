@@ -4,7 +4,7 @@
 Sources under upstream/scenarios/<model_slug>/core/ (optionally .../core/<run_id>/):
   qwen3_32b   — official HF dump (available now)
   gemma2_2b   — regen smoke / full (when present)
-  gemma2_9b   — stub until regen exists
+  gemma2_9b   — regen / full (when present)
 
 Protocol (generation/core.py): private R0 → 3 public discussion rounds → final vote.
 """
@@ -41,9 +41,9 @@ MODEL_CATALOG = [
     },
     {
         "id": "gemma2_9b",
-        "label": "Gemma-2-9B-IT (stub)",
+        "label": "Gemma-2-9B-IT (replication)",
         "hf_model": "google/gemma-2-9b-it",
-        "source": "not generated yet",
+        "source": "local regen via upstream/scenarios/gemma2_9b/core/20261001T012639Z",
         "replication": True,
     },
 ]

@@ -1,9 +1,9 @@
 {
   "model_id": "gemma2_9b",
-  "label": "Gemma-2-9B-IT (stub)",
+  "label": "Gemma-2-9B-IT (replication)",
   "hf_model": "google/gemma-2-9b-it",
   "replication": true,
-  "source_note": "not generated yet",
+  "source_note": "local regen via upstream/scenarios/gemma2_9b/core/20261001T012639Z",
   "available": true,
   "stub": false,
   "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/gemma2_9b/core/20261001T012639Z",

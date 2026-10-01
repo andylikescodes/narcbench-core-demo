@@ -31,7 +31,7 @@
     },
     {
       "id": "gemma2_9b",
-      "label": "Gemma-2-9B-IT (stub)",
+      "label": "Gemma-2-9B-IT (replication)",
       "hf_model": "google/gemma-2-9b-it",
       "available": true,
       "stub": false,

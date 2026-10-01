@@ -1928,15 +1928,15 @@
       "id": "gemma2_2b",
       "label": "Gemma-2-2B-IT (replication)",
       "hf_model": "google/gemma-2-2b-it",
-      "available": false,
-      "stub": true,
+      "available": true,
+      "stub": false,
       "replication": true,
       "stats": {
-        "n_scenario_pairs": 0,
-        "n_full_multi_round_pairs": 0,
-        "n_runs_on_disk": 0
+        "n_scenario_pairs": 50,
+        "n_full_multi_round_pairs": 50,
+        "n_runs_on_disk": 100
       },
-      "source_dir": null
+      "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/gemma2_2b/core/20260930T215454Z"
     },
     {
       "id": "gemma2_9b",

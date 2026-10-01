@@ -1942,15 +1942,15 @@
       "id": "gemma2_9b",
       "label": "Gemma-2-9B-IT (stub)",
       "hf_model": "google/gemma-2-9b-it",
-      "available": false,
-      "stub": true,
+      "available": true,
+      "stub": false,
       "replication": true,
       "stats": {
-        "n_scenario_pairs": 0,
-        "n_full_multi_round_pairs": 0,
-        "n_runs_on_disk": 0
+        "n_scenario_pairs": 50,
+        "n_full_multi_round_pairs": 50,
+        "n_runs_on_disk": 100
       },
-      "source_dir": null
+      "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/gemma2_9b/core/20261001T012639Z"
     }
   ],
   "default_model": "qwen3_32b"

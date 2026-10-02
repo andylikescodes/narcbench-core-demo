@@ -1,5 +1,7 @@
 # NARCBench Core demo — Zeabur deploy
 
+Weekend science review (Transfer-stable, 2026-10-01): see [README.md](README.md#weekend-review).
+
 Public walkthrough of **Qwen3-32B NARCBench-Core** multi-round transcripts (model picker API kept). **No GPU** — static + `app/server.py` only.
 
 Suggested subdomain: **`narcbench-demo.zeabur.app`** (same pattern as `age18-kit.zeabur.app`).

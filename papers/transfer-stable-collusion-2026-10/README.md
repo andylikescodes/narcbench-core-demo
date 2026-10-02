@@ -1,19 +1,35 @@
-# Transfer-stable collusion representations (weekend review)
+# Transfer-stable collusion representations — weekend review PDF
 
 **Author:** Andy Liang  
-**Date:** 1 October 2026 (PT)  
-**Lane:** NARCBench Transfer-stable · Gemma-2-9B-it · Core → Transfer
+**Date:** 2026-10-01 (PT)  
+**PDF:** `main.pdf` (14 pages)  
+**Science freeze:** folded in from `WEEKEND_REVIEW/CLAIMS_NUMBER_SHEET` (+ checklist / tables / figures)
 
-Review the typeset paper here:
+## Build
+```bash
+pdflatex main && bibtex main && pdflatex main && pdflatex main
+```
 
-- [`main.pdf`](main.pdf) — 14 pages, pdfTeX, built 2026-10-01 17:21 PT. Title: *Transfer-Stable Collusion Representations in Multi-Agent Committee Models: J-Space Failure, Attention Localization, and Causal Humility*.
-- [`CODE_INDEX.md`](CODE_INDEX.md) — symlink to the study-pack code map.
-- Claims sheet: [`../../results/transfer_stable/WEEKEND_REVIEW/CLAIMS_NUMBER_SHEET.md`](../../results/transfer_stable/WEEKEND_REVIEW/CLAIMS_NUMBER_SHEET.md)
-- Pack entry: [`../../results/transfer_stable/WEEKEND_REVIEW/00_README.md`](../../results/transfer_stable/WEEKEND_REVIEW/00_README.md)
-- FINAL handoff: [`../../docs/NARCBench-Weekend-FINAL-HANDOFF-2026-10-01.md`](../../docs/NARCBench-Weekend-FINAL-HANDOFF-2026-10-01.md)
+## Sources
+Numbers only from:
+- `/workspace/narcbench-core-demo/results/transfer_stable/WEEKEND_REVIEW/CLAIMS_NUMBER_SHEET.md` (+ `.json`)
+- `/workspace/narcbench-core-demo/results/transfer_stable/WEEKEND_REVIEW/CLAIMS_CHECKLIST.md`
+- `/workspace/narcbench-core-demo/results/transfer_stable/WEEKEND_REVIEW/tables/` + `figures/`
+- `/workspace/andy-biz/NARCBench-Transfer-Stable-Weekend-Review-2026-10-01.md`
+- `/workspace/narcbench-core-demo/results/transfer/` HARD metrics
 
-`main.tex` and the figure sources were not in the weekend attachment, so this directory ships the PDF. Rebuild instructions in `CODE_INDEX.md` apply on the machine that still has `main.tex`.
+No invented metrics. Soft-stop: Track I / Paper 2 / interp-demo untouched; no GPU this write-up.
 
-Locked safety wording (from the claims sheet):
+## Science-freeze numbers added in this rebuild
+- Cross-phase Core→Transfer **discussion** residual band primary **0.959**; attn_L22 discussion **0.997**
+- Core domain-holdout @ L21 mean primary **0.939** (vs full-fit 0.941)
+- Transfer family AUROC @ L21 (publication CSV)
+- WEEKEND_REVIEW figures: `fig_cross_phase_residual`, `fig_causal_null_flat`, `fig_j_vs_full_vs_complement`, `fig_residual_vs_attn_vs_mlp`
 
-> Monitorable, Transfer-stable coordination signature (attn_L22 / non-J residual) — editability unproven under tested interventions; matched-prefix + checkpoint assays are the next causal designs.
+## Code inventory
+
+Symlink to weekend code map: [`CODE_INDEX.md`](./CODE_INDEX.md) → `WEEKEND_REVIEW/CODE_INDEX.md`.
+
+## GitHub checkout
+
+On this repository, `/workspace/narcbench-core-demo/` is the repo root and this directory is `papers/transfer-stable-collusion-2026-10/`. `CODE_INDEX.md` is a relative symlink to `results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md`. The handoff and skim live under `docs/`.

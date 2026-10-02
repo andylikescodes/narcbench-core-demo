@@ -1,0 +1,42 @@
+\contentsline {section}{\numberline {1}Introduction / problem}{2}{section.1}%
+\contentsline {paragraph}{One-line motivation.}{3}{Item.4}%
+\contentsline {section}{\numberline {2}Setup}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}NARCBench Core and Transfer}{3}{subsection.2.1}%
+\contentsline {paragraph}{Model.}{3}{subsection.2.1}%
+\contentsline {paragraph}{Activation caches (inventory summary).}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Phases, labels, metrics}{3}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Hypotheses, predictions, and falsifiers}{4}{section.3}%
+\contentsline {section}{\numberline {4}Methods}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Probes and shared directions}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Subspaces and residualize}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Controls}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Causal ablations tried}{5}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Results}{5}{section.5}%
+\contentsline {subsection}{\numberline {5.1}J versus full versus complement (HARD Transfer)}{5}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Residual layer sweep and low-rank shared direction}{6}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Attention versus MLP versus residual}{6}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Entanglement: role $\leftrightarrow $ mode}{6}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Causal nulls}{7}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Science-freeze robustness (cross-phase, domain-holdout, family)}{7}{subsection.5.6}%
+\contentsline {section}{\numberline {6}Discussion}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Coordination-state interpretation}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Why divergent histories weaken classical tracing}{8}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}AI-safety claim (careful)}{9}{subsection.6.3}%
+\contentsline {paragraph}{Supported (correlational; Gemma-2-9B-it; this protocol).}{9}{subsection.6.3}%
+\contentsline {paragraph}{Candidate one-liner (max strength allowed by data).}{10}{Item.16}%
+\contentsline {section}{\numberline {7}Limitations and non-claims}{10}{section.7}%
+\contentsline {section}{\numberline {8}Next experiments}{11}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Matched-prefix / teacher-forced}{11}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Within-trajectory}{12}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Behavioral assays (co-primary with success)}{12}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Checkpoint timing}{12}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}Explicit non-goals until redesign is approved}{12}{subsection.8.5}%
+\contentsline {paragraph}{Weekend decision prompts.}{13}{subsection.8.5}%
+\contentsline {section}{\numberline {9}References}{13}{section.9}%
+\contentsline {section}{\numberline {A}Artifact index}{13}{appendix.A}%
+\contentsline {paragraph}{Entry / inventory (andy-biz).}{13}{appendix.A}%
+\contentsline {paragraph}{Transfer-stable results root.}{13}{appendix.A}%
+\contentsline {paragraph}{Science freeze (locked).}{13}{appendix.A}%
+\contentsline {paragraph}{HARD Transfer baselines.}{13}{appendix.A}%
+\contentsline {paragraph}{Canonical caches.}{13}{appendix.A}%
+\contentsline {section}{\numberline {B}Fridge line}{14}{appendix.B}%

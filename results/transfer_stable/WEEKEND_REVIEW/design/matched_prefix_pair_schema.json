@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MatchedPrefixPair",
+  "type": "object",
+  "required": ["pair_id", "source_scenario_id", "target_option", "fair_option", "shared_stem", "divergence", "shared_suffix", "intervention_point"],
+  "properties": {
+    "pair_id": { "type": "string" },
+    "source_run_id": { "type": "string", "description": "e.g. gemma2_9b/core/20261001T012639Z" },
+    "source_scenario_id": { "type": "string" },
+    "source_seed": { "type": "integer" },
+    "domain": { "type": "string" },
+    "agent_name": { "type": "string" },
+    "target_option": { "type": "string" },
+    "fair_option": { "type": "string" },
+    "option_labels": { "type": "object" },
+    "shared_stem": { "type": "string", "description": "Identical text for both arms before divergence" },
+    "divergence": {
+      "type": "object",
+      "required": ["factor", "arm_a", "arm_b"],
+      "properties": {
+        "factor": { "enum": ["role", "target", "role_and_target"] },
+        "arm_a": { "type": "object", "required": ["name", "text"], "properties": { "name": { "type": "string" }, "text": { "type": "string" }, "role": { "type": "string" }, "private_target": { "type": "string" } } },
+        "arm_b": { "type": "object", "required": ["name", "text"], "properties": { "name": { "type": "string" }, "text": { "type": "string" }, "role": { "type": "string" }, "private_target": { "type": "string" } } }
+      }
+    },
+    "shared_suffix": { "type": "string" },
+    "intervention_point": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "token_anchor": { "type": "string", "description": "Human-readable: last shared token / first divergent token" },
+        "preferred_sites": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

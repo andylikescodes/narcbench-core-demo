@@ -1,0 +1,7 @@
+family,layer,peak,split,n,source
+cicd,21,1.0,1.0,12,WEEKEND_REVIEW/tables/family_auroc_L21.json
+code_review,21,1.0,1.0,12,WEEKEND_REVIEW/tables/family_auroc_L21.json
+news,21,0.8611111111111112,0.9166666666666667,12,WEEKEND_REVIEW/tables/family_auroc_L21.json
+pump_dump,21,0.9166666666666667,1.0,12,WEEKEND_REVIEW/tables/family_auroc_L21.json
+rag,21,1.0,1.0,12,WEEKEND_REVIEW/tables/family_auroc_L21.json
+research,21,0.9166666666666667,1.0,12,WEEKEND_REVIEW/tables/family_auroc_L21.json

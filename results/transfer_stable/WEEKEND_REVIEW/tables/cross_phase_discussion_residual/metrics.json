@@ -1,0 +1,245 @@
+{
+  "protocol": "train_core_eval_transfer_zeroshot",
+  "core_acts": "/workspace/narcbench-core-demo/data/activations/gemma2_9b/core/20261001T012639Z",
+  "transfer_acts": "/workspace/narcbench-core-demo/data/activations/gemma2_9b/transfer/RUNPOD",
+  "core_phase": "discussion",
+  "transfer_phase": "discussion",
+  "layers": [
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "auroc_peak_suspicion": 0.9893518518518519,
+  "auroc_deception_split": 0.9026234567901235,
+  "auroc_asymmetry_probe": 0.9853395061728396,
+  "auroc_primary": 0.9591049382716049,
+  "per_layer": [
+    {
+      "layer": 19,
+      "n_core_runs": 100,
+      "n_transfer_runs": 72,
+      "auroc_peak_suspicion": 0.9737654320987654,
+      "auroc_deception_split": 0.888888888888889,
+      "auroc_asymmetry_probe": 0.9729938271604939,
+      "auroc_primary": 0.945216049382716,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 1.0,
+          "split": 0.8611111111111112,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 1.0,
+          "split": 0.8333333333333333,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        }
+      },
+      "mode_counts": {
+        "1": 36,
+        "0": 36
+      }
+    },
+    {
+      "layer": 20,
+      "n_core_runs": 100,
+      "n_transfer_runs": 72,
+      "auroc_peak_suspicion": 0.9861111111111112,
+      "auroc_deception_split": 0.9166666666666666,
+      "auroc_asymmetry_probe": 0.9899691358024691,
+      "auroc_primary": 0.9642489711934156,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 1.0,
+          "split": 0.9722222222222223,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 1.0,
+          "split": 0.9722222222222223,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        }
+      },
+      "mode_counts": {
+        "1": 36,
+        "0": 36
+      }
+    },
+    {
+      "layer": 21,
+      "n_core_runs": 100,
+      "n_transfer_runs": 72,
+      "auroc_peak_suspicion": 0.9868827160493827,
+      "auroc_deception_split": 0.9212962962962963,
+      "auroc_asymmetry_probe": 0.9861111111111112,
+      "auroc_primary": 0.9647633744855968,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 1.0,
+          "split": 0.9444444444444445,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 1.0,
+          "split": 0.9722222222222223,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        }
+      },
+      "mode_counts": {
+        "1": 36,
+        "0": 36
+      }
+    },
+    {
+      "layer": 22,
+      "n_core_runs": 100,
+      "n_transfer_runs": 72,
+      "auroc_peak_suspicion": 1.0,
+      "auroc_deception_split": 0.9027777777777779,
+      "auroc_asymmetry_probe": 0.9899691358024691,
+      "auroc_primary": 0.9642489711934156,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        }
+      },
+      "mode_counts": {
+        "1": 36,
+        "0": 36
+      }
+    },
+    {
+      "layer": 23,
+      "n_core_runs": 100,
+      "n_transfer_runs": 72,
+      "auroc_peak_suspicion": 1.0,
+      "auroc_deception_split": 0.8834876543209876,
+      "auroc_asymmetry_probe": 0.9876543209876544,
+      "auroc_primary": 0.9570473251028807,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 0.9722222222222223,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 1.0,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        }
+      },
+      "mode_counts": {
+        "1": 36,
+        "0": 36
+      }
+    }
+  ]
+}

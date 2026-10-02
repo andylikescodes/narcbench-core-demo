@@ -1,4 +1,4 @@
-> **GitHub snapshot, 2026-10-02.** This is the 2026-10-01 weekend attachment, placed in this repository for review. Paths that begin with `/workspace/narcbench-core-demo/` are this repo. Paper PDF: [papers/transfer-stable-collusion-2026-10/main.pdf](../../../papers/transfer-stable-collusion-2026-10/main.pdf). Handoff and skim: [docs/](../../../docs/). What arrived in the attachment, and what did not, is listed in [SNAPSHOT.md](SNAPSHOT.md).
+> **GitHub path map.** In this repository, `/workspace/narcbench-core-demo/` is the repo root. `/workspace/andy-biz/papers/transfer-stable-collusion-2026-10/` is `papers/transfer-stable-collusion-2026-10/`. `/workspace/andy-biz/NARCBench-Weekend-FINAL-HANDOFF-2026-10-01.md` and `NARCBench-Transfer-Stable-Weekend-Review-2026-10-01.md` are under `docs/`. `data/activations/` and other `.npz` caches are gitignored.
 
 # CODE_INDEX — Transfer-stable / NARCBench pipeline (weekend review)
 

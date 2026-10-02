@@ -1,5 +1,3 @@
-> **GitHub snapshot, 2026-10-02.** This is the 2026-10-01 weekend attachment, placed in this repository for review. Paths that begin with `/workspace/narcbench-core-demo/` are this repo. Paper PDF: [papers/transfer-stable-collusion-2026-10/main.pdf](../../../papers/transfer-stable-collusion-2026-10/main.pdf). Handoff and skim: [docs/](../../../docs/). What arrived in the attachment, and what did not, is listed in [SNAPSHOT.md](SNAPSHOT.md).
-
 # Claims / number sheet (frozen for Paige LaTeX)
 
 **Author:** Andy Liang  

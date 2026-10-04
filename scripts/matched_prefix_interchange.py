@@ -29,6 +29,17 @@ ways, on the 12-pair core set. The private-instruction span runs only if that
 copy closes at least half the untouched gap and flips every baseline
 disagreement. A failed gate writes results and stops.
 
+Final-site direction card (--final-resid-directions, added 2026-10-04): at the
+same final-norm last-token site, transplant one direction's component both ways
+next to the full-residual copy (the ceiling): role / role-perp / mode / attn-L22
+from --directions, a same-norm random vector, a leave-one-pair-out difference of
+means measured at the site, and the contrast-PCA k=8 subspace if present. Each
+direction also gets a project-out ablation on the colluder prompt.
+
+Last-token layer sweep (--last-token-layer-sweep --sweep-layers 24,27,...,final):
+copy the whole last-token residual both ways at several depths to find the first
+depth whose copy carries the vote. Needs no direction files.
+
   python3 scripts/matched_prefix_interchange.py \
     --pairs results/transfer_stable/matched_prefix/pairs_transfer.jsonl \
     --directions results/transfer_stable/directions \
@@ -1053,9 +1064,41 @@ def main() -> int:
             "Does not load direction files."
         ),
     )
+    ap.add_argument(
+        "--final-resid-directions",
+        action="store_true",
+        help=(
+            "final-site direction card: 1D transplants (role, role-perp, mode, attn-L22, random, "
+            "leave-one-out diff-means, PCA k8) both ways at the final norm, last prompt token, "
+            "next to the full-residual ceiling. Needs --directions."
+        ),
+    )
+    ap.add_argument(
+        "--last-token-layer-sweep",
+        action="store_true",
+        help="copy the whole last-token residual both ways at --sweep-layers depths; no direction files",
+    )
+    ap.add_argument(
+        "--sweep-layers",
+        default=DEFAULT_SWEEP_LAYERS,
+        help=f"comma-separated decoder layers and/or 'final' for the sweep (default {DEFAULT_SWEEP_LAYERS})",
+    )
     args = ap.parse_args()
+    final_site_flags = int(bool(args.final_resid_controls)) + int(bool(args.final_resid_directions)) + int(
+        bool(args.last_token_layer_sweep)
+    )
+    if final_site_flags > 1 or (final_site_flags and (args.extras or args.extras_only or args.role_perp_confirm)):
+        print("ERROR: --final-resid-controls, --final-resid-directions and --last-token-layer-sweep are each their own suite", flush=True)
+        return 1
+    if args.max_pairs < 0:
+        print("ERROR: --max-pairs must be >= 0 (0 = every row)", flush=True)
+        return 1
     if args.final_resid_controls:
         return run_final_resid_controls(args)
+    if args.final_resid_directions:
+        return run_final_resid_directions(args)
+    if args.last_token_layer_sweep:
+        return run_last_token_layer_sweep(args)
     if args.directions is None:
         print("ERROR: --directions is required", flush=True)
         return 1
@@ -1708,6 +1751,594 @@ def run_final_resid_controls(args: argparse.Namespace) -> int:
         print(f"\n[done] both controls passed. {args.out}", flush=True)
     else:
         print(f"\n[stop] private-span control failed. {args.out}", flush=True)
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Final-site cards (added 2026-10-04). Both reuse the final-residual machinery.
+#
+# --final-resid-directions: at the working site (final norm output, each prompt's
+#   last token) transplant ONE direction's component both ways, next to the full
+#   residual copy that is known to carry the vote. Directions: the Transfer-stable
+#   role / role-perp / mode / attn-L22 vectors from the volume, a random unit
+#   vector of the same norm, a leave-one-pair-out difference of means measured at
+#   this very site, and the contrast-PCA k=8 subspace if its file is present.
+#   Each direction also gets a project-out ablation on the colluder prompt.
+#
+# --last-token-layer-sweep: copy the whole last-token residual both ways at a list
+#   of decoder-layer outputs plus the final norm, to find the first depth at which
+#   the copy carries the vote (the L21 copy moved ~10% of the gap; the final norm
+#   copy moved all of it).
+# ---------------------------------------------------------------------------
+
+FINAL_SITE_DIRECTION_FILES = {
+    # arm label -> (file under --directions, required)
+    "role_L21": ("lr_role_L21.npy", True),
+    "role_perp_L21": ("lr_role_perp_mode_L21.npy", True),
+    "mode_L21": ("lr_mode_L21.npy", False),
+    "role_attn_L22": ("lr_role_attn_L22.npy", False),
+}
+FINAL_SITE_PCA_FILE = "pca_contrast_k8_L23.npy"
+FINAL_SITE_PCA_NAME = "pca_k8_L23"
+FINAL_SITE_RANDOM = "random"
+FINAL_SITE_DIFFMEANS = "diffmeans_loo"
+DEFAULT_SWEEP_LAYERS = "24,27,30,33,36,39,41,final"
+SWEEP_SPEC_RE = re.compile(r"^(\d+|final)(,(\d+|final))*$")
+
+
+def final_site_direction_names(directions: Path | None) -> list[str]:
+    """Direction arms in run order. Optional files that are missing are skipped; required ones raise."""
+    names: list[str] = []
+    for name, (fname, required) in FINAL_SITE_DIRECTION_FILES.items():
+        present = directions is not None and (directions / fname).exists()
+        if present:
+            names.append(name)
+        elif required:
+            raise FileNotFoundError(str(directions / fname) if directions is not None else fname)
+    names.append(FINAL_SITE_RANDOM)
+    names.append(FINAL_SITE_DIFFMEANS)
+    if directions is not None and (directions / FINAL_SITE_PCA_FILE).exists():
+        names.append(FINAL_SITE_PCA_NAME)
+    return names
+
+
+def final_site_arm_names(direction_names: list[str]) -> list[str]:
+    arms = list(FINAL_LAST_ARMS)  # baselines + full-residual copies (the ceiling)
+    for d in direction_names:
+        arms += [
+            f"patch_h2c_{d}_final_last",
+            f"patch_c2h_{d}_final_last",
+            f"ablate_{d}_final_last_colluder",
+        ]
+    return arms
+
+
+def loo_diff_means(deltas: np.ndarray, i: int) -> np.ndarray:
+    """Unit mean of colluder-minus-honest site residuals over every pair except ``i``."""
+    if deltas.ndim != 2 or deltas.shape[0] < 2:
+        raise ValueError("leave-one-out difference of means needs at least two pairs")
+    v = np.delete(deltas, i, axis=0).mean(axis=0).astype(np.float64)
+    return (v / (np.linalg.norm(v) + 1e-12)).astype(np.float32)
+
+
+def parse_sweep_layers(spec: str) -> list:
+    """'24,27,final' -> [24, 27, 'final']. Duplicates are dropped, order kept."""
+    if not SWEEP_SPEC_RE.fullmatch(spec.strip()):
+        raise ValueError(f"bad --sweep-layers {spec!r}: comma-separated layer numbers and/or 'final'")
+    sites: list = []
+    for item in spec.split(","):
+        site = "final" if item.strip() == "final" else int(item)
+        if site not in sites:
+            sites.append(site)
+    return sites
+
+
+def site_label(site) -> str:
+    return "final" if site == "final" else f"L{int(site)}"
+
+
+def site_module(model, site):
+    if site == "final":
+        return final_logit_hidden_module(model)
+    layers = model.model.layers
+    L = int(site)
+    if not (0 <= L < len(layers)):
+        raise ValueError(f"layer {L} out of range for a model with {len(layers)} layers")
+    return layers[L]
+
+
+def capture_last_token_at_modules(model, tok, prompt: str, pos: int, modules: dict) -> dict:
+    """One teacher-forced forward; cache the residual at ``pos`` on every named module."""
+    assert torch is not None
+    ids = tok(prompt, return_tensors="pt").to(model.device)
+    seq_len = int(ids["input_ids"].shape[-1])
+    if pos < 0:
+        pos = seq_len + pos
+    if not (0 <= pos < seq_len):
+        raise ValueError(f"pos {pos} out of range for seq_len {seq_len}")
+    captured: dict = {}
+    handles = []
+
+    def make(name: str):
+        def hook(_m, _i, out):
+            h = out[0] if isinstance(out, tuple) else out
+            captured[name] = h[0, pos, :].detach().to(torch.float32).cpu()
+
+        return hook
+
+    for name, mod in modules.items():
+        handles.append(mod.register_forward_hook(make(name)))
+    try:
+        with torch.no_grad():
+            model(**ids)
+    finally:
+        for h in handles:
+            h.remove()
+    missing = [n for n in modules if n not in captured]
+    if missing:
+        raise RuntimeError(f"capture missed modules {missing}")
+    return captured
+
+
+def make_subspace_patch_hook(pos: int, basis: "torch.Tensor", src_vec: "torch.Tensor"):
+    """Subspace transplant at ``pos`` on prefill: h' = h - Bᵀ(Bh) + Bᵀ(B h_src), B rows orthonormal (k, d)."""
+    fired = {"done": False}
+
+    def hook(_m, _i, out):
+        h = out[0] if isinstance(out, tuple) else out
+        if h.shape[1] > pos and not fired["done"]:
+            h = h.clone()
+            B = basis.to(device=h.device, dtype=torch.float32)
+            v = h[0, pos, :].float()
+            s = src_vec.to(device=h.device, dtype=torch.float32)
+            h[0, pos, :] = (v - B.T @ (B @ v) + B.T @ (B @ s)).to(dtype=h.dtype)
+            fired["done"] = True
+            return (h,) + out[1:] if isinstance(out, tuple) else h
+        return out
+
+    return hook
+
+
+def mirror_gate(per_pair: list[dict], c2h_arm: str) -> dict:
+    """Colluder-to-honest bar, the mirror of ``final_resid_gate``.
+
+    fraction_of_gap: how far the honest prompt moves toward the colluder baseline
+    across the untouched gap (positive = toward colluder). Votes: on every pair whose
+    untouched votes disagree, the copy's vote must be the colluder vote.
+    """
+    gaps: list[float] = []
+    deltas: list[float] = []
+    disagree: list[str] = []
+    flipped: list[str] = []
+    for row in per_pair:
+        arms = row.get("arms") or {}
+        base_c = arms.get("baseline_colluder") or {}
+        base_h = arms.get("baseline_honest") or {}
+        patched = arms.get(c2h_arm) or {}
+        pc, ph, pp = base_c.get("p_target"), base_h.get("p_target"), patched.get("p_target")
+        if pc is not None and ph is not None and pp is not None:
+            gaps.append(float(pc) - float(ph))
+            deltas.append(float(pp) - float(ph))
+        vc, vh, vp = base_c.get("vote"), base_h.get("vote"), patched.get("vote")
+        if vc not in (None, "?") and vh not in (None, "?") and vc != vh:
+            disagree.append(row["pair_id"])
+            if vp == vc:
+                flipped.append(row["pair_id"])
+    mean_gap = float(np.mean(gaps)) if gaps else None
+    mean_delta = float(np.mean(deltas)) if deltas else None
+    if mean_gap is None or mean_delta is None or abs(mean_gap) < 1e-8:
+        fraction = None
+        prob_pass = False
+    else:
+        fraction = float(mean_delta / mean_gap)
+        prob_pass = fraction >= FINAL_RESID_GAP_FRACTION
+    vote_pass = len(disagree) > 0 and len(flipped) == len(disagree)
+    return {
+        "control": c2h_arm,
+        "passed": bool(prob_pass and vote_pass),
+        "prob_pass": bool(prob_pass),
+        "vote_pass": bool(vote_pass),
+        "mean_gap_p": mean_gap,
+        "mean_delta_p_c2h": mean_delta,
+        "fraction_of_gap": fraction,
+        "gap_fraction_required": FINAL_RESID_GAP_FRACTION,
+        "n_disagree": len(disagree),
+        "n_flipped_to_colluder": len(flipped),
+        "disagree_pair_ids": disagree,
+        "flipped_pair_ids": flipped,
+    }
+
+
+def _both_way_row(label: str, per_pair: list[dict], h2c_arm: str, c2h_arm: str, ablate_arm: str | None, by_arm: dict) -> dict:
+    g = final_resid_gate(per_pair, h2c_arm)
+    m = mirror_gate(per_pair, c2h_arm)
+    row = {
+        "label": label,
+        "h2c_arm": h2c_arm,
+        "h2c_fraction_of_gap": g["fraction_of_gap"],
+        "h2c_flips": f"{g['n_flipped_to_honest']}/{g['n_disagree']}",
+        "h2c_passed": g["passed"],
+        "c2h_arm": c2h_arm,
+        "c2h_fraction_of_gap": m["fraction_of_gap"],
+        "c2h_flips": f"{m['n_flipped_to_colluder']}/{m['n_disagree']}",
+        "c2h_passed": m["passed"],
+    }
+    if ablate_arm is not None:
+        row["ablate_arm"] = ablate_arm
+        row["ablate_delta_p_vs_colluder"] = (by_arm.get(ablate_arm) or {}).get("mean_delta_p_vs_ref")
+        row["ablate_flip_rate"] = (by_arm.get(ablate_arm) or {}).get("flip_rate_vs_ref")
+    return row
+
+
+def direction_table(per_pair: list[dict], direction_names: list[str], by_arm: dict) -> list[dict]:
+    rows = [_both_way_row("full_residual_ceiling", per_pair, FINAL_LAST_H2C, FINAL_LAST_C2H, None, by_arm)]
+    for d in direction_names:
+        rows.append(
+            _both_way_row(
+                d,
+                per_pair,
+                f"patch_h2c_{d}_final_last",
+                f"patch_c2h_{d}_final_last",
+                f"ablate_{d}_final_last_colluder",
+                by_arm,
+            )
+        )
+    ceiling = rows[0]["h2c_fraction_of_gap"]
+    for row in rows[1:]:
+        f = row["h2c_fraction_of_gap"]
+        row["h2c_fraction_of_ceiling"] = (None if f is None or not ceiling else float(f / ceiling))
+    return rows
+
+
+def sweep_table(per_pair: list[dict], sites: list, by_arm: dict) -> list[dict]:
+    rows = []
+    for site in sites:
+        lab = site_label(site)
+        rows.append(_both_way_row(lab, per_pair, f"patch_h2c_full_{lab}_last", f"patch_c2h_full_{lab}_last", None, by_arm))
+    return rows
+
+
+def _rows_md(rows: list[dict], title: str) -> list[str]:
+    if not rows:
+        return []
+    cols = [c for c in rows[0].keys() if not c.endswith("_arm")]
+    out = ["", f"## {title}", "", "| " + " | ".join(cols) + " |", "|" + "---|" * len(cols)]
+    for r in rows:
+        cells = []
+        for c in cols:
+            v = r.get(c)
+            cells.append(f"{v:.4f}" if isinstance(v, float) else ("—" if v is None else str(v)))
+        out.append("| " + " | ".join(cells) + " |")
+    return out
+
+
+def _write_final_site(out: Path, per_pair: list[dict], arm_names: list[str], meta: dict, extra: dict, t0: float) -> dict:
+    summary = summarize(per_pair, arm_names)
+    summary["elapsed_sec"] = round(time.time() - t0, 1)
+    summary.update(extra)
+    summary["protocol"] = meta["protocol"]
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    (out / "per_pair.json").write_text(json.dumps(per_pair, indent=2) + "\n")
+    md = format_md(summary, per_pair, meta)
+    if summary.get("directions"):
+        md += "\n" + "\n".join(_rows_md(summary["directions"], "Directions at the final site (ranked by the h2c fraction of the gap)"))
+    if summary.get("sweep"):
+        md += "\n" + "\n".join(_rows_md(summary["sweep"], "Last-token full-residual copy by depth"))
+    (out / "RESULTS.md").write_text(md + "\n")
+    print(json.dumps({k: v for k, v in summary.items() if k != "by_arm"}, indent=2), flush=True)
+    return summary
+
+
+def _prepare_pairs(tok, pairs: list[dict]) -> list[dict]:
+    prepared = []
+    for pair in pairs:
+        target = str(pair["target_option"]).upper()
+        fair = str(pair["fair_option"]).upper()
+        letters = sorted(set(option_label_items(pair.get("option_labels")) + [target, fair]))
+        prompt_c = build_chat_prompt(tok, compose_prompt(pair, "colluder"))
+        prompt_h = build_chat_prompt(tok, compose_prompt(pair, "honest"))
+        ids_c = model_input_ids(tok, prompt_c)
+        ids_h = model_input_ids(tok, prompt_h)
+        sites = intervention_sites(ids_c, ids_h, prompt_last=True)
+        if sites["t_star"] < 8:
+            raise RuntimeError(f"chat-template prefix FAIL {pair['pair_id']} t*={sites['t_star']}")
+        prepared.append(
+            {
+                "pair": pair,
+                "target": target,
+                "fair": fair,
+                "letters": letters,
+                "prompt_c": prompt_c,
+                "prompt_h": prompt_h,
+                "t_star": sites["t_star"],
+                "pos_c": sites["pos_colluder"],
+                "pos_h": sites["pos_honest"],
+            }
+        )
+    return prepared
+
+
+def _base_row(item: dict, arm_results: dict, intervention: str) -> dict:
+    pair = item["pair"]
+    base_c = arm_results["baseline_colluder"]
+    base_h = arm_results["baseline_honest"]
+    derived = {
+        "baseline_gap_p": (
+            float(base_c["p_target"] - base_h["p_target"])
+            if base_c.get("p_target") is not None and base_h.get("p_target") is not None
+            else None
+        ),
+        "flips": {},
+    }
+    for name, metrics in arm_results.items():
+        if name.startswith("baseline"):
+            continue
+        derived["flips"][name] = _flip_record(name, metrics, base_c, base_h)
+    return {
+        "pair_id": pair["pair_id"],
+        "source_scenario_id": pair.get("source_scenario_id"),
+        "domain": pair.get("domain"),
+        "target_option": item["target"],
+        "fair_option": item["fair"],
+        "t_star": item["t_star"],
+        "pos": item["pos_c"],
+        "pos_honest": item["pos_h"],
+        "intervention": intervention,
+        "arms": arm_results,
+        "derived": derived,
+    }
+
+
+def run_final_resid_directions(args: argparse.Namespace) -> int:
+    """1D direction transplants at the final norm, last prompt token, next to the full-copy ceiling."""
+    if args.directions is None:
+        print("ERROR: --final-resid-directions needs --directions (role and role-perp files)", flush=True)
+        return 1
+    directions = args.directions if args.directions.is_absolute() else (
+        Path(__file__).resolve().parents[1] / args.directions
+    )
+    direction_names = final_site_direction_names(directions)
+    arm_names = final_site_arm_names(direction_names)
+    loaded = load_pairs(args.pairs)
+    pairs = loaded if args.max_pairs == 0 else loaded[: args.max_pairs]
+    if len(pairs) < 2:
+        print("ERROR: the leave-one-out difference of means needs at least two pairs", flush=True)
+        return 1
+    units: dict[str, np.ndarray] = {}
+    for name, (fname, _req) in FINAL_SITE_DIRECTION_FILES.items():
+        if name in direction_names:
+            units[name] = _unit(directions / fname)
+    dim = int(next(iter(units.values())).shape[0])
+    units[FINAL_SITE_RANDOM] = _unit_random((dim,), args.seed)
+    pca_basis = _pca_rows(directions / FINAL_SITE_PCA_FILE) if FINAL_SITE_PCA_NAME in direction_names else None
+    args.out.mkdir(parents=True, exist_ok=True)
+    meta = {
+        "model": args.model,
+        "n_pairs": len(pairs),
+        "n_pairs_in_file": len(loaded),
+        "pair_ids": [p["pair_id"] for p in pairs],
+        "arms": arm_names,
+        "n_arms": len(arm_names),
+        "directions": direction_names,
+        "direction_files": {
+            name: FINAL_SITE_DIRECTION_FILES[name][0] for name in direction_names if name in FINAL_SITE_DIRECTION_FILES
+        },
+        "direction_dim": dim,
+        "random_seed": args.seed,
+        "max_new_tokens": args.max_new_tokens,
+        "protocol": "matched_prefix_final_resid_directions",
+        "suite": "core",
+        "world": "Core",
+        "site": "final_norm_pre_lm_head",
+        "intervention": "prompt_last_token",
+        "edit": "directional component transplant h' = h - (h·û)û + (h_src·û)û; ablate uses h_src = 0",
+        "gap_fraction_required": FINAL_RESID_GAP_FRACTION,
+        "dry_run": args.dry_run,
+    }
+    (args.out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+    print(json.dumps(meta, indent=2), flush=True)
+    print("\n=== ARMS ===", flush=True)
+    for name in arm_names:
+        print(f"  - {name}", flush=True)
+    if args.dry_run:
+        (args.out / "DRY_RUN.md").write_text(
+            "\n".join(
+                [
+                    "# Final-site direction card — dry-run",
+                    "",
+                    f"- pairs: {len(pairs)} (of {len(loaded)})",
+                    "- site: final norm output, each prompt's last token",
+                    f"- directions: {', '.join(direction_names)} (dim {dim})",
+                    "- ceiling: full residual copy both ways (same arms as the wiring suite)",
+                    "",
+                    "## Arms",
+                    *[f"- {name}" for name in arm_names],
+                    "",
+                ]
+            )
+            + "\n"
+        )
+        print(f"\n[dry-run] OK — wrote {args.out / 'DRY_RUN.md'}", flush=True)
+        return 0
+    if torch is None:
+        print("ERROR: torch required for non-dry-run", flush=True)
+        return 1
+
+    print(f"\n[load] {args.model}", flush=True)
+    model, tok = load_gemma(args.model)
+    mod = final_logit_hidden_module(model)
+    prepared = _prepare_pairs(tok, pairs)
+    t0 = time.time()
+
+    # Pre-pass: the site residual at each prompt's last token, for every pair.
+    caps_c, caps_h = [], []
+    for item in prepared:
+        caps_c.append(capture_last_token_at_modules(model, tok, item["prompt_c"], item["pos_c"], {"site": mod})["site"])
+        caps_h.append(capture_last_token_at_modules(model, tok, item["prompt_h"], item["pos_h"], {"site": mod})["site"])
+    deltas = np.stack([(c - h).numpy() for c, h in zip(caps_c, caps_h)]).astype(np.float32)
+    if deltas.shape[1] != dim:
+        raise RuntimeError(f"direction dim {dim} != site dim {deltas.shape[1]}")
+
+    per_pair: list[dict] = []
+    for pi, item in enumerate(prepared):
+        pair = item["pair"]
+        letters = item["letters"]
+        letter_ids = letter_token_ids(tok, letters)
+        pos_c, pos_h = item["pos_c"], item["pos_h"]
+        src_c, src_h = caps_c[pi], caps_h[pi]
+        zero = torch.zeros_like(src_c)
+        dirs = dict(units)
+        dirs[FINAL_SITE_DIFFMEANS] = loo_diff_means(deltas, pi)
+        delta = deltas[pi].astype(np.float64)
+        delta_norm = float(np.linalg.norm(delta) + 1e-12)
+        diagnostics = {
+            "delta_norm": delta_norm,
+            "fraction_of_delta_along": {
+                name: float(abs(delta @ u.astype(np.float64)) / delta_norm) for name, u in dirs.items()
+            },
+            "cos_with_diffmeans_loo": {
+                name: float(u.astype(np.float64) @ dirs[FINAL_SITE_DIFFMEANS].astype(np.float64))
+                for name, u in dirs.items()
+                if name != FINAL_SITE_DIFFMEANS
+            },
+        }
+        if pca_basis is not None:
+            coeffs = pca_basis.astype(np.float64) @ delta
+            diagnostics["fraction_of_delta_along"][FINAL_SITE_PCA_NAME] = float(np.linalg.norm(coeffs) / delta_norm)
+        print(
+            f"\n[{pi+1}/{len(prepared)}] {pair['pair_id']} t*={item['t_star']} pos_c={pos_c} pos_h={pos_h} "
+            f"|Δ|={delta_norm:.3f} along: "
+            + ", ".join(f"{k}={v:.2f}" for k, v in diagnostics["fraction_of_delta_along"].items()),
+            flush=True,
+        )
+        specs: dict[str, tuple[str, list]] = {
+            "baseline_colluder": (item["prompt_c"], []),
+            "baseline_honest": (item["prompt_h"], []),
+            FINAL_LAST_H2C: (item["prompt_c"], [(mod, make_residual_copy_hook({pos_c: src_h}))]),
+            FINAL_LAST_C2H: (item["prompt_h"], [(mod, make_residual_copy_hook({pos_h: src_c}))]),
+        }
+        for name in direction_names:
+            if name == FINAL_SITE_PCA_NAME:
+                B = torch.tensor(pca_basis, dtype=torch.float32)
+                specs[f"patch_h2c_{name}_final_last"] = (item["prompt_c"], [(mod, make_subspace_patch_hook(pos_c, B, src_h))])
+                specs[f"patch_c2h_{name}_final_last"] = (item["prompt_h"], [(mod, make_subspace_patch_hook(pos_h, B, src_c))])
+                specs[f"ablate_{name}_final_last_colluder"] = (item["prompt_c"], [(mod, make_subspace_patch_hook(pos_c, B, zero))])
+                continue
+            u = torch.tensor(dirs[name], dtype=torch.float32)
+            specs[f"patch_h2c_{name}_final_last"] = (item["prompt_c"], [(mod, make_dir_patch_hook(pos_c, u, src_h))])
+            specs[f"patch_c2h_{name}_final_last"] = (item["prompt_h"], [(mod, make_dir_patch_hook(pos_h, u, src_c))])
+            specs[f"ablate_{name}_final_last_colluder"] = (item["prompt_c"], [(mod, make_dir_patch_hook(pos_c, u, zero))])
+        arm_results = {}
+        for name in arm_names:
+            prompt, hooks_spec = specs[name]
+            metrics = _score_generation(model, tok, prompt, hooks_spec, letters, letter_ids, item["target"], args.max_new_tokens)
+            arm_results[name] = metrics
+            print(f"  {name}: vote={metrics.get('vote')} p_tgt={metrics.get('p_target')}", flush=True)
+        row = _base_row(item, arm_results, "prompt_last_token")
+        row["site_diagnostics"] = diagnostics
+        per_pair.append(row)
+        (args.out / "per_pair.json").write_text(json.dumps(per_pair, indent=2) + "\n")
+
+    by_arm = summarize(per_pair, arm_names)["by_arm"]
+    table = direction_table(per_pair, direction_names, by_arm)
+    ranked = [table[0]] + sorted(table[1:], key=lambda r: -(r["h2c_fraction_of_gap"] or -1e9))
+    _write_final_site(args.out, per_pair, arm_names, meta, {"directions": ranked}, t0)
+    print(f"\n[done] {args.out}", flush=True)
+    return 0
+
+
+def run_last_token_layer_sweep(args: argparse.Namespace) -> int:
+    """Full last-token residual copy, both ways, at several depths."""
+    sites = parse_sweep_layers(args.sweep_layers)
+    arm_names = ["baseline_colluder", "baseline_honest"]
+    for site in sites:
+        lab = site_label(site)
+        arm_names += [f"patch_h2c_full_{lab}_last", f"patch_c2h_full_{lab}_last"]
+    loaded = load_pairs(args.pairs)
+    pairs = loaded if args.max_pairs == 0 else loaded[: args.max_pairs]
+    args.out.mkdir(parents=True, exist_ok=True)
+    meta = {
+        "model": args.model,
+        "n_pairs": len(pairs),
+        "n_pairs_in_file": len(loaded),
+        "pair_ids": [p["pair_id"] for p in pairs],
+        "arms": arm_names,
+        "n_arms": len(arm_names),
+        "sweep_sites": [site_label(s) for s in sites],
+        "max_new_tokens": args.max_new_tokens,
+        "protocol": "matched_prefix_last_token_layer_sweep",
+        "suite": "core",
+        "world": "Core",
+        "site": "decoder_layer_output_or_final_norm",
+        "intervention": "prompt_last_token",
+        "gap_fraction_required": FINAL_RESID_GAP_FRACTION,
+        "dry_run": args.dry_run,
+    }
+    (args.out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+    print(json.dumps(meta, indent=2), flush=True)
+    print("\n=== ARMS ===", flush=True)
+    for name in arm_names:
+        print(f"  - {name}", flush=True)
+    if args.dry_run:
+        (args.out / "DRY_RUN.md").write_text(
+            "\n".join(
+                [
+                    "# Last-token layer sweep — dry-run",
+                    "",
+                    f"- pairs: {len(pairs)} (of {len(loaded)})",
+                    f"- sites: {', '.join(site_label(s) for s in sites)}",
+                    "- edit: copy the whole last-token residual from the other prompt, both ways",
+                    "",
+                    "## Arms",
+                    *[f"- {name}" for name in arm_names],
+                    "",
+                ]
+            )
+            + "\n"
+        )
+        print(f"\n[dry-run] OK — wrote {args.out / 'DRY_RUN.md'}", flush=True)
+        return 0
+    if torch is None:
+        print("ERROR: torch required for non-dry-run", flush=True)
+        return 1
+
+    print(f"\n[load] {args.model}", flush=True)
+    model, tok = load_gemma(args.model)
+    modules = {site_label(s): site_module(model, s) for s in sites}
+    meta["n_layers"] = len(model.model.layers)
+    (args.out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+    prepared = _prepare_pairs(tok, pairs)
+    t0 = time.time()
+    per_pair: list[dict] = []
+    for pi, item in enumerate(prepared):
+        pair = item["pair"]
+        letters = item["letters"]
+        letter_ids = letter_token_ids(tok, letters)
+        pos_c, pos_h = item["pos_c"], item["pos_h"]
+        cap_c = capture_last_token_at_modules(model, tok, item["prompt_c"], pos_c, modules)
+        cap_h = capture_last_token_at_modules(model, tok, item["prompt_h"], pos_h, modules)
+        print(f"\n[{pi+1}/{len(prepared)}] {pair['pair_id']} t*={item['t_star']} pos_c={pos_c} pos_h={pos_h}", flush=True)
+        specs: dict[str, tuple[str, list]] = {
+            "baseline_colluder": (item["prompt_c"], []),
+            "baseline_honest": (item["prompt_h"], []),
+        }
+        for lab, mod in modules.items():
+            specs[f"patch_h2c_full_{lab}_last"] = (item["prompt_c"], [(mod, make_residual_copy_hook({pos_c: cap_h[lab]}))])
+            specs[f"patch_c2h_full_{lab}_last"] = (item["prompt_h"], [(mod, make_residual_copy_hook({pos_h: cap_c[lab]}))])
+        arm_results = {}
+        for name in arm_names:
+            prompt, hooks_spec = specs[name]
+            metrics = _score_generation(model, tok, prompt, hooks_spec, letters, letter_ids, item["target"], args.max_new_tokens)
+            arm_results[name] = metrics
+            print(f"  {name}: vote={metrics.get('vote')} p_tgt={metrics.get('p_target')}", flush=True)
+        per_pair.append(_base_row(item, arm_results, "prompt_last_token"))
+        (args.out / "per_pair.json").write_text(json.dumps(per_pair, indent=2) + "\n")
+
+    by_arm = summarize(per_pair, arm_names)["by_arm"]
+    table = sweep_table(per_pair, sites, by_arm)
+    first_pass = next((r["label"] for r in table if r["h2c_passed"]), None)
+    _write_final_site(args.out, per_pair, arm_names, meta, {"sweep": table, "first_site_passing_h2c_bar": first_pass}, t0)
+    print(f"\n[done] first site passing the h2c bar: {first_pass}. {args.out}", flush=True)
     return 0
 
 

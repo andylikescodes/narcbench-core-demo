@@ -14,8 +14,14 @@ JOB_BOOT_B64, JOB_PAYLOAD_B64, or a job tarball. --extras-only runs the
 multi-site, PCA, and role-perpendicular kitchen sink. --role-perp-confirm
 runs the residual-L21 role-perp card on every row of the volume pairs file.
 --final-resid-controls runs the pre-logit residual copies on the first 12
-core pairs and does not read direction files. Direction .npy files and pairs
-stay on the network volume. RUNPOD_API_KEY and HF_TOKEN come from the
+core pairs and does not read direction files. --final-resid-directions runs
+the 1D direction card at that same final site (reads the role and role-perp
+files from the volume; mode, attn-L22 and PCA files are used if present).
+--last-token-layer-sweep copies the whole last-token residual at several
+depths and reads no direction files. --pairs-on-volume points a card at a
+different pairs file on the volume (for example a v2 file built by
+scripts/build_matched_prefix_pairs.py and copied there). Direction .npy
+files and pairs stay on the network volume. RUNPOD_API_KEY and HF_TOKEN come from the
 environment. --launch refuses unless the harness and boot script are in the
 checked-out SHA.
 Soft-stop: no Track I / Paper 2 / interp-demo / family-house.
@@ -120,6 +126,39 @@ FINAL_RESID_CONDITIONAL_ARMS = [
     "patch_c2h_full_final_private",
 ]
 FINAL_RESID_CORE_PAIRS = 12
+# Final-site direction card: upper bound on the arm list (optional direction files may be absent).
+FINAL_SITE_DIRECTIONS_ALL = [
+    "role_L21",
+    "role_perp_L21",
+    "mode_L21",
+    "role_attn_L22",
+    "random",
+    "diffmeans_loo",
+    "pca_k8_L23",
+]
+FINAL_SITE_DIRECTION_ARMS = list(FINAL_RESID_ARMS) + [
+    arm
+    for d in FINAL_SITE_DIRECTIONS_ALL
+    for arm in (f"patch_h2c_{d}_final_last", f"patch_c2h_{d}_final_last", f"ablate_{d}_final_last_colluder")
+]
+FINAL_SITE_REQUIRED_DIRECTION_FILES = ["lr_role_L21.npy", "lr_role_perp_mode_L21.npy"]
+FINAL_SITE_OPTIONAL_DIRECTION_FILES = ["lr_mode_L21.npy", "lr_role_attn_L22.npy", "pca_contrast_k8_L23.npy"]
+DEFAULT_SWEEP_LAYERS = "24,27,30,33,36,39,41,final"
+SWEEP_SPEC_RE = re.compile(r"^(\d+|final)(,(\d+|final))*$")
+
+
+def sweep_arms(spec: str) -> list[str]:
+    arms = ["baseline_colluder", "baseline_honest"]
+    seen: list[str] = []
+    for item in spec.split(","):
+        lab = "final" if item.strip() == "final" else f"L{int(item)}"
+        if lab in seen:
+            continue
+        seen.append(lab)
+        arms += [f"patch_h2c_full_{lab}_last", f"patch_c2h_full_{lab}_last"]
+    return arms
+
+
 SUITE_META = {
     "core": {
         "kind": "matched_prefix_interchange_core_smoke",
@@ -246,6 +285,10 @@ def blob_in_commit(sha: str, rel: str) -> bool:
 def mode_cli(args: argparse.Namespace) -> str:
     if getattr(args, "final_resid_controls", False):
         return " --final-resid-controls"
+    if getattr(args, "final_resid_directions", False):
+        return " --final-resid-directions"
+    if getattr(args, "last_token_layer_sweep", False):
+        return f" --last-token-layer-sweep --sweep-layers {getattr(args, 'sweep_layers', DEFAULT_SWEEP_LAYERS)}"
     if args.role_perp_confirm:
         return " --role-perp-confirm"
     if args.extras_only:
@@ -258,6 +301,10 @@ def mode_cli(args: argparse.Namespace) -> str:
 def arms_for(args: argparse.Namespace) -> list[str]:
     if args.final_resid_controls:
         return list(FINAL_RESID_ARMS)
+    if getattr(args, "final_resid_directions", False):
+        return list(FINAL_SITE_DIRECTION_ARMS)
+    if getattr(args, "last_token_layer_sweep", False):
+        return sweep_arms(getattr(args, "sweep_layers", DEFAULT_SWEEP_LAYERS))
     if args.role_perp_confirm:
         return list(ROLE_PERP_CONFIRM_ARMS)
     if args.extras_only:
@@ -269,8 +316,10 @@ def arms_for(args: argparse.Namespace) -> list[str]:
 
 
 def direction_files_for(args: argparse.Namespace) -> list[str]:
-    if args.final_resid_controls:
+    if args.final_resid_controls or getattr(args, "last_token_layer_sweep", False):
         return []
+    if getattr(args, "final_resid_directions", False):
+        return list(FINAL_SITE_REQUIRED_DIRECTION_FILES) + [f"{f} (optional)" for f in FINAL_SITE_OPTIONAL_DIRECTION_FILES]
     needed = list(CORE_DIRECTION_FILES)
     if args.extras or args.extras_only or args.role_perp_confirm:
         needed.extend(EXTRAS_DIRECTION_FILES)
@@ -280,6 +329,10 @@ def direction_files_for(args: argparse.Namespace) -> list[str]:
 def mode_name(args: argparse.Namespace) -> str:
     if getattr(args, "final_resid_controls", False):
         return "final-resid-controls"
+    if getattr(args, "final_resid_directions", False):
+        return "final-resid-directions"
+    if getattr(args, "last_token_layer_sweep", False):
+        return "last-token-layer-sweep"
     if args.role_perp_confirm:
         return "role-perp-confirm"
     if args.extras_only:
@@ -335,6 +388,7 @@ ALLOWED_ENV_KEYS = frozenset(
         "JOB_OUT_ROOT",
         "JOB_MODE",
         "JOB_MAX_PAIRS",
+        "JOB_SWEEP_LAYERS",
         "JOB_MODEL",
         "JOB_MAX_NEW_TOKENS",
         "JOB_SEED",
@@ -355,7 +409,17 @@ FORBIDDEN_MARKERS = (
 REPO_URL_RE = re.compile(
     r"^https://github.com/andylikescodes/narcbench-core-demo(\.git)?$"
 )
-MODES = frozenset({"core", "extras", "extras-only", "role-perp-confirm", "final-resid-controls"})
+MODES = frozenset(
+    {
+        "core",
+        "extras",
+        "extras-only",
+        "role-perp-confirm",
+        "final-resid-controls",
+        "final-resid-directions",
+        "last-token-layer-sweep",
+    }
+)
 
 
 class LaunchRefused(Exception):
@@ -409,6 +473,11 @@ def validate_create_input(create_input: dict) -> int:
         raise LaunchRefused("JOB_REPO_URL must be https://github.com/andylikescodes/narcbench-core-demo")
     if env.get("JOB_MODE") not in MODES:
         raise LaunchRefused("JOB_MODE is not a known matched-prefix suite")
+    if env.get("JOB_MODE") == "last-token-layer-sweep":
+        if not SWEEP_SPEC_RE.fullmatch(env.get("JOB_SWEEP_LAYERS", "")):
+            raise LaunchRefused("JOB_SWEEP_LAYERS must be comma-separated layer numbers and/or 'final'")
+    elif "JOB_SWEEP_LAYERS" in env:
+        raise LaunchRefused("JOB_SWEEP_LAYERS is only for the last-token-layer-sweep suite")
     for label in ("JOB_PAIRS", "JOB_DIRECTIONS", "JOB_OUT_ROOT", "HF_HOME"):
         if label not in env:
             raise LaunchRefused(f"create env missing {label}")
@@ -447,6 +516,8 @@ def build_create_input(args: argparse.Namespace, api_key: str) -> dict:
         "HF_HOME": HF_CACHE_ON_VOLUME,
         "RUNPOD_API_KEY": api_key,
     }
+    if args.mode_name == "last-token-layer-sweep":
+        env["JOB_SWEEP_LAYERS"] = str(getattr(args, "sweep_layers", DEFAULT_SWEEP_LAYERS))
     hf_token = os.environ.get("HF_TOKEN")
     if hf_token:
         env["HF_TOKEN"] = hf_token
@@ -587,6 +658,22 @@ def main() -> int:
         action="store_true",
         help="boot the pre-logit residual controls on the first 12 core pairs",
     )
+    ap.add_argument(
+        "--final-resid-directions",
+        action="store_true",
+        help="boot the 1D direction card at the final norm, last prompt token (reads role + role-perp from the volume)",
+    )
+    ap.add_argument(
+        "--last-token-layer-sweep",
+        action="store_true",
+        help="boot the last-token full-residual copy sweep over --sweep-layers (no direction files)",
+    )
+    ap.add_argument("--sweep-layers", default=DEFAULT_SWEEP_LAYERS, help="layers and/or 'final' for the sweep")
+    ap.add_argument(
+        "--pairs-on-volume",
+        default=None,
+        help="alternative pairs file on the network volume (/workspace/...), e.g. a v2 file copied there",
+    )
     ap.add_argument("--launch", action="store_true")
     ap.add_argument("--max-minutes", type=int, default=90)
     ap.add_argument("--grace-minutes", type=int, default=6)
@@ -606,17 +693,29 @@ def main() -> int:
         + int(bool(args.extras_only))
         + int(bool(args.role_perp_confirm))
         + int(bool(args.final_resid_controls))
+        + int(bool(args.final_resid_directions))
+        + int(bool(args.last_token_layer_sweep))
     )
     if mode_flags > 1:
         print(
-            "ERROR: pass only one of --extras, --extras-only, --role-perp-confirm, --final-resid-controls",
+            "ERROR: pass only one of --extras, --extras-only, --role-perp-confirm, "
+            "--final-resid-controls, --final-resid-directions, --last-token-layer-sweep",
             file=sys.stderr,
         )
         return 1
-    if args.final_resid_controls and args.suite != "core":
-        print("ERROR: --final-resid-controls scores the 12-pair core set", file=sys.stderr)
+    final_site = args.final_resid_controls or args.final_resid_directions or args.last_token_layer_sweep
+    if final_site and args.suite != "core":
+        print("ERROR: the final-site cards score the core pair set", file=sys.stderr)
         return 1
-    if args.final_resid_controls:
+    if args.last_token_layer_sweep and not SWEEP_SPEC_RE.fullmatch(args.sweep_layers.strip()):
+        print("ERROR: --sweep-layers must be comma-separated layer numbers and/or 'final'", file=sys.stderr)
+        return 1
+    if args.final_resid_directions or args.last_token_layer_sweep:
+        args.max_pairs = FINAL_RESID_CORE_PAIRS if args.max_pairs is None else args.max_pairs
+        if args.max_pairs < 1:
+            print("ERROR: the final-site cards score at least one pair (12 matches the wiring suite)", file=sys.stderr)
+            return 1
+    elif args.final_resid_controls:
         args.max_pairs = FINAL_RESID_CORE_PAIRS if args.max_pairs is None else args.max_pairs
         if args.max_pairs != FINAL_RESID_CORE_PAIRS:
             print(
@@ -628,7 +727,9 @@ def main() -> int:
         args.max_pairs = 0 if args.max_pairs is None else args.max_pairs
     elif args.max_pairs is None:
         args.max_pairs = 10
-    if args.max_pairs < 0 or (args.max_pairs == 0 and not args.role_perp_confirm):
+    if (args.max_pairs < 0 or (args.max_pairs == 0 and not args.role_perp_confirm)) and not (
+        args.final_resid_directions or args.last_token_layer_sweep
+    ):
         print("ERROR: --max-pairs 0 is only valid with --role-perp-confirm", file=sys.stderr)
         return 1
 
@@ -636,6 +737,10 @@ def main() -> int:
     if args.estimate_out is None:
         if args.final_resid_controls:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_RESID_ESTIMATE.json"
+        elif args.final_resid_directions:
+            args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_SITE_DIRECTIONS_ESTIMATE.json"
+        elif args.last_token_layer_sweep:
+            args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_LAYER_SWEEP_ESTIMATE.json"
         elif args.role_perp_confirm:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_ESTIMATE.json"
         elif args.extras or args.extras_only:
@@ -645,6 +750,10 @@ def main() -> int:
     if args.launch_card is None:
         if args.final_resid_controls:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_RESID_LAUNCH.json"
+        elif args.final_resid_directions:
+            args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_SITE_DIRECTIONS_LAUNCH.json"
+        elif args.last_token_layer_sweep:
+            args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_LAYER_SWEEP_LAUNCH.json"
         elif args.role_perp_confirm:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_LAUNCH.json"
         elif args.extras or args.extras_only:
@@ -655,9 +764,17 @@ def main() -> int:
     vol_subdir = meta["vol_subdir"]
     pod_name = meta["pod_name"]
     pairs_on_volume = meta["pairs_on_volume"]
+    if args.pairs_on_volume:
+        pairs_on_volume = args.pairs_on_volume
     if args.final_resid_controls:
         vol_subdir = f"{vol_subdir}_final_resid"
         pod_name = f"{pod_name}-final-resid"
+    elif args.final_resid_directions:
+        vol_subdir = f"{vol_subdir}_final_site_directions"
+        pod_name = f"{pod_name}-final-site-dirs"
+    elif args.last_token_layer_sweep:
+        vol_subdir = f"{vol_subdir}_layer_sweep"
+        pod_name = f"{pod_name}-layer-sweep"
     elif args.role_perp_confirm:
         vol_subdir = f"{vol_subdir}_role_perp_confirm"
         pod_name = f"{pod_name}-role-perp-confirm"
@@ -681,6 +798,14 @@ def main() -> int:
         est["final_resid_controls"] = True
         est["conditional_arms"] = list(FINAL_RESID_CONDITIONAL_ARMS)
         est["n_pairs_cap"] = FINAL_RESID_CORE_PAIRS
+    elif args.final_resid_directions:
+        est["kind"] = est["kind"].replace("_smoke", "_final_site_directions")
+        est["final_resid_directions"] = True
+        est["n_arms_note"] = "upper bound; optional direction files missing on the volume drop 3 arms each"
+    elif args.last_token_layer_sweep:
+        est["kind"] = est["kind"].replace("_smoke", "_last_token_layer_sweep")
+        est["last_token_layer_sweep"] = True
+        est["sweep_layers"] = args.sweep_layers
     elif args.role_perp_confirm:
         est["kind"] = est["kind"].replace("_smoke", "_role_perp_confirm")
         est["role_perp_confirm"] = True
@@ -773,9 +898,10 @@ def main() -> int:
         "dry_run_command": (
             f"python3 scripts/runpod_launch_matched_prefix.py --suite {args.suite}{mode_cli(args)}"
         ),
+        "sweep_layers": args.sweep_layers if args.last_token_layer_sweep else None,
         "harness_boot_argv": (
             f"python3 scripts/matched_prefix_interchange.py --pairs {pairs_on_volume} "
-            + ("" if args.final_resid_controls else f"--directions {DIRECTIONS_ON_VOLUME} ")
+            + ("" if (args.final_resid_controls or args.last_token_layer_sweep) else f"--directions {DIRECTIONS_ON_VOLUME} ")
             + f"--max-pairs {args.max_pairs} "
             f"--model {args.model} --max-new-tokens {args.max_new_tokens} --seed {args.seed}"
             + mode_cli(args)

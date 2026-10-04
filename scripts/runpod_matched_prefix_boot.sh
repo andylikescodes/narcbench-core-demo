@@ -121,6 +121,16 @@ case "$MODE" in
     PASS_DIRECTIONS=0
     EXTRA_FLAG="--final-resid-controls"
     ;;
+  final-resid-directions)
+    # role and role-perp are required; mode, attn-L22 and PCA k8 are picked up if present
+    NEED="lr_role_L21.npy lr_role_perp_mode_L21.npy"
+    EXTRA_FLAG="--final-resid-directions"
+    ;;
+  last-token-layer-sweep)
+    NEED=""
+    PASS_DIRECTIONS=0
+    EXTRA_FLAG="--last-token-layer-sweep --sweep-layers ${JOB_SWEEP_LAYERS:-24,27,30,33,36,39,41,final}"
+    ;;
   *)
     echo "[setup] unknown JOB_MODE=$MODE" | tee -a "$RUN/job.log"
     finish failed bad_mode

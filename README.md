@@ -11,7 +11,9 @@ Transfer-stable collusion on Gemma-2-9B-it, Core discussion → Transfer. The re
 
 | Start here | Path |
 |---|---|
-| Migration handoff | [`MIGRATION_HANDOFF.md`](MIGRATION_HANDOFF.md) |
+| **Current status, review, and roadmap (living entry point)** | [`STATUS.md`](STATUS.md) |
+| Migration handoff (4 Oct 2026 record) | [`MIGRATION_HANDOFF.md`](MIGRATION_HANDOFF.md) |
+| CPU verification of every matched-prefix number in git | [`results/transfer_stable/VERIFICATION_2026-10-04.md`](results/transfer_stable/VERIFICATION_2026-10-04.md) |
 | Code map | [`CODE_INDEX.md`](CODE_INDEX.md) (same file: [`results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md`](results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md), [`papers/transfer-stable-collusion-2026-10/CODE_INDEX.md`](papers/transfer-stable-collusion-2026-10/CODE_INDEX.md)) |
 | Paper PDF (14 pp) | [`papers/transfer-stable-collusion-2026-10/main.pdf`](papers/transfer-stable-collusion-2026-10/main.pdf) |
 | Study pack | [`results/transfer_stable/WEEKEND_REVIEW/`](results/transfer_stable/WEEKEND_REVIEW/) |
@@ -36,6 +38,15 @@ Transfer-stable collusion on Gemma-2-9B-it, Core discussion → Transfer. The re
 | `data/activations/` | not committed |
 
 ### What you can run
+
+CPU checks that need nothing outside git (28 tests, two verifiers, the pair builder):
+
+```bash
+python3 -m unittest discover -s tests
+python3 scripts/verify_claims_sheet.py
+python3 scripts/verify_matched_prefix_results.py
+python3 scripts/build_matched_prefix_pairs.py --out /tmp/pairs_core_v2.jsonl
+```
 
 From the repo root, CPU presenter:
 

@@ -1,3 +1,5 @@
+> **Status update, 4 October 2026 (review pass).** Pull request 1 was merged into `main` and pull request 2 was closed, so the branch instructions below are complete. The living entry point is now [`STATUS.md`](STATUS.md). Every matched-prefix number cited below was re-derived from the per-pair records in git (`results/transfer_stable/VERIFICATION_2026-10-04.md`). Open question 1 (directions at the final site) and open question 2 (where the vote enters the last-token residual) now have cards in the harness and launcher; neither has been launched. The rest of this file is the 4 Oct record and is unchanged.
+
 # NARCBench / Transfer-stable migration handoff
 
 Written 4 October 2026. This file is the trunk note for leaving the Cursor / RunPod setup. Pull request #1 on `andylikescodes/narcbench-core-demo` is the single migration branch. Do not open a second PR for this lane, and do not merge pull request #2 on top of this branch.

@@ -11,5 +11,7 @@ Weekend review entry: [`WEEKEND_REVIEW/00_README.md`](WEEKEND_REVIEW/00_README.m
 | Paper | [`../../papers/transfer-stable-collusion-2026-10/`](../../papers/transfer-stable-collusion-2026-10/) (`main.tex`, `main.pdf`). Correlational claims predate the 4 Oct matched-prefix harness fix. |
 | Withdrawn Oct 1 matched-prefix "first positive" | [`MATCHED_PREFIX_INTERCHANGE_RESULTS.md`](MATCHED_PREFIX_INTERCHANGE_RESULTS.md), [`MATCHED_PREFIX_WIDEN_RESULTS.md`](MATCHED_PREFIX_WIDEN_RESULTS.md), [`MATCHED_PREFIX_TRANSFER_RESULTS.md`](MATCHED_PREFIX_TRANSFER_RESULTS.md). Not science until re-run on the fixed harness. |
 | Tables and figures | [`WEEKEND_REVIEW/tables/`](WEEKEND_REVIEW/tables/), [`WEEKEND_REVIEW/figures/`](WEEKEND_REVIEW/figures/) |
+| CPU re-derivation of every matched-prefix number in git (4 Oct) | [`VERIFICATION_2026-10-04.md`](VERIFICATION_2026-10-04.md) |
+| Reproducible v2 pairs for the next cards | [`../../data/matched_prefix/pairs_core_v2.jsonl`](../../data/matched_prefix/pairs_core_v2.jsonl) (built by `scripts/build_matched_prefix_pairs.py`) |
 
 Sibling analysis files named in the skim (`LAYER_SWEEP.md`, `MLP_ATTN_PROBES.md`, causal smoke writeups, `directions/`) are not in this checkout. Cite the claims sheet, `WEEKEND_REVIEW/tables/`, and the HARD metrics file.

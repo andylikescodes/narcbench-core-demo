@@ -74,6 +74,30 @@ Final-residual controls are a separate suite. They copy the pre-logit residual (
 python3 scripts/runpod_launch_matched_prefix.py --final-resid-controls
 ```
 
+Final-site direction card (added 2026-10-04, open question 1 of the migration handoff): at that same final-norm last-token site, transplant one direction's component both ways next to the full-residual ceiling. Directions: role L21 and role-perp L21 from the volume (required), mode L21, attn L22 and contrast-PCA k8 (used if present), a same-norm random vector, and a leave-one-pair-out difference of means measured at the site. Each direction also gets a project-out ablation on the colluder prompt:
+
+```bash
+python3 scripts/runpod_launch_matched_prefix.py --final-resid-directions
+```
+
+Last-token layer sweep (open question 2): copy the whole last-token residual both ways at several depths to find the first depth whose copy carries the vote. No direction files:
+
+```bash
+python3 scripts/runpod_launch_matched_prefix.py --last-token-layer-sweep --sweep-layers 24,27,30,33,36,39,41,final
+```
+
+`--pairs-on-volume /workspace/...` points any card at a different pairs file on the volume (for example the v2 file below after copying it there).
+
 Those estimates check out a git SHA and read direction `.npy` files from the network volume. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
 
-Files named `*.bak` and `*.bak_*` are earlier copies of the extract and causal harnesses from the science tree.
+## Pairs, verification (CPU, nothing outside git)
+
+| Script | What it does |
+|---|---|
+| `scripts/build_matched_prefix_pairs.py` | Rebuilds matched-prefix role-flip pairs from the Core transcripts: the 12 recorded scenarios by default (`data/matched_prefix/pairs_core_v2.jsonl`, committed), or `--all-letter-targets` for all 50. Character-level checks always; `--tokenizer google/gemma-2-9b-it` adds the token-level prefix check where the tokenizer is available. |
+| `scripts/verify_matched_prefix_results.py` | Re-derives every by-arm statistic, delta and gate of the matched-prefix runs in git from their per-pair records, and shows that the withdrawn writeups' "effects" equal their own untouched baselines. Writes `results/transfer_stable/VERIFICATION_2026-10-04.md` with `--out`. |
+| `scripts/verify_claims_sheet.py` | Cross-checks `CLAIMS_NUMBER_SHEET.json` against `WEEKEND_REVIEW/tables/`, the raw probe metrics under `results/transfer/`, the HARD markdown table, and the paper source. |
+
+Both verifiers run inside the test suite (`python3 -m unittest discover -s tests`).
+
+Earlier `*.bak*` copies of the extract and causal harnesses were removed on 2026-10-04; they remain in git history at commit `8eaca99`.

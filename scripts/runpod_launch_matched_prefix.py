@@ -10,11 +10,12 @@ Estimate-only by default. Pass --launch only after the cost gate is approved:
 Boot clones this public repo and checks out GIT_SHA, then runs
 scripts/matched_prefix_interchange.py from that checkout. --extras-only runs
 the multi-site, PCA, and role-perpendicular kitchen sink. --role-perp-confirm
-runs the residual-L21 role-perp card (not that kitchen sink) on every row of
-the volume pairs file. Direction .npy files and pairs stay on the network
-volume. RUNPOD_API_KEY and HF_TOKEN come from the environment. The GraphQL
-create body is the tiny boot plus a few env vars. --launch refuses unless the
-harness is in the checked-out SHA.
+runs the residual-L21 role-perp card on every row of the volume pairs file.
+--final-resid-controls runs the pre-logit residual copies on the first 12
+core pairs and does not read direction files. Direction .npy files and pairs
+stay on the network volume. RUNPOD_API_KEY and HF_TOKEN come from the
+environment. The GraphQL create body is the tiny boot plus a few env vars.
+--launch refuses unless the harness is in the checked-out SHA.
 Soft-stop: no Track I / Paper 2 / interp-demo / family-house.
 """
 from __future__ import annotations
@@ -105,6 +106,18 @@ ROLE_PERP_CONFIRM_ARMS = [
     "project_out_pca_k8_resid_L23_colluder",
     "ablate_pca_lr_ambient_resid_L23_colluder",
 ]
+# Pre-logit residual copies. Not the role-perp confirm list.
+FINAL_RESID_ARMS = [
+    "baseline_colluder",
+    "baseline_honest",
+    "patch_h2c_full_final_last",
+    "patch_c2h_full_final_last",
+]
+FINAL_RESID_CONDITIONAL_ARMS = [
+    "patch_h2c_full_final_private",
+    "patch_c2h_full_final_private",
+]
+FINAL_RESID_CORE_PAIRS = 12
 SUITE_META = {
     "core": {
         "kind": "matched_prefix_interchange_core_smoke",
@@ -228,7 +241,21 @@ def blob_in_commit(sha: str, rel: str) -> bool:
     return proc.returncode == 0
 
 
+def mode_cli(args: argparse.Namespace) -> str:
+    if getattr(args, "final_resid_controls", False):
+        return " --final-resid-controls"
+    if args.role_perp_confirm:
+        return " --role-perp-confirm"
+    if args.extras_only:
+        return " --extras-only"
+    if args.extras:
+        return " --extras"
+    return ""
+
+
 def arms_for(args: argparse.Namespace) -> list[str]:
+    if args.final_resid_controls:
+        return list(FINAL_RESID_ARMS)
     if args.role_perp_confirm:
         return list(ROLE_PERP_CONFIRM_ARMS)
     if args.extras_only:
@@ -240,6 +267,8 @@ def arms_for(args: argparse.Namespace) -> list[str]:
 
 
 def direction_files_for(args: argparse.Namespace) -> list[str]:
+    if args.final_resid_controls:
+        return []
     needed = list(CORE_DIRECTION_FILES)
     if args.extras or args.extras_only or args.role_perp_confirm:
         needed.extend(EXTRAS_DIRECTION_FILES)
@@ -247,17 +276,10 @@ def direction_files_for(args: argparse.Namespace) -> list[str]:
 
 
 def build_boot(args: argparse.Namespace, *, vol_subdir: str, pairs_on_volume: str) -> str:
-    if args.role_perp_confirm:
-        extras_argv = " --role-perp-confirm"
-    elif args.extras_only:
-        extras_argv = " --extras-only"
-    elif args.extras:
-        extras_argv = " --extras"
-    else:
-        extras_argv = ""
-    dir_checks = " && ".join(
-        f'[ -f "$DIRS/{name}" ]' for name in direction_files_for(args)
-    )
+    extras_argv = mode_cli(args)
+    dir_files = direction_files_for(args)
+    dir_checks = " && ".join(f'[ -f "$DIRS/{name}" ]' for name in dir_files) if dir_files else "true"
+    directions_argv = "" if args.final_resid_controls else "  --directions \"$DIRS\" \\\n"
     return f"""#!/bin/bash
 set -uo pipefail
 export GIT_TERMINAL_PROMPT=0
@@ -300,8 +322,7 @@ phase running
 set +e
 timeout {args.max_minutes}m python3 -u "$SRC/{HARNESS_REL}" \\
   --pairs "$PAIRS" \\
-  --directions "$DIRS" \\
-  --out "$OUT" \\
+{directions_argv}  --out "$OUT" \\
   --model {args.model} \\
   --max-pairs {args.max_pairs} \\
   --max-new-tokens {args.max_new_tokens} \\
@@ -499,6 +520,11 @@ def main() -> int:
         action="store_true",
         help="boot the residual-L21 role-perp confirm card on every volume pairs row",
     )
+    ap.add_argument(
+        "--final-resid-controls",
+        action="store_true",
+        help="boot the pre-logit residual controls on the first 12 core pairs",
+    )
     ap.add_argument("--launch", action="store_true")
     ap.add_argument("--max-minutes", type=int, default=90)
     ap.add_argument("--grace-minutes", type=int, default=6)
@@ -513,11 +539,30 @@ def main() -> int:
     if not MODEL_RE.fullmatch(args.model):
         print("ERROR: --model must be a single token (no spaces)", file=sys.stderr)
         return 1
-    mode_flags = int(bool(args.extras)) + int(bool(args.extras_only)) + int(bool(args.role_perp_confirm))
+    mode_flags = (
+        int(bool(args.extras))
+        + int(bool(args.extras_only))
+        + int(bool(args.role_perp_confirm))
+        + int(bool(args.final_resid_controls))
+    )
     if mode_flags > 1:
-        print("ERROR: pass only one of --extras, --extras-only, --role-perp-confirm", file=sys.stderr)
+        print(
+            "ERROR: pass only one of --extras, --extras-only, --role-perp-confirm, --final-resid-controls",
+            file=sys.stderr,
+        )
         return 1
-    if args.role_perp_confirm:
+    if args.final_resid_controls and args.suite != "core":
+        print("ERROR: --final-resid-controls scores the 12-pair core set", file=sys.stderr)
+        return 1
+    if args.final_resid_controls:
+        args.max_pairs = FINAL_RESID_CORE_PAIRS if args.max_pairs is None else args.max_pairs
+        if args.max_pairs != FINAL_RESID_CORE_PAIRS:
+            print(
+                f"ERROR: --final-resid-controls scores {FINAL_RESID_CORE_PAIRS} core pairs",
+                file=sys.stderr,
+            )
+            return 1
+    elif args.role_perp_confirm:
         args.max_pairs = 0 if args.max_pairs is None else args.max_pairs
     elif args.max_pairs is None:
         args.max_pairs = 10
@@ -527,14 +572,18 @@ def main() -> int:
 
     meta = SUITE_META[args.suite]
     if args.estimate_out is None:
-        if args.role_perp_confirm:
+        if args.final_resid_controls:
+            args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_RESID_ESTIMATE.json"
+        elif args.role_perp_confirm:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_ESTIMATE.json"
         elif args.extras or args.extras_only:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_CHEAP_EXTRAS_ESTIMATE.json"
         else:
             args.estimate_out = meta["estimate_out"]
     if args.launch_card is None:
-        if args.role_perp_confirm:
+        if args.final_resid_controls:
+            args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_RESID_LAUNCH.json"
+        elif args.role_perp_confirm:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_LAUNCH.json"
         elif args.extras or args.extras_only:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_CHEAP_EXTRAS_LAUNCH.json"
@@ -544,7 +593,10 @@ def main() -> int:
     vol_subdir = meta["vol_subdir"]
     pod_name = meta["pod_name"]
     pairs_on_volume = meta["pairs_on_volume"]
-    if args.role_perp_confirm:
+    if args.final_resid_controls:
+        vol_subdir = f"{vol_subdir}_final_resid"
+        pod_name = f"{pod_name}-final-resid"
+    elif args.role_perp_confirm:
         vol_subdir = f"{vol_subdir}_role_perp_confirm"
         pod_name = f"{pod_name}-role-perp-confirm"
     elif args.extras or args.extras_only:
@@ -562,7 +614,12 @@ def main() -> int:
         n_pairs = min(args.max_pairs, n_file) if n_file is not None else args.max_pairs
     arms_list = arms_for(args)
     est = estimate(n_pairs, args.max_new_tokens, len(arms_list), suite=args.suite)
-    if args.role_perp_confirm:
+    if args.final_resid_controls:
+        est["kind"] = est["kind"].replace("_smoke", "_final_resid_controls")
+        est["final_resid_controls"] = True
+        est["conditional_arms"] = list(FINAL_RESID_CONDITIONAL_ARMS)
+        est["n_pairs_cap"] = FINAL_RESID_CORE_PAIRS
+    elif args.role_perp_confirm:
         est["kind"] = est["kind"].replace("_smoke", "_role_perp_confirm")
         est["role_perp_confirm"] = True
         est["scores_every_pairs_row"] = args.max_pairs == 0
@@ -620,32 +677,20 @@ def main() -> int:
         "status_port": 8765,
         "cost_gate_usd": args.cost_max,
         "balance_min_usd": args.balance_min,
+        "conditional_arms": list(FINAL_RESID_CONDITIONAL_ARMS) if args.final_resid_controls else [],
         "launch_command": (
             f"python3 scripts/runpod_launch_matched_prefix.py --suite {args.suite} --launch "
-            f"--max-pairs {args.max_pairs}"
-            + (
-                " --role-perp-confirm"
-                if args.role_perp_confirm
-                else (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
-            )
+            f"--max-pairs {args.max_pairs}{mode_cli(args)}"
         ),
         "dry_run_command": (
-            f"python3 scripts/runpod_launch_matched_prefix.py --suite {args.suite}"
-            + (
-                " --role-perp-confirm"
-                if args.role_perp_confirm
-                else (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
-            )
+            f"python3 scripts/runpod_launch_matched_prefix.py --suite {args.suite}{mode_cli(args)}"
         ),
         "harness_boot_argv": (
             f"python3 scripts/matched_prefix_interchange.py --pairs {pairs_on_volume} "
-            f"--directions {DIRECTIONS_ON_VOLUME} --max-pairs {args.max_pairs} "
+            + ("" if args.final_resid_controls else f"--directions {DIRECTIONS_ON_VOLUME} ")
+            + f"--max-pairs {args.max_pairs} "
             f"--model {args.model} --max-new-tokens {args.max_new_tokens} --seed {args.seed}"
-            + (
-                " --role-perp-confirm"
-                if args.role_perp_confirm
-                else (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
-            )
+            + mode_cli(args)
         ),
         "soft_stop": "Track I / Paper 2 / interp-demo / family-house NOT touched; no GPU unless --launch",
     }

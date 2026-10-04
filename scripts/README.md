@@ -68,6 +68,12 @@ Role-perp confirm writes at each prompt's last token: a full residual copy, the 
 python3 scripts/runpod_launch_matched_prefix.py --role-perp-confirm
 ```
 
+Final-residual controls are a separate suite. They copy the pre-logit residual (the hidden state the lm_head reads) on the first 12 core pairs: last token first, then the private-instruction span only if that copy passes. No direction files:
+
+```bash
+python3 scripts/runpod_launch_matched_prefix.py --final-resid-controls
+```
+
 Those estimates check out a git SHA and read direction `.npy` files from the network volume. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
 
 Files named `*.bak` and `*.bak_*` are earlier copies of the extract and causal harnesses from the science tree.

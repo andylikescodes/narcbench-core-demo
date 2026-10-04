@@ -11,7 +11,7 @@ GPU stays off. Nothing in this note was launched.
 - Branch: `cursor/transfer-stable-weekend-review-8f77`
 - Code map: `CODE_INDEX.md` (the file itself is `results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md`)
 - Runners: `scripts/README.md`
-- Paper: `papers/transfer-stable-collusion-2026-10/` (`main.tex`, `refs.bib`, `main.pdf`)
+- Paper: `papers/transfer-stable-collusion-2026-10/` (`main.tex`, `refs.bib`, `main.pdf`). `main.pdf` and `main.tex` match the 1 Oct 2026 box copies. Correlational claims in that PDF predate the matched-prefix scorer/site bug and the wiring suite. The PDF does not contain the later "first positive" interchange tables.
 - Weekend pack: `results/transfer_stable/WEEKEND_REVIEW/` (spine `00`–`07`, claims sheet, tables, figures)
 - HARD n=72 table already on `main` and in this branch: `results/transfer/TRANSFER_FULL_HARD_METRICS.md`
 - 4 Oct matched-prefix narrative and the raw files it cites: `docs/handoff/2026-10-04-matched-prefix/HANDOFF.md`
@@ -68,7 +68,15 @@ Numbers below are the ones already written in this repo or in the 4 Oct handoff.
 1. The patch was applied at the last shared token (`t* - 1`). The honest and colluder prompts are the same there, so a 1D transplant is exactly zero.
 2. The scorer compared every patch to the honest baseline whenever `baseline_honest` was already in the results dict. Honest→colluder was never scored against the colluder baseline. The reported change, about +0.48, was the untouched gap. The "flips" were baseline disagreements.
 
-Withdraw the cheap-extras "perp copies the gap" claim and the role-perp confirm "random matches" claim. They are not effects. The withdrawn confirm run is `smoke_20261004T150244Z` (SHA `a0c34db645ba2904545967839f759febee167ece`). Its RESULTS file is `docs/handoff/2026-10-04-matched-prefix/withdrawn-role-perp-RESULTS.md`. Anything earlier that used the same site or the same scorer, including a Core "first positive," stays withdrawn until someone re-audits it.
+Withdraw the cheap-extras "perp copies the gap" claim and the role-perp confirm "random matches" claim. They are not effects. The withdrawn confirm run is `smoke_20261004T150244Z` (SHA `a0c34db645ba2904545967839f759febee167ece`). Its RESULTS file is `docs/handoff/2026-10-04-matched-prefix/withdrawn-role-perp-RESULTS.md`.
+
+The Oct 1 "first positive" matched-prefix writeups used that same pre-fix harness. They are in the repo only as a record, and they are withdrawn pending a re-run on the fixed harness:
+
+- `results/transfer_stable/MATCHED_PREFIX_INTERCHANGE_RESULTS.md` — Core smoke, n=10, pod `klmkfu4dubgc39`. Reported honest→colluder ΔP `+0.481` on attention L22 and residual L21.
+- `results/transfer_stable/MATCHED_PREFIX_WIDEN_RESULTS.md` — Core widen, n=33, pod `fczidrsh55t44p`. Reported honest→colluder ΔP `+0.619`.
+- `results/transfer_stable/MATCHED_PREFIX_TRANSFER_RESULTS.md` — Transfer smoke, n=12, pod `gy5yigd2nrwsua`. Reported honest→colluder ΔP `0.727`.
+
+Those ΔP figures match the untouched baseline gap in each file. Do not cite the takeaways as causal effects.
 
 **After the fix.** SHA `1fd085579aab7a868280a43caf09df1d232bffa1` (`1fd0855`) scores honest→colluder against the colluder baseline and colluder→honest against the honest baseline, from the arm name only, and writes at each prompt's last token. The layer-21 full residual at that last token did not carry the vote (smoke `smoke_20261004T165214Z`, pod `06rbunmpwe9sqs`). Mean change was about −0.05 versus the colluder baseline, with no vote flips. Files: `docs/handoff/2026-10-04-matched-prefix/l21-last-RESULTS.md` and the summary and meta next to it. Volume copy: `/workspace/jobs/narcbench-results/matched_prefix_role_perp_confirm/`.
 
@@ -80,7 +88,7 @@ Cheap-extras output, if a pod wrote it, is under `/workspace/jobs/narcbench-resu
 
 1. At the working site (final-layer residual, last prompt token), do the Transfer-stable directions — role, role-perpendicular, a random direction of the same norm, and the other 1D vectors already on the volume — move P relative to the full-residual ceiling? This suite was not run. The code on this branch does not add that card.
 2. Where does the private instruction enter that final last-token residual? The private-instruction span at the final depth was null, so the answer is earlier (layers or attention paths), not a copy of that span at the final norm.
-3. Re-audit any older "first positive" matched-prefix numbers that used the buggy site or the buggy scorer before treating them as science.
+3. Re-run the Oct 1 "first positive" matched-prefix numbers on the fixed harness before treating them as science. The copies under `results/transfer_stable/MATCHED_PREFIX_*_RESULTS.md` are withdrawn. They used the buggy site and scorer.
 4. Within-trajectory versus matched-prefix: keep exploring after a clean harness, or refocus on the site that already moves the vote?
 5. Before any future pod: confirm `pairs.jsonl` and the direction `.npy` files are on the volume at the paths above. Box copies lived under `results/transfer_stable/` and are not a substitute for the volume.
 

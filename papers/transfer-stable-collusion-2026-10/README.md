@@ -32,4 +32,8 @@ Symlink to weekend code map: [`CODE_INDEX.md`](./CODE_INDEX.md) → `WEEKEND_REV
 
 ## GitHub checkout
 
-On this repository, `/workspace/narcbench-core-demo/` is the repo root and this directory is `papers/transfer-stable-collusion-2026-10/`. `CODE_INDEX.md` is a relative symlink to `results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md`. The handoff and skim live under `docs/`.
+On this repository, `/workspace/narcbench-core-demo/` is the repo root and this directory is `papers/transfer-stable-collusion-2026-10/`. `CODE_INDEX.md` is a relative symlink to `results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md`. The handoff and skim live under `docs/`. `main.pdf` and `main.tex` here are the 1 Oct 2026 box copies.
+
+## Dating
+
+Correlational claims in `main.pdf` (J versus complement, residual L21/L22, attention L22, free-regen causal nulls) predate the matched-prefix scorer and site bug found on 4 Oct 2026, and they predate the final-residual wiring suite. The PDF treats matched-prefix interchange as next work. It does not contain the later "first positive" interchange tables. Those tables are `results/transfer_stable/MATCHED_PREFIX_INTERCHANGE_RESULTS.md`, `MATCHED_PREFIX_WIDEN_RESULTS.md`, and `MATCHED_PREFIX_TRANSFER_RESULTS.md`. They are withdrawn pending a re-run on the fixed harness. See `MIGRATION_HANDOFF.md`.

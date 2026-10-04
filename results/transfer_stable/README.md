@@ -8,7 +8,8 @@ Weekend review entry: [`WEEKEND_REVIEW/00_README.md`](WEEKEND_REVIEW/00_README.m
 | Code map | [`WEEKEND_REVIEW/CODE_INDEX.md`](WEEKEND_REVIEW/CODE_INDEX.md) |
 | What this commit contains | [`WEEKEND_REVIEW/SNAPSHOT.md`](WEEKEND_REVIEW/SNAPSHOT.md) |
 | HARD n=72 table already in the repo | [`../transfer/TRANSFER_FULL_HARD_METRICS.md`](../transfer/TRANSFER_FULL_HARD_METRICS.md) |
-| Paper | [`../../papers/transfer-stable-collusion-2026-10/`](../../papers/transfer-stable-collusion-2026-10/) (`main.tex`, `main.pdf`) |
+| Paper | [`../../papers/transfer-stable-collusion-2026-10/`](../../papers/transfer-stable-collusion-2026-10/) (`main.tex`, `main.pdf`). Correlational claims predate the 4 Oct matched-prefix harness fix. |
+| Withdrawn Oct 1 matched-prefix "first positive" | [`MATCHED_PREFIX_INTERCHANGE_RESULTS.md`](MATCHED_PREFIX_INTERCHANGE_RESULTS.md), [`MATCHED_PREFIX_WIDEN_RESULTS.md`](MATCHED_PREFIX_WIDEN_RESULTS.md), [`MATCHED_PREFIX_TRANSFER_RESULTS.md`](MATCHED_PREFIX_TRANSFER_RESULTS.md). Not science until re-run on the fixed harness. |
 | Tables and figures | [`WEEKEND_REVIEW/tables/`](WEEKEND_REVIEW/tables/), [`WEEKEND_REVIEW/figures/`](WEEKEND_REVIEW/figures/) |
 
 Sibling analysis files named in the skim (`LAYER_SWEEP.md`, `MLP_ATTN_PROBES.md`, causal smoke writeups, `directions/`) are not in this checkout. Cite the claims sheet, `WEEKEND_REVIEW/tables/`, and the HARD metrics file.

@@ -173,6 +173,7 @@ There is **no** `pyproject.toml` / `setup.py` for `narcbench-core-demo`. Code is
 | `results/transfer_stable/WEEKEND_REVIEW/` | Consolidated study pack (`00`–`07`, CLAIMS_*, tables/, figures/, design/). |
 | `MIGRATION_HANDOFF.md` | Migration trunk: pipeline, what is done, what is withdrawn, open questions, volume paths. Start here when leaving this platform. |
 | `docs/handoff/2026-10-04-matched-prefix/` | 4 Oct matched-prefix narrative plus the raw result files it cites. |
+| `results/transfer_stable/MATCHED_PREFIX_*_RESULTS.md` | Oct 1 "first positive" interchange summaries. Withdrawn pending a re-run on the fixed harness. |
 | `docs/NEXT-SCIENCE.md` | Science follow-ups / methods ladder notes. |
 | `docs/RUNPOD.md` | RunPod estimate/launch conventions. Older launchers in that note may still describe an embedded boot script. The within-traj and matched-prefix launchers no longer do that. |
 | `/workspace/andy-biz/papers/transfer-stable-collusion-2026-10/` | LaTeX + `main.pdf` (weekend review PDF). Build: `pdflatex main && bibtex main && pdflatex main && pdflatex main`. |

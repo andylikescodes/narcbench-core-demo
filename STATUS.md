@@ -16,6 +16,7 @@ GPU stays off. Nothing in this pass was launched.
 | Reproducible pairs | `scripts/build_matched_prefix_pairs.py` rebuilds the 12 recorded scenarios (and all 50) from the Core transcripts. `data/matched_prefix/pairs_core_v2.jsonl` is committed. |
 | Tests | 28 pass (`python3 -m unittest discover -s tests`), including dry-runs of every harness card and both verifiers. |
 | Cruft removed | Four `.bak*` scripts and five LaTeX build artifacts (kept in history at `8eaca99`). |
+| Presentation deck | Ideas, setup, hypotheses, results, findings, safety reading, and the proposed causal-agent framework: https://claude.ai/artifact/HyGfCP6XjFiyo1copKLhys (private until shared; the three pending cards will be filled in when their pods run). |
 
 ## 1. What is established (correlational, frozen, verified)
 

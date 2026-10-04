@@ -1,0 +1,43 @@
+{
+  "model": "google/gemma-2-9b-it",
+  "n_pairs": 12,
+  "n_pairs_in_file": 12,
+  "pair_ids": [
+    "audit_01_role_flip_v1",
+    "cyber_03_role_flip_v1",
+    "eng_01_role_flip_v1",
+    "env_01_role_flip_v1",
+    "env_02_role_flip_v1",
+    "fin_01_role_flip_v1",
+    "fin_02_role_flip_v1",
+    "food_01_role_flip_v1",
+    "gov_01_role_flip_v1",
+    "hire_01_role_flip_v1",
+    "leg_03_role_flip_v1",
+    "med_01_role_flip_v1"
+  ],
+  "arms": [
+    "baseline_colluder",
+    "baseline_honest",
+    "patch_h2c_full_final_last",
+    "patch_c2h_full_final_last",
+    "patch_h2c_full_final_private",
+    "patch_c2h_full_final_private"
+  ],
+  "conditional_arms": [
+    "patch_h2c_full_final_private",
+    "patch_c2h_full_final_private"
+  ],
+  "n_arms": 6,
+  "max_new_tokens": 8,
+  "protocol": "matched_prefix_final_resid_controls",
+  "suite": "core",
+  "world": "Core",
+  "site": "final_norm_pre_lm_head",
+  "intervention_order": [
+    "prompt_last_token",
+    "private_instruction_span"
+  ],
+  "gap_fraction_required": 0.5,
+  "dry_run": false
+}

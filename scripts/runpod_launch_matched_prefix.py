@@ -8,11 +8,12 @@ Estimate-only by default. Pass --launch only after the cost gate is approved:
   python3 scripts/runpod_launch_matched_prefix.py --suite transfer --max-pairs 12
 
 Boot clones this public repo and checks out GIT_SHA, then runs
-scripts/matched_prefix_interchange.py from that checkout. That harness is not
-in this repo yet, so --launch refuses until a SHA contains it. Pairs and
-direction .npy files stay on the network volume. RUNPOD_API_KEY and HF_TOKEN
-come from the environment. The GraphQL create body is the tiny boot plus a
-few env vars. Soft-stop: no Track I / Paper 2 / interp-demo / family-house.
+scripts/matched_prefix_interchange.py from that checkout. --extras-only runs
+the multi-site, PCA, and role-perpendicular arms. Direction .npy files and
+pairs stay on the network volume. RUNPOD_API_KEY and HF_TOKEN come from the
+environment. The GraphQL create body is the tiny boot plus a few env vars.
+--launch refuses unless the harness is in the checked-out SHA.
+Soft-stop: no Track I / Paper 2 / interp-demo / family-house.
 """
 from __future__ import annotations
 
@@ -49,6 +50,17 @@ MAX_CREATE_BODY_BYTES = 64 * 1024
 UA = "nb-matched-prefix/3"
 DIRECTIONS_ON_VOLUME = "/workspace/jobs/narcbench-data/transfer_stable/directions"
 HF_CACHE_ON_VOLUME = "/workspace/jobs/hf-cache"
+# Read from the volume at boot. Never copied into the GraphQL body.
+CORE_DIRECTION_FILES = [
+    "lr_role_attn_L22.npy",
+    "lr_role_L21.npy",
+    "lr_mode_L21.npy",
+]
+EXTRAS_DIRECTION_FILES = [
+    "lr_role_perp_mode_L21.npy",
+    "pca_contrast_k8_L23.npy",
+    "pca_contrast_k8_L23_lr_ambient.npy",
+]
 
 CORE_ARMS = [
     "baseline_colluder",
@@ -181,6 +193,13 @@ def arms_for(args: argparse.Namespace) -> list[str]:
     return list(CORE_ARMS)
 
 
+def direction_files_for(args: argparse.Namespace) -> list[str]:
+    needed = list(CORE_DIRECTION_FILES)
+    if args.extras or args.extras_only:
+        needed.extend(EXTRAS_DIRECTION_FILES)
+    return needed
+
+
 def build_boot(args: argparse.Namespace, *, vol_subdir: str, pairs_on_volume: str) -> str:
     if args.extras_only:
         extras_argv = " --extras-only"
@@ -188,6 +207,9 @@ def build_boot(args: argparse.Namespace, *, vol_subdir: str, pairs_on_volume: st
         extras_argv = " --extras"
     else:
         extras_argv = ""
+    dir_checks = " && ".join(
+        f'[ -f "$DIRS/{name}" ]' for name in direction_files_for(args)
+    )
     return f"""#!/bin/bash
 set -uo pipefail
 export GIT_TERMINAL_PROMPT=0
@@ -217,7 +239,7 @@ printf '%s\\n' "$GOT" > "$RUN/git_sha"
 phase data
 DIRS="${{DIRECTIONS_DIR:-{DIRECTIONS_ON_VOLUME}}}"
 PAIRS="${{PAIRS_FILE:-{pairs_on_volume}}}"
-[ -f "$DIRS/lr_role_attn_L22.npy" ] && [ -f "$DIRS/lr_role_L21.npy" ] || finish failed missing_directions
+{dir_checks} || finish failed missing_directions
 [ -f "$PAIRS" ] || finish failed missing_pairs
 echo "[setup] directions=$DIRS pairs=$PAIRS" | tee -a "$RUN/job.log"
 export HF_HOME="${{HF_HOME:-{HF_CACHE_ON_VOLUME}}}"
@@ -511,6 +533,7 @@ def main() -> int:
         "payload_in_graphql_env": False,
         "job_tarball_in_create": False,
         "directions_on_volume": DIRECTIONS_ON_VOLUME,
+        "direction_files_on_volume": direction_files_for(args),
         "pairs_on_volume": pairs_on_volume,
         "graphql_post_body_bytes": post_bytes,
         "graphql_post_body_limit": MAX_CREATE_BODY_BYTES,

@@ -56,6 +56,12 @@ python3 scripts/runpod_launch_within_traj.py
 python3 scripts/runpod_launch_matched_prefix.py
 ```
 
-`scripts/matched_prefix_interchange.py` is not in this repo, so the matched-prefix launcher refuses `--launch` until that harness is on the checked-out SHA. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
+Matched-prefix interchange is `scripts/matched_prefix_interchange.py`. Cheap extras (multi-site, PCA, role-perpendicular patch):
+
+```bash
+python3 scripts/runpod_launch_matched_prefix.py --extras-only
+```
+
+That estimate checks out a git SHA and reads direction `.npy` files from the network volume. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
 
 Files named `*.bak` and `*.bak_*` are earlier copies of the extract and causal harnesses from the science tree.

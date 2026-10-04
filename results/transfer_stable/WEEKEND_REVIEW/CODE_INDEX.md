@@ -145,7 +145,8 @@ There is **no** `pyproject.toml` / `setup.py` for `narcbench-core-demo`. Code is
 | `scripts/activation_patch_core.py` | Earlier Core residual **activation patch** restore/scrub (vote flips). | GPU via `runpod_launch_activation_patch.py` or direct with `--runs-dir` / `--out`. | Core runs → patch metrics under `--out`. **Not** the Transfer-stable role-direction suite. |
 | `scripts/within_traj_mid_private.py` | Teacher-forced within-trajectory mid-private intervene on Core (attn L22 + residual L21). `option_labels` may be a list or a dict. | `python3 scripts/within_traj_mid_private.py --dry-run --max-scenarios 6` (needs direction `.npy`, not in git). GPU via the launcher below. | Core run + directions → continuation edit + vote metrics under `--out`. |
 | `scripts/runpod_launch_within_traj.py` | Estimate / launch that smoke. Create body is a tiny boot that checks out a git SHA. No job tarball in GraphQL. | `python3 scripts/runpod_launch_within_traj.py` · `--launch` only after the cost gate. | Results on the network volume under `jobs/narcbench-results/within_traj_mid_private/`. |
-| `scripts/runpod_launch_matched_prefix.py` | Estimate / launch matched-prefix interchange. Same tiny git-SHA create. Refuses `--launch` while `scripts/matched_prefix_interchange.py` is absent from the SHA. | `python3 scripts/runpod_launch_matched_prefix.py` | Results on the volume under `jobs/narcbench-results/matched_prefix/`. |
+| `scripts/matched_prefix_interchange.py` | Teacher-forced matched-prefix activation interchange. `--extras-only` is multi-site patch/ablate, PCA k8 at residual L23, and role-perpendicular patch. | GPU via the launcher below. `option_labels` may be a list or a dict. | Pairs + direction `.npy` on the volume → vote metrics under `--out`. |
+| `scripts/runpod_launch_matched_prefix.py` | Estimate / launch that job. Tiny git-SHA create. `--extras-only` runs the harness from the checkout and reads direction files from the volume. | `python3 scripts/runpod_launch_matched_prefix.py --extras-only` · `--launch` only after the cost gate. | Results on the volume under `jobs/narcbench-results/matched_prefix_cheap_extras/`. |
 
 **Results already on disk (for review, not re-run):**  
 `results/transfer_stable/CAUSAL_*`, `MLP_ATTN_CAUSAL_*`, `DISCUSSION_PHASE_CAUSAL_*`, `NEGATIVE_CAUSAL_APPENDIX.md`, and pulled smoke dirs.
@@ -189,7 +190,7 @@ These are called out so weekend review does not assume a runner exists:
 
 | Desired capability | Status |
 |---|---|
-| **Matched-prefix causal interchange harness** | **GPU runner still absent** (`scripts/matched_prefix_interchange.py`). Slim launcher `scripts/runpod_launch_matched_prefix.py` checks out a git SHA and refuses `--launch` until that file is in the SHA. Specs + CPU scaffold remain under `WEEKEND_REVIEW/`. |
+| **Matched-prefix causal interchange harness** | **Present:** `scripts/matched_prefix_interchange.py`. Launcher `scripts/runpod_launch_matched_prefix.py --extras-only` checks out a git SHA and reads direction `.npy` files from the network volume. Specs + CPU scaffold remain under `WEEKEND_REVIEW/`. |
 | **Within-trajectory causal runner** | **Present:** `scripts/within_traj_mid_private.py`. Launcher `scripts/runpod_launch_within_traj.py` checks out a git SHA (estimate unless `--launch`). Direction `.npy` files stay on the network volume, not in git. Spec: `WEEKEND_REVIEW/design/within_trajectory_spec.md`. |
 | **Checkpoint-assay runner** | **Missing.** Spec only: `WEEKEND_REVIEW/design/checkpoint_assays_spec.md`. |
 | Official upstream `extract_core.py` / `extract_transfer.py` on Gemma | **Not wired** as the lane’s launcher; local `extract_activations_from_transcripts.py` is what ran. |

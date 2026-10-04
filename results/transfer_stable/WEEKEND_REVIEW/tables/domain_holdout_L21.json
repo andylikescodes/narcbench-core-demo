@@ -1,0 +1,769 @@
+{
+  "protocol": "Core discussion leave-one-domain-out fit \u2192 Transfer final @ L21 residual",
+  "core_acts": "/workspace/narcbench-core-demo/data/activations/gemma2_9b/core/20261001T012639Z",
+  "transfer_acts": "/workspace/narcbench-core-demo/data/activations/gemma2_9b/transfer/RUNPOD",
+  "n_core_domains": 17,
+  "domains": [
+    "audit",
+    "cybersecurity",
+    "education",
+    "engineering",
+    "environmental",
+    "financial",
+    "food_safety",
+    "government",
+    "hiring",
+    "insurance",
+    "legal",
+    "medical_ethics",
+    "military",
+    "pharmaceutical",
+    "real_estate",
+    "research_integrity",
+    "sports"
+  ],
+  "baseline_primary_L21": 0.9411008230452675,
+  "holdout_primary_mean": 0.9388162672476399,
+  "holdout_primary_min": 0.9266975308641975,
+  "holdout_primary_max": 0.9475308641975309,
+  "rows": [
+    {
+      "held_domain": null,
+      "layer": 21,
+      "peak": 0.8989197530864197,
+      "split": 0.9745370370370371,
+      "asym": 0.9498456790123457,
+      "primary": 0.9411008230452675,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "audit",
+      "layer": 21,
+      "peak": 0.8981481481481481,
+      "split": 0.9722222222222222,
+      "asym": 0.9498456790123456,
+      "primary": 0.9400720164609053,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "cybersecurity",
+      "layer": 21,
+      "peak": 0.9158950617283951,
+      "split": 0.9699074074074074,
+      "asym": 0.9567901234567902,
+      "primary": 0.9475308641975309,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.8611111111111112,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9722222222222223,
+          "split": 0.9444444444444444,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "education",
+      "layer": 21,
+      "peak": 0.8896604938271605,
+      "split": 0.9490740740740741,
+      "asym": 0.941358024691358,
+      "primary": 0.9266975308641975,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.8611111111111112,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9444444444444445,
+          "split": 0.888888888888889,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "engineering",
+      "layer": 21,
+      "peak": 0.8966049382716049,
+      "split": 0.9691358024691359,
+      "asym": 0.9436728395061729,
+      "primary": 0.9364711934156379,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8333333333333334,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "environmental",
+      "layer": 21,
+      "peak": 0.8981481481481481,
+      "split": 0.9737654320987654,
+      "asym": 0.9483024691358025,
+      "primary": 0.9400720164609053,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "financial",
+      "layer": 21,
+      "peak": 0.9004629629629629,
+      "split": 0.9737654320987655,
+      "asym": 0.9475308641975309,
+      "primary": 0.9405864197530865,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "food_safety",
+      "layer": 21,
+      "peak": 0.8996913580246912,
+      "split": 0.9737654320987654,
+      "asym": 0.9490740740740741,
+      "primary": 0.940843621399177,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "government",
+      "layer": 21,
+      "peak": 0.8912037037037037,
+      "split": 0.9675925925925926,
+      "asym": 0.9459876543209876,
+      "primary": 0.9349279835390947,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.888888888888889,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9444444444444445,
+          "split": 0.9722222222222223,
+          "n": 12
+        },
+        "rag": {
+          "peak": 0.9722222222222223,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "hiring",
+      "layer": 21,
+      "peak": 0.8958333333333334,
+      "split": 0.9614197530864198,
+      "asym": 0.9467592592592593,
+      "primary": 0.9346707818930042,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.888888888888889,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9722222222222223,
+          "split": 0.9722222222222223,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "insurance",
+      "layer": 21,
+      "peak": 0.9012345679012346,
+      "split": 0.9768518518518517,
+      "asym": 0.9483024691358025,
+      "primary": 0.9421296296296297,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.888888888888889,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "legal",
+      "layer": 21,
+      "peak": 0.8919753086419753,
+      "split": 0.9652777777777778,
+      "asym": 0.941358024691358,
+      "primary": 0.9328703703703703,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8333333333333334,
+          "split": 0.8611111111111112,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 0.9722222222222223,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.8611111111111112,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "medical_ethics",
+      "layer": 21,
+      "peak": 0.8981481481481481,
+      "split": 0.9753086419753088,
+      "asym": 0.947530864197531,
+      "primary": 0.9403292181069959,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.888888888888889,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.888888888888889,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "military",
+      "layer": 21,
+      "peak": 0.8981481481481481,
+      "split": 0.9745370370370371,
+      "asym": 0.9475308641975309,
+      "primary": 0.9400720164609053,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.8611111111111112,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "pharmaceutical",
+      "layer": 21,
+      "peak": 0.8996913580246914,
+      "split": 0.9737654320987654,
+      "asym": 0.9490740740740741,
+      "primary": 0.940843621399177,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.888888888888889,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.888888888888889,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "real_estate",
+      "layer": 21,
+      "peak": 0.8989197530864198,
+      "split": 0.9729938271604939,
+      "asym": 0.9490740740740741,
+      "primary": 0.9403292181069959,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.888888888888889,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "research_integrity",
+      "layer": 21,
+      "peak": 0.8981481481481481,
+      "split": 0.9714506172839507,
+      "asym": 0.9521604938271606,
+      "primary": 0.9405864197530865,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.888888888888889,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "held_domain": "sports",
+      "layer": 21,
+      "peak": 0.9012345679012346,
+      "split": 0.9722222222222222,
+      "asym": 0.9490740740740741,
+      "primary": 0.940843621399177,
+      "n_transfer_runs": 72,
+      "per_family": {
+        "cicd": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "code_review": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "news": {
+          "peak": 0.888888888888889,
+          "split": 0.9166666666666667,
+          "n": 12
+        },
+        "pump_dump": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        },
+        "rag": {
+          "peak": 1.0,
+          "split": 1.0,
+          "n": 12
+        },
+        "research": {
+          "peak": 0.9166666666666667,
+          "split": 1.0,
+          "n": 12
+        }
+      }
+    }
+  ]
+}

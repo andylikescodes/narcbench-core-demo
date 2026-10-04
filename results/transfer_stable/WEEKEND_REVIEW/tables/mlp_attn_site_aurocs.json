@@ -1,0 +1,161 @@
+{
+  "protocol": "Core discussion \u2192 Transfer final; sites attn/mlp/residual",
+  "best_site": "attn_L22",
+  "best_primary": 0.999,
+  "rows": [
+    {
+      "site": "attn",
+      "layer": 19,
+      "primary": 0.954,
+      "peak": 0.965,
+      "split": 0.928,
+      "asym": 0.97,
+      "role_sample": 0.951,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "attn",
+      "layer": 20,
+      "primary": 0.949,
+      "peak": 0.934,
+      "split": 0.948,
+      "asym": 0.965,
+      "role_sample": 0.87,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "attn",
+      "layer": 21,
+      "primary": 0.986,
+      "peak": 0.978,
+      "split": 0.986,
+      "asym": 0.994,
+      "role_sample": 0.948,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "attn",
+      "layer": 22,
+      "primary": 0.999,
+      "peak": 0.998,
+      "split": 1.0,
+      "asym": 1.0,
+      "role_sample": 0.987,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "attn",
+      "layer": 23,
+      "primary": 0.888,
+      "peak": 0.878,
+      "split": 0.873,
+      "asym": 0.914,
+      "role_sample": 0.881,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "mlp",
+      "layer": 19,
+      "primary": 0.861,
+      "peak": 0.863,
+      "split": 0.836,
+      "asym": 0.883,
+      "role_sample": 0.852,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "mlp",
+      "layer": 20,
+      "primary": 0.821,
+      "peak": 0.837,
+      "split": 0.763,
+      "asym": 0.863,
+      "role_sample": 0.872,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "mlp",
+      "layer": 21,
+      "primary": 0.849,
+      "peak": 0.834,
+      "split": 0.841,
+      "asym": 0.873,
+      "role_sample": 0.825,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "mlp",
+      "layer": 22,
+      "primary": 0.915,
+      "peak": 0.881,
+      "split": 0.923,
+      "asym": 0.941,
+      "role_sample": 0.878,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "mlp",
+      "layer": 23,
+      "primary": 0.823,
+      "peak": 0.805,
+      "split": 0.794,
+      "asym": 0.87,
+      "role_sample": 0.814,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "residual",
+      "layer": 19,
+      "primary": 0.884,
+      "peak": 0.879,
+      "split": 0.863,
+      "asym": 0.91,
+      "role_sample": 0.845,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "residual",
+      "layer": 20,
+      "primary": 0.885,
+      "peak": 0.864,
+      "split": 0.871,
+      "asym": 0.918,
+      "role_sample": 0.829,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "residual",
+      "layer": 21,
+      "primary": 0.941,
+      "peak": 0.899,
+      "split": 0.975,
+      "asym": 0.95,
+      "role_sample": 0.859,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "residual",
+      "layer": 22,
+      "primary": 0.93,
+      "peak": 0.897,
+      "split": 0.937,
+      "asym": 0.955,
+      "role_sample": 0.873,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    },
+    {
+      "site": "residual",
+      "layer": 23,
+      "primary": 0.873,
+      "peak": 0.832,
+      "split": 0.877,
+      "asym": 0.91,
+      "role_sample": 0.845,
+      "source": "results/transfer_stable/MLP_ATTN_PROBES.md"
+    }
+  ],
+  "sources": [
+    "results/transfer_stable/MLP_ATTN_PROBES.md",
+    "results/transfer_stable/MLP_ATTN_PROBES.json"
+  ]
+}

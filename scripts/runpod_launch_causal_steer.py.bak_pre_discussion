@@ -1,0 +1,631 @@
+#!/usr/bin/env python3
+"""Launch causal steer/ablate on Transfer (and optionally Core) — Gemma-2-9B-it.
+
+Default is estimate-only. Pass --launch only after Mira/Andy approval.
+Does NOT launch unless --launch. Auto-terminates on done.
+
+  python3 scripts/runpod_launch_causal_steer.py
+  python3 scripts/runpod_launch_causal_steer.py --suite alpha_core --launch
+
+Suites:
+  default      — Transfer α=1 smoke (legacy)
+  alpha_sweep  — Transfer multi-α only
+  core_smoke   — Core only
+  alpha_core   — ONE pod: Transfer α-sweep then Core smoke (model loads once)
+
+Volume cr1kjtzjs2; Transfer: gemma2_9b/transfer/RUNPOD;
+Core: gemma2_9b/core/20261001T012639Z.
+Bundles causal_steer_transfer.py + direction npy via b64 env.
+"""
+from __future__ import annotations
+
+import argparse
+import base64
+import io
+import json
+import os
+import sys
+import tarfile
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+ROOT = Path(__file__).resolve().parents[1]
+COLLUSION_SCRIPTS = Path("/workspace/collusion-exp/scripts")
+SECRETS = (
+    Path("/home/box/.secrets/interp-explorer.env"),
+    Path("/workspace/runpod-study/interp-explorer.env"),
+    Path.home() / ".secrets" / "interp-explorer.env",
+)
+IMAGE = "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404"
+VOLUME_ID = "cr1kjtzjs2"
+POD_NAME = "job-narcbench-causal-alpha-core"
+GPU_PREFS = [
+    "NVIDIA L4",
+    "NVIDIA RTX PRO 4500 Blackwell Server Edition",
+    "NVIDIA RTX PRO 4500 Blackwell",
+    "NVIDIA A40",
+    "NVIDIA RTX A5000",
+    "NVIDIA GeForce RTX 4090",
+    "NVIDIA GeForce RTX 3090",
+    "NVIDIA RTX A6000",
+    "NVIDIA L40S",
+    "NVIDIA A100 80GB PCIe",
+]
+RATES = {
+    "NVIDIA L4": 0.49,
+    "NVIDIA RTX PRO 4500 Blackwell Server Edition": 0.72,
+    "NVIDIA RTX PRO 4500 Blackwell": 0.72,
+    "NVIDIA A40": 0.49,
+    "NVIDIA RTX A5000": 0.49,
+    "NVIDIA GeForce RTX 4090": 0.74,
+    "NVIDIA GeForce RTX 3090": 0.50,
+    "NVIDIA RTX A6000": 0.53,
+    "NVIDIA L40S": 0.89,
+    "NVIDIA A100 80GB PCIe": 1.39,
+}
+DIR_FILES = [
+    "lr_role_L21.npy",
+    "lr_role_L22.npy",
+    "lr_role_perp_mode_L21.npy",
+    "meta.json",
+]
+PT = ZoneInfo("America/Los_Angeles")
+CORE_RUNS_REL_DEFAULT = "gemma2_9b/core/20261001T012639Z"
+TRANSFER_RUNS_REL_DEFAULT = "gemma2_9b/transfer/RUNPOD"
+
+
+def read_env() -> None:
+    for path in SECRETS:
+        if not path.is_file():
+            continue
+        for line in path.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
+def n_arms_for_suite(suite: str) -> int:
+    # alpha_sweep: baseline + 2*3 (L21/L22 × {2,4,8}) + perp@4 + random@maxα = 9
+    # core_smoke: baseline + L21 + L22 + perp + random + L21_a4 = 6
+    # mlp_attn_smoke: baseline + ablate_best + random + ablate_best_a4 = 4
+    # default: 5
+    return {"alpha_sweep": 9, "core_smoke": 6, "default": 5, "alpha_core": 9 + 6, "mlp_attn_smoke": 4}.get(suite, 5)
+
+
+def estimate(
+    max_scenarios: int,
+    max_new_tokens: int,
+    suite: str,
+    *,
+    also_max_scenarios: int | None = None,
+) -> dict:
+    """Rough hours/cost. Prior α=1 smoke: 60 gens ≈ 640s (~10.7s/gen) on L4."""
+    if suite == "alpha_core":
+        n_xfer = max_scenarios * 2 * n_arms_for_suite("alpha_sweep")
+        n_core = (also_max_scenarios or max_scenarios) * 2 * n_arms_for_suite("core_smoke")
+        n_gens = n_xfer + n_core
+        load_sec = 600  # single model load
+        kind = "alpha_core_combined"
+    else:
+        n_gens = max_scenarios * 2 * n_arms_for_suite(suite)
+        load_sec = 600
+        kind = suite if suite != "default" else ("smoke" if max_scenarios <= 6 else "scale")
+    # conservative 20s/gen (prior observed ~11s); + load once
+    sec_per = 20.0 if max_new_tokens <= 128 else 40.0
+    hours = round((n_gens * sec_per + load_sec) / 3600.0, 2)
+    hours = max(hours, 0.5)
+    gpu = GPU_PREFS[0]
+    rate = RATES.get(gpu, 0.55)
+    return {
+        "kind": kind,
+        "suite": suite,
+        "max_scenarios": max_scenarios,
+        "also_max_scenarios": also_max_scenarios or max_scenarios if suite == "alpha_core" else None,
+        "n_generations_est": n_gens,
+        "n_arms_est": n_arms_for_suite(suite if suite != "alpha_core" else "alpha_sweep"),
+        "max_new_tokens": max_new_tokens,
+        "hours_est": hours,
+        "preferred_gpu": gpu,
+        "gpu_prefs": GPU_PREFS,
+        "rate_usd_hr": rate,
+        "cost_est_usd": round(hours * rate, 2),
+        "cost_est_range_usd": [round(hours * 0.49, 2), round(hours * 0.74, 2)],
+        "balance_note": "clientBalance ≈ $27.59; keep combined under ~$2 if possible",
+        "volume_id": VOLUME_ID,
+        "transfer_path_on_volume": "gemma2_9b/transfer/RUNPOD",
+        "core_path_on_volume": CORE_RUNS_REL_DEFAULT,
+        "sec_per_gen_assumed": sec_per,
+        "model_load_once": suite == "alpha_core",
+    }
+
+
+def pack_directions_b64(directions: Path, *, suite: str = "default") -> str:
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+        names = list(DIR_FILES)
+        if suite == "mlp_attn_smoke":
+            # Pack only best (+ runner-up if present) to keep env small
+            import json as _json
+            meta_p = directions / "meta_mlp_attn.json"
+            extra = ["meta_mlp_attn.json"]
+            if meta_p.exists():
+                meta = _json.loads(meta_p.read_text())
+                bs = meta.get("best_site") or {}
+                if bs.get("direction_npy"):
+                    extra.append(bs["direction_npy"])
+                if bs.get("diff_means_npy"):
+                    extra.append(bs["diff_means_npy"])
+                ru = meta.get("runner_up") or {}
+                if ru.get("key"):
+                    extra.append(f"lr_role_{ru['key']}.npy")
+            else:
+                extra += sorted(p.name for p in directions.glob("lr_role_attn_L*.npy"))[:2]
+            names = [n for n in extra if (directions / n).exists()]
+            if not any(n.endswith(".npy") for n in names):
+                raise FileNotFoundError(f"no mlp/attn direction npy under {directions}")
+        for name in names:
+            pp = directions / name
+            if not pp.exists():
+                if suite == "mlp_attn_smoke" and name in DIR_FILES:
+                    continue  # residual files optional for mlp_attn
+                raise FileNotFoundError(f"missing direction file: {pp}")
+            tar.add(pp, arcname=name)
+    return base64.b64encode(buf.getvalue()).decode()
+
+
+def resolve_runs_snippet(rel: str, var: str) -> str:
+    return f"""
+{var}=""
+for c in \\
+  /workspace/jobs/narcbench-results/upstream/scenarios/{rel} \\
+  /workspace/jobs/narcbench-core-demo/upstream/scenarios/{rel} \\
+  /workspace/narcbench-core-demo/upstream/scenarios/{rel}; do
+  [ -d "$c" ] && {var}="$c" && break
+done
+"""
+
+
+def build_boot(args: argparse.Namespace) -> str:
+    suite = args.suite
+    transfer_rel = args.runs_rel
+    core_rel = args.core_runs_rel
+    max_min = args.max_minutes
+    grace = args.grace_minutes
+
+    if suite == "alpha_core":
+        harness_cmd = f"""phase transfer_alpha_sweep
+set +e
+timeout {max_min}m $PY -u "$DEMO/scripts/causal_steer_transfer.py" \\
+  --runs-dir "$RUNS_XFER" \\
+  --directions "$DEMO/directions" \\
+  --out "$OUT_XFER" \\
+  --model {args.model} \\
+  --layers {args.layers} \\
+  --suite alpha_sweep \\
+  --alphas {args.alphas} \\
+  --max-scenarios {args.max_scenarios} \\
+  --max-new-tokens {args.max_new_tokens} \\
+  --also-runs-dir "$RUNS_CORE" \\
+  --also-suite core_smoke \\
+  --also-out "$OUT_CORE" \\
+  --also-max-scenarios {args.also_max_scenarios} \\
+  >"$RUN/cmd.log" 2>&1
+EC=$?; set -e
+"""
+        resolve = resolve_runs_snippet(transfer_rel, "RUNS_XFER") + resolve_runs_snippet(core_rel, "RUNS_CORE")
+        resolve += """
+[ -n "$RUNS_XFER" ] || finish failed missing_transfer_runs
+[ -n "$RUNS_CORE" ] || finish failed missing_core_runs
+n_dirs=$(find "$RUNS_XFER" -mindepth 1 -maxdepth 1 -type d | wc -l)
+echo "[setup] RUNS_XFER=$RUNS_XFER n_dirs=$n_dirs RUNS_CORE=$RUNS_CORE" | tee -a "$RUN/job.log"
+[ "$n_dirs" -ge 2 ] || finish failed transfer_runs_too_few
+OUT_XFER=/workspace/jobs/narcbench-results/causal_steer/alpha_sweep_$(date -u +%Y%m%dT%H%M%SZ)
+OUT_CORE=/workspace/jobs/narcbench-results/causal_steer/core_smoke_$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$OUT_XFER" "$OUT_CORE"
+"""
+        after = """
+echo $EC > "$RUN/exit_code"; cat "$RUN/cmd.log" | tee -a "$RUN/job.log"
+mkdir -p "$RUN/transfer_alpha_sweep" "$RUN/core_smoke"
+cp -a "$OUT_XFER"/. "$RUN/transfer_alpha_sweep/" 2>/dev/null || true
+cp -a "$OUT_CORE"/. "$RUN/core_smoke/" 2>/dev/null || true
+phase packing
+tar -czf "$RUN/results.tgz" -C /workspace/jobs/narcbench-results causal_steer || true
+cp -f "$RUN/results.tgz" /workspace/jobs/narcbench-results/causal_steer/alpha_core_latest.tgz 2>/dev/null || true
+if [ $EC -eq 0 ]; then finish done ok; else finish failed exit_$EC; fi
+"""
+    elif suite == "core_smoke":
+        harness_cmd = f"""phase running
+set +e
+timeout {max_min}m $PY -u "$DEMO/scripts/causal_steer_transfer.py" \\
+  --runs-dir "$RUNS" \\
+  --directions "$DEMO/directions" \\
+  --out "$OUT" \\
+  --model {args.model} \\
+  --layers {args.layers} \\
+  --suite core_smoke \\
+  --max-scenarios {args.max_scenarios} \\
+  --max-new-tokens {args.max_new_tokens} \\
+  >"$RUN/cmd.log" 2>&1
+EC=$?; set -e
+"""
+        resolve = resolve_runs_snippet(core_rel, "RUNS")
+        resolve += """
+[ -n "$RUNS" ] || finish failed missing_core_runs
+n_dirs=$(find "$RUNS" -mindepth 1 -maxdepth 1 -type d | wc -l)
+echo "[setup] RUNS=$RUNS n_dirs=$n_dirs" | tee -a "$RUN/job.log"
+[ "$n_dirs" -ge 2 ] || finish failed core_runs_too_few
+OUT=/workspace/jobs/narcbench-results/causal_steer/core_smoke_$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$OUT"
+"""
+        after = """
+echo $EC > "$RUN/exit_code"; cat "$RUN/cmd.log" | tee -a "$RUN/job.log"
+cp -a "$OUT"/. "$RUN/" 2>/dev/null || true
+tar -czf "$RUN/results.tgz" -C /workspace/jobs/narcbench-results causal_steer || true
+if [ $EC -eq 0 ]; then finish done ok; else finish failed exit_$EC; fi
+"""
+    elif suite == "alpha_sweep":
+        harness_cmd = f"""phase running
+set +e
+timeout {max_min}m $PY -u "$DEMO/scripts/causal_steer_transfer.py" \\
+  --runs-dir "$RUNS" \\
+  --directions "$DEMO/directions" \\
+  --out "$OUT" \\
+  --model {args.model} \\
+  --layers {args.layers} \\
+  --suite alpha_sweep \\
+  --alphas {args.alphas} \\
+  --max-scenarios {args.max_scenarios} \\
+  --max-new-tokens {args.max_new_tokens} \\
+  >"$RUN/cmd.log" 2>&1
+EC=$?; set -e
+"""
+        resolve = resolve_runs_snippet(transfer_rel, "RUNS")
+        resolve += """
+[ -n "$RUNS" ] || finish failed missing_transfer_runs
+n_dirs=$(find "$RUNS" -mindepth 1 -maxdepth 1 -type d | wc -l)
+echo "[setup] RUNS=$RUNS n_dirs=$n_dirs" | tee -a "$RUN/job.log"
+[ "$n_dirs" -ge 2 ] || finish failed transfer_runs_too_few
+OUT=/workspace/jobs/narcbench-results/causal_steer/alpha_sweep_$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$OUT"
+"""
+        after = """
+echo $EC > "$RUN/exit_code"; cat "$RUN/cmd.log" | tee -a "$RUN/job.log"
+cp -a "$OUT"/. "$RUN/" 2>/dev/null || true
+tar -czf "$RUN/results.tgz" -C /workspace/jobs/narcbench-results causal_steer || true
+if [ $EC -eq 0 ]; then finish done ok; else finish failed exit_$EC; fi
+"""
+    elif suite == "mlp_attn_smoke":
+        # Core preferred (letter votes clearer); ablate best mlp/attn site
+        harness_cmd = f"""phase running
+set +e
+timeout {max_min}m $PY -u "$DEMO/scripts/causal_steer_transfer.py" \\
+  --runs-dir "$RUNS" \\
+  --directions "$DEMO/directions" \\
+  --out "$OUT" \\
+  --model {args.model} \\
+  --layers {args.layers} \\
+  --suite mlp_attn_smoke \\
+  --alpha {args.alpha} \\
+  --max-scenarios {args.max_scenarios} \\
+  --max-new-tokens {args.max_new_tokens} \\
+  >"$RUN/cmd.log" 2>&1
+EC=$?; set -e
+"""
+        resolve = resolve_runs_snippet(core_rel, "RUNS")
+        resolve += """
+[ -n "$RUNS" ] || finish failed missing_core_runs
+n_dirs=$(find "$RUNS" -mindepth 1 -maxdepth 1 -type d | wc -l)
+echo "[setup] RUNS=$RUNS n_dirs=$n_dirs suite=mlp_attn_smoke" | tee -a "$RUN/job.log"
+[ "$n_dirs" -ge 2 ] || finish failed core_runs_too_few
+OUT=/workspace/jobs/narcbench-results/causal_steer/mlp_attn_smoke_$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$OUT"
+"""
+        after = """
+echo $EC > "$RUN/exit_code"; cat "$RUN/cmd.log" | tee -a "$RUN/job.log"
+cp -a "$OUT"/. "$RUN/" 2>/dev/null || true
+tar -czf "$RUN/results.tgz" -C /workspace/jobs/narcbench-results causal_steer || true
+if [ $EC -eq 0 ]; then finish done ok; else finish failed exit_$EC; fi
+"""
+
+    else:
+        harness_cmd = f"""phase running
+set +e
+timeout {max_min}m $PY -u "$DEMO/scripts/causal_steer_transfer.py" \\
+  --runs-dir "$RUNS" \\
+  --directions "$DEMO/directions" \\
+  --out "$OUT" \\
+  --model {args.model} \\
+  --layers {args.layers} \\
+  --alpha {args.alpha} \\
+  --max-scenarios {args.max_scenarios} \\
+  --max-new-tokens {args.max_new_tokens} \\
+  >"$RUN/cmd.log" 2>&1
+EC=$?; set -e
+"""
+        resolve = resolve_runs_snippet(transfer_rel, "RUNS")
+        resolve += """
+[ -n "$RUNS" ] || finish failed missing_transfer_runs
+n_dirs=$(find "$RUNS" -mindepth 1 -maxdepth 1 -type d | wc -l)
+echo "[setup] RUNS=$RUNS n_dirs=$n_dirs" | tee -a "$RUN/job.log"
+[ "$n_dirs" -ge 2 ] || finish failed transfer_runs_too_few
+OUT=/workspace/jobs/narcbench-results/causal_steer/smoke_$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$OUT"
+"""
+        after = """
+echo $EC > "$RUN/exit_code"; cat "$RUN/cmd.log" | tee -a "$RUN/job.log"
+cp -a "$OUT"/. "$RUN/" 2>/dev/null || true
+tar -czf "$RUN/results.tgz" -C /workspace/jobs/narcbench-results causal_steer || true
+if [ $EC -eq 0 ]; then finish done ok; else finish failed exit_$EC; fi
+"""
+
+    boot = f"""#!/bin/bash
+set -uo pipefail
+RUN=/tmp/narcbench-causal; mkdir -p "$RUN" /workspace/jobs/narcbench-results/causal_steer
+python3 -m http.server 8765 --directory "$RUN" >/tmp/http.log 2>&1 &
+echo '{{"phase":"boot"}}' > "$RUN/status.json"
+phase() {{ echo "{{\\"phase\\":\\"$1\\"}}" > "$RUN/status.json"; echo "[phase] $1" | tee -a "$RUN/job.log"; }}
+term() {{ python3 -c "import os,json,urllib.request as u;p=os.environ.get('RUNPOD_POD_ID','');k=os.environ.get('RUNPOD_API_KEY','');
+b=json.dumps({{'query':'mutation {{ podTerminate(input: {{podId: \\"%s\\"}}) }}'%p}});
+r=u.Request('https://api.runpod.io/graphql',data=b.encode(),headers={{'content-type':'application/json','Authorization':'Bearer '+k,'User-Agent':'nb-causal/1'}},method='POST');
+u.urlopen(r,timeout=30).read()" || true; }}
+finish() {{ echo "{{\\"phase\\":\\"$1\\",\\"detail\\":\\"$2\\"}}" > "$RUN/status.json"; sleep {grace}m; term; exit 0; }}
+phase setup
+DEMO=/workspace/jobs/narcbench-causal-steer; mkdir -p "$DEMO/scripts" "$DEMO/directions"
+echo "$JOB_SCRIPT_B64" | base64 -d | gzip -d > "$DEMO/scripts/causal_steer_transfer.py"
+echo "$JOB_DIRS_B64" | base64 -d | tar -xzf - -C "$DEMO/directions"
+PY=/workspace/interp-demo/.venv-explorer/bin/python; [ -x "$PY" ] || PY=python3
+export HF_HOME=${{HF_HOME:-/workspace/interp-demo/models/hf}}
+$PY -m pip install -q 'transformers>=4.40' accelerate sentencepiece protobuf numpy 2>>"$RUN/job.log" || true
+{resolve}
+{harness_cmd}
+{after}
+"""
+    return boot
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--suite", default="alpha_core",
+                    choices=["default", "alpha_sweep", "core_smoke", "alpha_core", "mlp_attn_smoke"],
+                    help="alpha_core = Transfer α-sweep then Core smoke; mlp_attn_smoke = best attn/mlp site on Core")
+    ap.add_argument("--runs-rel", default=TRANSFER_RUNS_REL_DEFAULT)
+    ap.add_argument("--core-runs-rel", default=CORE_RUNS_REL_DEFAULT)
+    ap.add_argument("--model", default="google/gemma-2-9b-it")
+    ap.add_argument("--layers", default="21,22")
+    ap.add_argument("--alpha", type=float, default=1.0)
+    ap.add_argument("--alphas", default="2,4,8", help="for alpha_sweep / alpha_core Transfer phase")
+    ap.add_argument("--max-scenarios", type=int, default=6)
+    ap.add_argument("--also-max-scenarios", type=int, default=6, help="Core n for alpha_core")
+    ap.add_argument("--max-new-tokens", type=int, default=96)
+    ap.add_argument("--directions", type=Path, default=ROOT / "results/transfer_stable/directions")
+    ap.add_argument("--launch", action="store_true")
+    ap.add_argument("--max-minutes", type=int, default=150)
+    ap.add_argument("--grace-minutes", type=int, default=8)
+    ap.add_argument("--estimate-out", type=Path,
+                    default=ROOT / "results/transfer_stable/CAUSAL_ALPHA_CORE_ESTIMATE.json")
+    ap.add_argument("--launch-card", type=Path,
+                    default=ROOT / "results/transfer_stable/CAUSAL_ALPHA_CORE_LAUNCH.json")
+    ap.add_argument("--cost-defer-threshold", type=float, default=3.0,
+                    help="if estimate > this, launch Transfer α-sweep only")
+    args = ap.parse_args()
+    read_env()
+
+    directions = args.directions if args.directions.is_absolute() else ROOT / args.directions
+    suite = args.suite
+    global POD_NAME
+    if suite == "mlp_attn_smoke":
+        POD_NAME = "job-narcbench-causal-mlp-attn"
+    est = estimate(args.max_scenarios, args.max_new_tokens, suite,
+                   also_max_scenarios=args.also_max_scenarios)
+
+    deferred_core = False
+    if suite == "alpha_core" and est["cost_est_usd"] > args.cost_defer_threshold:
+        print(f"[defer] combined est ${est['cost_est_usd']} > ${args.cost_defer_threshold}; "
+              "Transfer α-sweep only", file=sys.stderr)
+        suite = "alpha_sweep"
+        args.suite = "alpha_sweep"
+        deferred_core = True
+        est = estimate(args.max_scenarios, args.max_new_tokens, "alpha_sweep")
+        est["core_deferred"] = True
+        est["defer_reason"] = f"combined cost above ${args.cost_defer_threshold}"
+
+    import gzip
+    raw_script = (ROOT / "scripts/causal_steer_transfer.py").read_bytes()
+    script_b64 = base64.b64encode(gzip.compress(raw_script, compresslevel=9)).decode()
+    dirs_b64 = pack_directions_b64(directions, suite=suite)
+    boot = build_boot(args)
+    boot_b64 = base64.b64encode(boot.encode()).decode()
+    print(f"[pack] script_b64={len(script_b64)} dirs_b64={len(dirs_b64)} boot_b64={len(boot_b64)} "
+          f"total_env≈{len(script_b64)+len(dirs_b64)+len(boot_b64)}", file=sys.stderr)
+
+    job_design = {
+        "suite": suite,
+        "deferred_core": deferred_core,
+        "transfer": {
+            "runs_rel": args.runs_rel,
+            "suite": "alpha_sweep" if suite in ("alpha_sweep", "alpha_core") else suite,
+            "alphas": args.alphas if suite in ("alpha_sweep", "alpha_core") else str(args.alpha),
+            "arms": (
+                "baseline_regen; ablate_role_L21/L22 @ α∈{2,4,8}; "
+                "ablate_role_perp_L21 @ α=4; random_direction_L21 @ α=8"
+                if suite in ("alpha_sweep", "alpha_core")
+                else "baseline + role L21/L22 + perp + random @ α=1"
+            ),
+            "max_scenarios": args.max_scenarios,
+            "world": "Transfer",
+        },
+        "core": None if suite != "alpha_core" else {
+            "runs_rel": args.core_runs_rel,
+            "suite": "core_smoke",
+            "arms": "baseline_regen; ablate_role_L21/L22/perp + random @ α=1; ablate_role_L21 @ α=4",
+            "max_scenarios": args.also_max_scenarios,
+            "world": "Core",
+            "note": "same directions (fit Core→Transfer role); letter target_option",
+        },
+        "model": args.model,
+        "layers": args.layers,
+        "max_new_tokens": args.max_new_tokens,
+        "mlp_attn_extract": "HELD",
+        "sequential_one_pod": suite == "alpha_core",
+        "random_control_policy": "α matching max ablate (α=8) on Transfer sweep",
+    }
+
+    report = {
+        "estimate": est,
+        "hours_est": est["hours_est"],
+        "cost_est": est["cost_est_usd"],
+        "cost_est_usd": est["cost_est_usd"],
+        "rate_usd_hr": est["rate_usd_hr"],
+        "gpu_prefs": GPU_PREFS,
+        "preferred_gpu": est["preferred_gpu"],
+        "job_design": job_design,
+        "runs_rel": args.runs_rel,
+        "core_runs_rel": args.core_runs_rel if suite == "alpha_core" else None,
+        "model": args.model,
+        "layers": args.layers,
+        "suite": suite,
+        "alphas": args.alphas,
+        "max_scenarios": args.max_scenarios,
+        "max_new_tokens": args.max_new_tokens,
+        "boot_b64_len": len(boot_b64),
+        "script_b64_len": len(script_b64),
+        "dirs_b64_len": len(dirs_b64),
+        "will_launch": args.launch,
+        "volume_id": VOLUME_ID,
+        "output_on_volume": "/workspace/jobs/narcbench-results/causal_steer/...",
+        "status_port": 8765,
+        "launch_command": (
+            f"python3 scripts/runpod_launch_causal_steer.py --suite {suite} --launch "
+            f"--max-scenarios {args.max_scenarios} --layers {args.layers} --alphas {args.alphas}"
+        ),
+        "blocker_risks": [
+            "Transfer transcripts missing on volume → phase failed missing_transfer_runs",
+            "Core transcripts missing on volume → phase failed missing_core_runs",
+            "GPU stock out on preferred L4/4500/A40 → falls through prefs SECURE then COMMUNITY",
+            "HF model not cached on volume → first download adds time/cost",
+        ],
+    }
+    print(json.dumps(report, indent=2))
+    args.estimate_out.parent.mkdir(parents=True, exist_ok=True)
+    args.estimate_out.write_text(json.dumps(report, indent=2) + "\n")
+    print(f"\n[wrote] {args.estimate_out}", file=sys.stderr)
+
+    if not args.launch:
+        print("\n[estimate-only] NOT launching. Re-run with --launch when ready.", file=sys.stderr)
+        return 0
+
+    if not os.environ.get("RUNPOD_API_KEY"):
+        print("RUNPOD_API_KEY missing", file=sys.stderr)
+        return 1
+
+    # balance snapshot
+    balance = None
+    try:
+        sys.path.insert(0, str(COLLUSION_SCRIPTS))
+        from runpod_graphql import graphql  # type: ignore
+        bal = graphql("query { myself { clientBalance currentSpendPerHr } }", {}, timeout=30)
+        me = ((bal.get("data") or {}).get("myself") or {})
+        balance = me.get("clientBalance")
+        spend = me.get("currentSpendPerHr")
+    except Exception as e:
+        print(f"[warn] balance fetch: {e}", file=sys.stderr)
+        spend = None
+        from runpod_graphql import graphql  # type: ignore
+
+    env = {
+        "JOB_BOOT_B64": boot_b64,
+        "JOB_SCRIPT_B64": script_b64,
+        "JOB_DIRS_B64": dirs_b64,
+        "RUNPOD_API_KEY": os.environ["RUNPOD_API_KEY"],
+    }
+    if os.environ.get("HF_TOKEN"):
+        env["HF_TOKEN"] = os.environ["HF_TOKEN"]
+    docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
+    last = None
+    pod_out = None
+    for cloud in ("SECURE", "COMMUNITY"):
+        for gpu in GPU_PREFS:
+            inp = {
+                "name": POD_NAME if suite == "alpha_core" else "job-narcbench-causal-steer",
+                "imageName": IMAGE,
+                "gpuTypeId": gpu,
+                "cloudType": cloud,
+                "gpuCount": 1,
+                "volumeInGb": 0,
+                "containerDiskInGb": 40,
+                "minVcpuCount": 4,
+                "minMemoryInGb": 32,
+                "ports": "8765/http",
+                "env": [{"key": k, "value": str(v)} for k, v in env.items()],
+                "dockerArgs": docker_args,
+                "supportPublicIp": False,
+                "startSsh": False,
+                "networkVolumeId": VOLUME_ID,
+                "volumeMountPath": "/workspace",
+            }
+            q = """mutation ($input: PodFindAndDeployOnDemandInput!) {
+              podFindAndDeployOnDemand(input: $input) {
+                id desiredStatus costPerHr machine { gpuDisplayName dataCenterId }
+              }
+            }"""
+            try:
+                import time as _time
+                data = graphql(q, {"input": inp}, timeout=120)
+                if data.get("errors"):
+                    err = str(data["errors"])[:400]
+                    raise RuntimeError(err)
+                pod = (data.get("data") or {}).get("podFindAndDeployOnDemand")
+                if not pod or not pod.get("id"):
+                    raise RuntimeError("empty pod")
+                pod_out = {"created": pod, "gpu": gpu, "cloud": cloud, "estimate": est}
+                print(json.dumps(pod_out, indent=2))
+                status_url = f"https://{pod['id']}-8765.proxy.runpod.net/status.json"
+                print(f"Status: {status_url}")
+                started = datetime.now(PT).strftime("%Y-%m-%d %H:%M:%S %Z")
+                card = {
+                    "pod_id": pod["id"],
+                    "pod_name": inp["name"],
+                    "gpu": gpu,
+                    "cloud": cloud,
+                    "cost_per_hr": pod.get("costPerHr") or RATES.get(gpu, est["rate_usd_hr"]),
+                    "started_pt": started,
+                    "kind": est["kind"],
+                    "suite": suite,
+                    "job_design": job_design,
+                    "max_scenarios_transfer": args.max_scenarios,
+                    "max_scenarios_core": args.also_max_scenarios if suite == "alpha_core" else None,
+                    "layers": args.layers,
+                    "alphas": args.alphas if suite in ("alpha_sweep", "alpha_core") else args.alpha,
+                    "status_url": status_url,
+                    "hours_est": est["hours_est"],
+                    "estimate_usd": est["cost_est_usd"],
+                    "balance_usd": balance,
+                    "spend_per_hr_at_launch": spend,
+                    "volume_id": VOLUME_ID,
+                    "output_on_volume": "/workspace/jobs/narcbench-results/causal_steer/",
+                    "mlp_attn_extract": "HELD",
+                    "soft_stop": "Track I / Paper 2 / interp-demo / family-house NOT touched",
+                    "deferred_core": deferred_core,
+                    "machine": (pod.get("machine") or {}),
+                }
+                args.launch_card.write_text(json.dumps(card, indent=2) + "\n")
+                Path("/tmp/narcbench_causal_pod.json").write_text(json.dumps(pod_out, indent=2))
+                (ROOT / "results/transfer_stable/causal_pod.json").write_text(
+                    json.dumps({**pod_out, "launch_card": str(args.launch_card)}, indent=2) + "\n"
+                )
+                print(f"[wrote] {args.launch_card}", file=sys.stderr)
+                return 0
+            except Exception as e:
+                last = e
+                print(f"[launch] {cloud} {gpu}: {e}")
+                import time as _time
+                _time.sleep(1.5)
+    print(f"all failed: {last}", file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,3 +1,18 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Multi-GB activation caches (Transfer-stable). Do not commit.
+data/activations/
+**/*.npz
+
+# Secrets / RunPod
+.env
+.env.*
+secrets/
+*.pem
+*.key
+
+# Out of scope for the Transfer-stable weekend lane
+track-i-intention/
+interp-demo/

@@ -1,0 +1,15 @@
+layer,metric,auroc,source
+21,role→role,0.859,results/transfer_stable/CONTROLS_OFFLINE.md
+21,role→mode_runavg,0.766,results/transfer_stable/CONTROLS_OFFLINE.md
+21,role→mode_scenario_primary,0.941,results/transfer_stable/CONTROLS_OFFLINE.md
+21,mode→mode_runavg,0.886,results/transfer_stable/CONTROLS_OFFLINE.md
+21,mode→role,0.9,results/transfer_stable/CONTROLS_OFFLINE.md
+22,role→role,0.873,results/transfer_stable/CONTROLS_OFFLINE.md
+22,mode→role,0.887,results/transfer_stable/WEEKEND_REVIEW/05_CONTROLS_AND_RESIDUALIZE.md
+22,mode→mode_runavg,0.831,results/transfer_stable/WEEKEND_REVIEW/05_CONTROLS_AND_RESIDUALIZE.md
+21,"cos(role,mode_runavg)",0.694,results/transfer_stable/CONTROLS_OFFLINE.md
+22,"cos(role,mode_runavg)",0.707,results/transfer_stable/CONTROLS_OFFLINE.md
+21,role_perp→role,0.796,results/transfer_stable/RESIDUALIZE_MODE.md
+21,role_perp→mode,0.575,results/transfer_stable/RESIDUALIZE_MODE.md
+22,role_perp→role,0.837,results/transfer_stable/RESIDUALIZE_MODE.md
+22,role_perp→mode,0.604,results/transfer_stable/RESIDUALIZE_MODE.md

@@ -1,0 +1,309 @@
+{
+  "pack_id": "WEEKEND_REVIEW",
+  "lane": "transfer_stable",
+  "kind": "systematic_coherent_study",
+  "created_pt": "2026-10-01 17:10:00 PT",
+  "upgraded_pt": "2026-10-01 17:15:00 PT",
+  "absolute_path": "/workspace/narcbench-core-demo/results/transfer_stable/WEEKEND_REVIEW",
+  "study_spine": [
+    "1 Probeable (prior) \u2192 where + transfer (ours)",
+    "2 J fails Transfer; non-J / attn_L22 Transfer-stable",
+    "3 Role\u2194mode entanglement \u2192 coordination/setup vs pure lying atom",
+    "4 Causal null under divergent histories \u2192 readability \u2260 control",
+    "5 Safety claim: monitorable transferable coordination signature; editability unproven; matched-prefix + checkpoints next"
+  ],
+  "safety_claim": {
+    "endorsed": "Monitorable, Transfer-stable coordination signature (attn_L22 / non-J residual) \u2014 editability unproven under tested interventions; matched-prefix + checkpoint assays are the next causal designs.",
+    "non_claim": "Editability / vote control via last-token free-regen ablate \u2014 unproven (all nulls).",
+    "next": "Matched-prefix interchange + within-trajectory + checkpoint assays; no residual-\u03b1 chase."
+  },
+  "balance_snapshot_note": "~$26.24 last known (after discussion-phase attn_L22 smoke, 2026-10-01 ~4:37 PM PT). Live API not queried.",
+  "soft_stop": {
+    "honored": true,
+    "do_not_touch": [
+      "Track I",
+      "Paper 2",
+      "interp-demo",
+      "family-house"
+    ],
+    "causal_gpu": "paused pending matched-prefix rethink",
+    "no_gpu_this_pack": true,
+    "track_i": "soft-stopped; no GPU launched this session"
+  },
+  "reading_order": [
+    "CLAIMS_CHECKLIST.md",
+    "CLAIMS_NUMBER_SHEET.md",
+    "00_README.md",
+    "01_EXECUTIVE_SUMMARY.md",
+    "02_RESEARCH_RETHINK.md",
+    "03_CORRELATIONAL_CLAIMS.md",
+    "05_CONTROLS_AND_RESIDUALIZE.md",
+    "04_NEGATIVE_CAUSAL_APPENDIX.md",
+    "06_METHODS_LADDER.md",
+    "07_OPEN_QUESTIONS.md",
+    "CODE_INDEX.md"
+  ],
+  "design_artifacts": [
+    "design/matched_prefix_spec.md",
+    "design/matched_prefix_pair_schema.json",
+    "design/matched_prefix_example_pairs.json",
+    "design/matched_prefix_candidates.json",
+    "design/within_trajectory_spec.md",
+    "design/checkpoint_assays_spec.md",
+    "scripts/matched_prefix_scaffold.py"
+  ],
+  "source_pointers": [
+    "../CLAIM_CORRELATIONAL.md",
+    "../INTERIM_VS_BASELINES.md",
+    "../LAYER_SWEEP.md",
+    "../SUBSPACE_AND_DIRECTION.md",
+    "../CONTROLS_OFFLINE.md",
+    "../RESIDUALIZE_MODE.md",
+    "../MLP_ATTN_PROBES.md",
+    "../NEGATIVE_CAUSAL_APPENDIX.md",
+    "../CAUSAL_SMOKE_RESULTS.md",
+    "../CAUSAL_ALPHA_CORE_RESULTS.md",
+    "../MLP_ATTN_CAUSAL_RESULTS.md",
+    "../DISCUSSION_PHASE_CAUSAL_RESULTS.md",
+    "../../transfer/TRANSFER_FULL_HARD_METRICS.md",
+    "../../../docs/NEXT-SCIENCE.md"
+  ],
+  "files": [
+    {
+      "path": "00_README.md",
+      "bytes": 3570,
+      "mtime_pt": "2026-10-01 17:19:56 PT"
+    },
+    {
+      "path": "01_EXECUTIVE_SUMMARY.md",
+      "bytes": 5078,
+      "mtime_pt": "2026-10-01 17:12:26 PT"
+    },
+    {
+      "path": "02_RESEARCH_RETHINK.md",
+      "bytes": 5920,
+      "mtime_pt": "2026-10-01 17:13:00 PT"
+    },
+    {
+      "path": "03_CORRELATIONAL_CLAIMS.md",
+      "bytes": 6672,
+      "mtime_pt": "2026-10-01 17:13:00 PT"
+    },
+    {
+      "path": "04_NEGATIVE_CAUSAL_APPENDIX.md",
+      "bytes": 4581,
+      "mtime_pt": "2026-10-01 17:13:12 PT"
+    },
+    {
+      "path": "05_CONTROLS_AND_RESIDUALIZE.md",
+      "bytes": 4296,
+      "mtime_pt": "2026-10-01 17:13:12 PT"
+    },
+    {
+      "path": "06_METHODS_LADDER.md",
+      "bytes": 6870,
+      "mtime_pt": "2026-10-01 17:13:12 PT"
+    },
+    {
+      "path": "07_OPEN_QUESTIONS.md",
+      "bytes": 3041,
+      "mtime_pt": "2026-10-01 17:13:12 PT"
+    },
+    {
+      "path": "CLAIMS_CHECKLIST.md",
+      "bytes": 6816,
+      "mtime_pt": "2026-10-01 17:19:17 PT"
+    },
+    {
+      "path": "CLAIMS_NUMBER_SHEET.json",
+      "bytes": 11758,
+      "mtime_pt": "2026-10-01 17:19:07 PT"
+    },
+    {
+      "path": "CLAIMS_NUMBER_SHEET.md",
+      "bytes": 11077,
+      "mtime_pt": "2026-10-01 17:19:56 PT"
+    },
+    {
+      "path": "PACK_MANIFEST.json",
+      "bytes": 8239,
+      "mtime_pt": "2026-10-01 17:19:11 PT"
+    },
+    {
+      "path": "design/checkpoint_assays_spec.md",
+      "bytes": 2910,
+      "mtime_pt": "2026-10-01 17:11:36 PT"
+    },
+    {
+      "path": "design/matched_prefix_candidates.json",
+      "bytes": 41855,
+      "mtime_pt": "2026-10-01 17:11:59 PT"
+    },
+    {
+      "path": "design/matched_prefix_example_pairs.json",
+      "bytes": 3243,
+      "mtime_pt": "2026-10-01 17:11:17 PT"
+    },
+    {
+      "path": "design/matched_prefix_pair_schema.json",
+      "bytes": 1864,
+      "mtime_pt": "2026-10-01 17:11:17 PT"
+    },
+    {
+      "path": "design/matched_prefix_spec.md",
+      "bytes": 4935,
+      "mtime_pt": "2026-10-01 17:11:17 PT"
+    },
+    {
+      "path": "design/within_trajectory_spec.md",
+      "bytes": 3077,
+      "mtime_pt": "2026-10-01 17:11:36 PT"
+    },
+    {
+      "path": "figures/fig_causal_null_flat.png",
+      "bytes": 52023,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "figures/fig_cross_phase_residual.png",
+      "bytes": 41372,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "figures/fig_j_vs_full_vs_complement.png",
+      "bytes": 48681,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "figures/fig_residual_vs_attn_vs_mlp.png",
+      "bytes": 43321,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "scripts/matched_prefix_scaffold.py",
+      "bytes": 5425,
+      "mtime_pt": "2026-10-01 17:11:51 PT"
+    },
+    {
+      "path": "tables/causal_nulls.csv",
+      "bytes": 804,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/causal_nulls.json",
+      "bytes": 1824,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/controls_residualize.csv",
+      "bytes": 1083,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/controls_residualize.json",
+      "bytes": 2241,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/cross_phase.csv",
+      "bytes": 1522,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/cross_phase.json",
+      "bytes": 3087,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/cross_phase_attn.json",
+      "bytes": 4304,
+      "mtime_pt": "2026-10-01 17:17:00 PT"
+    },
+    {
+      "path": "tables/cross_phase_discussion_residual/metrics.json",
+      "bytes": 5433,
+      "mtime_pt": "2026-10-01 17:16:30 PT"
+    },
+    {
+      "path": "tables/domain_holdout_L21.csv",
+      "bytes": 2515,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/domain_holdout_L21.json",
+      "bytes": 17180,
+      "mtime_pt": "2026-10-01 17:16:58 PT"
+    },
+    {
+      "path": "tables/family_auroc_L21.csv",
+      "bytes": 493,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/family_auroc_L21.json",
+      "bytes": 1014,
+      "mtime_pt": "2026-10-01 17:16:58 PT"
+    },
+    {
+      "path": "tables/hard_metrics.csv",
+      "bytes": 485,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/hard_metrics.json",
+      "bytes": 1229,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/layer_sweep_residual.csv",
+      "bytes": 992,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/layer_sweep_residual.json",
+      "bytes": 1908,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/mlp_attn_site_aurocs.csv",
+      "bytes": 1289,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "tables/mlp_attn_site_aurocs.json",
+      "bytes": 3741,
+      "mtime_pt": "2026-10-01 17:18:03 PT"
+    },
+    {
+      "path": "CODE_INDEX.md",
+      "bytes": 20833,
+      "mtime_pt": "2026-10-01 17:42:00 PT",
+      "role": "code inventory for weekend review"
+    }
+  ],
+  "updated_pt": "2026-10-01 17:19:00 PT",
+  "paper_pdf": "/workspace/andy-biz/papers/transfer-stable-collusion-2026-10/main.pdf",
+  "andy_biz_skim": "/workspace/andy-biz/NARCBench-Transfer-Stable-Weekend-Review-2026-10-01.md",
+  "claims_number_sheet": "/workspace/narcbench-core-demo/results/transfer_stable/WEEKEND_REVIEW/CLAIMS_NUMBER_SHEET.md",
+  "final_handoff": "/workspace/andy-biz/NARCBench-Weekend-FINAL-HANDOFF-2026-10-01.md",
+  "claims_freeze_pt": "2026-10-01 17:20:00 PT",
+  "claims_artifacts": [
+    "CLAIMS_NUMBER_SHEET.md",
+    "CLAIMS_NUMBER_SHEET.json",
+    "CLAIMS_CHECKLIST.md"
+  ],
+  "tables_dir": "tables/",
+  "figures_dir": "figures/",
+  "new_offline_analyses": [
+    "cross_phase Core discussion \u2192 Transfer discussion (residual band primary 0.959; attn_L22 0.997)",
+    "Core domain-holdout \u2192 Transfer final @ L21 (mean 0.939 vs baseline 0.941)",
+    "Transfer family AUROC @ L21 table export",
+    "Publication tables/ + figures/ from frozen sources"
+  ],
+  "claims_checklist": "/workspace/narcbench-core-demo/results/transfer_stable/WEEKEND_REVIEW/CLAIMS_CHECKLIST.md",
+  "code_index": {
+    "path": "CODE_INDEX.md",
+    "absolute": "/workspace/narcbench-core-demo/results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md",
+    "paper_symlink": "/workspace/andy-biz/papers/transfer-stable-collusion-2026-10/CODE_INDEX.md"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "protocol": "Core discussion full-fit \u2192 Transfer final per-family @ L21 residual",
+  "source_script": "WEEKEND_REVIEW offline domain-holdout runner",
+  "layer": 21,
+  "overall": {
+    "peak": 0.8989197530864197,
+    "split": 0.9745370370370371,
+    "asym": 0.9498456790123457,
+    "primary": 0.9411008230452675,
+    "n_transfer_runs": 72
+  },
+  "per_family": {
+    "cicd": {
+      "peak": 1.0,
+      "split": 1.0,
+      "n": 12
+    },
+    "code_review": {
+      "peak": 1.0,
+      "split": 1.0,
+      "n": 12
+    },
+    "news": {
+      "peak": 0.8611111111111112,
+      "split": 0.9166666666666667,
+      "n": 12
+    },
+    "pump_dump": {
+      "peak": 0.9166666666666667,
+      "split": 1.0,
+      "n": 12
+    },
+    "rag": {
+      "peak": 1.0,
+      "split": 1.0,
+      "n": 12
+    },
+    "research": {
+      "peak": 0.9166666666666667,
+      "split": 1.0,
+      "n": 12
+    }
+  },
+  "note": "Core domains do not overlap Transfer families; holdout = Core leave-one-domain-out fit, eval all Transfer."
+}

@@ -162,6 +162,10 @@ class BootScriptTests(unittest.TestCase):
         self.assertNotIn("/upload", text)
         self.assertNotIn("interp-demo/.venv", text)
         self.assertIn("refusing to use interp-demo", text)
+        self.assertLess(
+            text.index("refusing to use interp-demo"),
+            text.index('mkdir -p "$HF_HOME"'),
+        )
         proc = subprocess.run(["bash", "-n", str(ROOT / "scripts/runpod_within_traj_boot.sh")], check=False)
         self.assertEqual(proc.returncode, 0)
 

@@ -85,7 +85,6 @@ phase setup
 OUT_ROOT="${JOB_OUT_ROOT:-/workspace/jobs/narcbench-results/within_traj_mid_private}"
 export HF_HOME="${HF_HOME:-/workspace/jobs/narcbench-hf}"
 export HUGGINGFACE_HUB_CACHE="${HF_HOME}/hub"
-mkdir -p "$HF_HOME" "$OUT_ROOT"
 
 python3 - "$JOB_RUN_DIR" "$JOB_DIRECTIONS" "$OUT_ROOT" "$HF_HOME" <<'PY' || finish failed bad_path
 import sys
@@ -96,6 +95,7 @@ for path in sys.argv[1:]:
         raise SystemExit("refusing to use interp-demo: %s" % path)
 print("volume paths ok")
 PY
+mkdir -p "$HF_HOME" "$OUT_ROOT"
 
 if [ ! -d "$JOB_RUN_DIR" ]; then
   echo "[setup] missing run dir $JOB_RUN_DIR" | tee -a "$RUN/job.log"

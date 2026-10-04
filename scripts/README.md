@@ -41,6 +41,21 @@ python3 app/server.py
 
 ## Causal
 
-`scripts/causal_steer_transfer.py` and `scripts/activation_patch_core.py` are present. `CODE_INDEX.md` marks the causal GPU battery as paused. Matched-prefix, within-trajectory, and checkpoint assay runners are specs under `results/transfer_stable/WEEKEND_REVIEW/design/`, not GPU entry points.
+`scripts/causal_steer_transfer.py` and `scripts/activation_patch_core.py` are present. `CODE_INDEX.md` marks the causal GPU battery as paused.
+
+Within-trajectory mid-private (teacher-forced) is `scripts/within_traj_mid_private.py`. Offline shape check:
+
+```bash
+python3 scripts/within_traj_mid_private.py --dry-run --max-scenarios 6
+```
+
+That dry-run still needs direction `.npy` files under `results/transfer_stable/directions/` (those files are not in git). The slim launchers are estimate-only unless `--launch` is passed. A create checks out a git SHA of this repo on the pod and writes results on the network volume. Direction vectors stay on the volume.
+
+```bash
+python3 scripts/runpod_launch_within_traj.py
+python3 scripts/runpod_launch_matched_prefix.py
+```
+
+`scripts/matched_prefix_interchange.py` is not in this repo, so the matched-prefix launcher refuses `--launch` until that harness is on the checked-out SHA. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
 
 Files named `*.bak` and `*.bak_*` are earlier copies of the extract and causal harnesses from the science tree.

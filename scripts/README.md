@@ -49,7 +49,7 @@ Within-trajectory mid-private (teacher-forced) is `scripts/within_traj_mid_priva
 python3 scripts/within_traj_mid_private.py --dry-run --max-scenarios 6
 ```
 
-That dry-run still needs direction `.npy` files under `results/transfer_stable/directions/` (those files are not in git). The slim launchers are estimate-only unless `--launch` is passed. A create checks out a git SHA of this repo on the pod and writes results on the network volume. Direction vectors stay on the volume.
+That dry-run still needs direction `.npy` files under `results/transfer_stable/directions/` (those files are not in git). The slim launchers are estimate-only unless `--launch` is passed. A create checks out a public git SHA and runs the smoke script that lives in this repo (`scripts/runpod_within_traj_boot.sh` or `scripts/runpod_matched_prefix_boot.sh`). The GraphQL env is the SHA plus volume paths. It does not contain `JOB_BOOT_B64`, `JOB_PAYLOAD_B64`, or a job tarball. Direction vectors stay on the volume. See [`MIGRATION_HANDOFF.md`](../MIGRATION_HANDOFF.md).
 
 ```bash
 python3 scripts/runpod_launch_within_traj.py

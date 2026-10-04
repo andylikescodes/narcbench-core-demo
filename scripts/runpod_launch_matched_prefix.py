@@ -7,21 +7,22 @@ Estimate-only by default. Pass --launch only after the cost gate is approved:
   python3 scripts/runpod_launch_matched_prefix.py --launch --max-pairs 10
   python3 scripts/runpod_launch_matched_prefix.py --suite transfer --max-pairs 12
 
-Boot clones this public repo and checks out GIT_SHA, then runs
-scripts/matched_prefix_interchange.py from that checkout. --extras-only runs
-the multi-site, PCA, and role-perpendicular kitchen sink. --role-perp-confirm
+Boot clones this public repo and checks out a public SHA, then runs
+scripts/runpod_matched_prefix_boot.sh from that checkout. The GraphQL create
+env carries the SHA and volume paths only. It does not carry a boot script,
+JOB_BOOT_B64, JOB_PAYLOAD_B64, or a job tarball. --extras-only runs the
+multi-site, PCA, and role-perpendicular kitchen sink. --role-perp-confirm
 runs the residual-L21 role-perp card on every row of the volume pairs file.
 --final-resid-controls runs the pre-logit residual copies on the first 12
 core pairs and does not read direction files. Direction .npy files and pairs
 stay on the network volume. RUNPOD_API_KEY and HF_TOKEN come from the
-environment. The GraphQL create body is the tiny boot plus a few env vars.
---launch refuses unless the harness is in the checked-out SHA.
+environment. --launch refuses unless the harness and boot script are in the
+checked-out SHA.
 Soft-stop: no Track I / Paper 2 / interp-demo / family-house.
 """
 from __future__ import annotations
 
 import argparse
-import base64
 import json
 import os
 import re
@@ -37,6 +38,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 REPO_URL = "https://github.com/andylikescodes/narcbench-core-demo.git"
 HARNESS_REL = "scripts/matched_prefix_interchange.py"
+BOOT_REL = "scripts/runpod_matched_prefix_boot.sh"
 IMAGE = "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404"
 VOLUME_ID = "cr1kjtzjs2"
 GPU_TRIES = [
@@ -275,103 +277,199 @@ def direction_files_for(args: argparse.Namespace) -> list[str]:
     return needed
 
 
-def build_boot(args: argparse.Namespace, *, vol_subdir: str, pairs_on_volume: str) -> str:
-    extras_argv = mode_cli(args)
-    dir_files = direction_files_for(args)
-    dir_checks = " && ".join(f'[ -f "$DIRS/{name}" ]' for name in dir_files) if dir_files else "true"
-    directions_argv = "" if args.final_resid_controls else "  --directions \"$DIRS\" \\\n"
-    return f"""#!/bin/bash
-set -uo pipefail
-export GIT_TERMINAL_PROMPT=0
-RUN=/tmp/narcbench-matched-prefix
-SRC=/tmp/narcbench-src
-RESULTS=/workspace/jobs/narcbench-results/{vol_subdir}
-mkdir -p "$RUN" "$RESULTS"
-phase() {{ echo "{{\\"phase\\":\\"$1\\"}}" > "$RUN/status.json"; echo "[phase] $1" | tee -a "$RUN/job.log"; }}
-term() {{ python3 -c "import os,json,urllib.request as u;p=os.environ.get('RUNPOD_POD_ID','');k=os.environ.get('RUNPOD_API_KEY',''); b=json.dumps({{'query':'mutation {{ podTerminate(input: {{podId: \\\"%s\\\"}}) }}'%p}}); r=u.Request('https://api.runpod.io/graphql',data=b.encode(),headers={{'content-type':'application/json','Authorization':'Bearer '+k,'User-Agent':'nb-matched-prefix/3'}},method='POST'); u.urlopen(r,timeout=30).read()" || true; }}
-finish() {{ cp -f "$RUN/job.log" "$RESULTS/last_boot.log" 2>/dev/null || true; echo "{{\\"phase\\":\\"$1\\",\\"detail\\":\\"$2\\"}}" > "$RUN/status.json"; sleep {args.grace_minutes}m; term; exit 0; }}
-python3 -m http.server 8765 --directory "$RUN" >/tmp/http.log 2>&1 &
-phase checkout
-if ! command -v git >/dev/null 2>&1; then
-  apt-get update -qq && apt-get install -y -qq git >>"$RUN/job.log" 2>&1 || finish failed git_install
-fi
-rm -rf "$SRC"
-GIT_REPO_URL="{REPO_URL}"
-SHA="${{GIT_SHA:?missing GIT_SHA}}"
-REF="${{GIT_REF:?missing GIT_REF}}"
-git clone --branch "$REF" --single-branch "$GIT_REPO_URL" "$SRC" >>"$RUN/job.log" 2>&1 || finish failed git_clone
-git -C "$SRC" checkout --detach "$SHA" >>"$RUN/job.log" 2>&1 || finish failed git_checkout
-GOT=$(git -C "$SRC" rev-parse HEAD)
-echo "[setup] git_sha=$GOT" | tee -a "$RUN/job.log"
-printf '%s\\n' "$GOT" > "$RUN/git_sha"
-[ "$GOT" = "$SHA" ] || finish failed git_sha_mismatch
-[ -f "$SRC/{HARNESS_REL}" ] || finish failed missing_harness
-phase data
-DIRS="${{DIRECTIONS_DIR:-{DIRECTIONS_ON_VOLUME}}}"
-PAIRS="${{PAIRS_FILE:-{pairs_on_volume}}}"
-{dir_checks} || finish failed missing_directions
-[ -f "$PAIRS" ] || finish failed missing_pairs
-NPAIRS=$(grep -cve '^[[:space:]]*$' "$PAIRS" || true)
-echo "[setup] directions=$DIRS pairs=$PAIRS pairs_rows=$NPAIRS" | tee -a "$RUN/job.log"
-export HF_HOME="${{HF_HOME:-{HF_CACHE_ON_VOLUME}}}"
-mkdir -p "$HF_HOME"
-python3 -m pip install -q 'transformers>=4.40' accelerate sentencepiece protobuf numpy >>"$RUN/job.log" 2>&1 || true
-OUT="$RESULTS/smoke_$(date -u +%Y%m%dT%H%M%SZ)"
-mkdir -p "$OUT"
-phase running
-set +e
-timeout {args.max_minutes}m python3 -u "$SRC/{HARNESS_REL}" \\
-  --pairs "$PAIRS" \\
-{directions_argv}  --out "$OUT" \\
-  --model {args.model} \\
-  --max-pairs {args.max_pairs} \\
-  --max-new-tokens {args.max_new_tokens} \\
-  --seed {args.seed}{extras_argv} \\
-  >"$RUN/cmd.log" 2>&1
-EC=$?; set -e
-printf '%s\\n' "$EC" > "$RUN/exit_code"
-cat "$RUN/cmd.log" | tee -a "$RUN/job.log"
-cp -a "$OUT" "$RESULTS/latest_smoke" 2>/dev/null || true
-if [ "$EC" -eq 0 ]; then finish done ok; else finish failed exit_$EC; fi
-"""
+def mode_name(args: argparse.Namespace) -> str:
+    if getattr(args, "final_resid_controls", False):
+        return "final-resid-controls"
+    if args.role_perp_confirm:
+        return "role-perp-confirm"
+    if args.extras_only:
+        return "extras-only"
+    if args.extras:
+        return "extras"
+    return "core"
 
 
-def build_create_input(
-    boot_b64: str,
-    *,
-    pod_name: str,
-    gpu: str,
-    cloud: str,
-    git_sha: str,
-    git_ref: str,
-) -> dict:
-    env = {
-        "JOB_BOOT_B64": boot_b64,
-        "GIT_SHA": git_sha,
-        "GIT_REF": git_ref,
-        "RUNPOD_API_KEY": os.environ["RUNPOD_API_KEY"],
+# Short bootstrap only. The smoke itself lives in scripts/runpod_matched_prefix_boot.sh
+# at the pinned SHA, so script source is not placed in the GraphQL env.
+DOCKER_ARGS = (
+    "bash -c '"
+    "set -euo pipefail; "
+    "export DEBIAN_FRONTEND=noninteractive; "
+    "if ! command -v git >/dev/null 2>&1; then "
+    "apt-get update -qq && apt-get install -y -qq git ca-certificates; "
+    "fi; "
+    ': "${JOB_GIT_SHA:?}"; '
+    ': "${JOB_REPO_URL:?}"; '
+    'if [ -n "${JOB_IMAGE_REPO:-}" ]; then '
+    'REPO="$JOB_IMAGE_REPO"; '
+    'GOT=$(git -C "$REPO" rev-parse HEAD); '
+    'if [ "$GOT" != "$JOB_GIT_SHA" ]; then echo "image pin $GOT != $JOB_GIT_SHA" >&2; exit 2; fi; '
+    "else "
+    "REPO=/tmp/narcbench-core-demo; "
+    'rm -rf "$REPO"; '
+    'git init "$REPO"; '
+    'git -C "$REPO" remote add origin "$JOB_REPO_URL"; '
+    'if ! git -C "$REPO" fetch --depth 1 origin "$JOB_GIT_SHA"; then '
+    'rm -rf "$REPO"; '
+    'git clone "$JOB_REPO_URL" "$REPO"; '
+    'git -C "$REPO" checkout --detach "$JOB_GIT_SHA"; '
+    "else "
+    'git -C "$REPO" checkout --detach FETCH_HEAD; '
+    "fi; "
+    'GOT=$(git -C "$REPO" rev-parse HEAD); '
+    'if [ "$GOT" != "$JOB_GIT_SHA" ]; then echo "clone pin $GOT != $JOB_GIT_SHA" >&2; exit 2; fi; '
+    "fi; "
+    'exec bash "$REPO/scripts/runpod_matched_prefix_boot.sh"'
+    "'"
+)
+
+MAX_ENV_VALUE_CHARS = 4096
+MAX_DOCKER_ARGS_CHARS = 8192
+ALLOWED_ENV_KEYS = frozenset(
+    {
+        "JOB_GIT_SHA",
+        "JOB_REPO_URL",
+        "JOB_IMAGE_REPO",
+        "JOB_PAIRS",
+        "JOB_DIRECTIONS",
+        "JOB_OUT_ROOT",
+        "JOB_MODE",
+        "JOB_MAX_PAIRS",
+        "JOB_MODEL",
+        "JOB_MAX_NEW_TOKENS",
+        "JOB_SEED",
+        "JOB_MAX_MINUTES",
+        "JOB_GRACE_MINUTES",
+        "HF_TOKEN",
+        "HF_HOME",
+        "RUNPOD_API_KEY",
     }
-    if os.environ.get("HF_TOKEN"):
-        env["HF_TOKEN"] = os.environ["HF_TOKEN"]
-    docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
-    return {
-        "name": pod_name,
+)
+FORBIDDEN_MARKERS = (
+    "JOB_PAYLOAD_B64",
+    "JOB_BOOT_B64",
+    "JOB_TGZ_B64",
+    "JOB_TGZ_NAME",
+    "JOB_TGZ_SHA256",
+)
+REPO_URL_RE = re.compile(
+    r"^https://github.com/andylikescodes/narcbench-core-demo(\.git)?$"
+)
+MODES = frozenset({"core", "extras", "extras-only", "role-perp-confirm", "final-resid-controls"})
+
+
+class LaunchRefused(Exception):
+    def __init__(self, reason: str, code: int = 4):
+        super().__init__(reason)
+        self.reason = reason
+        self.code = code
+
+
+def assert_volume_path(path: str, label: str) -> str:
+    if not path.startswith("/workspace/") or ".." in path.split("/"):
+        raise LaunchRefused(f"{label} must be an absolute path on the network volume (/workspace/...)")
+    if path == "/workspace/interp-demo" or path.startswith("/workspace/interp-demo/"):
+        raise LaunchRefused(f"{label} must not use /workspace/interp-demo")
+    return path
+
+
+def _looks_like_tarball(value: str) -> bool:
+    if value.startswith("\x1f\x8b") or "ustar" in value[:600]:
+        return True
+    stripped = value.strip()
+    if stripped.startswith("H4sI") and len(stripped) > 64:
+        return True
+    return False
+
+
+def validate_create_input(create_input: dict) -> int:
+    """Refuse a create body that carries a boot script, payload tarball, or script source."""
+    env_pairs = create_input.get("env") or []
+    env = {}
+    for item in env_pairs:
+        key = str(item.get("key") or "")
+        value = "" if item.get("value") is None else str(item.get("value"))
+        if key in env:
+            raise LaunchRefused(f"duplicate create env key {key}")
+        env[key] = value
+        if key not in ALLOWED_ENV_KEYS:
+            raise LaunchRefused(f"create env key not allowed: {key}")
+        upper = key.upper()
+        if "PAYLOAD" in upper or "TARBALL" in upper or upper.endswith("TGZ") or upper.endswith("_B64"):
+            raise LaunchRefused(f"refusing payload-like create env key {key}")
+        if len(value) > MAX_ENV_VALUE_CHARS:
+            raise LaunchRefused(f"create env {key} is {len(value)} chars; script source stays out of GraphQL env")
+        if _looks_like_tarball(value):
+            raise LaunchRefused(f"create env {key} looks like a payload tarball")
+        if value.startswith("#!") or "def run_scenario" in value or "make_dir_patch_hook" in value:
+            raise LaunchRefused(f"create env {key} contains script source")
+    if not SHA_RE.fullmatch(env.get("JOB_GIT_SHA", "")):
+        raise LaunchRefused("JOB_GIT_SHA must be a 40-hex pin")
+    if not REPO_URL_RE.fullmatch(env.get("JOB_REPO_URL", "")):
+        raise LaunchRefused("JOB_REPO_URL must be https://github.com/andylikescodes/narcbench-core-demo")
+    if env.get("JOB_MODE") not in MODES:
+        raise LaunchRefused("JOB_MODE is not a known matched-prefix suite")
+    for label in ("JOB_PAIRS", "JOB_DIRECTIONS", "JOB_OUT_ROOT", "HF_HOME"):
+        if label not in env:
+            raise LaunchRefused(f"create env missing {label}")
+        assert_volume_path(env[label], label)
+    docker_args = str(create_input.get("dockerArgs") or "")
+    if len(docker_args) > MAX_DOCKER_ARGS_CHARS:
+        raise LaunchRefused("dockerArgs embeds the job; boot the pinned checkout instead")
+    if "base64 -d" in docker_args or "JOB_BOOT_B64" in docker_args:
+        raise LaunchRefused("dockerArgs must not decode an embedded boot script")
+    blob = json.dumps({"env": env_pairs, "dockerArgs": docker_args})
+    for marker in FORBIDDEN_MARKERS:
+        if marker in blob:
+            raise LaunchRefused(f"refusing create body that contains {marker}")
+    if "JOB_GIT_SHA" not in docker_args or "runpod_matched_prefix_boot.sh" not in docker_args:
+        raise LaunchRefused("dockerArgs must pin JOB_GIT_SHA and exec the in-repo boot script")
+    nbytes = body_bytes(CREATE_MUTATION, {"input": create_input})
+    if nbytes >= MAX_CREATE_BODY_BYTES:
+        raise LaunchRefused(f"GraphQL POST body {nbytes} >= {MAX_CREATE_BODY_BYTES}")
+    return nbytes
+
+
+def build_create_input(args: argparse.Namespace, api_key: str) -> dict:
+    env = {
+        "JOB_GIT_SHA": args.git_sha,
+        "JOB_REPO_URL": REPO_URL,
+        "JOB_PAIRS": args.pairs_on_volume,
+        "JOB_DIRECTIONS": DIRECTIONS_ON_VOLUME,
+        "JOB_OUT_ROOT": args.volume_out,
+        "JOB_MODE": args.mode_name,
+        "JOB_MAX_PAIRS": str(args.max_pairs),
+        "JOB_MODEL": args.model,
+        "JOB_MAX_NEW_TOKENS": str(args.max_new_tokens),
+        "JOB_SEED": str(args.seed),
+        "JOB_MAX_MINUTES": str(args.max_minutes),
+        "JOB_GRACE_MINUTES": str(args.grace_minutes),
+        "HF_HOME": HF_CACHE_ON_VOLUME,
+        "RUNPOD_API_KEY": api_key,
+    }
+    hf_token = os.environ.get("HF_TOKEN")
+    if hf_token:
+        env["HF_TOKEN"] = hf_token
+    create_input = {
+        "name": args.pod_name,
         "imageName": IMAGE,
-        "gpuTypeId": gpu,
-        "cloudType": cloud,
+        "gpuTypeId": args.gpu,
+        "cloudType": args.cloud,
         "gpuCount": 1,
         "volumeInGb": 0,
         "containerDiskInGb": 40,
         "minVcpuCount": 4,
         "minMemoryInGb": 32,
         "ports": "8765/http",
-        "env": [{"key": k, "value": str(v)} for k, v in env.items()],
-        "dockerArgs": docker_args,
+        "env": [{"key": key, "value": str(value)} for key, value in env.items()],
+        "dockerArgs": DOCKER_ARGS,
         "supportPublicIp": False,
         "startSsh": False,
         "networkVolumeId": VOLUME_ID,
         "volumeMountPath": "/workspace",
     }
+    validate_create_input(create_input)
+    return create_input
 
 
 def body_bytes(query: str, variables: dict) -> int:
@@ -443,42 +541,6 @@ def terminate_pod(pod_id: str) -> None:
         {"input": {"podId": pod_id}},
         timeout=30,
     )
-
-
-def measure_post_bytes(boot_b64: str, pod_name: str, git_sha: str, git_ref: str) -> int:
-    saved_key = os.environ.get("RUNPOD_API_KEY")
-    saved_hf = os.environ.get("HF_TOKEN")
-    if not saved_key:
-        os.environ["RUNPOD_API_KEY"] = "0" * 40
-    if not saved_hf:
-        os.environ["HF_TOKEN"] = "0" * 40
-    try:
-        sample = build_create_input(
-            boot_b64,
-            pod_name=pod_name,
-            gpu=GPU,
-            cloud="SECURE",
-            git_sha=git_sha,
-            git_ref=git_ref,
-        )
-        return body_bytes(CREATE_MUTATION, {"input": sample})
-    finally:
-        if not saved_key:
-            os.environ.pop("RUNPOD_API_KEY", None)
-        if not saved_hf:
-            os.environ.pop("HF_TOKEN", None)
-
-
-def refuse_payload(boot: str, boot_b64: str) -> str | None:
-    blob = boot + "\n" + boot_b64
-    if "JOB_PAYLOAD_B64" in blob or "JOB_TGZ" in blob or "JOB_TAR_" in blob:
-        return "job payload env present"
-    if "/upload" in boot or "do_PUT" in boot or "tarfile" in boot:
-        return "volume upload present in boot"
-    for banned in ("/home/box", "collusion-exp", "interp-demo", "runpod-study"):
-        if banned in boot:
-            return f"box-only path in boot: {banned}"
-    return None
 
 
 def remote_has_sha(sha: str, ref: str) -> bool:
@@ -636,11 +698,31 @@ def main() -> int:
         return 1
 
     harness_in_sha = blob_in_commit(git_sha, HARNESS_REL)
+    boot_in_sha = blob_in_commit(git_sha, BOOT_REL)
     dirty = worktree_dirty()
-    boot = build_boot(args, vol_subdir=vol_subdir, pairs_on_volume=pairs_on_volume)
-    boot_b64 = base64.b64encode(boot.encode()).decode("ascii")
-    post_bytes = measure_post_bytes(boot_b64, pod_name, git_sha, git_ref)
-    payload_problem = refuse_payload(boot, boot_b64)
+    args.git_sha = git_sha
+    args.pod_name = pod_name
+    args.pairs_on_volume = pairs_on_volume
+    args.volume_out = f"/workspace/jobs/narcbench-results/{vol_subdir}"
+    args.mode_name = mode_name(args)
+    args.gpu = GPU
+    args.cloud = "SECURE"
+    try:
+        assert_volume_path(args.pairs_on_volume, "pairs")
+        assert_volume_path(args.volume_out, "volume_out")
+        assert_volume_path(DIRECTIONS_ON_VOLUME, "directions")
+        assert_volume_path(HF_CACHE_ON_VOLUME, "hf_home")
+    except LaunchRefused as exc:
+        print(f"REFUSE: {exc.reason}", file=sys.stderr)
+        return exc.code
+    real_key = os.environ.get("RUNPOD_API_KEY") or ""
+    measure_key = real_key or ("0" * 64)
+    try:
+        sample = build_create_input(args, measure_key)
+        post_bytes = validate_create_input(sample)
+    except LaunchRefused as exc:
+        print(f"REFUSE: {exc.reason}", file=sys.stderr)
+        return exc.code
 
     report = {
         "estimate": est,
@@ -662,17 +744,23 @@ def main() -> int:
         "git_sha": git_sha,
         "git_ref": git_ref,
         "harness": HARNESS_REL,
+        "boot_script": BOOT_REL,
         "harness_in_sha": harness_in_sha,
+        "boot_script_in_sha": boot_in_sha,
         "worktree_dirty": dirty,
+        "code_source": "git_clone_sha",
         "payload_delivery": "git_checkout_sha",
         "payload_in_graphql_env": False,
+        "job_boot_b64_in_create_env": False,
+        "job_payload_b64_in_create_env": False,
+        "script_source_in_create_env": False,
         "job_tarball_in_create": False,
+        "job_mode": args.mode_name,
         "directions_on_volume": DIRECTIONS_ON_VOLUME,
         "direction_files_on_volume": direction_files_for(args),
         "pairs_on_volume": pairs_on_volume,
         "graphql_post_body_bytes": post_bytes,
         "graphql_post_body_limit": MAX_CREATE_BODY_BYTES,
-        "boot_b64_len": len(boot_b64),
         "output_on_volume": f"/workspace/jobs/narcbench-results/{vol_subdir}/smoke_*",
         "status_port": 8765,
         "cost_gate_usd": args.cost_max,
@@ -698,11 +786,8 @@ def main() -> int:
     args.estimate_out.parent.mkdir(parents=True, exist_ok=True)
     args.estimate_out.write_text(json.dumps(report, indent=2) + "\n")
     print(f"\n[wrote] {args.estimate_out}", file=sys.stderr)
-    print(f"[pack] boot_b64={len(boot_b64)} post_body={post_bytes}", file=sys.stderr)
+    print(f"[pin] sha={git_sha} mode={args.mode_name} post_body={post_bytes}", file=sys.stderr)
 
-    if payload_problem:
-        print(f"REFUSE: {payload_problem}", file=sys.stderr)
-        return 4
     if post_bytes >= MAX_CREATE_BODY_BYTES:
         print(f"REFUSE: GraphQL POST body {post_bytes} >= {MAX_CREATE_BODY_BYTES}", file=sys.stderr)
         return 4
@@ -710,9 +795,9 @@ def main() -> int:
         print("\n[estimate-only] NOT launching. Re-run with --launch when ready.", file=sys.stderr)
         return 0
 
-    if not harness_in_sha:
+    if not harness_in_sha or not boot_in_sha:
         print(
-            f"REFUSE launch: {HARNESS_REL} is not in git SHA {git_sha}. "
+            f"REFUSE launch: {HARNESS_REL} or {BOOT_REL} is not in git SHA {git_sha}. "
             "Experiment code ships only through this repo.",
             file=sys.stderr,
         )
@@ -776,15 +861,14 @@ def main() -> int:
 
     last: Exception | None = None
     for cloud, gpu in GPU_TRIES:
-        inp = build_create_input(
-            boot_b64,
-            pod_name=pod_name,
-            gpu=gpu,
-            cloud=cloud,
-            git_sha=git_sha,
-            git_ref=git_ref,
-        )
-        nbytes = body_bytes(CREATE_MUTATION, {"input": inp})
+        args.gpu = gpu
+        args.cloud = cloud
+        try:
+            inp = build_create_input(args, os.environ["RUNPOD_API_KEY"])
+            nbytes = validate_create_input(inp)
+        except LaunchRefused as exc:
+            print(f"REFUSE: {exc.reason}", file=sys.stderr)
+            return exc.code
         if nbytes >= MAX_CREATE_BODY_BYTES:
             print(f"REFUSE POST: body {nbytes}", file=sys.stderr)
             return 4

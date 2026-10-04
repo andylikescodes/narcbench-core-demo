@@ -144,9 +144,9 @@ There is **no** `pyproject.toml` / `setup.py` for `narcbench-core-demo`. Code is
 | `scripts/runpod_launch_causal_steer.py` | Estimate / launch causal suites on RunPod (incl. `alpha_core`, mlp/attn, discussion). | `python3 scripts/runpod_launch_causal_steer.py --suite discussion_attn_smoke` · `--launch` when approved. | Estimate/launch cards under `results/transfer_stable/` + volume pulls. |
 | `scripts/activation_patch_core.py` | Earlier Core residual **activation patch** restore/scrub (vote flips). | GPU via `runpod_launch_activation_patch.py` or direct with `--runs-dir` / `--out`. | Core runs → patch metrics under `--out`. **Not** the Transfer-stable role-direction suite. |
 | `scripts/within_traj_mid_private.py` | Teacher-forced within-trajectory mid-private intervene on Core (attn L22 + residual L21). `option_labels` may be a list or a dict. | `python3 scripts/within_traj_mid_private.py --dry-run --max-scenarios 6` (needs direction `.npy`, not in git). GPU via the launcher below. | Core run + directions → continuation edit + vote metrics under `--out`. |
-| `scripts/runpod_launch_within_traj.py` | Estimate / launch that smoke. Create body is a tiny boot that checks out a git SHA. No job tarball in GraphQL. | `python3 scripts/runpod_launch_within_traj.py` · `--launch` only after the cost gate. | Results on the network volume under `jobs/narcbench-results/within_traj_mid_private/`. |
+| `scripts/runpod_launch_within_traj.py` | Estimate / launch that smoke. Create env is the commit SHA plus volume paths. The smoke script is `scripts/runpod_within_traj_boot.sh` in the checkout. No `JOB_BOOT_B64`, no `JOB_PAYLOAD_B64`, no job tarball. | `python3 scripts/runpod_launch_within_traj.py` · `--launch` only after the cost gate. | Results on the network volume under `jobs/narcbench-results/within_traj_mid_private/`. |
 | `scripts/matched_prefix_interchange.py` | Teacher-forced matched-prefix activation interchange. `--extras-only` is the multi-site / PCA / role-perp kitchen sink. `--role-perp-confirm` is the residual-L21 card. `--final-resid-controls` is a separate 12-pair suite: copy the pre-logit residual at the last token, then the private-instruction span only if that copy passes. h2c is scored against the colluder baseline and c2h against the honest baseline, from the arm name. | GPU via the launcher below. `option_labels` may be a list or a dict. | Pairs on the volume → vote metrics under `--out`. Direction `.npy` files are used only by the cards that name them. |
-| `scripts/runpod_launch_matched_prefix.py` | Estimate / launch that job. Tiny git-SHA create. `--role-perp-confirm` boots the confirm card and reads direction files from the volume. `--final-resid-controls` boots the pre-logit residual suite on the first 12 core pairs and does not read direction files. | `python3 scripts/runpod_launch_matched_prefix.py --final-resid-controls` · `--launch` only after the cost gate. | Final-residual results on the volume under `jobs/narcbench-results/matched_prefix_final_resid/`. |
+| `scripts/runpod_launch_matched_prefix.py` | Estimate / launch that job. Create env is the commit SHA, a short suite name, and volume paths. The smoke script is `scripts/runpod_matched_prefix_boot.sh` in the checkout. No `JOB_BOOT_B64`, no `JOB_PAYLOAD_B64`, no job tarball. `--role-perp-confirm` reads direction files from the volume. `--final-resid-controls` is the pre-logit suite on the first 12 core pairs and does not read direction files. | `python3 scripts/runpod_launch_matched_prefix.py --final-resid-controls` · `--launch` only after the cost gate. | Final-residual results on the volume under `jobs/narcbench-results/matched_prefix_final_resid/`. |
 
 **Results already on disk (for review, not re-run):**  
 `results/transfer_stable/CAUSAL_*`, `MLP_ATTN_CAUSAL_*`, `DISCUSSION_PHASE_CAUSAL_*`, `NEGATIVE_CAUSAL_APPENDIX.md`, and pulled smoke dirs.
@@ -171,8 +171,10 @@ There is **no** `pyproject.toml` / `setup.py` for `narcbench-core-demo`. Code is
 | `results/transfer/TRANSFER_FULL_HARD_METRICS.md` | HARD n=72 full / J / complement AUROCs. |
 | `results/transfer_stable/*.md` / `*.json` | Layer sweep, controls, residualize, mlp/attn probes, causal results, claim notes. |
 | `results/transfer_stable/WEEKEND_REVIEW/` | Consolidated study pack (`00`–`07`, CLAIMS_*, tables/, figures/, design/). |
+| `MIGRATION_HANDOFF.md` | Migration trunk: pipeline, what is done, what is withdrawn, open questions, volume paths. Start here when leaving this platform. |
+| `docs/handoff/2026-10-04-matched-prefix/` | 4 Oct matched-prefix narrative plus the raw result files it cites. |
 | `docs/NEXT-SCIENCE.md` | Science follow-ups / methods ladder notes. |
-| `docs/RUNPOD.md` | RunPod estimate/launch conventions. |
+| `docs/RUNPOD.md` | RunPod estimate/launch conventions. Older launchers in that note may still describe an embedded boot script. The within-traj and matched-prefix launchers no longer do that. |
 | `/workspace/andy-biz/papers/transfer-stable-collusion-2026-10/` | LaTeX + `main.pdf` (weekend review PDF). Build: `pdflatex main && bibtex main && pdflatex main && pdflatex main`. |
 | `/workspace/andy-biz/NARCBench-Weekend-FINAL-HANDOFF-2026-10-01.md` | FINAL handoff paths + soft-stops. |
 
@@ -190,8 +192,8 @@ These are called out so weekend review does not assume a runner exists:
 
 | Desired capability | Status |
 |---|---|
-| **Matched-prefix causal interchange harness** | **Present:** `scripts/matched_prefix_interchange.py`. `--final-resid-controls` copies the pre-logit residual on the first 12 core pairs (last token, then the private span only if that passes). `--role-perp-confirm` is the separate residual-L21 card. `--extras-only` remains the wider kitchen sink. Launcher `scripts/runpod_launch_matched_prefix.py` checks out a git SHA. Direction `.npy` files stay on the volume for the cards that use them. Specs + CPU scaffold remain under `WEEKEND_REVIEW/`. |
-| **Within-trajectory causal runner** | **Present:** `scripts/within_traj_mid_private.py`. Launcher `scripts/runpod_launch_within_traj.py` checks out a git SHA (estimate unless `--launch`). Direction `.npy` files stay on the network volume, not in git. Spec: `WEEKEND_REVIEW/design/within_trajectory_spec.md`. |
+| **Matched-prefix causal interchange harness** | **Present:** `scripts/matched_prefix_interchange.py`. `--final-resid-controls` copies the pre-logit residual on the first 12 core pairs (last token, then the private span only if that passes). `--role-perp-confirm` is the separate residual-L21 card. `--extras-only` remains the wider kitchen sink. Launcher `scripts/runpod_launch_matched_prefix.py` checks out a git SHA and execs `scripts/runpod_matched_prefix_boot.sh`. Direction `.npy` files stay on the volume for the cards that use them. Specs + CPU scaffold remain under `WEEKEND_REVIEW/`. 1D patches at the final residual were not run. |
+| **Within-trajectory causal runner** | **Present:** `scripts/within_traj_mid_private.py`. Launcher `scripts/runpod_launch_within_traj.py` checks out a git SHA and execs `scripts/runpod_within_traj_boot.sh` (estimate unless `--launch`). Direction `.npy` files stay on the network volume, not in git. Spec: `WEEKEND_REVIEW/design/within_trajectory_spec.md`. |
 | **Checkpoint-assay runner** | **Missing.** Spec only: `WEEKEND_REVIEW/design/checkpoint_assays_spec.md`. |
 | Official upstream `extract_core.py` / `extract_transfer.py` on Gemma | **Not wired** as the lane’s launcher; local `extract_activations_from_transcripts.py` is what ran. |
 | Official upstream vLLM Core regen for Gemma | **Not used**; local `generation/core_protocol.py` + HF. |
@@ -205,7 +207,7 @@ These are called out so weekend review does not assume a runner exists:
 - **No GPU** for this CODE_INDEX write; do not `--launch` RunPod from review alone.
 - **Track I / Paper 2 / interp-demo / family-house:** soft-stopped — not part of this tree’s edits.
 - RunPod secrets (if ever launching): `/home/box/.secrets/interp-explorer.env` (see `docs/RUNPOD.md`). Shared GraphQL helper historically: `/workspace/collusion-exp/scripts/runpod_graphql.py`.
-- Volume paths seen in launchers: `/workspace/jobs/narcbench-results/` (acts, causal, upstream sync).
+- Volume paths seen in launchers: network volume `cr1kjtzjs2`, mount `/workspace`. Data under `jobs/narcbench-data/`, results under `jobs/narcbench-results/`. See [`MIGRATION_HANDOFF.md`](../../../MIGRATION_HANDOFF.md). Do not commit direction `.npy` files or activation caches.
 
 ---
 

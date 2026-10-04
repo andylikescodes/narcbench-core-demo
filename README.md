@@ -11,6 +11,7 @@ Transfer-stable collusion on Gemma-2-9B-it, Core discussion → Transfer. The re
 
 | Start here | Path |
 |---|---|
+| Migration handoff | [`MIGRATION_HANDOFF.md`](MIGRATION_HANDOFF.md) |
 | Code map | [`CODE_INDEX.md`](CODE_INDEX.md) (same file: [`results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md`](results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md), [`papers/transfer-stable-collusion-2026-10/CODE_INDEX.md`](papers/transfer-stable-collusion-2026-10/CODE_INDEX.md)) |
 | Paper PDF (14 pp) | [`papers/transfer-stable-collusion-2026-10/main.pdf`](papers/transfer-stable-collusion-2026-10/main.pdf) |
 | Study pack | [`results/transfer_stable/WEEKEND_REVIEW/`](results/transfer_stable/WEEKEND_REVIEW/) |

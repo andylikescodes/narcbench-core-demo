@@ -35,6 +35,9 @@ def _args(**overrides):
         final_resid_directions=False,
         last_token_layer_sweep=False,
         sweep_layers=launch.DEFAULT_SWEEP_LAYERS,
+        private_span_patch=False,
+        span_sites=launch.DEFAULT_SPAN_SITES,
+        pairs_from_repo=None,
         role_perp_confirm=False,
         extras=False,
         extras_only=False,
@@ -403,6 +406,158 @@ class VerifierTests(unittest.TestCase):
         proc = subprocess.run([sys.executable, str(ROOT / "scripts/verify_claims_sheet.py")], cwd=ROOT, text=True, capture_output=True, check=False)
         self.assertEqual(proc.returncode, 0, proc.stdout[-2000:])
         self.assertIn("**0 hard failure(s)", proc.stdout)
+
+
+class SpanCardAndPlumbingTests(unittest.TestCase):
+    """Private-span patch card, pairs shipped from the repo, result serving on the pod."""
+
+    def test_span_card_create_env_and_arms(self):
+        args = _args(
+            final_resid_controls=False,
+            private_span_patch=True,
+            span_sites="21,attn22,final,21",
+            mode_name="private-span-patch",
+            pod_name="job-narcbench-matched-prefix-span-patch",
+            volume_out="/workspace/jobs/narcbench-results/matched_prefix_span_patch",
+        )
+        create_input = launch.build_create_input(args, "k" * 40)
+        env = {item["key"]: item["value"] for item in create_input["env"]}
+        self.assertEqual(env["JOB_MODE"], "private-span-patch")
+        self.assertEqual(env["JOB_SPAN_SITES"], "21,attn22,final,21")
+        self.assertNotIn("JOB_SWEEP_LAYERS", env)
+        self.assertNotIn("JOB_PAIRS_FROM_REPO", env)
+        self.assertLess(launch.validate_create_input(create_input), 20_000)
+        arms = launch.arms_for(args)
+        self.assertEqual(len(arms), 2 + 3 * 2 * 3)
+        self.assertIn("patch_h2c_span_resid_L21", arms)
+        self.assertIn("patch_c2h_spanlast_attn_L22", arms)
+        self.assertIn("patch_h2c_last_final", arms)
+        self.assertEqual(launch.direction_files_for(args), [])
+        junk = json.loads(json.dumps(create_input))
+        for item in junk["env"]:
+            if item["key"] == "JOB_SPAN_SITES":
+                item["value"] = "21,attn22; curl evil"
+        with self.assertRaises(launch.LaunchRefused):
+            launch.validate_create_input(junk)
+
+    def test_pairs_from_repo_env_is_validated(self):
+        args = _args(pairs_from_repo="data/matched_prefix/pairs_core_v2.jsonl")
+        create_input = launch.build_create_input(args, "k" * 40)
+        env = {item["key"]: item["value"] for item in create_input["env"]}
+        self.assertEqual(env["JOB_PAIRS_FROM_REPO"], "data/matched_prefix/pairs_core_v2.jsonl")
+        launch.validate_create_input(create_input)
+        bad = json.loads(json.dumps(create_input))
+        for item in bad["env"]:
+            if item["key"] == "JOB_PAIRS_FROM_REPO":
+                item["value"] = "../../etc/passwd"
+        with self.assertRaises(launch.LaunchRefused):
+            launch.validate_create_input(bad)
+
+    def test_estimates_for_span_and_pairs_from_repo(self):
+        proc, report = _estimate("--private-span-patch", "--span-sites", "21,attn22,33,final", out=Path("/tmp/mp_span_estimate.json"))
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("NOT launching", proc.stderr)
+        self.assertEqual(report["job_mode"], "private-span-patch")
+        self.assertEqual(report["span_sites"], "21,attn22,33,final")
+        self.assertEqual(report["n_arms"], 2 + 4 * 6)
+        self.assertNotIn("--directions", report["harness_boot_argv"])
+        self.assertIn("--private-span-patch --span-sites 21,attn22,33,final", report["harness_boot_argv"])
+
+        proc, report = _estimate(
+            "--final-resid-directions", "--pairs-from-repo", "data/matched_prefix/pairs_core_v2.jsonl", "--max-pairs", "0",
+            out=Path("/tmp/mp_pairs_from_repo_estimate.json"),
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(report["pairs_from_repo"], "data/matched_prefix/pairs_core_v2.jsonl")
+        self.assertEqual(report["pairs_on_volume"], "/workspace/jobs/narcbench-data/matched_prefix/pairs_core_v2.jsonl")
+        self.assertEqual(report["n_pairs_local_file"], 12)
+        self.assertEqual(report["n_pairs"], 12)
+        self.assertIn("pairs_core_v2.jsonl", report["harness_boot_argv"])
+
+        proc, _ = _estimate("--private-span-patch", "--pairs-from-repo", "data/matched_prefix/nope.jsonl", out=Path("/tmp/mp_pairs_bad2.json"))
+        self.assertNotEqual(proc.returncode, 0)
+        proc, _ = _estimate("--private-span-patch", "--pairs-from-repo", "scripts/README.md", out=Path("/tmp/mp_pairs_bad3.json"))
+        self.assertNotEqual(proc.returncode, 0)
+
+    def test_boot_serves_results_and_copies_pairs(self):
+        text = (ROOT / "scripts/runpod_matched_prefix_boot.sh").read_text()
+        for needle in (
+            "private-span-patch)",
+            "--span-sites ${JOB_SPAN_SITES",
+            'path.startswith("/out/")',
+            'printf \'%s\' "$OUT" > "$RUN/out_dir"',
+            "=====BEGIN $f=====",
+            "JOB_PAIRS_FROM_REPO",
+            "data/matched_prefix/*.jsonl)",
+        ):
+            self.assertIn(needle, text, needle)
+        # the checkout path is known before the pairs copy and before the pin check
+        self.assertLess(text.index('REPO="$(cd'), text.index("JOB_PAIRS_FROM_REPO:-"))
+        self.assertEqual(text.count('REPO="$(cd'), 1)
+        proc = subprocess.run(["bash", "-n", str(ROOT / "scripts/runpod_matched_prefix_boot.sh")], check=False)
+        self.assertEqual(proc.returncode, 0)
+
+    def test_span_card_dry_run_and_helpers(self):
+        try:
+            import numpy  # noqa: F401
+        except ImportError:
+            self.skipTest("numpy not installed")
+        import matched_prefix_interchange as mp  # noqa: E402
+
+        self.assertEqual(
+            [s["label"] for s in mp.parse_span_sites("21,attn22,mlp22,final,21")],
+            ["resid_L21", "attn_L22", "mlp_L22", "final"],
+        )
+        with self.assertRaises(ValueError):
+            mp.parse_span_sites("21,head22")
+        self.assertEqual(mp.span_arm_names(mp.parse_span_sites("final"))[2:], [
+            "patch_h2c_span_final", "patch_c2h_span_final",
+            "patch_h2c_last_final", "patch_c2h_last_final",
+            "patch_h2c_spanlast_final", "patch_c2h_spanlast_final",
+        ])
+        pairs = Path("/tmp/mp_synthetic_pairs.jsonl")
+        _synthetic_pairs(pairs)
+        out = Path("/tmp/mp_span_dry")
+        env = os.environ.copy()
+        env["HF_HUB_OFFLINE"] = "1"
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/matched_prefix_interchange.py"), "--pairs", str(pairs), "--out", str(out),
+             "--dry-run", "--private-span-patch", "--span-sites", "21,attn22,final"],
+            cwd=ROOT, env=env, text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+        meta = json.loads((out / "meta.json").read_text())
+        self.assertEqual(meta["protocol"], "matched_prefix_private_span_patch")
+        self.assertEqual(meta["span_sites"], ["resid_L21", "attn_L22", "final"])
+        self.assertEqual(len(meta["arms"]), 2 + 3 * 6)
+        self.assertEqual(meta["arms"], launch.span_arms("21,attn22,final"))
+
+
+class WatcherAndVerifierRunDirTests(unittest.TestCase):
+    def test_job_log_blocks_and_status_url(self):
+        import watch_matched_prefix_pod as w  # noqa: E402
+
+        self.assertEqual(w.status_url_for("abc123"), "https://abc123-8765.proxy.runpod.net")
+        log = "noise\n=====BEGIN meta.json=====\n{\"a\": 1}\n=====END meta.json=====\n=====BEGIN RESULTS.md=====\n# r\nx\n=====END RESULTS.md=====\n"
+        blocks = w.blocks_from_job_log(log)
+        self.assertEqual(json.loads(blocks["meta.json"]), {"a": 1})
+        self.assertEqual(blocks["RESULTS.md"], "# r\nx")
+
+    def test_verifier_run_dir_on_recorded_wiring_suite(self):
+        src = ROOT / "docs/handoff/2026-10-04-matched-prefix"
+        run = Path("/tmp/mp_verify_run_dir")
+        run.mkdir(parents=True, exist_ok=True)
+        for name in ("meta.json", "summary.json", "per_pair.json"):
+            (run / name).write_text((src / f"final-resid-{name}").read_text())
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/verify_matched_prefix_results.py"), "--run-dir", str(run)],
+            cwd=ROOT, text=True, capture_output=True, check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout[-1500:])
+        self.assertIn("**0 failing check(s).**", proc.stdout)
+        self.assertIn("patch_h2c_full_final_last: fraction of gap 1.0, flips 5/5, passed=True", proc.stdout)
+        self.assertIn("patch_c2h_full_final_last: mirror fraction 1.0, flips 5/5, passed=True", proc.stdout)
+        self.assertTrue((run / "VERIFY.md").is_file())
 
 
 if __name__ == "__main__":

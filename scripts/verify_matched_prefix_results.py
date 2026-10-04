@@ -241,11 +241,97 @@ def compare_tables(rep: Report, label: str, recomputed: dict, written: dict):
               + ("" if not bad else " — " + "; ".join(bad[:5])))
 
 
+def verify_run_dir(run_dir: Path, rep: Report) -> None:
+    """Generic re-derivation for any run directory (meta.json, summary.json, per_pair.json).
+
+    Recomputes every by-arm statistic and compares with summary.json; recomputes the
+    honest->colluder bar for every h2c arm and the mirror bar for every c2h arm; and checks
+    the directions / sweep / sites tables the harness wrote against those recomputations.
+    """
+    meta = json.loads((run_dir / "meta.json").read_text())
+    summary = json.loads((run_dir / "summary.json").read_text())
+    per_pair = json.loads((run_dir / "per_pair.json").read_text())
+    for row in per_pair:
+        row["arms"] = {k: {"vote": v.get("vote"), "p_target": v.get("p_target")} for k, v in row["arms"].items()}
+    rep.h(f"Run {run_dir.name}: protocol {meta.get('protocol')}, {meta.get('n_pairs')} pairs, site {meta.get('site')}")
+    rec = recompute(per_pair)
+    rep.table(rec, summary.get("by_arm"))
+    compare_tables(rep, f"{run_dir.name}: per_pair.json vs summary.json", rec, summary.get("by_arm") or {})
+    bc, bh = rec.get("baseline_colluder"), rec.get("baseline_honest")
+    if bc and bh:
+        gap = bc["mean_p_target"] - bh["mean_p_target"]
+        rep.note(f"untouched gap {gap:.4f} (colluder {bc['mean_p_target']:.4f}, honest {bh['mean_p_target']:.4f})")
+    bars = {}
+    for arm in rec:
+        if arm.startswith("baseline"):
+            continue
+        if "h2c" in arm:
+            g = gate(per_pair, arm)
+            bars[arm] = g
+            rep.note(f"{arm}: fraction of gap {g['fraction_of_gap'] if g['fraction_of_gap'] is None else round(g['fraction_of_gap'], 4)}, flips {g['n_flipped_to_honest']}/{g['n_disagree']}, passed={g['passed']}")
+        elif "c2h" in arm:
+            m = mirror(per_pair, arm)
+            bars[arm] = m
+            rep.note(f"{arm}: mirror fraction {m['fraction_of_gap'] if m['fraction_of_gap'] is None else round(m['fraction_of_gap'], 4)}, flips {m['n_flipped']}/{m['n_disagree']}, passed={m['passed']}")
+    for table in ("directions", "sweep", "sites"):
+        rows = summary.get(table) or []
+        bad = []
+        for r in rows:
+            for side, key in (("h2c", "h2c_fraction_of_gap"), ("c2h", "c2h_fraction_of_gap")):
+                arm = r.get(f"{side}_arm")
+                b = bars.get(arm)
+                if b is None:
+                    bad.append(f"{r.get('label')}: {arm} not recomputed")
+                    continue
+                a, w = b["fraction_of_gap"], r.get(key)
+                if (a is None) != (w is None) or (a is not None and abs(a - w) > 1e-9):
+                    bad.append(f"{r.get('label')}.{key}: recomputed {a} vs written {w}")
+                if bool(b["passed"]) != bool(r.get(f"{side}_passed")):
+                    bad.append(f"{r.get('label')}.{side}_passed: recomputed {b['passed']} vs written {r.get(f'{side}_passed')}")
+        if rows:
+            rep.check(not bad, f"{run_dir.name}: the '{table}' table matches the recomputed bars" + ("" if not bad else " — " + "; ".join(bad[:5])))
+
+
+def mirror(per_pair: list[dict], c2h_arm: str) -> dict:
+    """Colluder-to-honest bar (mirror of gate): toward the colluder baseline, flips to the colluder vote."""
+    gaps, deltas, disagree, flipped = [], [], [], []
+    for row in per_pair:
+        a = row["arms"]
+        bc, bh, pp = a.get("baseline_colluder"), a.get("baseline_honest"), a.get(c2h_arm)
+        if not (bc and bh and pp):
+            continue
+        if None not in (bc["p_target"], bh["p_target"], pp["p_target"]):
+            gaps.append(bc["p_target"] - bh["p_target"])
+            deltas.append(pp["p_target"] - bh["p_target"])
+        if bc["vote"] != "?" and bh["vote"] != "?" and bc["vote"] != bh["vote"]:
+            disagree.append(row["pair_id"])
+            if pp["vote"] == bc["vote"]:
+                flipped.append(row["pair_id"])
+    mg, md = mean(gaps), mean(deltas)
+    fraction = None if (mg is None or md is None or abs(mg) < 1e-8) else md / mg
+    prob_pass = fraction is not None and fraction >= GAP_FRACTION_REQUIRED
+    vote_pass = len(disagree) > 0 and len(flipped) == len(disagree)
+    return {"control": c2h_arm, "passed": bool(prob_pass and vote_pass), "fraction_of_gap": fraction, "n_disagree": len(disagree), "n_flipped": len(flipped)}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=None, help="write the markdown report here")
+    ap.add_argument("--run-dir", type=Path, action="append", default=[], help="verify this run directory (meta/summary/per_pair) instead of the fixed 4 Oct set; repeatable")
     args = ap.parse_args()
     rep = Report()
+    if args.run_dir:
+        rep.lines += ["# Matched-prefix run verification (CPU re-derivation)", ""]
+        for d in args.run_dir:
+            verify_run_dir(d, rep)
+        rep.lines += ["", f"**{rep.failures} failing check(s).**", ""]
+        text = "\n".join(rep.lines)
+        print(text)
+        out = args.out or (args.run_dir[-1] / "VERIFY.md")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text)
+        print(f"[wrote] {out}", file=sys.stderr)
+        return 1 if rep.failures else 0
     rep.lines += [
         "# Matched-prefix result verification (CPU re-derivation)",
         "",

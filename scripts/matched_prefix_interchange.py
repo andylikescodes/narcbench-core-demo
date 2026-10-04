@@ -40,6 +40,11 @@ Last-token layer sweep (--last-token-layer-sweep --sweep-layers 24,27,...,final)
 copy the whole last-token residual both ways at several depths to find the first
 depth whose copy carries the vote. Needs no direction files.
 
+Private-span patch (--private-span-patch --span-sites 21,attn22,final): copy the
+private-instruction span residuals, the last-token residual, and both together,
+both ways, at residual / attention / MLP sites or the final norm. Needs no
+direction files. The valid replacement for the withdrawn Oct 1 design.
+
   python3 scripts/matched_prefix_interchange.py \
     --pairs results/transfer_stable/matched_prefix/pairs_transfer.jsonl \
     --directions results/transfer_stable/directions \
@@ -1083,12 +1088,29 @@ def main() -> int:
         default=DEFAULT_SWEEP_LAYERS,
         help=f"comma-separated decoder layers and/or 'final' for the sweep (default {DEFAULT_SWEEP_LAYERS})",
     )
+    ap.add_argument(
+        "--private-span-patch",
+        action="store_true",
+        help="copy the private-note span, the last token, and both, both ways, at --span-sites; no direction files",
+    )
+    ap.add_argument(
+        "--span-sites",
+        default=DEFAULT_SPAN_SITES,
+        help=f"comma-separated sites for the span card: 21, attn22, mlp22 or final (default {DEFAULT_SPAN_SITES})",
+    )
     args = ap.parse_args()
-    final_site_flags = int(bool(args.final_resid_controls)) + int(bool(args.final_resid_directions)) + int(
-        bool(args.last_token_layer_sweep)
+    final_site_flags = (
+        int(bool(args.final_resid_controls))
+        + int(bool(args.final_resid_directions))
+        + int(bool(args.last_token_layer_sweep))
+        + int(bool(args.private_span_patch))
     )
     if final_site_flags > 1 or (final_site_flags and (args.extras or args.extras_only or args.role_perp_confirm)):
-        print("ERROR: --final-resid-controls, --final-resid-directions and --last-token-layer-sweep are each their own suite", flush=True)
+        print(
+            "ERROR: --final-resid-controls, --final-resid-directions, --last-token-layer-sweep and "
+            "--private-span-patch are each their own suite",
+            flush=True,
+        )
         return 1
     if args.max_pairs < 0:
         print("ERROR: --max-pairs must be >= 0 (0 = every row)", flush=True)
@@ -1099,6 +1121,8 @@ def main() -> int:
         return run_final_resid_directions(args)
     if args.last_token_layer_sweep:
         return run_last_token_layer_sweep(args)
+    if args.private_span_patch:
+        return run_private_span_patch(args)
     if args.directions is None:
         print("ERROR: --directions is required", flush=True)
         return 1
@@ -2339,6 +2363,219 @@ def run_last_token_layer_sweep(args: argparse.Namespace) -> int:
     first_pass = next((r["label"] for r in table if r["h2c_passed"]), None)
     _write_final_site(args.out, per_pair, arm_names, meta, {"sweep": table, "first_site_passing_h2c_bar": first_pass}, t0)
     print(f"\n[done] first site passing the h2c bar: {first_pass}. {args.out}", flush=True)
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Private-span patch card (added 2026-10-04, open question 3). Copies the
+# private-instruction span residuals, the last-token residual, and both
+# together, at any mix of sites: residual output of a decoder layer ("21"),
+# an attention residual-write ("attn22"), an MLP residual-write ("mlp22"),
+# or the final norm ("final"). This is the valid replacement for the withdrawn
+# Oct 1 design, whose last-shared-token patch was zero by construction.
+# ---------------------------------------------------------------------------
+
+DEFAULT_SPAN_SITES = "21,attn22,final"
+SPAN_SITE_RE = re.compile(r"^(?:(attn|mlp)?(\d+)|final)$")
+SPAN_SPEC_RE = re.compile(r"^((attn|mlp)?\d+|final)(,((attn|mlp)?\d+|final))*$")
+SPAN_EDITS = ("span", "last", "spanlast")
+
+
+def parse_span_sites(spec: str) -> list[dict]:
+    """'21,attn22,final' -> [{'label': 'resid_L21', 'kind': 'residual', 'layer': 21}, ...]."""
+    if not SPAN_SPEC_RE.fullmatch(spec.strip()):
+        raise ValueError(f"bad --span-sites {spec!r}: items like 21, attn22, mlp22 or final")
+    sites: list[dict] = []
+    for item in spec.split(","):
+        m = SPAN_SITE_RE.fullmatch(item.strip())
+        if item.strip() == "final":
+            site = {"label": "final", "kind": "final", "layer": None}
+        else:
+            kind = {"attn": "attn", "mlp": "mlp", None: "residual"}[m.group(1)]
+            layer = int(m.group(2))
+            site = {"label": f"{'resid' if kind == 'residual' else kind}_L{layer}", "kind": kind, "layer": layer}
+        if site["label"] not in [s["label"] for s in sites]:
+            sites.append(site)
+    return sites
+
+
+def span_site_module(model, site: dict):
+    if site["kind"] == "final":
+        return final_logit_hidden_module(model)
+    layers = model.model.layers
+    if not (0 <= site["layer"] < len(layers)):
+        raise ValueError(f"layer {site['layer']} out of range for a model with {len(layers)} layers")
+    return _module_for_site(model, site["layer"], site["kind"])
+
+
+def span_arm_names(sites: list[dict]) -> list[str]:
+    arms = ["baseline_colluder", "baseline_honest"]
+    for site in sites:
+        for edit in SPAN_EDITS:
+            arms += [f"patch_h2c_{edit}_{site['label']}", f"patch_c2h_{edit}_{site['label']}"]
+    return arms
+
+
+def capture_positions_at_modules(model, tok, prompt: str, positions: list[int], modules: dict) -> dict:
+    """One teacher-forced forward; cache the residual at every position on every named module."""
+    assert torch is not None
+    ids = tok(prompt, return_tensors="pt").to(model.device)
+    seq_len = int(ids["input_ids"].shape[-1])
+    want: list[int] = []
+    for pos in positions:
+        if pos < 0:
+            pos = seq_len + pos
+        if not (0 <= pos < seq_len):
+            raise ValueError(f"pos {pos} out of range for seq_len {seq_len}")
+        if pos not in want:
+            want.append(pos)
+    captured: dict = {name: {} for name in modules}
+    handles = []
+
+    def make(name: str):
+        def hook(_m, _i, out):
+            h = out[0] if isinstance(out, tuple) else out
+            for pos in want:
+                captured[name][pos] = h[0, pos, :].detach().to(torch.float32).cpu()
+
+        return hook
+
+    for name, mod in modules.items():
+        handles.append(mod.register_forward_hook(make(name)))
+    try:
+        with torch.no_grad():
+            model(**ids)
+    finally:
+        for h in handles:
+            h.remove()
+    for name in modules:
+        missing = [pos for pos in want if pos not in captured[name]]
+        if missing:
+            raise RuntimeError(f"capture at {name} missed positions {missing}")
+    return captured
+
+
+def span_table(per_pair: list[dict], sites: list[dict], by_arm: dict) -> list[dict]:
+    rows = []
+    for site in sites:
+        for edit in SPAN_EDITS:
+            lab = f"{edit}_{site['label']}"
+            rows.append(_both_way_row(lab, per_pair, f"patch_h2c_{lab}", f"patch_c2h_{lab}", None, by_arm))
+    return rows
+
+
+def run_private_span_patch(args: argparse.Namespace) -> int:
+    """Span / last-token / span+last residual copies, both ways, at the requested sites."""
+    sites = parse_span_sites(args.span_sites)
+    arm_names = span_arm_names(sites)
+    loaded = load_pairs(args.pairs)
+    pairs = loaded if args.max_pairs == 0 else loaded[: args.max_pairs]
+    args.out.mkdir(parents=True, exist_ok=True)
+    meta = {
+        "model": args.model,
+        "n_pairs": len(pairs),
+        "n_pairs_in_file": len(loaded),
+        "pair_ids": [p["pair_id"] for p in pairs],
+        "arms": arm_names,
+        "n_arms": len(arm_names),
+        "span_sites": [s["label"] for s in sites],
+        "edits": list(SPAN_EDITS),
+        "max_new_tokens": args.max_new_tokens,
+        "protocol": "matched_prefix_private_span_patch",
+        "suite": "core",
+        "world": "Core",
+        "site": "per_site",
+        "intervention": "private_instruction_span | prompt_last_token | both",
+        "gap_fraction_required": FINAL_RESID_GAP_FRACTION,
+        "dry_run": args.dry_run,
+    }
+    (args.out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+    print(json.dumps(meta, indent=2), flush=True)
+    print("\n=== ARMS ===", flush=True)
+    for name in arm_names:
+        print(f"  - {name}", flush=True)
+    if args.dry_run:
+        (args.out / "DRY_RUN.md").write_text(
+            "\n".join(
+                [
+                    "# Private-span patch — dry-run",
+                    "",
+                    f"- pairs: {len(pairs)} (of {len(loaded)})",
+                    f"- sites: {', '.join(s['label'] for s in sites)}",
+                    "- edits: copy the private-note span, the last prompt token, or both, from the other prompt",
+                    "",
+                    "## Arms",
+                    *[f"- {name}" for name in arm_names],
+                    "",
+                ]
+            )
+            + "\n"
+        )
+        print(f"\n[dry-run] OK — wrote {args.out / 'DRY_RUN.md'}", flush=True)
+        return 0
+    if torch is None:
+        print("ERROR: torch required for non-dry-run", flush=True)
+        return 1
+
+    print(f"\n[load] {args.model}", flush=True)
+    model, tok = load_gemma(args.model)
+    modules = {s["label"]: span_site_module(model, s) for s in sites}
+    meta["n_layers"] = len(model.model.layers)
+    (args.out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+    prepared = _prepare_pairs(tok, pairs)
+    t0 = time.time()
+    per_pair: list[dict] = []
+    for pi, item in enumerate(prepared):
+        pair = item["pair"]
+        letters = item["letters"]
+        letter_ids = letter_token_ids(tok, letters)
+        ids_c = model_input_ids(tok, item["prompt_c"])
+        ids_h = model_input_ids(tok, item["prompt_h"])
+        span = private_instruction_spans(ids_c, ids_h)
+        assert_private_instruction_span(span, pair["pair_id"])
+        n = span["n_aligned"]
+        pos_c, pos_h = span["last_colluder"], span["last_honest"]
+        cap_c = capture_positions_at_modules(model, tok, item["prompt_c"], span["colluder"][:n] + [pos_c], modules)
+        cap_h = capture_positions_at_modules(model, tok, item["prompt_h"], span["honest"][:n] + [pos_h], modules)
+        print(
+            f"\n[{pi+1}/{len(prepared)}] {pair['pair_id']} t*={span['t_star']} aligned={n} "
+            f"last_c={pos_c} last_h={pos_h}",
+            flush=True,
+        )
+        specs: dict[str, tuple[str, list]] = {
+            "baseline_colluder": (item["prompt_c"], []),
+            "baseline_honest": (item["prompt_h"], []),
+        }
+        for lab, mod in modules.items():
+            span_h2c = {span["colluder"][i]: cap_h[lab][span["honest"][i]] for i in range(n)}
+            span_c2h = {span["honest"][i]: cap_c[lab][span["colluder"][i]] for i in range(n)}
+            last_h2c = {pos_c: cap_h[lab][pos_h]}
+            last_c2h = {pos_h: cap_c[lab][pos_c]}
+            edits = {
+                "span": (span_h2c, span_c2h),
+                "last": (last_h2c, last_c2h),
+                "spanlast": ({**span_h2c, **last_h2c}, {**span_c2h, **last_c2h}),
+            }
+            for edit, (r_h2c, r_c2h) in edits.items():
+                specs[f"patch_h2c_{edit}_{lab}"] = (item["prompt_c"], [(mod, make_residual_copy_hook(r_h2c))])
+                specs[f"patch_c2h_{edit}_{lab}"] = (item["prompt_h"], [(mod, make_residual_copy_hook(r_c2h))])
+        arm_results = {}
+        for name in arm_names:
+            prompt, hooks_spec = specs[name]
+            metrics = _score_generation(model, tok, prompt, hooks_spec, letters, letter_ids, item["target"], args.max_new_tokens)
+            arm_results[name] = metrics
+            print(f"  {name}: vote={metrics.get('vote')} p_tgt={metrics.get('p_target')}", flush=True)
+        row = _base_row(item, arm_results, "private_instruction_span|prompt_last_token|both")
+        row["private_span"] = span
+        row["n_private_copied"] = n
+        per_pair.append(row)
+        (args.out / "per_pair.json").write_text(json.dumps(per_pair, indent=2) + "\n")
+
+    by_arm = summarize(per_pair, arm_names)["by_arm"]
+    table = span_table(per_pair, sites, by_arm)
+    passing = [r["label"] for r in table if r["h2c_passed"]]
+    _write_final_site(args.out, per_pair, arm_names, meta, {"sites": table, "edits_passing_h2c_bar": passing}, t0)
+    print(f"\n[done] edits passing the h2c bar: {passing or 'none'}. {args.out}", flush=True)
     return 0
 
 

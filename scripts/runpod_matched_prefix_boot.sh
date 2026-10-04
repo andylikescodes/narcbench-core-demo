@@ -65,6 +65,24 @@ class H(BaseHTTPRequestHandler):
             src = RUN / "job.log"
             body = src.read_bytes() if src.exists() else b""
             ctype = "text/plain"
+        elif path == "/cmd.log":
+            src = RUN / "cmd.log"
+            body = src.read_bytes() if src.exists() else b""
+            ctype = "text/plain"
+        elif path.startswith("/out/"):
+            # Result files of the current run (the harness rewrites per_pair.json after every pair).
+            name = path[len("/out/"):]
+            allowed = {"meta.json", "summary.json", "per_pair.json", "RESULTS.md", "DRY_RUN.md"}
+            ptr = RUN / "out_dir"
+            if name not in allowed or not ptr.exists():
+                self.send_error(404)
+                return
+            src = Path(ptr.read_text().strip()) / name
+            if not src.is_file():
+                self.send_error(404)
+                return
+            body = src.read_bytes()
+            ctype = "application/json" if name.endswith(".json") else "text/plain"
         else:
             self.send_error(404)
             return
@@ -84,6 +102,7 @@ phase setup
 : "${JOB_OUT_ROOT:?missing JOB_OUT_ROOT}"
 : "${JOB_MODE:?missing JOB_MODE}"
 export HF_HOME="${HF_HOME:-/workspace/jobs/hf-cache}"
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
 
 python3 - "$JOB_PAIRS" "$JOB_DIRECTIONS" "$JOB_OUT_ROOT" "$HF_HOME" <<'PY' || finish failed bad_path
 import sys
@@ -131,12 +150,31 @@ case "$MODE" in
     PASS_DIRECTIONS=0
     EXTRA_FLAG="--last-token-layer-sweep --sweep-layers ${JOB_SWEEP_LAYERS:-24,27,30,33,36,39,41,final}"
     ;;
+  private-span-patch)
+    NEED=""
+    PASS_DIRECTIONS=0
+    EXTRA_FLAG="--private-span-patch --span-sites ${JOB_SPAN_SITES:-21,attn22,final}"
+    ;;
   *)
     echo "[setup] unknown JOB_MODE=$MODE" | tee -a "$RUN/job.log"
     finish failed bad_mode
     ;;
 esac
 
+if [ -n "${JOB_PAIRS_FROM_REPO:-}" ]; then
+  # A pairs file shipped in the pinned checkout (data/matched_prefix/*.jsonl) is copied onto the volume.
+  case "$JOB_PAIRS_FROM_REPO" in
+    data/matched_prefix/*.jsonl) ;;
+    *) echo "[setup] refusing JOB_PAIRS_FROM_REPO=$JOB_PAIRS_FROM_REPO" | tee -a "$RUN/job.log"; finish failed bad_pairs_from_repo ;;
+  esac
+  if [ ! -f "$REPO/$JOB_PAIRS_FROM_REPO" ]; then
+    echo "[setup] $JOB_PAIRS_FROM_REPO is not in the checkout" | tee -a "$RUN/job.log"
+    finish failed missing_pairs_in_repo
+  fi
+  mkdir -p "$(dirname "$JOB_PAIRS")"
+  cp "$REPO/$JOB_PAIRS_FROM_REPO" "$JOB_PAIRS"
+  echo "[setup] copied $JOB_PAIRS_FROM_REPO -> $JOB_PAIRS ($(wc -l < "$JOB_PAIRS") rows)" | tee -a "$RUN/job.log"
+fi
 if [ ! -f "$JOB_PAIRS" ]; then
   echo "[setup] missing pairs $JOB_PAIRS" | tee -a "$RUN/job.log"
   finish failed missing_pairs
@@ -154,7 +192,6 @@ if [ "$PASS_DIRECTIONS" = 1 ]; then
   done
 fi
 
-REPO="$(cd "$(dirname "$0")/.." && pwd)"
 GOT="$(git -C "$REPO" rev-parse HEAD)"
 echo "[pin] repo=$REPO head=$GOT expect=$JOB_GIT_SHA mode=$MODE" | tee -a "$RUN/job.log"
 if [ "$GOT" != "$JOB_GIT_SHA" ]; then
@@ -165,6 +202,8 @@ python3 -m pip install -q 'transformers>=4.40' accelerate sentencepiece protobuf
 
 OUT="$JOB_OUT_ROOT/smoke_$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -p "$OUT"
+printf '%s' "$OUT" > "$RUN/out_dir"
+echo "[out] $OUT" | tee -a "$RUN/job.log"
 phase running
 set +e
 if [ "$PASS_DIRECTIONS" = 1 ]; then
@@ -193,6 +232,11 @@ EC=$?
 set -e
 printf '%s\n' "$EC" > "$RUN/exit_code"
 cat "$RUN/cmd.log" | tee -a "$RUN/job.log"
+for f in meta.json summary.json per_pair.json RESULTS.md; do
+  if [ -f "$OUT/$f" ]; then
+    { echo "=====BEGIN $f====="; cat "$OUT/$f"; echo; echo "=====END $f====="; } >> "$RUN/job.log"
+  fi
+done
 cp -a "$OUT" "$JOB_OUT_ROOT/latest_smoke" 2>/dev/null || true
 if [ "$EC" -eq 0 ]; then
   finish done ok

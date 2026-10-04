@@ -18,9 +18,12 @@ core pairs and does not read direction files. --final-resid-directions runs
 the 1D direction card at that same final site (reads the role and role-perp
 files from the volume; mode, attn-L22 and PCA files are used if present).
 --last-token-layer-sweep copies the whole last-token residual at several
-depths and reads no direction files. --pairs-on-volume points a card at a
-different pairs file on the volume (for example a v2 file built by
-scripts/build_matched_prefix_pairs.py and copied there). Direction .npy
+depths and reads no direction files. --private-span-patch copies the
+private-note span, the last token, and both, at --span-sites. --pairs-on-volume
+points a card at a different pairs file on the volume; --pairs-from-repo
+data/matched_prefix/<file>.jsonl has the pod copy a pairs file from the pinned
+checkout onto the volume first (the v2 pairs built by
+scripts/build_matched_prefix_pairs.py). Direction .npy
 files and pairs stay on the network volume. RUNPOD_API_KEY and HF_TOKEN come from the
 environment. --launch refuses unless the harness and boot script are in the
 checked-out SHA.
@@ -145,6 +148,34 @@ FINAL_SITE_REQUIRED_DIRECTION_FILES = ["lr_role_L21.npy", "lr_role_perp_mode_L21
 FINAL_SITE_OPTIONAL_DIRECTION_FILES = ["lr_mode_L21.npy", "lr_role_attn_L22.npy", "pca_contrast_k8_L23.npy"]
 DEFAULT_SWEEP_LAYERS = "24,27,30,33,36,39,41,final"
 SWEEP_SPEC_RE = re.compile(r"^(\d+|final)(,(\d+|final))*$")
+DEFAULT_SPAN_SITES = "21,attn22,final"
+SPAN_SPEC_RE = re.compile(r"^((attn|mlp)?\d+|final)(,((attn|mlp)?\d+|final))*$")
+SPAN_EDITS = ("span", "last", "spanlast")
+PAIRS_FROM_REPO_RE = re.compile(r"^data/matched_prefix/[A-Za-z0-9_.-]+\.jsonl$")
+MAX_PAIRS_FROM_REPO_BYTES = 2_000_000
+
+
+def span_site_label(item: str) -> str:
+    item = item.strip()
+    if item == "final":
+        return "final"
+    m = re.fullmatch(r"(attn|mlp)?(\d+)", item)
+    if not m:
+        raise ValueError(f"bad span site {item!r}")
+    return f"{m.group(1) or 'resid'}_L{int(m.group(2))}"
+
+
+def span_arms(spec: str) -> list[str]:
+    arms = ["baseline_colluder", "baseline_honest"]
+    seen: list[str] = []
+    for item in spec.split(","):
+        lab = span_site_label(item)
+        if lab in seen:
+            continue
+        seen.append(lab)
+        for edit in SPAN_EDITS:
+            arms += [f"patch_h2c_{edit}_{lab}", f"patch_c2h_{edit}_{lab}"]
+    return arms
 
 
 def sweep_arms(spec: str) -> list[str]:
@@ -289,6 +320,8 @@ def mode_cli(args: argparse.Namespace) -> str:
         return " --final-resid-directions"
     if getattr(args, "last_token_layer_sweep", False):
         return f" --last-token-layer-sweep --sweep-layers {getattr(args, 'sweep_layers', DEFAULT_SWEEP_LAYERS)}"
+    if getattr(args, "private_span_patch", False):
+        return f" --private-span-patch --span-sites {getattr(args, 'span_sites', DEFAULT_SPAN_SITES)}"
     if args.role_perp_confirm:
         return " --role-perp-confirm"
     if args.extras_only:
@@ -305,6 +338,8 @@ def arms_for(args: argparse.Namespace) -> list[str]:
         return list(FINAL_SITE_DIRECTION_ARMS)
     if getattr(args, "last_token_layer_sweep", False):
         return sweep_arms(getattr(args, "sweep_layers", DEFAULT_SWEEP_LAYERS))
+    if getattr(args, "private_span_patch", False):
+        return span_arms(getattr(args, "span_sites", DEFAULT_SPAN_SITES))
     if args.role_perp_confirm:
         return list(ROLE_PERP_CONFIRM_ARMS)
     if args.extras_only:
@@ -316,7 +351,7 @@ def arms_for(args: argparse.Namespace) -> list[str]:
 
 
 def direction_files_for(args: argparse.Namespace) -> list[str]:
-    if args.final_resid_controls or getattr(args, "last_token_layer_sweep", False):
+    if args.final_resid_controls or getattr(args, "last_token_layer_sweep", False) or getattr(args, "private_span_patch", False):
         return []
     if getattr(args, "final_resid_directions", False):
         return list(FINAL_SITE_REQUIRED_DIRECTION_FILES) + [f"{f} (optional)" for f in FINAL_SITE_OPTIONAL_DIRECTION_FILES]
@@ -333,6 +368,8 @@ def mode_name(args: argparse.Namespace) -> str:
         return "final-resid-directions"
     if getattr(args, "last_token_layer_sweep", False):
         return "last-token-layer-sweep"
+    if getattr(args, "private_span_patch", False):
+        return "private-span-patch"
     if args.role_perp_confirm:
         return "role-perp-confirm"
     if args.extras_only:
@@ -389,6 +426,8 @@ ALLOWED_ENV_KEYS = frozenset(
         "JOB_MODE",
         "JOB_MAX_PAIRS",
         "JOB_SWEEP_LAYERS",
+        "JOB_SPAN_SITES",
+        "JOB_PAIRS_FROM_REPO",
         "JOB_MODEL",
         "JOB_MAX_NEW_TOKENS",
         "JOB_SEED",
@@ -418,6 +457,7 @@ MODES = frozenset(
         "final-resid-controls",
         "final-resid-directions",
         "last-token-layer-sweep",
+        "private-span-patch",
     }
 )
 
@@ -478,6 +518,13 @@ def validate_create_input(create_input: dict) -> int:
             raise LaunchRefused("JOB_SWEEP_LAYERS must be comma-separated layer numbers and/or 'final'")
     elif "JOB_SWEEP_LAYERS" in env:
         raise LaunchRefused("JOB_SWEEP_LAYERS is only for the last-token-layer-sweep suite")
+    if env.get("JOB_MODE") == "private-span-patch":
+        if not SPAN_SPEC_RE.fullmatch(env.get("JOB_SPAN_SITES", "")):
+            raise LaunchRefused("JOB_SPAN_SITES must be items like 21, attn22, mlp22 or final")
+    elif "JOB_SPAN_SITES" in env:
+        raise LaunchRefused("JOB_SPAN_SITES is only for the private-span-patch suite")
+    if "JOB_PAIRS_FROM_REPO" in env and not PAIRS_FROM_REPO_RE.fullmatch(env["JOB_PAIRS_FROM_REPO"]):
+        raise LaunchRefused("JOB_PAIRS_FROM_REPO must be data/matched_prefix/<name>.jsonl")
     for label in ("JOB_PAIRS", "JOB_DIRECTIONS", "JOB_OUT_ROOT", "HF_HOME"):
         if label not in env:
             raise LaunchRefused(f"create env missing {label}")
@@ -518,6 +565,10 @@ def build_create_input(args: argparse.Namespace, api_key: str) -> dict:
     }
     if args.mode_name == "last-token-layer-sweep":
         env["JOB_SWEEP_LAYERS"] = str(getattr(args, "sweep_layers", DEFAULT_SWEEP_LAYERS))
+    if args.mode_name == "private-span-patch":
+        env["JOB_SPAN_SITES"] = str(getattr(args, "span_sites", DEFAULT_SPAN_SITES))
+    if getattr(args, "pairs_from_repo", None):
+        env["JOB_PAIRS_FROM_REPO"] = str(args.pairs_from_repo)
     hf_token = os.environ.get("HF_TOKEN")
     if hf_token:
         env["HF_TOKEN"] = hf_token
@@ -670,6 +721,17 @@ def main() -> int:
     )
     ap.add_argument("--sweep-layers", default=DEFAULT_SWEEP_LAYERS, help="layers and/or 'final' for the sweep")
     ap.add_argument(
+        "--private-span-patch",
+        action="store_true",
+        help="boot the private-note span / last-token / both copies at --span-sites (no direction files)",
+    )
+    ap.add_argument("--span-sites", default=DEFAULT_SPAN_SITES, help="sites for the span card: 21, attn22, mlp22, final")
+    ap.add_argument(
+        "--pairs-from-repo",
+        default=None,
+        help="data/matched_prefix/<name>.jsonl in the pinned checkout; the pod copies it onto the volume before scoring",
+    )
+    ap.add_argument(
         "--pairs-on-volume",
         default=None,
         help="alternative pairs file on the network volume (/workspace/...), e.g. a v2 file copied there",
@@ -695,25 +757,46 @@ def main() -> int:
         + int(bool(args.final_resid_controls))
         + int(bool(args.final_resid_directions))
         + int(bool(args.last_token_layer_sweep))
+        + int(bool(args.private_span_patch))
     )
     if mode_flags > 1:
         print(
             "ERROR: pass only one of --extras, --extras-only, --role-perp-confirm, "
-            "--final-resid-controls, --final-resid-directions, --last-token-layer-sweep",
+            "--final-resid-controls, --final-resid-directions, --last-token-layer-sweep, --private-span-patch",
             file=sys.stderr,
         )
         return 1
-    final_site = args.final_resid_controls or args.final_resid_directions or args.last_token_layer_sweep
+    final_site = (
+        args.final_resid_controls or args.final_resid_directions or args.last_token_layer_sweep or args.private_span_patch
+    )
     if final_site and args.suite != "core":
         print("ERROR: the final-site cards score the core pair set", file=sys.stderr)
         return 1
     if args.last_token_layer_sweep and not SWEEP_SPEC_RE.fullmatch(args.sweep_layers.strip()):
         print("ERROR: --sweep-layers must be comma-separated layer numbers and/or 'final'", file=sys.stderr)
         return 1
-    if args.final_resid_directions or args.last_token_layer_sweep:
+    if args.private_span_patch and not SPAN_SPEC_RE.fullmatch(args.span_sites.strip()):
+        print("ERROR: --span-sites must be items like 21, attn22, mlp22 or final", file=sys.stderr)
+        return 1
+    if args.pairs_from_repo:
+        if not PAIRS_FROM_REPO_RE.fullmatch(args.pairs_from_repo):
+            print("ERROR: --pairs-from-repo must be data/matched_prefix/<name>.jsonl", file=sys.stderr)
+            return 1
+        local_pairs = ROOT / args.pairs_from_repo
+        if not local_pairs.is_file():
+            print(f"ERROR: --pairs-from-repo {args.pairs_from_repo} is not in this checkout", file=sys.stderr)
+            return 1
+        if local_pairs.stat().st_size > MAX_PAIRS_FROM_REPO_BYTES:
+            print(f"ERROR: --pairs-from-repo {args.pairs_from_repo} is larger than {MAX_PAIRS_FROM_REPO_BYTES} bytes", file=sys.stderr)
+            return 1
+        if args.pairs is None:
+            args.pairs = Path(args.pairs_from_repo)
+        if args.pairs_on_volume is None:
+            args.pairs_on_volume = f"/workspace/jobs/narcbench-data/matched_prefix/{local_pairs.name}"
+    if args.final_resid_directions or args.last_token_layer_sweep or args.private_span_patch:
         args.max_pairs = FINAL_RESID_CORE_PAIRS if args.max_pairs is None else args.max_pairs
-        if args.max_pairs < 1:
-            print("ERROR: the final-site cards score at least one pair (12 matches the wiring suite)", file=sys.stderr)
+        if args.max_pairs < 0:
+            print("ERROR: --max-pairs must be >= 0 (0 = every row of the pairs file; 12 matches the wiring suite)", file=sys.stderr)
             return 1
     elif args.final_resid_controls:
         args.max_pairs = FINAL_RESID_CORE_PAIRS if args.max_pairs is None else args.max_pairs
@@ -728,7 +811,7 @@ def main() -> int:
     elif args.max_pairs is None:
         args.max_pairs = 10
     if (args.max_pairs < 0 or (args.max_pairs == 0 and not args.role_perp_confirm)) and not (
-        args.final_resid_directions or args.last_token_layer_sweep
+        args.final_resid_directions or args.last_token_layer_sweep or args.private_span_patch
     ):
         print("ERROR: --max-pairs 0 is only valid with --role-perp-confirm", file=sys.stderr)
         return 1
@@ -741,6 +824,8 @@ def main() -> int:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_SITE_DIRECTIONS_ESTIMATE.json"
         elif args.last_token_layer_sweep:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_LAYER_SWEEP_ESTIMATE.json"
+        elif args.private_span_patch:
+            args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_SPAN_PATCH_ESTIMATE.json"
         elif args.role_perp_confirm:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_ESTIMATE.json"
         elif args.extras or args.extras_only:
@@ -754,6 +839,8 @@ def main() -> int:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_FINAL_SITE_DIRECTIONS_LAUNCH.json"
         elif args.last_token_layer_sweep:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_LAYER_SWEEP_LAUNCH.json"
+        elif args.private_span_patch:
+            args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_SPAN_PATCH_LAUNCH.json"
         elif args.role_perp_confirm:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_LAUNCH.json"
         elif args.extras or args.extras_only:
@@ -775,6 +862,9 @@ def main() -> int:
     elif args.last_token_layer_sweep:
         vol_subdir = f"{vol_subdir}_layer_sweep"
         pod_name = f"{pod_name}-layer-sweep"
+    elif args.private_span_patch:
+        vol_subdir = f"{vol_subdir}_span_patch"
+        pod_name = f"{pod_name}-span-patch"
     elif args.role_perp_confirm:
         vol_subdir = f"{vol_subdir}_role_perp_confirm"
         pod_name = f"{pod_name}-role-perp-confirm"
@@ -806,6 +896,10 @@ def main() -> int:
         est["kind"] = est["kind"].replace("_smoke", "_last_token_layer_sweep")
         est["last_token_layer_sweep"] = True
         est["sweep_layers"] = args.sweep_layers
+    elif args.private_span_patch:
+        est["kind"] = est["kind"].replace("_smoke", "_private_span_patch")
+        est["private_span_patch"] = True
+        est["span_sites"] = args.span_sites
     elif args.role_perp_confirm:
         est["kind"] = est["kind"].replace("_smoke", "_role_perp_confirm")
         est["role_perp_confirm"] = True
@@ -899,9 +993,12 @@ def main() -> int:
             f"python3 scripts/runpod_launch_matched_prefix.py --suite {args.suite}{mode_cli(args)}"
         ),
         "sweep_layers": args.sweep_layers if args.last_token_layer_sweep else None,
+        "span_sites": args.span_sites if args.private_span_patch else None,
+        "pairs_from_repo": args.pairs_from_repo,
+        "pairs_from_repo_in_sha": blob_in_commit(git_sha, args.pairs_from_repo) if args.pairs_from_repo else None,
         "harness_boot_argv": (
             f"python3 scripts/matched_prefix_interchange.py --pairs {pairs_on_volume} "
-            + ("" if (args.final_resid_controls or args.last_token_layer_sweep) else f"--directions {DIRECTIONS_ON_VOLUME} ")
+            + ("" if (args.final_resid_controls or args.last_token_layer_sweep or args.private_span_patch) else f"--directions {DIRECTIONS_ON_VOLUME} ")
             + f"--max-pairs {args.max_pairs} "
             f"--model {args.model} --max-new-tokens {args.max_new_tokens} --seed {args.seed}"
             + mode_cli(args)
@@ -930,6 +1027,9 @@ def main() -> int:
         return 1
     if dirty:
         print("REFUSE launch: worktree is dirty; commit and push the SHA first", file=sys.stderr)
+        return 1
+    if args.pairs_from_repo and not blob_in_commit(git_sha, args.pairs_from_repo):
+        print(f"REFUSE launch: {args.pairs_from_repo} is not in git SHA {git_sha}", file=sys.stderr)
         return 1
     if not remote_has_sha(git_sha, git_ref):
         print("REFUSE launch: SHA is not on the public remote branch yet", file=sys.stderr)

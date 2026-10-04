@@ -86,7 +86,25 @@ Last-token layer sweep (open question 2): copy the whole last-token residual bot
 python3 scripts/runpod_launch_matched_prefix.py --last-token-layer-sweep --sweep-layers 24,27,30,33,36,39,41,final
 ```
 
-`--pairs-on-volume /workspace/...` points any card at a different pairs file on the volume (for example the v2 file below after copying it there).
+Private-span patch (open question 3): copy the private-note span residuals, the last-token residual, and both together, both ways, at residual, attention or MLP sites or the final norm. This is the valid replacement for the withdrawn Oct 1 design, whose last-shared-token patch was zero by construction. No direction files:
+
+```bash
+python3 scripts/runpod_launch_matched_prefix.py --private-span-patch --span-sites 21,attn22,final
+```
+
+`--pairs-on-volume /workspace/...` points any card at a different pairs file on the volume. `--pairs-from-repo data/matched_prefix/pairs_core_v2.jsonl` has the pod copy that file from the pinned checkout onto the volume first (the destination defaults to `/workspace/jobs/narcbench-data/matched_prefix/<name>`), so the 50-pair widen set never has to be uploaded by hand:
+
+```bash
+python3 scripts/build_matched_prefix_pairs.py --all-letter-targets --out data/matched_prefix/pairs_core_v2_all50.jsonl
+python3 scripts/runpod_launch_matched_prefix.py --final-resid-directions --pairs-from-repo data/matched_prefix/pairs_core_v2_all50.jsonl --max-pairs 0
+```
+
+While a pod runs, the boot serves `/status.json`, `/job.log`, `/cmd.log` and `/out/{meta.json,summary.json,per_pair.json,RESULTS.md}` on port 8765 (RunPod proxy `https://<pod>-8765.proxy.runpod.net`), and appends the result files to `job.log` at the end. `scripts/watch_matched_prefix_pod.py` polls a pod, saves everything into a handoff directory, and can terminate the pod once the files are safe:
+
+```bash
+python3 scripts/watch_matched_prefix_pod.py --card results/transfer_stable/MATCHED_PREFIX_LAYER_SWEEP_LAUNCH.json --dest docs/handoff/<date>-layer-sweep --follow --poll 60 --terminate-after-fetch
+python3 scripts/verify_matched_prefix_results.py --run-dir docs/handoff/<date>-layer-sweep
+```
 
 Those estimates check out a git SHA and read direction `.npy` files from the network volume. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
 

@@ -85,7 +85,7 @@ The migration note records `smoke_20261004T031403Z` as near-null (edit-fraction 
 |---|---|---|---|
 | 1 | At the working site (final norm, last prompt token), does any 1D direction move P relative to the full-copy ceiling? Role, role-perp, mode, attn-L22, random, site diff-means, PCA k8. | `--final-resid-directions` | coded, not run |
 | 2 | At which depth does the last-token residual start to carry the vote? | `--last-token-layer-sweep` | coded, not run |
-| 3 | Where does the private note enter that residual: copy the private-span residuals at the depth found in 2, and at the probe sites (resid L21, attn L22). This is the valid replacement for the withdrawn Oct 1 design, whose last-shared-token patch was zero by construction. | not coded; small delta on the private-span machinery of `--final-resid-controls`, generalized by module | next after 2 |
+| 3 | Where does the private note enter that residual: copy the private-span residuals, the last token, and both, at the probe sites (resid L21, attn L22), the final norm, and the depth found in 2. This is the valid replacement for the withdrawn Oct 1 design, whose last-shared-token patch was zero by construction. | `--private-span-patch --span-sites 21,attn22,<L>,final` | coded, not run |
 | 4 | Within-trajectory versus matched-prefix | recommendation: stay on matched-prefix until 1–3 answer; within-trajectory inherits the same site question and its edit-fraction metric is noisier than P(letter) | — |
 | 5 | Volume files present before any pod | see runbook checklist | — |
 
@@ -122,7 +122,16 @@ python3 scripts/runpod_launch_matched_prefix.py --final-resid-directions --launc
 python3 scripts/runpod_launch_matched_prefix.py --last-token-layer-sweep --launch
 ```
 
-Results land on the volume under `/workspace/jobs/narcbench-results/matched_prefix_final_site_directions/smoke_*` and `.../matched_prefix_layer_sweep/smoke_*` (`meta.json`, `per_pair.json`, `summary.json`, `RESULTS.md`). After a run: copy those four files into `docs/handoff/<date>-<card>/`, rerun `python3 scripts/verify_matched_prefix_results.py` (extend it with a section for the new card), and add one row per card to section 2 of this file.
+Results land on the volume under `/workspace/jobs/narcbench-results/matched_prefix_<card>/smoke_*` (`meta.json`, `per_pair.json`, `summary.json`, `RESULTS.md`) and are also served by the pod while it is up. Fetch, verify and record each run:
+
+```bash
+python3 scripts/watch_matched_prefix_pod.py --card results/transfer_stable/MATCHED_PREFIX_<CARD>_LAUNCH.json --dest docs/handoff/<date>-<card> --follow --terminate-after-fetch
+python3 scripts/verify_matched_prefix_results.py --run-dir docs/handoff/<date>-<card>
+```
+
+Then add one row per card to section 2 of this file. Order of the pod runs: layer sweep (card 2) first, because its first passing depth is an input to the span card; then the direction card (card 1); then the span card (card 3) with that depth added to `--span-sites`; then, for any positive, the 50-pair widen with `--pairs-from-repo data/matched_prefix/pairs_core_v2_all50.jsonl --max-pairs 0`.
+
+Pre-registered reading for card 3, per site and edit, honest→colluder: the same bar as the wiring suite (fraction of gap ≥ 0.5 and every disagreeing pair flips). The expected pattern if the note is read at the vote through attention: the span copy at resid L21 / attn L22 moves little, the span+last copy at the first passing depth of the sweep moves most, and the span copy at the final norm stays null.
 
 ## 6. Repository map
 

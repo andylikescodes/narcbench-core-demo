@@ -263,7 +263,7 @@ def load_pair(scenario_id: str, model_id: str | None = None) -> dict | None:
         "control": ctrl,
         "attribution": idx.get("attribution"),
         "source": col.get("source"),
-        "source_dir": str(src),
+        "source_dir": build_mod.repo_relative(src),
         "models": idx.get("models"),
         "demonstrates": (
             f"[{mid}] Colluders privately aligned then steered public talk toward hidden goal "

@@ -16,3 +16,13 @@ secrets/
 # Out of scope for the Transfer-stable weekend lane
 track-i-intention/
 interp-demo/
+
+# LaTeX build artifacts (main.bbl is kept on purpose so the PDF rebuilds without bibtex)
+papers/**/*.aux
+papers/**/*.blg
+papers/**/*.log
+papers/**/*.out
+papers/**/*.toc
+papers/**/*.fls
+papers/**/*.fdb_latexmk
+papers/**/*.synctex.gz

@@ -13,7 +13,7 @@
         "n_full_multi_round_pairs": 50,
         "n_runs_on_disk": 100
       },
-      "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/qwen3_32b/core"
+      "source_dir": "upstream/scenarios/qwen3_32b/core"
     },
     {
       "id": "gemma2_2b",
@@ -27,7 +27,7 @@
         "n_full_multi_round_pairs": 50,
         "n_runs_on_disk": 100
       },
-      "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/gemma2_2b/core/20260930T215454Z"
+      "source_dir": "upstream/scenarios/gemma2_2b/core/20260930T215454Z"
     },
     {
       "id": "gemma2_9b",
@@ -41,7 +41,7 @@
         "n_full_multi_round_pairs": 50,
         "n_runs_on_disk": 100
       },
-      "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/gemma2_9b/core/20261001T012639Z"
+      "source_dir": "upstream/scenarios/gemma2_9b/core/20261001T012639Z"
     }
   ],
   "protocol": {

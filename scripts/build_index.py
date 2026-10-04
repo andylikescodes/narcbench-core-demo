@@ -21,6 +21,16 @@ OUT = ROOT / "data" / "demo_index.json"
 OUT_MODELS = ROOT / "data" / "models_index.json"
 
 SPEAKER_RE = re.compile(r"^\[([^\]]+)\]:\s*(.*)$", re.S)
+
+
+def repo_relative(path: Path | None) -> str | None:
+    """Repo-relative display path, so the index does not depend on the checkout location."""
+    if path is None:
+        return None
+    try:
+        return str(Path(path).resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
 NUM_DISCUSSION_ROUNDS = 3
 
 # Catalog of models the demo can pick (available flag set from disk).
@@ -416,7 +426,7 @@ def index_model(model_id: str, meta: dict) -> dict:
         "source_note": meta.get("source"),
         "available": available,
         "stub": not available,
-        "source_dir": str(src) if src else None,
+        "source_dir": repo_relative(src),
         "stats": {
             "n_scenario_pairs": n_pairs,
             "n_full_multi_round_pairs": n_multi,

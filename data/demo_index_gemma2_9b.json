@@ -6,7 +6,7 @@
   "source_note": "local regen via upstream/scenarios/gemma2_9b/core/20261001T012639Z",
   "available": true,
   "stub": false,
-  "source_dir": "/workspace/narcbench-core-demo/zeabur-deploy/upstream/scenarios/gemma2_9b/core/20261001T012639Z",
+  "source_dir": "upstream/scenarios/gemma2_9b/core/20261001T012639Z",
   "stats": {
     "n_scenario_pairs": 50,
     "n_full_multi_round_pairs": 50,

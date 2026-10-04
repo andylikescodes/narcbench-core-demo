@@ -15,10 +15,12 @@ Cheap-extras (--extras / --extras-only; Paige queue #4 offline-prep):
   PCA k8 L23 project-out + ambient single-dir ablate @ resid_L23
   role_perp directional component transplant (patch_h2c / patch_c2h donor)
 
-Role-perp confirm (--role-perp-confirm): that perp transplant both ways at
-residual L21, plus single-site perp vs role ablate, role-direction and
-same-norm random dir_patch controls at the same site, and the PCA arms.
-Pass --max-pairs 0 to score every row of the pairs file.
+Role-perp confirm (--role-perp-confirm): same residual-L21 card, but the
+write is the last token of each prompt (past the shared prefix). A one-direction
+transplant at the last shared token is zero because those residuals match.
+The card also copies the whole residual at that last-token site, both ways.
+h2c is scored against the colluder baseline and c2h against the honest
+baseline, from the arm name only. Pass --max-pairs 0 to score every row.
 
   python3 scripts/matched_prefix_interchange.py \
     --pairs results/transfer_stable/matched_prefix/pairs_transfer.jsonl \
@@ -81,6 +83,53 @@ def shared_prefix_len(ids_a: list[int], ids_b: list[int]) -> int:
     return t
 
 
+def intervention_sites(ids_colluder: list[int], ids_honest: list[int], *, prompt_last: bool) -> dict:
+    """Where a confirm-card write lands.
+
+    Last-shared-token residuals match, so a directional transplant there is zero.
+    prompt_last writes the source prompt's last residual onto the destination
+    prompt's last token, which is past that shared prefix.
+    """
+    t_star = shared_prefix_len(ids_colluder, ids_honest)
+    shared_pos = t_star - 1
+    if not prompt_last:
+        return {
+            "t_star": t_star,
+            "shared_pos": shared_pos,
+            "pos_colluder": shared_pos,
+            "pos_honest": shared_pos,
+            "intervention": "last_shared_token",
+        }
+    pos_c = len(ids_colluder) - 1
+    pos_h = len(ids_honest) - 1
+    if pos_c < t_star or pos_h < t_star:
+        raise RuntimeError(
+            f"prompt last token is not past the shared prefix "
+            f"(t*={t_star}, pos_colluder={pos_c}, pos_honest={pos_h})"
+        )
+    return {
+        "t_star": t_star,
+        "shared_pos": shared_pos,
+        "pos_colluder": pos_c,
+        "pos_honest": pos_h,
+        "intervention": "prompt_last_token",
+    }
+
+
+def ref_baseline_name(arm_name: str) -> str:
+    """Comparison baseline from the arm name alone.
+
+    h2c is the colluder prompt, so it is compared to baseline_colluder.
+    c2h is the honest prompt, so it is compared to baseline_honest.
+    The results object always contains baseline_honest; that string is not a signal.
+    """
+    if "h2c" in arm_name:
+        return "baseline_colluder"
+    if "c2h" in arm_name:
+        return "baseline_honest"
+    return "baseline_colluder"
+
+
 def option_label_items(raw: Any) -> list[str]:
     """option_labels may be a list or a dict. Dict keys are read only in the dict branch."""
     if isinstance(raw, dict):
@@ -106,6 +155,17 @@ def parse_vote_letter(text: str, allowed: list[str] | None = None) -> str:
             if v in allowed:
                 return v
     return "?"
+
+
+def model_input_ids(tok, prompt: str) -> list[int]:
+    """Token ids of the forward ``tok(prompt)`` actually runs."""
+    encoded = tok(prompt)
+    ids = encoded["input_ids"]
+    if hasattr(ids, "tolist"):
+        ids = ids.tolist()
+    if ids and isinstance(ids[0], (list, tuple)):
+        ids = list(ids[0])
+    return [int(i) for i in ids]
 
 
 def build_chat_prompt(tok, body: str) -> str:
@@ -636,7 +696,26 @@ def build_arms(
             "u": u_rand_l21,
             "dir_file": "random",
         }
+        full_resid = {
+            "kind": "patch",
+            "site": "residual",
+            "layer": 21,
+            "cache_key": "resid_L21",
+            "dir_file": "activation",
+        }
         return baselines + [
+            {
+                **full_resid,
+                "name": "patch_h2c_full_resid_L21",
+                "prompt_arm": "colluder",
+                "src_arm": "honest",
+            },
+            {
+                **full_resid,
+                "name": "patch_c2h_full_resid_L21",
+                "prompt_arm": "honest",
+                "src_arm": "colluder",
+            },
             {
                 "name": "patch_h2c_role_perp_resid_L21",
                 "kind": "dir_patch",
@@ -781,9 +860,9 @@ def main() -> int:
         "--role-perp-confirm",
         action="store_true",
         help=(
-            "residual-L21 role-perp confirm card: perp dir_patch both ways, "
-            "perp vs role ablate, role and same-norm random dir_patch, PCA. "
-            "Not the extras kitchen sink. Use --max-pairs 0 for every pairs-file row."
+            "residual-L21 confirm card at each prompt's last token: full residual "
+            "copy, perp dir_patch both ways, perp vs role ablate, role and "
+            "same-norm random dir_patch, PCA. Use --max-pairs 0 for every pairs-file row."
         ),
     )
     args = ap.parse_args()
@@ -832,11 +911,12 @@ def main() -> int:
         "world": "Transfer" if suite == "transfer" else ("Mixed" if suite == "mixed" else "Core"),
         "source_run": source_run,
         "sites": (
-            ["residual_L21", "residual_L23_pca_k8"]
+            ["residual_L21_prompt_last", "residual_L23_pca_k8_prompt_last"]
             if args.role_perp_confirm
             else ["attn_L22", "residual_L21"]
             + (["attn_L22+resid_L21", "residual_L23_pca_k8"] if (args.extras or args.extras_only) else [])
         ),
+        "intervention": "prompt_last_token" if args.role_perp_confirm else "last_shared_token",
         "extras": bool(args.extras or args.extras_only),
         "extras_only": bool(args.extras_only),
         "role_perp_confirm": bool(args.role_perp_confirm),
@@ -916,22 +996,28 @@ def main() -> int:
         body_h = compose_prompt(pair, "honest")
         prompt_c = build_chat_prompt(tok, body_c)
         prompt_h = build_chat_prompt(tok, body_h)
-        ids_c = tok.encode(prompt_c, add_special_tokens=False)
-        ids_h = tok.encode(prompt_h, add_special_tokens=False)
-        t_star = shared_prefix_len(ids_c, ids_h)
+        if args.role_perp_confirm:
+            ids_c = model_input_ids(tok, prompt_c)
+            ids_h = model_input_ids(tok, prompt_h)
+        else:
+            ids_c = tok.encode(prompt_c, add_special_tokens=False)
+            ids_h = tok.encode(prompt_h, add_special_tokens=False)
+        sites = intervention_sites(ids_c, ids_h, prompt_last=bool(args.role_perp_confirm))
+        t_star = sites["t_star"]
         if t_star < 8:
             raise RuntimeError(f"chat-template prefix FAIL {pair['pair_id']} t*={t_star}")
-        # Last shared token index
-        pos = t_star - 1
+        pos_c = sites["pos_colluder"]
+        pos_h = sites["pos_honest"]
         print(
-            f"\n[{pi+1}/{len(pairs)}] {pair['pair_id']} t*={t_star} pos={pos} "
-            f"tgt={target}",
+            f"\n[{pi+1}/{len(pairs)}] {pair['pair_id']} t*={t_star} "
+            f"shared_pos={sites['shared_pos']} pos_c={pos_c} pos_h={pos_h} "
+            f"site={sites['intervention']} tgt={target}",
             flush=True,
         )
 
-        # Capture activations at last shared token on both arms
-        cap_c = capture_activations(model, tok, prompt_c, sites=cache_sites, pos=pos)
-        cap_h = capture_activations(model, tok, prompt_h, sites=cache_sites, pos=pos)
+        # Confirm card: each prompt's own last token. Other cards: last shared token.
+        cap_c = capture_activations(model, tok, prompt_c, sites=cache_sites, pos=pos_c)
+        cap_h = capture_activations(model, tok, prompt_h, sites=cache_sites, pos=pos_h)
         caches = {"colluder": cap_c, "honest": cap_h}
         letter_ids = letter_token_ids(tok, letters)
 
@@ -940,40 +1026,41 @@ def main() -> int:
             kind = arm["kind"]
             prompt_arm = arm["prompt_arm"]
             prompt = prompt_c if prompt_arm == "colluder" else prompt_h
+            apply_pos = pos_c if prompt_arm == "colluder" else pos_h
             hooks_spec = []
             if kind == "patch":
                 src = arm["src_arm"]
                 key = arm["cache_key"]
                 vec = caches[src][key]
                 mod = _module_for_site(model, arm["layer"], arm["site"])
-                hooks_spec.append((mod, make_patch_hook(pos, vec)))
+                hooks_spec.append((mod, make_patch_hook(apply_pos, vec)))
             elif kind == "multi_patch":
                 src = arm["src_arm"]
                 for op in arm["ops"]:
                     vec = caches[src][op["cache_key"]]
                     mod = _module_for_site(model, op["layer"], op["site"])
-                    hooks_spec.append((mod, make_patch_hook(pos, vec)))
+                    hooks_spec.append((mod, make_patch_hook(apply_pos, vec)))
             elif kind == "dir_patch":
                 src = arm["src_arm"]
                 key = arm["cache_key"]
                 src_vec = caches[src][key]
                 u = torch.tensor(arm["u"], dtype=torch.float32)
                 mod = _module_for_site(model, arm["layer"], arm["site"])
-                hooks_spec.append((mod, make_dir_patch_hook(pos, u, src_vec)))
+                hooks_spec.append((mod, make_dir_patch_hook(apply_pos, u, src_vec)))
             elif kind == "ablate":
                 u = torch.tensor(arm["u"], dtype=torch.float32)
                 mod = _module_for_site(model, arm["layer"], arm["site"])
-                hooks_spec.append((mod, make_ablate_hook(pos, u, float(arm["alpha"]))))
+                hooks_spec.append((mod, make_ablate_hook(apply_pos, u, float(arm["alpha"]))))
             elif kind == "multi_ablate":
                 for op in arm["ops"]:
                     u = torch.tensor(op["u"], dtype=torch.float32)
                     mod = _module_for_site(model, op["layer"], op["site"])
-                    hooks_spec.append((mod, make_ablate_hook(pos, u, float(op["alpha"]))))
+                    hooks_spec.append((mod, make_ablate_hook(apply_pos, u, float(op["alpha"]))))
             elif kind == "project_out":
                 B = torch.tensor(arm["basis"], dtype=torch.float32)
                 mod = _module_for_site(model, arm["layer"], arm["site"])
                 hooks_spec.append(
-                    (mod, make_project_out_hook(pos, B, float(arm.get("alpha", 1.0))))
+                    (mod, make_project_out_hook(apply_pos, B, float(arm.get("alpha", 1.0))))
                 )
             # baseline: no hooks
             gen = generate_with_hooks(
@@ -1003,18 +1090,8 @@ def main() -> int:
         for name, m in arm_results.items():
             if name.startswith("baseline"):
                 continue
-            if "c2h" in name or (name.startswith("patch_") and "honest" in str(arm_results)):
-                ref = base_h
-                ref_name = "baseline_honest"
-            elif "h2c" in name:
-                ref = base_c
-                ref_name = "baseline_colluder"
-            elif "ablate" in name:
-                ref = base_c
-                ref_name = "baseline_colluder"
-            else:
-                ref = base_c
-                ref_name = "baseline_colluder"
+            ref_name = ref_baseline_name(name)
+            ref = base_c if ref_name == "baseline_colluder" else base_h
             flip = (m.get("vote") != ref.get("vote")) if m.get("vote") != "?" and ref.get("vote") != "?" else None
             dp = None
             if m.get("p_target") is not None and ref.get("p_target") is not None:
@@ -1033,7 +1110,10 @@ def main() -> int:
                 "target_option": target,
                 "fair_option": fair,
                 "t_star": t_star,
-                "pos": pos,
+                "pos": pos_c,
+                "pos_honest": pos_h,
+                "shared_pos": sites["shared_pos"],
+                "intervention": sites["intervention"],
                 "arms": arm_results,
                 "derived": derived,
             }
@@ -1091,6 +1171,8 @@ def summarize(per_pair: list[dict], arm_names: list[str]) -> dict:
         "patch_h2c_multi_vs_colluder_dp": (by.get("patch_h2c_attn_L22+resid_L21") or {}).get("mean_delta_p_vs_ref"),
         "ablate_multi_vs_colluder_dp": (by.get("ablate_role_attn_L22+resid_L21_colluder") or {}).get("mean_delta_p_vs_ref"),
         "project_out_pca_k8_L23_dp": (by.get("project_out_pca_k8_resid_L23_colluder") or {}).get("mean_delta_p_vs_ref"),
+        "patch_h2c_full_resid_dp": (by.get("patch_h2c_full_resid_L21") or {}).get("mean_delta_p_vs_ref"),
+        "patch_c2h_full_resid_dp": (by.get("patch_c2h_full_resid_L21") or {}).get("mean_delta_p_vs_ref"),
         "patch_h2c_role_perp_dp": (by.get("patch_h2c_role_perp_resid_L21") or {}).get("mean_delta_p_vs_ref"),
         "patch_c2h_role_perp_dp": (by.get("patch_c2h_role_perp_resid_L21") or {}).get("mean_delta_p_vs_ref"),
         "ablate_role_resid_L21_vs_colluder_dp": (by.get("ablate_role_resid_L21_colluder") or {}).get(

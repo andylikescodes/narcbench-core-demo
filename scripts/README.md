@@ -62,7 +62,7 @@ Matched-prefix interchange is `scripts/matched_prefix_interchange.py`. Cheap ext
 python3 scripts/runpod_launch_matched_prefix.py --extras-only
 ```
 
-Role-perp confirm (residual L21 perp patch both ways, perp vs role ablate, role and same-norm random controls, PCA). This is not the extras kitchen sink. It scores every row of the volume pairs file (`--max-pairs 0`):
+Role-perp confirm writes at each prompt's last token: a full residual copy, the perp dir_patch both ways, perp vs role ablate, role and same-norm random controls, and PCA. h2c is scored against the colluder baseline and c2h against the honest baseline. It scores every row of the volume pairs file (`--max-pairs 0`):
 
 ```bash
 python3 scripts/runpod_launch_matched_prefix.py --role-perp-confirm

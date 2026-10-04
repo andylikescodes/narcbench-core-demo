@@ -92,6 +92,8 @@ EXTRAS_ONLY_ARMS = [
 ROLE_PERP_CONFIRM_ARMS = [
     "baseline_colluder",
     "baseline_honest",
+    "patch_h2c_full_resid_L21",
+    "patch_c2h_full_resid_L21",
     "patch_h2c_role_perp_resid_L21",
     "patch_c2h_role_perp_resid_L21",
     "ablate_role_perp_resid_L21_colluder",

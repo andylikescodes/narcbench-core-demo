@@ -9,10 +9,12 @@ Estimate-only by default. Pass --launch only after the cost gate is approved:
 
 Boot clones this public repo and checks out GIT_SHA, then runs
 scripts/matched_prefix_interchange.py from that checkout. --extras-only runs
-the multi-site, PCA, and role-perpendicular arms. Direction .npy files and
-pairs stay on the network volume. RUNPOD_API_KEY and HF_TOKEN come from the
-environment. The GraphQL create body is the tiny boot plus a few env vars.
---launch refuses unless the harness is in the checked-out SHA.
+the multi-site, PCA, and role-perpendicular kitchen sink. --role-perp-confirm
+runs the residual-L21 role-perp card (not that kitchen sink) on every row of
+the volume pairs file. Direction .npy files and pairs stay on the network
+volume. RUNPOD_API_KEY and HF_TOKEN come from the environment. The GraphQL
+create body is the tiny boot plus a few env vars. --launch refuses unless the
+harness is in the checked-out SHA.
 Soft-stop: no Track I / Paper 2 / interp-demo / family-house.
 """
 from __future__ import annotations
@@ -86,6 +88,21 @@ EXTRAS_ONLY_ARMS = [
     "patch_c2h_role_perp_resid_L21",
     "patch_h2c_role_perp_resid_L21",
 ]
+# Residual L21 confirm card. Not the extras-only multi-site kitchen sink.
+ROLE_PERP_CONFIRM_ARMS = [
+    "baseline_colluder",
+    "baseline_honest",
+    "patch_h2c_role_perp_resid_L21",
+    "patch_c2h_role_perp_resid_L21",
+    "ablate_role_perp_resid_L21_colluder",
+    "ablate_role_resid_L21_colluder",
+    "patch_h2c_role_resid_L21",
+    "patch_c2h_role_resid_L21",
+    "patch_h2c_random_resid_L21",
+    "patch_c2h_random_resid_L21",
+    "project_out_pca_k8_resid_L23_colluder",
+    "ablate_pca_lr_ambient_resid_L23_colluder",
+]
 SUITE_META = {
     "core": {
         "kind": "matched_prefix_interchange_core_smoke",
@@ -122,8 +139,33 @@ REF_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
 MODEL_RE = re.compile(r"^[A-Za-z0-9_./:-]+$")
 
 
-def estimate(n_pairs: int, max_new_tokens: int, n_arms: int, *, suite: str) -> dict:
+def estimate(n_pairs: int | None, max_new_tokens: int, n_arms: int, *, suite: str) -> dict:
     meta = SUITE_META[suite]
+    if n_pairs is None:
+        return {
+            "kind": meta["kind"],
+            "suite": suite,
+            "n_pairs": None,
+            "n_arms": n_arms,
+            "n_generations_est": None,
+            "n_captures_est": None,
+            "max_new_tokens": max_new_tokens,
+            "hours_est": None,
+            "preferred_gpu": GPU,
+            "gpu_tries": [{"cloud": c, "gpu": g} for c, g in GPU_TRIES],
+            "rate_usd_hr": RATES[GPU],
+            "cost_est_usd": None,
+            "cost_est_range_usd": None,
+            "target_band_usd": list(meta["target_band_usd"]),
+            "volume_id": VOLUME_ID,
+            "sec_per_gen_assumed": 10.0 if max_new_tokens <= 16 else 18.0,
+            "model_load_sec": 600,
+            "world": meta["world"],
+            "source_run": meta["source_run"],
+            "protocol": "teacher_forced_matched_prefix_activation_interchange",
+            "payload_delivery": "git_checkout_sha",
+            "n_pairs_note": "every non-empty row of the volume pairs file; this machine has no local copy to count",
+        }
     n_gens = n_pairs * n_arms
     n_captures = n_pairs * 2
     sec_per_gen = 10.0 if max_new_tokens <= 16 else 18.0
@@ -185,6 +227,8 @@ def blob_in_commit(sha: str, rel: str) -> bool:
 
 
 def arms_for(args: argparse.Namespace) -> list[str]:
+    if args.role_perp_confirm:
+        return list(ROLE_PERP_CONFIRM_ARMS)
     if args.extras_only:
         return list(EXTRAS_ONLY_ARMS)
     if args.extras:
@@ -195,13 +239,15 @@ def arms_for(args: argparse.Namespace) -> list[str]:
 
 def direction_files_for(args: argparse.Namespace) -> list[str]:
     needed = list(CORE_DIRECTION_FILES)
-    if args.extras or args.extras_only:
+    if args.extras or args.extras_only or args.role_perp_confirm:
         needed.extend(EXTRAS_DIRECTION_FILES)
     return needed
 
 
 def build_boot(args: argparse.Namespace, *, vol_subdir: str, pairs_on_volume: str) -> str:
-    if args.extras_only:
+    if args.role_perp_confirm:
+        extras_argv = " --role-perp-confirm"
+    elif args.extras_only:
         extras_argv = " --extras-only"
     elif args.extras:
         extras_argv = " --extras"
@@ -241,7 +287,8 @@ DIRS="${{DIRECTIONS_DIR:-{DIRECTIONS_ON_VOLUME}}}"
 PAIRS="${{PAIRS_FILE:-{pairs_on_volume}}}"
 {dir_checks} || finish failed missing_directions
 [ -f "$PAIRS" ] || finish failed missing_pairs
-echo "[setup] directions=$DIRS pairs=$PAIRS" | tee -a "$RUN/job.log"
+NPAIRS=$(grep -cve '^[[:space:]]*$' "$PAIRS" || true)
+echo "[setup] directions=$DIRS pairs=$PAIRS pairs_rows=$NPAIRS" | tee -a "$RUN/job.log"
 export HF_HOME="${{HF_HOME:-{HF_CACHE_ON_VOLUME}}}"
 mkdir -p "$HF_HOME"
 python3 -m pip install -q 'transformers>=4.40' accelerate sentencepiece protobuf numpy >>"$RUN/job.log" 2>&1 || true
@@ -435,11 +482,21 @@ def main() -> int:
         help="Optional local pairs file, used only to count rows for the estimate",
     )
     ap.add_argument("--model", default="google/gemma-2-9b-it")
-    ap.add_argument("--max-pairs", type=int, default=10)
+    ap.add_argument(
+        "--max-pairs",
+        type=int,
+        default=None,
+        help="leading rows to score; default 10, or 0 (every row) with --role-perp-confirm",
+    )
     ap.add_argument("--max-new-tokens", type=int, default=8)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--extras", action="store_true")
     ap.add_argument("--extras-only", action="store_true")
+    ap.add_argument(
+        "--role-perp-confirm",
+        action="store_true",
+        help="boot the residual-L21 role-perp confirm card on every volume pairs row",
+    )
     ap.add_argument("--launch", action="store_true")
     ap.add_argument("--max-minutes", type=int, default=90)
     ap.add_argument("--grace-minutes", type=int, default=6)
@@ -454,21 +511,30 @@ def main() -> int:
     if not MODEL_RE.fullmatch(args.model):
         print("ERROR: --model must be a single token (no spaces)", file=sys.stderr)
         return 1
-    if args.max_pairs < 1:
-        print("ERROR: --max-pairs must be >= 1", file=sys.stderr)
+    mode_flags = int(bool(args.extras)) + int(bool(args.extras_only)) + int(bool(args.role_perp_confirm))
+    if mode_flags > 1:
+        print("ERROR: pass only one of --extras, --extras-only, --role-perp-confirm", file=sys.stderr)
         return 1
-    if args.extras and args.extras_only:
-        print("ERROR: pass only one of --extras and --extras-only", file=sys.stderr)
+    if args.role_perp_confirm:
+        args.max_pairs = 0 if args.max_pairs is None else args.max_pairs
+    elif args.max_pairs is None:
+        args.max_pairs = 10
+    if args.max_pairs < 0 or (args.max_pairs == 0 and not args.role_perp_confirm):
+        print("ERROR: --max-pairs 0 is only valid with --role-perp-confirm", file=sys.stderr)
         return 1
 
     meta = SUITE_META[args.suite]
     if args.estimate_out is None:
-        if args.extras or args.extras_only:
+        if args.role_perp_confirm:
+            args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_ESTIMATE.json"
+        elif args.extras or args.extras_only:
             args.estimate_out = ROOT / "results/transfer_stable/MATCHED_PREFIX_CHEAP_EXTRAS_ESTIMATE.json"
         else:
             args.estimate_out = meta["estimate_out"]
     if args.launch_card is None:
-        if args.extras or args.extras_only:
+        if args.role_perp_confirm:
+            args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_ROLE_PERP_CONFIRM_LAUNCH.json"
+        elif args.extras or args.extras_only:
             args.launch_card = ROOT / "results/transfer_stable/MATCHED_PREFIX_CHEAP_EXTRAS_LAUNCH.json"
         else:
             args.launch_card = meta["launch_out"]
@@ -476,7 +542,10 @@ def main() -> int:
     vol_subdir = meta["vol_subdir"]
     pod_name = meta["pod_name"]
     pairs_on_volume = meta["pairs_on_volume"]
-    if args.extras or args.extras_only:
+    if args.role_perp_confirm:
+        vol_subdir = f"{vol_subdir}_role_perp_confirm"
+        pod_name = f"{pod_name}-role-perp-confirm"
+    elif args.extras or args.extras_only:
         vol_subdir = f"{vol_subdir}_cheap_extras"
         pod_name = f"{pod_name}-cheap-extras"
 
@@ -485,10 +554,17 @@ def main() -> int:
         pairs_path = args.pairs if args.pairs.is_absolute() else ROOT / args.pairs
         if pairs_path.is_file():
             n_file = sum(1 for line in pairs_path.read_text().splitlines() if line.strip())
-    n_pairs = min(args.max_pairs, n_file) if n_file is not None else args.max_pairs
+    if args.max_pairs == 0:
+        n_pairs = n_file
+    else:
+        n_pairs = min(args.max_pairs, n_file) if n_file is not None else args.max_pairs
     arms_list = arms_for(args)
     est = estimate(n_pairs, args.max_new_tokens, len(arms_list), suite=args.suite)
-    if args.extras or args.extras_only:
+    if args.role_perp_confirm:
+        est["kind"] = est["kind"].replace("_smoke", "_role_perp_confirm")
+        est["role_perp_confirm"] = True
+        est["scores_every_pairs_row"] = args.max_pairs == 0
+    elif args.extras or args.extras_only:
         est["kind"] = est["kind"].replace("_smoke", "_cheap_extras_smoke")
         est["cheap_extras"] = True
         est["extras_only"] = bool(args.extras_only)
@@ -545,11 +621,29 @@ def main() -> int:
         "launch_command": (
             f"python3 scripts/runpod_launch_matched_prefix.py --suite {args.suite} --launch "
             f"--max-pairs {args.max_pairs}"
-            + (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
+            + (
+                " --role-perp-confirm"
+                if args.role_perp_confirm
+                else (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
+            )
         ),
         "dry_run_command": (
             f"python3 scripts/runpod_launch_matched_prefix.py --suite {args.suite}"
-            + (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
+            + (
+                " --role-perp-confirm"
+                if args.role_perp_confirm
+                else (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
+            )
+        ),
+        "harness_boot_argv": (
+            f"python3 scripts/matched_prefix_interchange.py --pairs {pairs_on_volume} "
+            f"--directions {DIRECTIONS_ON_VOLUME} --max-pairs {args.max_pairs} "
+            f"--model {args.model} --max-new-tokens {args.max_new_tokens} --seed {args.seed}"
+            + (
+                " --role-perp-confirm"
+                if args.role_perp_confirm
+                else (" --extras-only" if args.extras_only else (" --extras" if args.extras else ""))
+            )
         ),
         "soft_stop": "Track I / Paper 2 / interp-demo / family-house NOT touched; no GPU unless --launch",
     }
@@ -582,7 +676,13 @@ def main() -> int:
     if not remote_has_sha(git_sha, git_ref):
         print("REFUSE launch: SHA is not on the public remote branch yet", file=sys.stderr)
         return 1
-    if est["cost_est_usd"] > args.cost_max:
+    if est["cost_est_usd"] is None:
+        print(
+            "[warn] cost gate not applied: this machine has no local pairs file to count. "
+            "The pod scores every row of the volume pairs file.",
+            file=sys.stderr,
+        )
+    elif est["cost_est_usd"] > args.cost_max:
         print(f"REFUSE launch: cost_est ${est['cost_est_usd']} > ${args.cost_max}", file=sys.stderr)
         return 2
     if not os.environ.get("RUNPOD_API_KEY"):

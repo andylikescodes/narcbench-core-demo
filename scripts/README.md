@@ -62,6 +62,12 @@ Matched-prefix interchange is `scripts/matched_prefix_interchange.py`. Cheap ext
 python3 scripts/runpod_launch_matched_prefix.py --extras-only
 ```
 
-That estimate checks out a git SHA and reads direction `.npy` files from the network volume. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
+Role-perp confirm (residual L21 perp patch both ways, perp vs role ablate, role and same-norm random controls, PCA). This is not the extras kitchen sink. It scores every row of the volume pairs file (`--max-pairs 0`):
+
+```bash
+python3 scripts/runpod_launch_matched_prefix.py --role-perp-confirm
+```
+
+Those estimates check out a git SHA and read direction `.npy` files from the network volume. Checkpoint assay remains a spec under `results/transfer_stable/WEEKEND_REVIEW/design/`.
 
 Files named `*.bak` and `*.bak_*` are earlier copies of the extract and causal harnesses from the science tree.

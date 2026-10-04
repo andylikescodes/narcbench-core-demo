@@ -15,6 +15,11 @@ Cheap-extras (--extras / --extras-only; Paige queue #4 offline-prep):
   PCA k8 L23 project-out + ambient single-dir ablate @ resid_L23
   role_perp directional component transplant (patch_h2c / patch_c2h donor)
 
+Role-perp confirm (--role-perp-confirm): that perp transplant both ways at
+residual L21, plus single-site perp vs role ablate, role-direction and
+same-norm random dir_patch controls at the same site, and the PCA arms.
+Pass --max-pairs 0 to score every row of the pairs file.
+
   python3 scripts/matched_prefix_interchange.py \
     --pairs results/transfer_stable/matched_prefix/pairs_transfer.jsonl \
     --directions results/transfer_stable/directions \
@@ -351,14 +356,36 @@ def p_letter_from_logits(logits: "torch.Tensor", letter_ids: dict[str, list[int]
 # Arms
 # ---------------------------------------------------------------------------
 
+def _pca_rows(path: Path) -> np.ndarray:
+    P = np.load(path).astype(np.float32)
+    if P.ndim != 2:
+        raise ValueError(f"expected pca basis (k,d), got {P.shape}")
+    norms = np.linalg.norm(P, axis=1, keepdims=True) + 1e-12
+    return (P / norms).astype(np.float32)
+
+
+def _unit_random(shape: tuple[int, ...], seed: int) -> np.ndarray:
+    """Unit vector in ``shape``. Same L2 norm as ``_unit`` directions."""
+    rng = np.random.default_rng(seed)
+    u = rng.normal(size=shape).astype(np.float64)
+    return (u / (np.linalg.norm(u) + 1e-12)).astype(np.float32)
+
+
 def build_arms(
     directions: Path,
     seed: int = 0,
     *,
     extras: bool = False,
     extras_only: bool = False,
+    role_perp_confirm: bool = False,
 ) -> list[dict]:
-    """Build arm list. Default = original 11; --extras appends cheap-extras; --extras-only = baselines + extras."""
+    """Build arm list. Default = original 11; --extras appends cheap-extras; --extras-only = baselines + extras.
+
+    --role-perp-confirm is the residual-L21 card: perp dir_patch both ways,
+    perp vs role ablate, role and same-norm random dir_patch controls, PCA.
+    """
+    if role_perp_confirm and (extras or extras_only):
+        raise ValueError("role_perp_confirm is exclusive of extras / extras_only")
     role_attn = directions / "lr_role_attn_L22.npy"
     role_l21 = directions / "lr_role_L21.npy"
     mode_l21 = directions / "lr_mode_L21.npy"
@@ -372,9 +399,7 @@ def build_arms(
     u_role_l21 = _unit(role_l21)
     u_mode = _unit(mode_l21)
     u_perp = _unit(perp_l21) if perp_l21.exists() else None
-    rng = np.random.default_rng(seed)
-    u_rand = rng.normal(size=u_role_attn.shape).astype(np.float64)
-    u_rand = (u_rand / (np.linalg.norm(u_rand) + 1e-12)).astype(np.float32)
+    u_rand = _unit_random(u_role_attn.shape, seed)
 
     baselines: list[dict] = [
         {"name": "baseline_colluder", "kind": "baseline", "prompt_arm": "colluder"},
@@ -522,11 +547,7 @@ def build_arms(
         )
         # (2) PCA k8 L23 project-out (+ ambient single-dir ablate if present)
         if pca_k8.exists():
-            P = np.load(pca_k8).astype(np.float32)
-            if P.ndim != 2:
-                raise ValueError(f"expected pca basis (k,d), got {P.shape}")
-            norms = np.linalg.norm(P, axis=1, keepdims=True) + 1e-12
-            P = (P / norms).astype(np.float32)
+            P = _pca_rows(pca_k8)
             extra_arms.append(
                 {
                     "name": "project_out_pca_k8_resid_L23_colluder",
@@ -590,6 +611,100 @@ def build_arms(
                 ]
             )
 
+    if role_perp_confirm:
+        if u_perp is None:
+            raise FileNotFoundError(perp_l21)
+        if not pca_k8.exists():
+            raise FileNotFoundError(pca_k8)
+        if not pca_amb.exists():
+            raise FileNotFoundError(pca_amb)
+        # Same seed and width as the residual-L21 unit directions (norm 1).
+        u_rand_l21 = _unit_random(u_role_l21.shape, seed)
+        role_patch = {
+            "kind": "dir_patch",
+            "site": "residual",
+            "layer": 21,
+            "cache_key": "resid_L21",
+            "u": u_role_l21,
+            "dir_file": "lr_role_L21.npy",
+        }
+        rand_patch = {
+            "kind": "dir_patch",
+            "site": "residual",
+            "layer": 21,
+            "cache_key": "resid_L21",
+            "u": u_rand_l21,
+            "dir_file": "random",
+        }
+        return baselines + [
+            {
+                "name": "patch_h2c_role_perp_resid_L21",
+                "kind": "dir_patch",
+                "prompt_arm": "colluder",
+                "src_arm": "honest",
+                "site": "residual",
+                "layer": 21,
+                "cache_key": "resid_L21",
+                "u": u_perp,
+                "dir_file": "lr_role_perp_mode_L21.npy",
+            },
+            {
+                "name": "patch_c2h_role_perp_resid_L21",
+                "kind": "dir_patch",
+                "prompt_arm": "honest",
+                "src_arm": "colluder",
+                "site": "residual",
+                "layer": 21,
+                "cache_key": "resid_L21",
+                "u": u_perp,
+                "dir_file": "lr_role_perp_mode_L21.npy",
+            },
+            {
+                "name": "ablate_role_perp_resid_L21_colluder",
+                "kind": "ablate",
+                "prompt_arm": "colluder",
+                "site": "residual",
+                "layer": 21,
+                "u": u_perp,
+                "alpha": 1.0,
+                "dir_file": "lr_role_perp_mode_L21.npy",
+            },
+            {
+                "name": "ablate_role_resid_L21_colluder",
+                "kind": "ablate",
+                "prompt_arm": "colluder",
+                "site": "residual",
+                "layer": 21,
+                "u": u_role_l21,
+                "alpha": 1.0,
+                "dir_file": "lr_role_L21.npy",
+            },
+            {**role_patch, "name": "patch_h2c_role_resid_L21", "prompt_arm": "colluder", "src_arm": "honest"},
+            {**role_patch, "name": "patch_c2h_role_resid_L21", "prompt_arm": "honest", "src_arm": "colluder"},
+            {**rand_patch, "name": "patch_h2c_random_resid_L21", "prompt_arm": "colluder", "src_arm": "honest"},
+            {**rand_patch, "name": "patch_c2h_random_resid_L21", "prompt_arm": "honest", "src_arm": "colluder"},
+            {
+                "name": "project_out_pca_k8_resid_L23_colluder",
+                "kind": "project_out",
+                "prompt_arm": "colluder",
+                "site": "residual",
+                "layer": 23,
+                "basis": _pca_rows(pca_k8),
+                "alpha": 1.0,
+                "dir_file": "pca_contrast_k8_L23.npy",
+            },
+            {
+                "name": "ablate_pca_lr_ambient_resid_L23_colluder",
+                "kind": "ablate",
+                "prompt_arm": "colluder",
+                "site": "residual",
+                "layer": 23,
+                "u": _unit(pca_amb),
+                "alpha": 1.0,
+                "dir_file": "pca_contrast_k8_L23_lr_ambient.npy",
+            },
+        ]
+
     if extras_only:
         return baselines + extra_arms
     if extras:
@@ -642,7 +757,12 @@ def main() -> int:
     ap.add_argument("--directions", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--model", default="google/gemma-2-9b-it")
-    ap.add_argument("--max-pairs", type=int, default=12)
+    ap.add_argument(
+        "--max-pairs",
+        type=int,
+        default=12,
+        help="score this many leading rows; 0 scores every row in the pairs file",
+    )
     ap.add_argument("--max-new-tokens", type=int, default=8)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--dry-run", action="store_true")
@@ -657,9 +777,28 @@ def main() -> int:
         action="store_true",
         help="baselines + cheap-extras only (omit original single-site interchange arms)",
     )
+    ap.add_argument(
+        "--role-perp-confirm",
+        action="store_true",
+        help=(
+            "residual-L21 role-perp confirm card: perp dir_patch both ways, "
+            "perp vs role ablate, role and same-norm random dir_patch, PCA. "
+            "Not the extras kitchen sink. Use --max-pairs 0 for every pairs-file row."
+        ),
+    )
     args = ap.parse_args()
+    if args.max_pairs < 0:
+        print("ERROR: --max-pairs must be >= 0 (0 = every row)", flush=True)
+        return 1
+    if args.role_perp_confirm and (args.extras or args.extras_only):
+        print("ERROR: --role-perp-confirm cannot be combined with --extras or --extras-only", flush=True)
+        return 1
+    if args.role_perp_confirm and args.skip_perp:
+        print("ERROR: --role-perp-confirm scores the perp arms", flush=True)
+        return 1
 
-    pairs = load_pairs(args.pairs)[: args.max_pairs]
+    loaded = load_pairs(args.pairs)
+    pairs = loaded if args.max_pairs == 0 else loaded[: args.max_pairs]
     directions = args.directions if args.directions.is_absolute() else (
         Path(__file__).resolve().parents[1] / args.directions
     )
@@ -668,6 +807,7 @@ def main() -> int:
         seed=args.seed,
         extras=bool(args.extras),
         extras_only=bool(args.extras_only),
+        role_perp_confirm=bool(args.role_perp_confirm),
     )
     if args.skip_perp:
         arms = [a for a in arms if "perp" not in a["name"]]
@@ -682,6 +822,7 @@ def main() -> int:
     meta = {
         "model": args.model,
         "n_pairs": len(pairs),
+        "n_pairs_in_file": len(loaded),
         "pair_ids": [p["pair_id"] for p in pairs],
         "arms": arm_names,
         "n_arms": len(arms),
@@ -690,10 +831,15 @@ def main() -> int:
         "suite": suite,
         "world": "Transfer" if suite == "transfer" else ("Mixed" if suite == "mixed" else "Core"),
         "source_run": source_run,
-        "sites": ["attn_L22", "residual_L21"]
-        + (["attn_L22+resid_L21", "residual_L23_pca_k8"] if (args.extras or args.extras_only) else []),
+        "sites": (
+            ["residual_L21", "residual_L23_pca_k8"]
+            if args.role_perp_confirm
+            else ["attn_L22", "residual_L21"]
+            + (["attn_L22+resid_L21", "residual_L23_pca_k8"] if (args.extras or args.extras_only) else [])
+        ),
         "extras": bool(args.extras or args.extras_only),
         "extras_only": bool(args.extras_only),
+        "role_perp_confirm": bool(args.role_perp_confirm),
         "dry_run": args.dry_run,
     }
     (args.out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
@@ -736,6 +882,8 @@ def main() -> int:
             f"- arms: {len(arms)}",
             f"- model: {args.model}",
             f"- extras: {bool(args.extras or args.extras_only)} (extras_only={bool(args.extras_only)})",
+            f"- role_perp_confirm: {bool(args.role_perp_confirm)}",
+            f"- n_pairs_in_file: {len(loaded)}",
             f"- cache_sites: {[s[0] for s in cache_sites_for_arms(arms)]}",
             "",
             "## Pairs",
@@ -945,6 +1093,16 @@ def summarize(per_pair: list[dict], arm_names: list[str]) -> dict:
         "project_out_pca_k8_L23_dp": (by.get("project_out_pca_k8_resid_L23_colluder") or {}).get("mean_delta_p_vs_ref"),
         "patch_h2c_role_perp_dp": (by.get("patch_h2c_role_perp_resid_L21") or {}).get("mean_delta_p_vs_ref"),
         "patch_c2h_role_perp_dp": (by.get("patch_c2h_role_perp_resid_L21") or {}).get("mean_delta_p_vs_ref"),
+        "ablate_role_resid_L21_vs_colluder_dp": (by.get("ablate_role_resid_L21_colluder") or {}).get(
+            "mean_delta_p_vs_ref"
+        ),
+        "patch_h2c_role_resid_dp": (by.get("patch_h2c_role_resid_L21") or {}).get("mean_delta_p_vs_ref"),
+        "patch_c2h_role_resid_dp": (by.get("patch_c2h_role_resid_L21") or {}).get("mean_delta_p_vs_ref"),
+        "patch_h2c_random_resid_dp": (by.get("patch_h2c_random_resid_L21") or {}).get("mean_delta_p_vs_ref"),
+        "patch_c2h_random_resid_dp": (by.get("patch_c2h_random_resid_L21") or {}).get("mean_delta_p_vs_ref"),
+        "ablate_pca_lr_ambient_dp": (by.get("ablate_pca_lr_ambient_resid_L23_colluder") or {}).get(
+            "mean_delta_p_vs_ref"
+        ),
     }
     return out
 

@@ -1,0 +1,50 @@
+{
+  "protocol": "Core discussion \u2192 Transfer final; HARD n=72",
+  "n_transfer_runs": 72,
+  "rows": [
+    {
+      "arm": "full_acts_band_L19-23",
+      "primary": 0.902,
+      "peak": 0.874,
+      "split": 0.904,
+      "asym": 0.929,
+      "source": "results/transfer/TRANSFER_FULL_HARD_METRICS.md"
+    },
+    {
+      "arm": "W_U_k25_J_only",
+      "primary": 0.602,
+      "peak": 0.625,
+      "split": 0.565,
+      "asym": 0.616,
+      "source": "results/transfer/TRANSFER_FULL_HARD_METRICS.md"
+    },
+    {
+      "arm": "jac_k25_J_only",
+      "primary": 0.549,
+      "peak": 0.586,
+      "split": 0.523,
+      "asym": 0.54,
+      "source": "results/transfer/TRANSFER_FULL_HARD_METRICS.md"
+    },
+    {
+      "arm": "W_U_k25_complement",
+      "primary": 0.898,
+      "peak": 0.869,
+      "split": 0.897,
+      "asym": 0.928,
+      "source": "results/transfer/TRANSFER_FULL_HARD_METRICS.md"
+    },
+    {
+      "arm": "jac_k25_complement",
+      "primary": 0.891,
+      "peak": 0.867,
+      "split": 0.888,
+      "asym": 0.917,
+      "source": "results/transfer/TRANSFER_FULL_HARD_METRICS.md"
+    }
+  ],
+  "sources": [
+    "results/transfer/TRANSFER_FULL_HARD_METRICS.md",
+    "results/transfer/FULL_HARD_SUMMARY.json"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "rows": [
+    {
+      "layer": 21,
+      "metric": "role\u2192role",
+      "auroc": 0.859,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 21,
+      "metric": "role\u2192mode_runavg",
+      "auroc": 0.766,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 21,
+      "metric": "role\u2192mode_scenario_primary",
+      "auroc": 0.941,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 21,
+      "metric": "mode\u2192mode_runavg",
+      "auroc": 0.886,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 21,
+      "metric": "mode\u2192role",
+      "auroc": 0.9,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 22,
+      "metric": "role\u2192role",
+      "auroc": 0.873,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 22,
+      "metric": "mode\u2192role",
+      "auroc": 0.887,
+      "source": "results/transfer_stable/WEEKEND_REVIEW/05_CONTROLS_AND_RESIDUALIZE.md"
+    },
+    {
+      "layer": 22,
+      "metric": "mode\u2192mode_runavg",
+      "auroc": 0.831,
+      "source": "results/transfer_stable/WEEKEND_REVIEW/05_CONTROLS_AND_RESIDUALIZE.md"
+    },
+    {
+      "layer": 21,
+      "metric": "cos(role,mode_runavg)",
+      "auroc": 0.694,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 22,
+      "metric": "cos(role,mode_runavg)",
+      "auroc": 0.707,
+      "source": "results/transfer_stable/CONTROLS_OFFLINE.md"
+    },
+    {
+      "layer": 21,
+      "metric": "role_perp\u2192role",
+      "auroc": 0.796,
+      "source": "results/transfer_stable/RESIDUALIZE_MODE.md"
+    },
+    {
+      "layer": 21,
+      "metric": "role_perp\u2192mode",
+      "auroc": 0.575,
+      "source": "results/transfer_stable/RESIDUALIZE_MODE.md"
+    },
+    {
+      "layer": 22,
+      "metric": "role_perp\u2192role",
+      "auroc": 0.837,
+      "source": "results/transfer_stable/RESIDUALIZE_MODE.md"
+    },
+    {
+      "layer": 22,
+      "metric": "role_perp\u2192mode",
+      "auroc": 0.604,
+      "source": "results/transfer_stable/RESIDUALIZE_MODE.md"
+    }
+  ]
+}

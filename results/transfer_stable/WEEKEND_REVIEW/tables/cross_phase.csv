@@ -1,0 +1,11 @@
+site,layer,transfer_phase,primary,peak,split,asym,source
+residual,19,discussion,0.945216049382716,0.9737654320987654,0.888888888888889,0.9729938271604939,WEEKEND_REVIEW/tables/cross_phase_discussion_residual/metrics.json
+residual,20,discussion,0.9642489711934156,0.9861111111111112,0.9166666666666666,0.9899691358024691,WEEKEND_REVIEW/tables/cross_phase_discussion_residual/metrics.json
+residual,21,discussion,0.9647633744855968,0.9868827160493827,0.9212962962962963,0.9861111111111112,WEEKEND_REVIEW/tables/cross_phase_discussion_residual/metrics.json
+residual,22,discussion,0.9642489711934156,1.0,0.9027777777777779,0.9899691358024691,WEEKEND_REVIEW/tables/cross_phase_discussion_residual/metrics.json
+residual,23,discussion,0.9570473251028807,1.0,0.8834876543209876,0.9876543209876544,WEEKEND_REVIEW/tables/cross_phase_discussion_residual/metrics.json
+residual,band_mean,discussion,0.9591049382716049,0.9893518518518519,0.9026234567901235,0.9853395061728396,WEEKEND_REVIEW/tables/cross_phase_discussion_residual/metrics.json
+attn,21,final,0.9861111111111112,0.9783950617283951,0.9861111111111112,0.9938271604938271,WEEKEND_REVIEW/tables/cross_phase_attn.json
+attn,22,final,0.999485596707819,0.9984567901234568,1.0,1.0,WEEKEND_REVIEW/tables/cross_phase_attn.json
+attn,21,discussion,0.9652777777777778,0.992283950617284,0.9197530864197531,0.9837962962962963,WEEKEND_REVIEW/tables/cross_phase_attn.json
+attn,22,discussion,0.9974279835390947,1.0,0.992283950617284,1.0,WEEKEND_REVIEW/tables/cross_phase_attn.json

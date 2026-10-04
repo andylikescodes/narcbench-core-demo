@@ -1,0 +1,68 @@
+{
+  "protocol": "Core discussion\u2192Transfer final",
+  "rows": [
+    {
+      "arm": "residual_L19",
+      "layer": 19,
+      "primary": 0.8837448559670782,
+      "peak": 0.878858024691358,
+      "split": 0.8626543209876544,
+      "asym": 0.9097222222222222,
+      "source": "results/transfer_stable/layer_sweep.json"
+    },
+    {
+      "arm": "residual_L20",
+      "layer": 20,
+      "primary": 0.8845164609053496,
+      "peak": 0.8641975308641975,
+      "split": 0.871141975308642,
+      "asym": 0.9182098765432098,
+      "source": "results/transfer_stable/layer_sweep.json"
+    },
+    {
+      "arm": "residual_L21",
+      "layer": 21,
+      "primary": 0.9411008230452675,
+      "peak": 0.8989197530864197,
+      "split": 0.9745370370370371,
+      "asym": 0.9498456790123457,
+      "source": "results/transfer_stable/layer_sweep.json"
+    },
+    {
+      "arm": "residual_L22",
+      "layer": 22,
+      "primary": 0.9295267489711935,
+      "peak": 0.8966049382716049,
+      "split": 0.9367283950617284,
+      "asym": 0.9552469135802469,
+      "source": "results/transfer_stable/layer_sweep.json"
+    },
+    {
+      "arm": "residual_L23",
+      "layer": 23,
+      "primary": 0.8729423868312757,
+      "peak": 0.8317901234567902,
+      "split": 0.8765432098765431,
+      "asym": 0.9104938271604939,
+      "source": "results/transfer_stable/layer_sweep.json"
+    },
+    {
+      "arm": "mean_pool_L19-23",
+      "layer": "pool",
+      "primary": 0.9413580246913581,
+      "peak": 0.9058641975308642,
+      "split": 0.9513888888888888,
+      "asym": 0.966820987654321,
+      "source": "results/transfer_stable/layer_sweep.json"
+    },
+    {
+      "arm": "band_mean_L19-23",
+      "layer": "band_mean",
+      "primary": 0.902366255144033,
+      "peak": 0.874074074074074,
+      "split": 0.9043209876543209,
+      "asym": 0.9287037037037036,
+      "source": "results/transfer_stable/layer_sweep.json"
+    }
+  ]
+}

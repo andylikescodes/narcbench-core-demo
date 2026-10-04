@@ -1,0 +1,112 @@
+{
+  "n_pairs": 12,
+  "by_arm": {
+    "baseline_colluder": {
+      "mean_p_target": 0.567593713310392,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": null,
+      "mean_delta_p_vs_ref": null
+    },
+    "baseline_honest": {
+      "mean_p_target": 0.08388786840563019,
+      "target_vote_rate": 0.08333333333333333,
+      "flip_rate_vs_ref": null,
+      "mean_delta_p_vs_ref": null
+    },
+    "patch_h2c_full_resid_L21": {
+      "mean_p_target": 0.5156521642735848,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": -0.05194154903680707
+    },
+    "patch_c2h_full_resid_L21": {
+      "mean_p_target": 0.08408832759171976,
+      "target_vote_rate": 0.08333333333333333,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": 0.00020045918608957436
+    },
+    "patch_h2c_role_perp_resid_L21": {
+      "mean_p_target": 0.5626595687548009,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": -0.004934144555591047
+    },
+    "patch_c2h_role_perp_resid_L21": {
+      "mean_p_target": 0.0838680373490206,
+      "target_vote_rate": 0.08333333333333333,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": -1.9831056609594572e-05
+    },
+    "ablate_role_perp_resid_L21_colluder": {
+      "mean_p_target": 0.5686182905143747,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": 0.00102457720398282
+    },
+    "ablate_role_resid_L21_colluder": {
+      "mean_p_target": 0.562390623051518,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": -0.005203090258873999
+    },
+    "patch_h2c_role_resid_L21": {
+      "mean_p_target": 0.5454382124589756,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": -0.02215550085141634
+    },
+    "patch_c2h_role_resid_L21": {
+      "mean_p_target": 0.08389326677888675,
+      "target_vote_rate": 0.08333333333333333,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": 5.398373256563597e-06
+    },
+    "patch_h2c_random_resid_L21": {
+      "mean_p_target": 0.5674138349519732,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": -0.0001798783584187428
+    },
+    "patch_c2h_random_resid_L21": {
+      "mean_p_target": 0.08388783344647284,
+      "target_vote_rate": 0.08333333333333333,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": -3.4959157346747816e-08
+    },
+    "project_out_pca_k8_resid_L23_colluder": {
+      "mean_p_target": 0.5837961959186941,
+      "target_vote_rate": 0.5833333333333334,
+      "flip_rate_vs_ref": 0.08333333333333333,
+      "mean_delta_p_vs_ref": 0.016202482608302187
+    },
+    "ablate_pca_lr_ambient_resid_L23_colluder": {
+      "mean_p_target": 0.5804779441095889,
+      "target_vote_rate": 0.5,
+      "flip_rate_vs_ref": 0.0,
+      "mean_delta_p_vs_ref": 0.012884230799196908
+    }
+  },
+  "primary": {
+    "baseline_gap_p": 0.48370584490476176,
+    "patch_c2h_attn_vs_honest_dp": null,
+    "patch_h2c_attn_vs_colluder_dp": null,
+    "ablate_role_attn_vs_colluder_dp": null,
+    "ablate_random_attn_vs_colluder_dp": null,
+    "ablate_mode_vs_colluder_dp": null,
+    "ablate_perp_vs_colluder_dp": 0.00102457720398282,
+    "patch_h2c_multi_vs_colluder_dp": null,
+    "ablate_multi_vs_colluder_dp": null,
+    "project_out_pca_k8_L23_dp": 0.016202482608302187,
+    "patch_h2c_full_resid_dp": -0.05194154903680707,
+    "patch_c2h_full_resid_dp": 0.00020045918608957436,
+    "patch_h2c_role_perp_dp": -0.004934144555591047,
+    "patch_c2h_role_perp_dp": -1.9831056609594572e-05,
+    "ablate_role_resid_L21_vs_colluder_dp": -0.005203090258873999,
+    "patch_h2c_role_resid_dp": -0.02215550085141634,
+    "patch_c2h_role_resid_dp": 5.398373256563597e-06,
+    "patch_h2c_random_resid_dp": -0.0001798783584187428,
+    "patch_c2h_random_resid_dp": -3.4959157346747816e-08,
+    "ablate_pca_lr_ambient_dp": 0.012884230799196908
+  },
+  "elapsed_sec": 78.3
+}

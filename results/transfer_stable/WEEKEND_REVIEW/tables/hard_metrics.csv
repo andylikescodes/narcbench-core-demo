@@ -1,0 +1,6 @@
+arm,primary,peak,split,asym,source
+full_acts_band_L19-23,0.902,0.874,0.904,0.929,results/transfer/TRANSFER_FULL_HARD_METRICS.md
+W_U_k25_J_only,0.602,0.625,0.565,0.616,results/transfer/TRANSFER_FULL_HARD_METRICS.md
+jac_k25_J_only,0.549,0.586,0.523,0.54,results/transfer/TRANSFER_FULL_HARD_METRICS.md
+W_U_k25_complement,0.898,0.869,0.897,0.928,results/transfer/TRANSFER_FULL_HARD_METRICS.md
+jac_k25_complement,0.891,0.867,0.888,0.917,results/transfer/TRANSFER_FULL_HARD_METRICS.md

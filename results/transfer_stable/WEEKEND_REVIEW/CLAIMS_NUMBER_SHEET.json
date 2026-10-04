@@ -1,0 +1,509 @@
+{
+  "doc": "CLAIMS_NUMBER_SHEET",
+  "author": "Andy Liang",
+  "written_pt": "2026-10-01 17:20:00 PT",
+  "lane": "transfer_stable",
+  "model": "Gemma-2-9B-it",
+  "protocol_default": "Core discussion public \u2192 Transfer final",
+  "soft_stop": {
+    "honored": true,
+    "do_not_touch": [
+      "Track I",
+      "Paper 2",
+      "interp-demo",
+      "family-house"
+    ]
+  },
+  "no_gpu_this_pack": true,
+  "safety_claim_locked": "Monitorable, Transfer-stable coordination signature (attn_L22 / non-J residual) \u2014 editability unproven under tested interventions; matched-prefix + checkpoint assays are the next causal designs.",
+  "balance_snapshot_note": "~$26.24 last known after discussion-phase attn_L22 smoke (~4:37 PM PT 2026-10-01). Live API not queried.",
+  "setup": {
+    "train_acts": "data/activations/gemma2_9b/core/20261001T012639Z",
+    "eval_acts": "data/activations/gemma2_9b/transfer/RUNPOD",
+    "n_transfer_runs_hard": 72,
+    "layers": [
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "status": "frozen",
+    "sources": [
+      "results/transfer/TRANSFER_FULL_HARD_METRICS.md",
+      "results/transfer/FULL_HARD_SUMMARY.json"
+    ]
+  },
+  "hard_j_vs_full_vs_complement": {
+    "status": "frozen",
+    "source": "results/transfer/TRANSFER_FULL_HARD_METRICS.md",
+    "rows": [
+      {
+        "arm": "full_acts_band_L19-23",
+        "primary": 0.902,
+        "peak": 0.874,
+        "split": 0.904,
+        "asym": 0.929
+      },
+      {
+        "arm": "W_U_k25_J_only",
+        "primary": 0.602,
+        "peak": 0.625,
+        "split": 0.565,
+        "asym": 0.616
+      },
+      {
+        "arm": "jac_k25_J_only",
+        "primary": 0.549,
+        "peak": 0.586,
+        "split": 0.523,
+        "asym": 0.54
+      },
+      {
+        "arm": "W_U_k25_complement",
+        "primary": 0.898,
+        "peak": 0.869,
+        "split": 0.897,
+        "asym": 0.928
+      },
+      {
+        "arm": "jac_k25_complement",
+        "primary": 0.891,
+        "peak": 0.867,
+        "split": 0.888,
+        "asym": 0.917
+      }
+    ]
+  },
+  "residual_layer_sweep": {
+    "status": "frozen",
+    "source": "results/transfer_stable/layer_sweep.json",
+    "rows": [
+      {
+        "arm": "L19",
+        "primary": 0.884,
+        "peak": 0.879,
+        "split": 0.863,
+        "asym": 0.91
+      },
+      {
+        "arm": "L20",
+        "primary": 0.885,
+        "peak": 0.864,
+        "split": 0.871,
+        "asym": 0.918
+      },
+      {
+        "arm": "L21",
+        "primary": 0.941,
+        "peak": 0.899,
+        "split": 0.975,
+        "asym": 0.95
+      },
+      {
+        "arm": "L22",
+        "primary": 0.93,
+        "peak": 0.897,
+        "split": 0.937,
+        "asym": 0.955
+      },
+      {
+        "arm": "L23",
+        "primary": 0.873,
+        "peak": 0.832,
+        "split": 0.877,
+        "asym": 0.91
+      },
+      {
+        "arm": "band_mean_L19-23",
+        "primary": 0.902,
+        "peak": 0.874,
+        "split": 0.904,
+        "asym": 0.929
+      },
+      {
+        "arm": "mean_pool_L19-23",
+        "primary": 0.941,
+        "peak": 0.906,
+        "split": 0.951,
+        "asym": 0.967
+      }
+    ]
+  },
+  "subspace_and_direction": {
+    "status": "frozen",
+    "source": "results/transfer_stable/SUBSPACE_AND_DIRECTION.md",
+    "rows": [
+      {
+        "arm": "diff_in_means",
+        "best_layer": 22,
+        "primary": 0.858,
+        "band_mean_primary": 0.817
+      },
+      {
+        "arm": "lr_weight",
+        "best_layer": 21,
+        "primary": 0.941,
+        "band_mean_primary": 0.902
+      },
+      {
+        "arm": "pca_residual_k8",
+        "best_layer": 22,
+        "primary": 0.927
+      },
+      {
+        "arm": "pca_residual_k32",
+        "best_layer": 22,
+        "primary": 0.956
+      },
+      {
+        "arm": "pca_contrast_k4",
+        "best_layer": 23,
+        "primary": 0.957
+      },
+      {
+        "arm": "pca_contrast_k8",
+        "best_layer": 23,
+        "primary": 0.964
+      },
+      {
+        "arm": "mean_abs_cos_diff_means_lr",
+        "value": 0.875
+      }
+    ]
+  },
+  "mlp_attn_per_site": {
+    "status": "frozen",
+    "best_site": "attn_L22",
+    "best_primary": 0.999,
+    "json_raw_attn_L22_primary": 0.999485596707819,
+    "source": "results/transfer_stable/MLP_ATTN_PROBES.md",
+    "direction": "results/transfer_stable/directions/lr_role_attn_L22.npy",
+    "caveat": "attn_L22 = attention block residual-write, not named head",
+    "rows": [
+      {
+        "site": "attn",
+        "layer": 22,
+        "primary": 0.999,
+        "peak": 0.998,
+        "split": 1.0,
+        "asym": 1.0,
+        "role_sample": 0.987
+      },
+      {
+        "site": "attn",
+        "layer": 21,
+        "primary": 0.986,
+        "peak": 0.978,
+        "split": 0.986,
+        "asym": 0.994,
+        "role_sample": 0.948
+      },
+      {
+        "site": "attn",
+        "layer": 19,
+        "primary": 0.954,
+        "peak": 0.965,
+        "split": 0.928,
+        "asym": 0.97,
+        "role_sample": 0.951
+      },
+      {
+        "site": "attn",
+        "layer": 20,
+        "primary": 0.949,
+        "peak": 0.934,
+        "split": 0.948,
+        "asym": 0.965,
+        "role_sample": 0.87
+      },
+      {
+        "site": "attn",
+        "layer": 23,
+        "primary": 0.888,
+        "peak": 0.878,
+        "split": 0.873,
+        "asym": 0.914,
+        "role_sample": 0.881
+      },
+      {
+        "site": "mlp",
+        "layer": 22,
+        "primary": 0.915,
+        "peak": 0.881,
+        "split": 0.923,
+        "asym": 0.941,
+        "role_sample": 0.878
+      },
+      {
+        "site": "mlp",
+        "layer": 19,
+        "primary": 0.861,
+        "peak": 0.863,
+        "split": 0.836,
+        "asym": 0.883,
+        "role_sample": 0.852
+      },
+      {
+        "site": "mlp",
+        "layer": 20,
+        "primary": 0.821,
+        "peak": 0.837,
+        "split": 0.763,
+        "asym": 0.863,
+        "role_sample": 0.872
+      },
+      {
+        "site": "mlp",
+        "layer": 21,
+        "primary": 0.849,
+        "peak": 0.834,
+        "split": 0.841,
+        "asym": 0.873,
+        "role_sample": 0.825
+      },
+      {
+        "site": "mlp",
+        "layer": 23,
+        "primary": 0.823,
+        "peak": 0.805,
+        "split": 0.794,
+        "asym": 0.87,
+        "role_sample": 0.814
+      },
+      {
+        "site": "residual",
+        "layer": 21,
+        "primary": 0.941,
+        "peak": 0.899,
+        "split": 0.975,
+        "asym": 0.95,
+        "role_sample": 0.859
+      },
+      {
+        "site": "residual",
+        "layer": 22,
+        "primary": 0.93,
+        "peak": 0.897,
+        "split": 0.937,
+        "asym": 0.955,
+        "role_sample": 0.873
+      }
+    ]
+  },
+  "controls_role_mode": {
+    "status": "frozen",
+    "source": "results/transfer_stable/CONTROLS_OFFLINE.md",
+    "cross_tests": [
+      {
+        "layer": 21,
+        "metric": "role\u2192role",
+        "auroc": 0.859
+      },
+      {
+        "layer": 21,
+        "metric": "role\u2192mode_runavg",
+        "auroc": 0.766
+      },
+      {
+        "layer": 21,
+        "metric": "role\u2192mode_scenario_primary",
+        "auroc": 0.941
+      },
+      {
+        "layer": 21,
+        "metric": "mode\u2192mode_runavg",
+        "auroc": 0.886
+      },
+      {
+        "layer": 21,
+        "metric": "mode\u2192role",
+        "auroc": 0.9
+      },
+      {
+        "layer": 22,
+        "metric": "role\u2192role",
+        "auroc": 0.873
+      },
+      {
+        "layer": 22,
+        "metric": "mode\u2192role",
+        "auroc": 0.887
+      },
+      {
+        "layer": 22,
+        "metric": "mode\u2192mode_runavg",
+        "auroc": 0.831
+      },
+      {
+        "layer": 21,
+        "metric": "cos(role,mode_runavg)",
+        "value": 0.694
+      },
+      {
+        "layer": 22,
+        "metric": "cos(role,mode_runavg)",
+        "value": 0.707
+      }
+    ]
+  },
+  "residualize_mode": {
+    "status": "frozen",
+    "source": "results/transfer_stable/RESIDUALIZE_MODE.md",
+    "rows": [
+      {
+        "layer": 21,
+        "role_to_role": 0.859,
+        "role_perp_to_role": 0.796,
+        "role_to_mode": 0.766,
+        "role_perp_to_mode": 0.575
+      },
+      {
+        "layer": 22,
+        "role_to_role": 0.873,
+        "role_perp_to_role": 0.837,
+        "role_to_mode": 0.767,
+        "role_perp_to_mode": 0.604
+      }
+    ],
+    "cos_role_perp_mode": 0.0
+  },
+  "causal_nulls": {
+    "status": "frozen",
+    "n_smokes": 5,
+    "smoke_n": 6,
+    "all_null": true,
+    "source": "results/transfer_stable/NEGATIVE_CAUSAL_APPENDIX.md",
+    "rows": [
+      {
+        "battery": 1,
+        "name": "Transfer residual \u03b1=1",
+        "world": "Transfer",
+        "collusion_success_all_arms": 0.167,
+        "flips": 0
+      },
+      {
+        "battery": 2,
+        "name": "Transfer residual \u03b1-sweep",
+        "world": "Transfer",
+        "collusion_success_all_arms": 0.167,
+        "flips": 0
+      },
+      {
+        "battery": 3,
+        "name": "Core residual role",
+        "world": "Core",
+        "collusion_success_all_arms": 0.833,
+        "flips": 0
+      },
+      {
+        "battery": 4,
+        "name": "Core attn_L22 final-only",
+        "world": "Core",
+        "collusion_success_all_arms": 0.833,
+        "flips": 0
+      },
+      {
+        "battery": 5,
+        "name": "Core attn_L22 discussion (\u00b1final)",
+        "world": "Core",
+        "collusion_success_all_arms": 0.667,
+        "flips": 0
+      }
+    ]
+  },
+  "cross_phase_new_offline": {
+    "status": "frozen",
+    "protocol": "Core discussion \u2192 Transfer discussion",
+    "residual_band_primary": 0.959,
+    "residual_L21_primary": 0.965,
+    "residual_L22_primary": 0.964,
+    "attn_L22_discussion_primary": 0.997,
+    "attn_L21_discussion_primary": 0.965,
+    "sources": [
+      "WEEKEND_REVIEW/tables/cross_phase_discussion_residual/metrics.json",
+      "WEEKEND_REVIEW/tables/cross_phase_attn.json"
+    ]
+  },
+  "domain_holdout_new_offline": {
+    "status": "frozen",
+    "layer": 21,
+    "baseline_primary": 0.941,
+    "holdout_mean": 0.939,
+    "holdout_min": 0.927,
+    "holdout_max": 0.948,
+    "n_core_domains": 17,
+    "note": "Core domains do not overlap Transfer family names; LDO fit on Core, eval all Transfer",
+    "source": "WEEKEND_REVIEW/tables/domain_holdout_L21.json"
+  },
+  "family_auroc_L21": {
+    "status": "frozen",
+    "source": "WEEKEND_REVIEW/tables/family_auroc_L21.json",
+    "rows": [
+      {
+        "family": "cicd",
+        "peak": 1.0,
+        "split": 1.0,
+        "n": 12
+      },
+      {
+        "family": "code_review",
+        "peak": 1.0,
+        "split": 1.0,
+        "n": 12
+      },
+      {
+        "family": "news",
+        "peak": 0.861,
+        "split": 0.917,
+        "n": 12
+      },
+      {
+        "family": "pump_dump",
+        "peak": 0.917,
+        "split": 1.0,
+        "n": 12
+      },
+      {
+        "family": "rag",
+        "peak": 1.0,
+        "split": 1.0,
+        "n": 12
+      },
+      {
+        "family": "research",
+        "peak": 0.917,
+        "split": 1.0,
+        "n": 12
+      }
+    ]
+  },
+  "non_claims": [
+    {
+      "item": "Editability / vote control via last-token free-regen ablate",
+      "status": "frozen_non_claim"
+    },
+    {
+      "item": "Pure lying atom (deception-only axis)",
+      "status": "frozen_non_claim"
+    },
+    {
+      "item": "J carries Transfer-stable role signal",
+      "status": "frozen_non_claim"
+    },
+    {
+      "item": "Head-level localization inside attn L22",
+      "status": "open"
+    },
+    {
+      "item": "Editability under matched-prefix",
+      "status": "open"
+    },
+    {
+      "item": "Track I / Paper 2 / interp-demo",
+      "status": "non_scope"
+    }
+  ],
+  "tables_dir": "WEEKEND_REVIEW/tables/",
+  "figures_dir": "WEEKEND_REVIEW/figures/"
+}

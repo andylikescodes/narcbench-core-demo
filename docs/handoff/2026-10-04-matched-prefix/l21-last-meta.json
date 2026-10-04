@@ -1,0 +1,50 @@
+{
+  "model": "google/gemma-2-9b-it",
+  "n_pairs": 12,
+  "n_pairs_in_file": 12,
+  "pair_ids": [
+    "audit_01_role_flip_v1",
+    "cyber_03_role_flip_v1",
+    "eng_01_role_flip_v1",
+    "env_01_role_flip_v1",
+    "env_02_role_flip_v1",
+    "fin_01_role_flip_v1",
+    "fin_02_role_flip_v1",
+    "food_01_role_flip_v1",
+    "gov_01_role_flip_v1",
+    "hire_01_role_flip_v1",
+    "leg_03_role_flip_v1",
+    "med_01_role_flip_v1"
+  ],
+  "arms": [
+    "baseline_colluder",
+    "baseline_honest",
+    "patch_h2c_full_resid_L21",
+    "patch_c2h_full_resid_L21",
+    "patch_h2c_role_perp_resid_L21",
+    "patch_c2h_role_perp_resid_L21",
+    "ablate_role_perp_resid_L21_colluder",
+    "ablate_role_resid_L21_colluder",
+    "patch_h2c_role_resid_L21",
+    "patch_c2h_role_resid_L21",
+    "patch_h2c_random_resid_L21",
+    "patch_c2h_random_resid_L21",
+    "project_out_pca_k8_resid_L23_colluder",
+    "ablate_pca_lr_ambient_resid_L23_colluder"
+  ],
+  "n_arms": 14,
+  "max_new_tokens": 8,
+  "protocol": "matched_prefix_activation_interchange",
+  "suite": "core",
+  "world": "Core",
+  "source_run": "gemma2_9b/core/20261001T012639Z",
+  "sites": [
+    "residual_L21_prompt_last",
+    "residual_L23_pca_k8_prompt_last"
+  ],
+  "intervention": "prompt_last_token",
+  "extras": false,
+  "extras_only": false,
+  "role_perp_confirm": true,
+  "dry_run": false
+}

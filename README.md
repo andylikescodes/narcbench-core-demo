@@ -3,7 +3,8 @@
 Public walkthrough of NARCBench Core transcripts, plus the 1 October 2026 Transfer-stable weekend review (Andy Liang).
 
 Live presenter: <https://narcbench-demo.zeabur.app>  
-Deploy notes: [`README_DEPLOY.md`](README_DEPLOY.md)
+Deploy notes: [`README_DEPLOY.md`](README_DEPLOY.md)  
+Walkthrough notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/andylikescodes/narcbench-core-demo/blob/claude/beautiful-mayer-wtyfjf/notebooks/narcbench_jspace_colab.ipynb) [`notebooks/narcbench_jspace_colab.ipynb`](notebooks/narcbench_jspace_colab.ipynb)
 
 ## Weekend review
 
@@ -12,6 +13,7 @@ Transfer-stable collusion on Gemma-2-9B-it, Core discussion → Transfer. The re
 | Start here | Path |
 |---|---|
 | **Current status, review, and roadmap (living entry point)** | [`STATUS.md`](STATUS.md) |
+| Colab walkthrough: one scenario end to end, the model's input and output live, J-space step by step, the probe on full / J-only / complement activations, Transfer, role vs mode, every recorded table | [`notebooks/narcbench_jspace_colab.ipynb`](notebooks/narcbench_jspace_colab.ipynb) ([open in Colab](https://colab.research.google.com/github/andylikescodes/narcbench-core-demo/blob/claude/beautiful-mayer-wtyfjf/notebooks/narcbench_jspace_colab.ipynb)) |
 | Migration handoff (4 Oct 2026 record) | [`MIGRATION_HANDOFF.md`](MIGRATION_HANDOFF.md) |
 | CPU verification of every matched-prefix number in git | [`results/transfer_stable/VERIFICATION_2026-10-04.md`](results/transfer_stable/VERIFICATION_2026-10-04.md) |
 | Code map | [`CODE_INDEX.md`](CODE_INDEX.md) (same file: [`results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md`](results/transfer_stable/WEEKEND_REVIEW/CODE_INDEX.md), [`papers/transfer-stable-collusion-2026-10/CODE_INDEX.md`](papers/transfer-stable-collusion-2026-10/CODE_INDEX.md)) |
@@ -39,13 +41,20 @@ Transfer-stable collusion on Gemma-2-9B-it, Core discussion → Transfer. The re
 
 ### What you can run
 
-CPU checks that need nothing outside git (28 tests, two verifiers, the pair builder):
+CPU checks that need nothing outside git (43 tests, two verifiers, the pair builder):
 
 ```bash
 python3 -m unittest discover -s tests
 python3 scripts/verify_claims_sheet.py
 python3 scripts/verify_matched_prefix_results.py
 python3 scripts/build_matched_prefix_pairs.py --out /tmp/pairs_core_v2.jsonl
+```
+
+The Colab notebook ([open](https://colab.research.google.com/github/andylikescodes/narcbench-core-demo/blob/claude/beautiful-mayer-wtyfjf/notebooks/narcbench_jspace_colab.ipynb)) clones this branch, loads `google/gemma-2-9b-it` on an L4 or A100 (or `google/gemma-2-2b-it` on a T4), re-extracts the activations with the repository's own scripts and walks through the probe and the J-space split with the code visible; sections 1 and 9 (the scenario and the recorded tables) run without a GPU. If Colab cannot resolve the branch from the badge, use *File → Open notebook → GitHub*, paste the repository URL and pick the branch. A CPU plumbing check of the whole notebook with a tiny random model (numbers meaningless) is
+
+```bash
+pip install nbclient ipykernel matplotlib pandas scikit-learn torch transformers
+NARCBENCH_NB_EXECUTE=1 python3 -m unittest tests.test_notebook
 ```
 
 From the repo root, CPU presenter:

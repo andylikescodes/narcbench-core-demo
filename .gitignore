@@ -26,3 +26,6 @@ papers/**/*.toc
 papers/**/*.fls
 papers/**/*.fdb_latexmk
 papers/**/*.synctex.gz
+
+# Activation cache written by notebooks/narcbench_jspace_colab.ipynb
+/cache/

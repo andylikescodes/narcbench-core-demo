@@ -14,9 +14,10 @@ GPU stays off. Nothing in this pass was launched.
 | Presenter | Indexes rebuilt from the transcripts (content identical; paths now repo-relative). `app/server.py` smoke-tested on all four API routes. |
 | Next cards coded | Open question 1 (directions at the final site) and open question 2 (where the vote enters the last-token residual) are now harness modes with launcher, boot and tests. Estimate-only. |
 | Reproducible pairs | `scripts/build_matched_prefix_pairs.py` rebuilds the 12 recorded scenarios (and all 50) from the Core transcripts. `data/matched_prefix/pairs_core_v2.jsonl` is committed. |
-| Tests | 28 pass (`python3 -m unittest discover -s tests`), including dry-runs of every harness card and both verifiers. |
+| Tests | 43 pass (`python3 -m unittest discover -s tests`), including dry-runs of every harness card, both verifiers, and the structure of the Colab notebook; `NARCBENCH_NB_EXECUTE=1` also executes the notebook on the CPU with a tiny random model. |
 | Cruft removed | Four `.bak*` scripts and five LaTeX build artifacts (kept in history at `8eaca99`). |
 | Presentation deck | Ideas, setup, hypotheses, results, findings, safety reading, and the proposed causal-agent framework: https://claude.ai/artifact/HyGfCP6XjFiyo1copKLhys (private until shared; the three pending cards will be filled in when their pods run). |
+| Colab notebook | `notebooks/narcbench_jspace_colab.ipynb` ([open in Colab](https://colab.research.google.com/github/andylikescodes/narcbench-core-demo/blob/claude/beautiful-mayer-wtyfjf/notebooks/narcbench_jspace_colab.ipynb)): one scenario end to end, the model's input and output live, J-space on one activation step by step, the probe on full / J-only / complement activations with leave-one-domain-out folds, zero-shot Transfer, role vs mode, and every recorded table. Runs the 9B study model on an L4/A100, the 2B model on a T4. |
 
 ## 1. What is established (correlational, frozen, verified)
 
@@ -153,7 +154,8 @@ Pre-registered reading for card 3, per site and edit, honest→colluder: the sam
 | `scripts/` (others) | regen, extraction, probes, J-space, offline Transfer-stable analysis; need `data/activations/`, which is not in git |
 | `upstream/scenarios/` | Core transcripts (Qwen3-32B official; Gemma-2-2B and -9B replications) and the 72 Gemma-2-9B Transfer runs |
 | `app/`, `data/demo_index*.json` | the CPU presenter |
-| `tests/` | 28 tests; none create a pod |
+| `notebooks/narcbench_jspace_colab.ipynb` | Colab walkthrough of the scenario, the probe and the J-space split; reuses `scripts/`, writes its activation cache to `cache/` (ignored) |
+| `tests/` | 43 tests; none create a pod |
 
 ## 7. Conventions kept from the handoffs
 

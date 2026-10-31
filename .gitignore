@@ -29,3 +29,7 @@ papers/**/*.synctex.gz
 
 # Activation cache written by notebooks/narcbench_jspace_colab.ipynb
 /cache/
+
+# J-space analysis inputs (official NARCBench activations, unembedding matrices); multi-GB, never committed
+data/j_basis/
+data/activations/

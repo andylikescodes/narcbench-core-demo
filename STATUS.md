@@ -14,7 +14,7 @@ GPU stays off. Nothing in this pass was launched.
 | Presenter | Indexes rebuilt from the transcripts (content identical; paths now repo-relative). `app/server.py` smoke-tested on all four API routes. |
 | Next cards coded | Open question 1 (directions at the final site) and open question 2 (where the vote enters the last-token residual) are now harness modes with launcher, boot and tests. Estimate-only. |
 | Reproducible pairs | `scripts/build_matched_prefix_pairs.py` rebuilds the 12 recorded scenarios (and all 50) from the Core transcripts. `data/matched_prefix/pairs_core_v2.jsonl` is committed. |
-| Tests | 43 pass (`python3 -m unittest discover -s tests`), including dry-runs of every harness card, both verifiers, and the structure of the Colab notebook; `NARCBENCH_NB_EXECUTE=1` also executes the notebook on the CPU with a tiny random model. |
+| Tests | 43 passed on 4 Oct (54 with the J-space tests added on 31 Oct) (`python3 -m unittest discover -s tests`), including dry-runs of every harness card, both verifiers, and the structure of the Colab notebook; `NARCBENCH_NB_EXECUTE=1` also executes the notebook on the CPU with a tiny random model. |
 | Cruft removed | Four `.bak*` scripts and five LaTeX build artifacts (kept in history at `8eaca99`). |
 | Presentation deck | Ideas, setup, hypotheses, results, findings, safety reading, and the proposed causal-agent framework: https://claude.ai/artifact/HyGfCP6XjFiyo1copKLhys (private until shared; the three pending cards will be filled in when their pods run). |
 | Colab notebook | `notebooks/narcbench_jspace_colab.ipynb` ([open in Colab](https://colab.research.google.com/github/andylikescodes/narcbench-core-demo/blob/claude/beautiful-mayer-wtyfjf/notebooks/narcbench_jspace_colab.ipynb)): one scenario end to end, the model's input and output live, J-space on one activation step by step, the probe on full / J-only / complement activations with leave-one-domain-out folds, zero-shot Transfer, role vs mode, and every recorded table. Runs the 9B study model on an L4/A100, the 2B model on a T4. |
@@ -155,7 +155,10 @@ Pre-registered reading for card 3, per site and edit, honest→colluder: the sam
 | `upstream/scenarios/` | Core transcripts (Qwen3-32B official; Gemma-2-2B and -9B replications) and the 72 Gemma-2-9B Transfer runs |
 | `app/`, `data/demo_index*.json` | the CPU presenter |
 | `notebooks/narcbench_jspace_colab.ipynb` | Colab walkthrough of the scenario, the probe and the J-space split; reuses `scripts/`, writes its activation cache to `cache/` (ignored) |
-| `tests/` | 43 tests; none create a pod |
+| `docs/jspace/JSPACE_SEPARABILITY_DESIGN.md` | pre-registered design of the J-space separability analysis (31 Oct 2026) |
+| `results/jspace/` | its outputs: one directory per model (`summary.json`, `RESULTS.md`, `episode_scores.json`), the frozen Gemma statistics, figures, and the cross-model `RESULTS.md` |
+| `scripts/jspace_separability.py`, `jspace_offline_stats.py`, `jspace_figures.py`, `download_narcbench_activations.py`, `fetch_unembed_rows.py` | the analysis, the frozen-number statistics, figures, and the two downloaders (official activations; unembedding by range request) |
+| `tests/` | 54 tests; none create a pod |
 
 ## 7. Conventions kept from the handoffs
 
@@ -163,3 +166,33 @@ Pre-registered reading for card 3, per site and edit, honest→colluder: the sam
 - `RUNPOD_API_KEY` and `HF_TOKEN` come from the environment. Never commit `.npy` direction files, activation caches, or secrets.
 - One billable GPU at a time. Do not launch under $20. Estimate mode is the default.
 - Track I, Paper 2 and interp-demo stay untouched from this lane.
+
+## 8. J-space separability formalization (31 October 2026)
+
+Pass by a review session on branch `jspace-separability` (cut from `claude/beautiful-mayer-wtyfjf`). GPU stayed off; nothing was launched. The question picked up from the notebook, "can J-space tell the colluders apart", had five frozen Gemma numbers behind it and no control, no uncertainty and no within-Transfer test. This pass turned it into a pre-registered analysis and ran it.
+
+| Item | Outcome |
+|---|---|
+| Design, written before any new number | `docs/jspace/JSPACE_SEPARABILITY_DESIGN.md`: definitions, twelve arms (J-only, complement, random fixed subspace, another activation's frame, random unembedding rows, PCA, supervised contrast, and their complements), analyses A1 to A5, bootstrap and permutation inference, readings fixed in advance. |
+| Data that made it runnable without a pod | The paper's own activations are public (`aaronrose227/narcbench` on Hugging Face): Core and Transfer, four agents per run, the schema the repo's probe code reads. Qwen3-32B (L26–30), DeepSeek-R1-32B (L26–30) and GPT-OSS-20B (L10–14) were analysed; Llama-3.1-70B is gated. Unembeddings were fetched by HTTP range request (`scripts/fetch_unembed_rows.py`). The Gemma caches are still not in git; the notebook's new section 7b runs the same script on its extraction. |
+| Baseline reproduction | Full-activation Core leave-one-domain-out primary 1.000 on all three official models (paper: 1.00); Core → Transfer full 0.773 / 0.736 / 0.748 (Qwen3 / DeepSeek / GPT-OSS). |
+| Frozen Gemma numbers with uncertainty | `results/jspace/gemma2_9b_frozen/FROZEN_STATS.md`: J-only Transfer arms are compatible with chance (W_U 0.602 ± 0.067, p = 0.13; Jacobian 0.549 ± 0.068, p = 0.47 against 0.5); complement minus J-only +0.30 and +0.34 with p < 0.001 even treating arms as independent. |
+| Results on the official models | `results/jspace/<model>/RESULTS.md` and the cross-model `results/jspace/RESULTS.md` (section 8a below once the runs are recorded). |
+| Tests | `tests/test_jspace_separability.py`: the whole pipeline on synthetic data with a planted role direction, about 20 s. |
+
+### 8a. Results (31 October 2026, all three official runs complete)
+
+Full write-up: `results/jspace/RESULTS.md`; tables: `results/jspace/CROSS_MODEL_TABLES.md`; figures: `results/jspace/figures/`. k = 25, band mean over the cached layers, 95% bootstrap intervals over episodes.
+
+| | Qwen3-32B | DeepSeek-R1-32B | GPT-OSS-20B | Gemma-2-9B (frozen) |
+|---|---|---|---|---|
+| Core LDO: full / J-only / random 25-dim subspace | 1.000 / 0.991 / 0.988 | 1.000 / 0.906 / 0.974 | 1.000 / 0.784 / 0.800 | 1.000 / 0.989 / — |
+| Core → Transfer: full | 0.773 [0.692, 0.847] | 0.733 [0.669, 0.794] | 0.748 [0.644, 0.838] | 0.902 [0.829, 0.975] |
+| Core → Transfer: J-only (permutation p) | 0.513 [0.459, 0.564] (0.31) | 0.500 [0.435, 0.566] (0.52) | 0.568 [0.477, 0.660] (0.13) | 0.602 [0.471, 0.733] (0.13) |
+| Core → Transfer: complement of J | 0.775 [0.696, 0.846] | 0.729 [0.666, 0.792] | 0.725 [0.621, 0.818] | 0.898 [0.823, 0.972] |
+| Core → Transfer: random 25-dim subspace / another activation's frame | 0.508 / 0.506 | 0.550 / 0.513 | 0.611 / 0.563 | — |
+| J − random subspace (paired) | +0.005 [−0.053, +0.066] | −0.050 [−0.120, +0.013] | −0.043 [−0.169, +0.090] | — |
+| within Transfer (family held out): full / J-only / complement | 0.924 / 0.600 / 0.904 | 0.827 / 0.539 / 0.800 | 0.777 / 0.556 / 0.770 | not measured |
+| Core disc → Core final: full / J-only | 1.000 / 0.700 | 0.999 / 0.579 | 0.924 / 0.507 | not measured |
+
+Reading (rules fixed in the design): the transferable signal is not in J-space on any of the four models; J-only sits with the dimension-matched controls and its complement with the full residual. In distribution J-space separates colluders only where a random 25-dimensional subspace does too. Within Transfer, J-space holds no more role information than a random subspace. Either the phase change or the family change alone removes what J-space had. Cause (A5 geometry): at these depths the top-25 frames are nearly the same fixed junk or formatting directions for every turn, and the probe direction has no more weight in them than a random direction. The locked safety wording ("mostly non-J coordination signature") stands; "complement ≈ full" and "Core J-only ≈ 0.99" should no longer be cited as evidence about J-space. An exploratory variant with the final-norm-scaled unembedding (E1, `results/jspace/E1_GAMMA.md`) was run afterwards: J-only on Transfer moves to 0.542 / 0.496 / 0.615, still at its random-subspace control on every model; the pre-registered readings stand. Paper: `papers/jspace-separability-2026-10/main.tex` (PDF built with `tectonic`).

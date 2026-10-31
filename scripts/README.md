@@ -119,3 +119,27 @@ Those estimates check out a git SHA and read direction `.npy` files from the net
 Both verifiers run inside the test suite (`python3 -m unittest discover -s tests`).
 
 Earlier `*.bak*` copies of the extract and causal harnesses were removed on 2026-10-04; they remain in git history at commit `8eaca99`.
+
+## J-space separability (CPU; official NARCBench activations or any cache in the paper layout)
+
+Pre-registered design: [`docs/jspace/JSPACE_SEPARABILITY_DESIGN.md`](../docs/jspace/JSPACE_SEPARABILITY_DESIGN.md). Results: `results/jspace/`.
+
+| Script | What it does |
+|---|---|
+| `scripts/download_narcbench_activations.py` | Downloads the paper's own activations (`aaronrose227/narcbench` on Hugging Face; Core and Transfer for `qwen3_32b`, `deepseek_r1_32b`, `gpt_oss_20b`; 14 to 210 MB per split) into `data/activations/official/` (gitignored). |
+| `scripts/fetch_unembed_rows.py` | Fetches only the `lm_head.weight` tensor of a model by HTTP range requests on its safetensors shard and writes `data/j_basis/<tag>/unembed_fp16.npy` + row norms (gitignored). `python3 scripts/fetch_unembed_rows.py Qwen/Qwen3-32B-AWQ data/j_basis/qwen3_32b_awq` |
+| `scripts/jspace_separability.py` | The analysis: J-only and complement at k = 8, 16, 25, 50, 100 next to dimension-matched controls (random fixed subspace, another activation's frame, random unembedding rows, PCA, supervised contrast), Core leave-one-domain-out (A1), Core → Transfer (A2), within-Transfer leave-one-family-out (A3), phase-versus-family split (A4), probe geometry (A5); bootstrap intervals and permutation tests over episodes; the readings fixed in the design. Writes `summary.json`, `RESULTS.md`, `episode_scores.json`. |
+| `scripts/jspace_offline_stats.py` | Hanley–McNeil intervals and contrasts for the frozen Gemma-2-9B numbers, from `results/transfer/FULL_core_to_transfer_*/metrics.json` alone → `results/jspace/gemma2_9b_frozen/`. |
+| `scripts/jspace_figures.py` | Figures from the summaries → `results/jspace/figures/`. |
+
+```bash
+python3 scripts/download_narcbench_activations.py
+python3 scripts/fetch_unembed_rows.py Qwen/Qwen3-32B-AWQ data/j_basis/qwen3_32b_awq
+python3 scripts/jspace_separability.py --core-acts data/activations/official/qwen3_32b/core \
+    --transfer-acts data/activations/official/qwen3_32b/transfer --unembed data/j_basis/qwen3_32b_awq \
+    --layers 26-30 --ks 8,16,25,50,100 --out results/jspace/qwen3_32b --tag qwen3_32b
+python3 scripts/jspace_offline_stats.py
+python3 scripts/jspace_figures.py
+```
+
+Layers: Qwen3-32B and DeepSeek-R1-32B 26–30, GPT-OSS-20B 10–14, Gemma-2-9B 19–23. The Gemma caches are not in git; the Colab notebook (section 7b) writes its extraction in this layout and runs the same script. `tests/test_jspace_separability.py` runs the whole pipeline on synthetic data in about 20 s. Needs `numpy`, `scipy`, `scikit-learn` (`requests`, `huggingface_hub` for the downloads; `tokenizers` to decode frame tokens; `matplotlib` for figures).

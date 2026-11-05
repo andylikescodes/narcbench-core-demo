@@ -5,6 +5,7 @@ Self-contained: keys come from the environment only (RUNPOD_API_KEY required to 
 HF_TOKEN optional, used if the model is not already cached on the network volume). Default is estimate-only.
 
     python3 scripts/runpod_launch_jlens_full.py                       # print the plan and the cost estimate
+    RUNPOD_API_KEY=... python3 scripts/runpod_launch_jlens_full.py --preflight   # gates only: balance, running pods, GPU budget
     RUNPOD_API_KEY=... python3 scripts/runpod_launch_jlens_full.py --launch
     python3 scripts/runpod_launch_jlens_full.py --status <pod id>     # progress (status.json on the pod)
     python3 scripts/runpod_launch_jlens_full.py --pull <pod id>       # results.tgz -> data/j_basis/gemma2_9b/jlens_full/
@@ -32,15 +33,17 @@ IMAGE = "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404"
 VOLUME_ID = "cr1kjtzjs2"  # network volume with the HF cache under /workspace/interp-demo/models/hf
 POD_NAME = "job-narcbench-jlens-full"
 OUT_REL = "gemma2_9b/jlens_full"
+# gpuTypeId values as RunPod's gpuTypes query lists them on 2026-11-05 ("NVIDIA RTX PRO 4500" without "Blackwell" is rejected).
 GPU_PREFS = [
-    "NVIDIA RTX 6000 Ada Generation", "NVIDIA L40S", "NVIDIA A40", "NVIDIA RTX A6000",
-    "NVIDIA A100 80GB PCIe", "NVIDIA A100-SXM4-80GB", "NVIDIA H100 PCIe",
-    "NVIDIA RTX PRO 4500", "NVIDIA GeForce RTX 4090", "NVIDIA L4",
+    "NVIDIA RTX 6000 Ada Generation", "NVIDIA L40S", "NVIDIA L40", "NVIDIA A40", "NVIDIA RTX A6000",
+    "NVIDIA RTX PRO 5000 Blackwell", "NVIDIA A100 80GB PCIe", "NVIDIA A100-SXM4-80GB", "NVIDIA H100 PCIe",
+    "NVIDIA RTX PRO 4500 Blackwell", "NVIDIA GeForce RTX 4090", "NVIDIA L4",
 ]
+# Secure-cloud on-demand USD/h from the same query (the launcher tries SECURE before COMMUNITY); the estimate uses these.
 RATES = {
-    "NVIDIA RTX 6000 Ada Generation": 0.89, "NVIDIA L40S": 0.89, "NVIDIA A40": 0.49, "NVIDIA RTX A6000": 0.79,
-    "NVIDIA A100 80GB PCIe": 1.39, "NVIDIA A100-SXM4-80GB": 1.64, "NVIDIA H100 PCIe": 2.49,
-    "NVIDIA RTX PRO 4500": 0.72, "NVIDIA GeForce RTX 4090": 0.74, "NVIDIA L4": 0.49,
+    "NVIDIA RTX 6000 Ada Generation": 0.99, "NVIDIA L40S": 1.09, "NVIDIA L40": 0.82, "NVIDIA A40": 0.59, "NVIDIA RTX A6000": 0.59,
+    "NVIDIA RTX PRO 5000 Blackwell": 0.96, "NVIDIA A100 80GB PCIe": 1.79, "NVIDIA A100-SXM4-80GB": 1.79, "NVIDIA H100 PCIe": 2.89,
+    "NVIDIA RTX PRO 4500 Blackwell": 0.72, "NVIDIA GeForce RTX 4090": 0.89, "NVIDIA L4": 0.59,
 }
 
 
@@ -97,7 +100,7 @@ if [ "{int(a.smoke)}" = "1" ]; then
   $PY - <<'PY' > "$RUN/projection.json"
 import json, math
 m=json.load(open("/workspace/jobs/narcbench-results/j_basis/{OUT_REL}/smoke/jlens_meta.json"))
-s=m["pass1_s"]+m["pass2_s"]; per_unit=s/(8*32*1)/({a.max_len}/64)   # seconds per (prompt x rank x layer) at max_len
+s=m["pass1_s"]+m["pass2_s"]; per_unit=s/(8*32*1)*({a.max_len}/64)   # seconds per (prompt x rank x layer), scaled up to max_len (cost ~ linear in tokens)
 cap_h={a.max_minutes}/60*0.9; n={a.n_prompts}; r={a.rank}
 def hours(n,r): return per_unit*n*r*{n_layers}/3600
 tried=[]
@@ -149,6 +152,14 @@ def main() -> int:
     ap.add_argument("--grace-minutes", type=int, default=45)
     ap.add_argument("--s-per-pass", type=float, default=0.6, help="assumed seconds per batched JVP or VJP pass")
     ap.add_argument("--gpu", default=None, help="force one GPU type id")
+    ap.add_argument("--min-balance", type=float, default=20.0, help="refuse to launch below this account balance (USD)")
+    ap.add_argument("--reserve", type=float, default=5.0,
+                    help="skip GPU types whose worst case (rate x (cap + 1 h smoke + grace)) would leave less than this (USD)")
+    ap.add_argument("--allow-existing", action="store_true", help="launch even if a billable pod is already running")
+    ap.add_argument("--min-download", type=int, default=800,
+                    help="only hosts with at least this download speed (Mbps); 0 disables. The image is ~10 GB, and a pod on a slow "
+                         "or stuck host billed 19 min without starting its container on 2026-11-05")
+    ap.add_argument("--preflight", action="store_true", help="run the launch gates and list the eligible GPU types, then exit")
     ap.add_argument("--launch", action="store_true", help="create the pod (spends money)")
     ap.add_argument("--status", metavar="POD_ID")
     ap.add_argument("--pull", metavar="POD_ID")
@@ -189,8 +200,36 @@ def main() -> int:
     boot_b64 = base64.b64encode(boot.encode()).decode()
     (ROOT / "results/jspace").mkdir(parents=True, exist_ok=True)
     (ROOT / "results/jspace/jlens_full_launch_estimate.json").write_text(json.dumps(est, indent=2) + "\n")
+    gpus = [a.gpu] if a.gpu else GPU_PREFS
+    if a.launch or a.preflight:
+        # Launch gates (STATUS.md: balance >= $20, one billable GPU at a time) plus a per-type budget check.
+        me = graphql("query { myself { clientBalance pods { id name desiredStatus costPerHr machine { gpuDisplayName } } } }")
+        if me.get("errors"):
+            print(f"gate: cannot read the account: {str(me['errors'])[:300]}", file=sys.stderr)
+            return 2
+        me = me["data"]["myself"]
+        balance = float(me.get("clientBalance") or 0.0)
+        running = [p for p in (me.get("pods") or []) if p.get("desiredStatus") == "RUNNING" and (p.get("costPerHr") or 0) > 0.05]
+        worst_h = (a.max_minutes + 60 + a.grace_minutes) / 60  # run cap + up to 1 h smoke + grace window
+        eligible = [g for g in gpus if RATES.get(g) is None or RATES[g] * worst_h <= balance - a.reserve]
+        skipped = [g for g in gpus if g not in eligible]
+        print(json.dumps({"balance_usd": round(balance, 2), "billable_pods_running": running, "worst_case_hours": round(worst_h, 2),
+                          "eligible_gpus": eligible, "skipped_over_budget": skipped}, indent=2))
+        if balance < a.min_balance:
+            print(f"gate: balance {balance:.2f} is below --min-balance {a.min_balance:.2f}; not launching", file=sys.stderr)
+            return 2
+        if running and not a.allow_existing:
+            print("gate: a billable pod is already running (one GPU at a time); pass --allow-existing to override", file=sys.stderr)
+            return 2
+        if not eligible:
+            print("gate: no GPU type fits the budget (--reserve); not launching", file=sys.stderr)
+            return 2
+        gpus = eligible
+        if a.preflight:
+            return 0
     if not a.launch:
-        print("\n[estimate-only] re-run with --launch to spend; the smoke on the pod measures the real rate", file=sys.stderr)
+        print("\n[estimate-only] re-run with --preflight to check the gates, --launch to spend; the smoke on the pod measures the real rate",
+              file=sys.stderr)
         return 0
     if len(boot_b64) > 120000:
         print("boot script too large", file=sys.stderr)
@@ -199,7 +238,6 @@ def main() -> int:
     if os.environ.get("HF_TOKEN"):
         env["HF_TOKEN"] = os.environ["HF_TOKEN"]
     docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
-    gpus = [a.gpu] if a.gpu else GPU_PREFS
     last = None
     for cloud in ("SECURE", "COMMUNITY"):
         for g in gpus:
@@ -208,6 +246,8 @@ def main() -> int:
                    "ports": "8765/http", "env": [{"key": k, "value": str(v)} for k, v in env.items()],
                    "dockerArgs": docker_args, "supportPublicIp": False, "startSsh": False,
                    "networkVolumeId": VOLUME_ID, "volumeMountPath": "/workspace"}
+            if a.min_download > 0:
+                inp["minDownload"] = a.min_download
             q = """mutation ($input: PodFindAndDeployOnDemandInput!) {
                   podFindAndDeployOnDemand(input: $input) { id desiredStatus costPerHr machine { gpuDisplayName dataCenterId } } }"""
             try:

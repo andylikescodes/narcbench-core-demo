@@ -92,3 +92,23 @@ It does not estimate Jacobians for the official models (no GPU here), does not u
 ## 8. Outputs
 
 `results/jspace/<model>/summary.json` (every number with its interval), `results/jspace/<model>/RESULTS.md` (tables), `results/jspace/<model>/episode_scores.json` (per-episode Peak, Split and Asymmetry scores per arm, layer and k, so the bootstrap can be rerun without the activations), and `results/jspace/RESULTS.md` across models. Figures go to `results/jspace/figures/`.
+
+## Addendum, 5 November 2026 — the paper-faithful J arm (registered before any run)
+
+The arms above build J-space from the unembedding alone (W_U top-k frames, J ≈ I). The paper's J-space uses the Jacobian lens. This addendum registers the arm that follows the paper, implemented in `scripts/jspace_decompose.py`, before it has been run on any activation cache.
+
+**J_ℓ.** The published Jacobian lens for `google/gemma-2-9b-it` (Hugging Face `neuronpedia/jacobian-lens`, `gemma-2-9b-it/jlens/Salesforce-wikitext/gemma-2-9b-it_jacobian_lens.pt`, fitted with Anthropic's `jlens` on 453 WikiText-103 prompts, 128 tokens, all 41 source layers, fp16). Our own estimate (a rank-256 sketch) was stopped on 5 November and is not used.
+
+**Readout.** lens(h) = softcap(W_U · norm(J_ℓ h)) with Gemma's RMSNorm, norm(x) = x / rms(x) · (1 + γ), and the logit softcap 30, as `jlens.hf.unembed` applies it.
+
+**Dictionary.** The J-lens vector of token i at layer ℓ is v_i = J_ℓᵀ((1 + γ) ⊙ W_U[i]), row i of W_U diag(1 + γ) J_ℓ; logit_i is an increasing function of ⟨v_i, h⟩.
+
+**Split, per activation.** Candidates: the 1,024 tokens with the largest ⟨v_i, h⟩/‖v_i‖. Pursuit: nonnegative orthogonal matching pursuit, k = 25 steps; each step adds the candidate with the largest positive ⟨v_i, r⟩/‖v_i‖ against the current residual r and refits nonnegative coefficients by NNLS on the support. If no candidate correlates positively before k atoms are chosen, the remaining slots are filled with the next-best candidates by ⟨v_i, h⟩/‖v_i‖ so that |S| = k exactly, as in the paper's minimum over |S| = k; the number of filled atoms is recorded per activation. S = the chosen tokens. h_Jpaper = Π_S h (orthogonal projection onto span{v_i : i ∈ S}), h_Cpaper = h − h_Jpaper. FVE_J = ‖h_Jpaper‖²/‖h‖².
+
+**Arms added.** `Jpaper_25` (h_Jpaper) and `Cpaper_25` (h_Cpaper), run through the unchanged probe pipeline of Section 3, with the same controls as Section 2 (randsub_25, C_randsub_25, shuffled_25 with the other activation's S, pca_25, contrast) and the same inference.
+
+**Registered robustness variants** (reported, not selected on): atom selection by raw score (`--select raw`) instead of unit-normalised correlation, since the paper does not state its normalisation and the largest-norm J-lens vectors on this model belong to `<end_of_turn>` and `<unused…>` tokens; `--method topk` (the k largest correlations, no pursuit) and `--method gp` (gradient pursuit); k ∈ {8, 16, 25, 50}; the cone fit Σ c_i v_i in place of Π_S h; the early-stopped pursuit without filling (`--no-fill`).
+
+**Predictions.** Unchanged from Section 5, now stated for Jpaper/Cpaper: if the J component carries the colluder signal in distribution but not across families, Jpaper_25 ≈ full on Core leave-one-domain-out and Jpaper_25 ≈ randsub_25 on Core → Transfer, with Cpaper_25 ≈ full on both. The paper's own expectation (J component under 10% of variance) predicts FVE_J well below 0.10 at every layer of the band.
+
+**Not changed.** Readings, layers, the probe pipeline, the inference, and the arms above. The Gemma activation caches live on the RunPod network volume and must be copied down before any of this runs.

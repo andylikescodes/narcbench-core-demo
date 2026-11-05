@@ -47,11 +47,17 @@ def find_shard(repo: str, tensor: str, local: Path) -> str:
         raise
 
 
+def auth() -> dict:
+    """Bearer header from HF_TOKEN when set (gated repos such as google/gemma-2-9b-it); never printed."""
+    tok = os.environ.get("HF_TOKEN")
+    return {"Authorization": f"Bearer {tok}"} if tok else {}
+
+
 def get_header(url: str) -> tuple[int, dict]:
-    r = requests.get(url, headers={"Range": "bytes=0-7"}, allow_redirects=True, timeout=60)
+    r = requests.get(url, headers={**auth(), "Range": "bytes=0-7"}, allow_redirects=True, timeout=60)
     r.raise_for_status()
     n = struct.unpack("<Q", r.content[:8])[0]
-    r = requests.get(url, headers={"Range": f"bytes=8-{8 + n - 1}"}, allow_redirects=True, timeout=120)
+    r = requests.get(url, headers={**auth(), "Range": f"bytes=8-{8 + n - 1}"}, allow_redirects=True, timeout=120)
     r.raise_for_status()
     return n, json.loads(r.content[:n].decode("utf-8"))
 
@@ -63,7 +69,7 @@ def stream_range(url: str, start: int, end_inclusive: int, dest: Path) -> None:
     if have >= total:
         print(f"  already have {have} bytes", flush=True)
         return
-    headers = {"Range": f"bytes={start + have}-{end_inclusive}"}
+    headers = {**auth(), "Range": f"bytes={start + have}-{end_inclusive}"}
     t0, done = time.time(), have
     with requests.get(url, headers=headers, stream=True, allow_redirects=True, timeout=120) as r:
         r.raise_for_status()
@@ -79,6 +85,21 @@ def stream_range(url: str, start: int, end_inclusive: int, dest: Path) -> None:
                     print(f"  {done/1e6:,.0f}/{total/1e6:,.0f} MB  {rate:.1f} MB/s  eta {(total-done)/max(rate,1e-6)/1e6:.0f}s", flush=True)
     if dest.stat().st_size != total:
         raise SystemExit(f"size mismatch {dest.stat().st_size} != {total}")
+
+
+def convert_vector(raw: Path, dtype: str, shape: list[int], out: Path, name: str) -> None:
+    """A 1-D tensor (e.g. the final norm weight model.norm.weight) -> <out>/<name>_fp32.npy."""
+    (n,) = shape
+    b = np.fromfile(raw, dtype=np.uint8)
+    if dtype == "BF16":
+        f32 = (b.view("<u2").astype(np.uint32) << 16).view(np.float32)
+    elif dtype == "F16":
+        f32 = b.view("<f2").astype(np.float32)
+    else:
+        f32 = b.view("<f4")
+    assert f32.shape[0] == n, (f32.shape, n)
+    np.save(out / f"{name}_fp32.npy", f32.astype(np.float32))
+    print(f"  wrote {out / (name + '_fp32.npy')} {f32.shape}; mean {f32.mean():.4f} min {f32.min():.4f} max {f32.max():.4f}", flush=True)
 
 
 def convert(raw: Path, dtype: str, shape: list[int], out: Path, rows_per_block: int = 8192) -> None:
@@ -110,7 +131,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("repo")
     ap.add_argument("out", type=Path)
-    ap.add_argument("--tensor", default="lm_head.weight")
+    ap.add_argument("--tensor", default="lm_head.weight",
+                    help="tied-embedding models (Gemma): model.embed_tokens.weight; 1-D tensors such as model.norm.weight are "
+                         "written as <out>/<name>_fp32.npy")
+    ap.add_argument("--name", default=None, help="file stem for a 1-D tensor (default final_norm_weight for *norm.weight)")
     ap.add_argument("--revision", default="main")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -126,11 +150,18 @@ def main() -> int:
     print(f"  dtype {info['dtype']} shape {info['shape']} bytes {(end-start)/1e9:.3f} GB", flush=True)
     raw = args.out / f"_raw_{args.tensor}.bin"
     stream_range(url, abs_start, abs_end, raw)
-    convert(raw, info["dtype"], info["shape"], args.out)
     meta = {"repo": args.repo, "revision": args.revision, "shard": shard, "tensor": args.tensor,
             "dtype_source": info["dtype"], "shape": info["shape"], "data_offsets": [start, end],
-            "stored_as": "float16 (lossless for BF16 values within fp16 range)", "fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
-    (args.out / "unembed_meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+            "fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    if len(info["shape"]) == 1:
+        name = args.name or ("final_norm_weight" if args.tensor.endswith("norm.weight") else args.tensor.replace(".", "_"))
+        convert_vector(raw, info["dtype"], info["shape"], args.out, name)
+        meta["stored_as"] = "float32"
+        (args.out / f"{name}_meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+    else:
+        convert(raw, info["dtype"], info["shape"], args.out)
+        meta["stored_as"] = "float16 (lossless for BF16 values within fp16 range)"
+        (args.out / "unembed_meta.json").write_text(json.dumps(meta, indent=2) + "\n")
     raw.unlink()
     print("  done", flush=True)
     return 0

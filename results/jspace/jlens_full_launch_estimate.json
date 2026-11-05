@@ -2,7 +2,7 @@
   "batched_passes": 80000,
   "assumed_s_per_pass": 0.6,
   "hours_est": 15.8,
-  "preferred_gpu": "NVIDIA RTX 6000 Ada Generation",
+  "preferred_gpu": "NVIDIA GeForce RTX 4090",
   "rate_usd_hr": 0.89,
   "cost_est_usd": 14.09,
   "settings": {

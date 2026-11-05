@@ -75,7 +75,8 @@ def build_prompts(tok, mix: str, seed: int) -> list[dict]:
         name, cnt = part.split(":")
         cnt = int(cnt)
         if name == "wikitext":
-            ds = load_dataset("wikitext", "wikitext-103-raw-v1", split="test+validation")
+            # The canonical dataset moved under a namespace; huggingface_hub >= 1.0 rejects the bare "wikitext" id.
+            ds = load_dataset("Salesforce/wikitext", "wikitext-103-raw-v1", split="test+validation")
             paras = [t.strip() for t in ds["text"] if len(t.split()) >= 40 and not t.strip().startswith("=")]
             for t in rng.sample(paras, cnt):
                 out.append({"source": "wikitext-103-raw-v1 test+validation", "text": t})

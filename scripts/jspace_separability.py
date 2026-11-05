@@ -57,13 +57,15 @@ ARM_ORDER = [
 ]
 METRICS = ("peak", "split", "asym")
 PRIMARY_K = 25
+DIFF_PAIRS = [("C_J", "J"), ("J", "randsub"), ("J", "shuffled"), ("J", "randrows"), ("J", "pca"), ("C_J", "full"), ("C_randsub", "full"),
+              ("contrast", "J"), ("pca", "J")]
 
 
 # ---------------------------------------------------------------------------
 # Data
 # ---------------------------------------------------------------------------
 
-def load_split(acts_dir: Path, layers: list[int], *, transfer: bool) -> tuple[list[dict], dict[int, np.ndarray], dict]:
+def load_split(acts_dir: Path, layers: list[int], *, transfer: bool) -> tuple[list[dict], dict[int, np.ndarray], dict, np.ndarray]:
     meta, npz = load_acts(acts_dir)
     if transfer:
         meta = enrich_transfer_meta(meta)
@@ -86,7 +88,34 @@ def load_split(acts_dir: Path, layers: list[int], *, transfer: bool) -> tuple[li
         },
         "domains_or_families": sorted({domain_of(m.get("scenario_id", ""), m.get("scenario_domain", "") or "") for m in meta}),
     }
-    return meta, acts, info
+    return meta, acts, info, keep
+
+
+def load_external_arm(arm_dir: Path, layers: list[int], keep: np.ndarray, n_expected: int) -> dict[int, np.ndarray]:
+    """A precomputed arm in the paper layout (e.g. jspace_decompose.py's j_only/ or shuffled/), row-aligned with the
+    base cache: the same first len(keep) rows, the same zero-row mask."""
+    npz = np.load(arm_dir / "activations_gen.npz")
+    out = {}
+    for L in layers:
+        arr = npz[f"layer_{L}"][: len(keep)]
+        if arr.shape[0] != len(keep):
+            raise SystemExit(f"{arm_dir}: layer {L} has {arr.shape[0]} rows, base cache has {len(keep)}")
+        arr = np.ascontiguousarray(arr[keep], dtype=np.float32)
+        assert arr.shape[0] == n_expected, (arr.shape, n_expected)
+        out[L] = arr
+    return out
+
+
+def parse_external_arm(spec: str) -> dict:
+    """NAME=k:CORE_DIR:XFER_DIR[+C]  ->  {name, k, core, xfer, complement}. +C also adds C_NAME = h - arm."""
+    name, _, rest = spec.partition("=")
+    comp = rest.endswith("+C")
+    if comp:
+        rest = rest[:-2]
+    parts = rest.split(":")
+    if not name or len(parts) != 3:
+        raise SystemExit(f"--external-arm expects NAME=k:CORE_DIR:XFER_DIR[+C], got {spec!r}")
+    return {"name": name, "k": int(parts[0]), "core": Path(parts[1]), "xfer": Path(parts[2]), "complement": comp}
 
 
 def has_discussion_groups(meta: list[dict], acts: np.ndarray) -> bool:
@@ -743,6 +772,10 @@ def main() -> int:
     ap.add_argument("--ldo-all-k-all-layers", action="store_true", help="run the Core LDO k sweep at every layer (slow); default: k=25 everywhere, sweep at the centre layer")
     ap.add_argument("--skip-ldo", action="store_true")
     ap.add_argument("--skip-lofo", action="store_true")
+    ap.add_argument("--external-arm", action="append", default=[], metavar="NAME=k:CORE_DIR:XFER_DIR[+C]",
+                    help="a precomputed arm in the paper layout (row-aligned activations_gen.npz under CORE_DIR and XFER_DIR), "
+                         "entered at frame size k beside the arms above; +C also adds its complement C_NAME = h - arm. "
+                         "Used for jspace_decompose.py's Jacobian-lens split (design addendum of 5 Nov 2026). Repeatable.")
     args = ap.parse_args()
 
     if args.recompute_readings:
@@ -767,9 +800,21 @@ def main() -> int:
     out = args.out if args.out.is_absolute() else ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
 
-    core_meta, core_acts, core_info = load_split(args.core_acts if args.core_acts.is_absolute() else ROOT / args.core_acts, layers, transfer=False)
-    xfer_meta, xfer_acts, xfer_info = load_split(args.transfer_acts if args.transfer_acts.is_absolute() else ROOT / args.transfer_acts, layers, transfer=True)
+    core_meta, core_acts, core_info, core_keep = load_split(args.core_acts if args.core_acts.is_absolute() else ROOT / args.core_acts, layers, transfer=False)
+    xfer_meta, xfer_acts, xfer_info, xfer_keep = load_split(args.transfer_acts if args.transfer_acts.is_absolute() else ROOT / args.transfer_acts, layers, transfer=True)
     layers = [L for L in layers if L in core_acts and L in xfer_acts]
+    externals = [parse_external_arm(spec) for spec in args.external_arm]
+    for e in externals:
+        if e["name"] in ARM_ORDER or f"C_{e['name']}" in ARM_ORDER:
+            raise SystemExit(f"external arm name {e['name']!r} collides with an existing arm")
+        e["core_arr"] = load_external_arm(e["core"] if e["core"].is_absolute() else ROOT / e["core"], layers, core_keep, len(core_meta))
+        e["xfer_arr"] = load_external_arm(e["xfer"] if e["xfer"].is_absolute() else ROOT / e["xfer"], layers, xfer_keep, len(xfer_meta))
+        ARM_ORDER.append(e["name"])
+        DIFF_PAIRS.extend([(e["name"], "J"), (e["name"], "randsub"), (e["name"], "shuffled"), (e["name"], "pca")])
+        if e["complement"]:
+            ARM_ORDER.append(f"C_{e['name']}")
+            DIFF_PAIRS.extend([(f"C_{e['name']}", e["name"]), (f"C_{e['name']}", "full"), (f"C_{e['name']}", "C_J")])
+        print(f"[external arm] {e['name']} at k={e['k']}: core {e['core']} transfer {e['xfer']}" + (" (+ complement)" if e["complement"] else ""), flush=True)
     centre = args.centre_layer if args.centre_layer is not None else layers[len(layers) // 2]
     scale = np.load(args.unembed_scale) if args.unembed_scale else None
     W, norms = load_unembed(args.unembed if args.unembed.is_absolute() else ROOT / args.unembed, scale=scale)
@@ -782,7 +827,9 @@ def main() -> int:
     summary: dict[str, Any] = {
         "tag": args.tag, "design": DESIGN, "written": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
         "data": {"core": core_info, "transfer": xfer_info, "unembed": str(args.unembed), "V": int(V), "d": int(d),
-                 "unembed_scale": str(args.unembed_scale) if args.unembed_scale else None},
+                 "unembed_scale": str(args.unembed_scale) if args.unembed_scale else None,
+                 "external_arms": [{"name": e["name"], "k": e["k"], "core": str(e["core"]), "transfer": str(e["xfer"]), "complement": e["complement"]}
+                                   for e in externals]},
         "layers": layers, "centre_layer": centre, "ks": ks, "seed": args.seed, "n_boot": args.n_boot, "n_perm": args.n_perm,
         "A1_core_ldo": {"per_layer": {}}, "A2_transfer": {"per_layer": {}}, "A3_transfer_lofo": {"per_layer": {}},
         "A4a_core_disc_to_final": {"per_layer": {}}, "A4b_core_to_transfer_discussion": {"per_layer": {}},
@@ -831,6 +878,11 @@ def main() -> int:
             kp = min(k, Q_pca.shape[1])
             arms["pca"] = fixed_projection(H, Q_pca, kp); arms["C_pca"] = H - arms["pca"]
             arms["contrast"] = fixed_projection(H, Q_con, min(k, k_con))
+            for e in externals:
+                if e["k"] == k:
+                    arms[e["name"]] = np.vstack([e["core_arr"][L], e["xfer_arr"][L]])
+                    if e["complement"]:
+                        arms[f"C_{e['name']}"] = H - arms[e["name"]]
             res_a2, res_a1, res_a3, res_a4a, res_a4b = {}, {}, {}, {}, {}
             run_ldo_here = (not args.skip_ldo) and (k == PRIMARY_K or L == centre or args.ldo_all_k_all_layers)
             for arm, A in arms.items():
@@ -866,7 +918,10 @@ def main() -> int:
                 summary["A4b_core_to_transfer_discussion"]["per_layer"].setdefault(str(L), {})[str(k)] = res_a4b
             print(f"[L{L} k={k}] A2 primary: full {res_a2['full']['primary']:.3f} | J {res_a2['J']['primary']:.3f} | C_J {res_a2['C_J']['primary']:.3f} | "
                   f"randsub {res_a2['randsub']['primary']:.3f} | shuffled {res_a2['shuffled']['primary']:.3f} | pca {res_a2['pca']['primary']:.3f} | "
-                  f"contrast {res_a2['contrast']['primary']:.3f}" + (f" || A1 J {res_a1['J']['primary']:.3f} C_J {res_a1['C_J']['primary']:.3f}" if res_a1 else "")
+                  f"contrast {res_a2['contrast']['primary']:.3f}"
+                  + "".join(f" | {e['name']} {res_a2[e['name']]['primary']:.3f}" + (f" C_{e['name']} {res_a2['C_' + e['name']]['primary']:.3f}" if e["complement"] else "")
+                            for e in externals if e["k"] == k)
+                  + (f" || A1 J {res_a1['J']['primary']:.3f} C_J {res_a1['C_J']['primary']:.3f}" if res_a1 else "")
                   + (f" || A3 J {res_a3['J']['primary']:.3f} C_J {res_a3['C_J']['primary']:.3f}" if res_a3 else "") + f"  ({time.time() - tk:.0f}s)", flush=True)
         del projJ, projS, projR
         print(f"[L{L}] done in {time.time() - tL:.0f}s", flush=True)
@@ -926,7 +981,7 @@ def main() -> int:
                 p = permutation_pvalue(ep_by_layer, Yperm)
                 arms_out[arm] = {"est": est, "ci": ci(vals), "p_perm": p}
             diffs = {}
-            for a, b in (("C_J", "J"), ("J", "randsub"), ("J", "shuffled"), ("J", "randrows"), ("J", "pca"), ("C_J", "full"), ("C_randsub", "full"), ("contrast", "J"), ("pca", "J")):
+            for a, b in DIFF_PAIRS:
                 if a in dist and b in dist:
                     diffs[f"{a}-{b}"] = {"est": arms_out[a]["est"] - arms_out[b]["est"], "ci": ci(dist[a] - dist[b])}
             res[k_] = {"arms": arms_out, "differences": diffs, "n_episodes": int(len(y))}

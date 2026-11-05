@@ -33,3 +33,6 @@ papers/**/*.synctex.gz
 # J-space analysis inputs (official NARCBench activations, unembedding matrices); multi-GB, never committed
 data/j_basis/
 data/activations/
+
+# Volume pull inventories (scripts/runpod_pull_volume_files.py); the record lives in results/jspace/
+data/volume_pull/

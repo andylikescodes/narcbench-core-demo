@@ -196,3 +196,18 @@ Full write-up: `results/jspace/RESULTS.md`; tables: `results/jspace/CROSS_MODEL_
 | Core disc → Core final: full / J-only | 1.000 / 0.700 | 0.999 / 0.579 | 0.924 / 0.507 | not measured |
 
 Reading (rules fixed in the design): the transferable signal is not in J-space on any of the four models; J-only sits with the dimension-matched controls and its complement with the full residual. In distribution J-space separates colluders only where a random 25-dimensional subspace does too. Within Transfer, J-space holds no more role information than a random subspace. Either the phase change or the family change alone removes what J-space had. Cause (A5 geometry): at these depths the top-25 frames are nearly the same fixed junk or formatting directions for every turn, and the probe direction has no more weight in them than a random direction. The locked safety wording ("mostly non-J coordination signature") stands; "complement ≈ full" and "Core J-only ≈ 0.99" should no longer be cited as evidence about J-space. An exploratory variant with the final-norm-scaled unembedding (E1, `results/jspace/E1_GAMMA.md`) was run afterwards: J-only on Transfer moves to 0.542 / 0.496 / 0.615, still at its random-subspace control on every model; the pre-registered readings stand. Paper: `papers/jspace-separability-2026-10/main.tex` (PDF built with `tectonic`). A Gemma-only methods-and-results paper (4 November 2026) is at `papers/jspace-gemma2-9b-2026-11/main.pdf`: it documents the data, both Gemma J-space estimators (the W_U frame and the rank-64 eight-prompt Jacobian sketch) as proxies for the paper's J-space, the probe pipeline, the run ledger, and the frozen numbers with Hanley–McNeil intervals, and lists the controls that were never run on Gemma.
+
+### 8b. The paper's J-space on Gemma-2-9B-it (5 November 2026)
+
+The arms above build J-space from the unembedding (W_U top-k frames). On 4–5 November the lane switched to the paper's definition: the published Jacobian lens for `gemma-2-9b-it` (Neuronpedia, fitted with Anthropic's `jlens`), J-lens vectors v_i = J_ℓᵀ((1 + γ) ⊙ W_U[i]), a nonnegative pursuit to k = 25 atoms per activation, h_J = projection onto their span (`scripts/jspace_decompose.py`, registered in the design addendum of 5 Nov before any run). The Gemma caches were copied off the RunPod volume (`scripts/runpod_pull_volume_files.py`, ≈$0.15 in pods) and the pre-registered pipeline was run with the new arms beside the old ones (`scripts/jspace_separability.py --external-arm`).
+
+| | Core LDO | Core → Transfer (72 ep.) | within-Transfer LOFO | FVE |
+|---|---|---|---|---|
+| full | 1.000 | 0.902 [0.863, 0.935] | 0.977 | 1 |
+| **Jpaper_25** | 0.995 | **0.755 [0.709, 0.796]** | 0.854 [0.820, 0.887] | 0.011–0.013 |
+| C_Jpaper_25 | 1.000 | 0.891 [0.850, 0.927] | 0.978 | ≈0.99 |
+| another turn's atoms | 0.965 | 0.559 [0.511, 0.611] | 0.608 | 0.011–0.013 |
+| random 25-dim subspace | 0.981 | 0.647 [0.602, 0.693] | 0.742 | 0.007 |
+| J (W_U top-25, as in 8a) | 0.989 | 0.602 [0.550, 0.658] | 0.744 | 0.057 |
+
+Reading by the design's rules: the paper's J-space carries a part of the transferable colluder signal (above both dimension-matched controls, +0.108 [+0.052, +0.160] and +0.196 [+0.136, +0.252]) and the complement carries most of it (0.891 vs 0.902). The effect sits at layers 22–23 (0.852, 0.897; nothing beyond a random subspace at 19–21) and in final turns only (on Transfer discussion turns Jpaper is at the random level). The full and W_U numbers reproduce the frozen 1 October values exactly. Details: `results/jspace/gemma2_9b_jpaper_nnomp_k25/`, `docs/NEXT-SCIENCE.md` (5 Nov). Robustness variants (raw selection, top-k, k = 16/50) were running when this was written.

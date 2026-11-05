@@ -1,0 +1,86 @@
+{
+  "created_utc": "20261105T073331Z",
+  "pod": {
+    "id": "fu2kvy935mvcxs",
+    "desiredStatus": "RUNNING",
+    "costPerHr": 0.57,
+    "machine": {
+      "podHostId": "fu2kvy935mvcxs-64410cda",
+      "gpuDisplayName": "RTX PRO 4000",
+      "dataCenterId": "EU-RO-1"
+    },
+    "gpu": "NVIDIA RTX PRO 4000 Blackwell"
+  },
+  "rate_usd_hr": 0.57,
+  "spec": "gemma_acts",
+  "paths": [
+    "gemma2_9b/core/20261001T012639Z/activations_gen.npz",
+    "gemma2_9b/core/20261001T012639Z/metadata_gen.json",
+    "gemma2_9b/transfer/RUNPOD/activations_gen.npz",
+    "gemma2_9b/transfer/RUNPOD/metadata_gen.json"
+  ],
+  "ready_after_s": 319.2,
+  "files": [
+    {
+      "wanted": "gemma2_9b/core/20261001T012639Z/activations_gen.npz",
+      "remote": "/workspace/jobs/narcbench-results/activations/gemma2_9b/core/20261001T012639Z/activations_gen.npz",
+      "local": "data/activations/gemma2_9b/core/20261001T012639Z/activations_gen.npz",
+      "size": 70902744,
+      "sha256": "656100bf6aa651abd2fa47384761a90e8ba7a6991fac15ff130db8d41b6cd73b",
+      "status": "downloaded",
+      "seconds": 4.5
+    },
+    {
+      "wanted": "gemma2_9b/core/20261001T012639Z/metadata_gen.json",
+      "remote": "/workspace/jobs/narcbench-results/activations/gemma2_9b/core/20261001T012639Z/metadata_gen.json",
+      "local": "data/activations/gemma2_9b/core/20261001T012639Z/metadata_gen.json",
+      "size": 800949,
+      "sha256": "c653854d15d6abd0bb0b4c31621eaf43819c6e046a1feea368b768d6cb7a61dc",
+      "status": "downloaded",
+      "seconds": 1.6
+    },
+    {
+      "wanted": "gemma2_9b/transfer/RUNPOD/activations_gen.npz",
+      "remote": "/workspace/jobs/narcbench-results/activations/gemma2_9b/transfer/RUNPOD/activations_gen.npz",
+      "local": "data/activations/gemma2_9b/transfer/RUNPOD/activations_gen.npz",
+      "size": 39051479,
+      "sha256": "58e9eb5611ef95ee69ac5ebb1d6ed90be6eafce11dae10d4bdad3ef6c2cf8627",
+      "status": "downloaded",
+      "seconds": 3.8
+    },
+    {
+      "wanted": "gemma2_9b/transfer/RUNPOD/metadata_gen.json",
+      "remote": "/workspace/jobs/narcbench-results/activations/gemma2_9b/transfer/RUNPOD/metadata_gen.json",
+      "local": "data/activations/gemma2_9b/transfer/RUNPOD/metadata_gen.json",
+      "size": 430648,
+      "sha256": "24ca0b31cb285fba91ad3ec08e990667c4becbdf7d94d45255b6d31944a080b8",
+      "status": "downloaded",
+      "seconds": 1.7
+    }
+  ],
+  "missing": [],
+  "alternatives": {
+    "gemma2_9b/core/20261001T012639Z/activations_gen.npz": [
+      "/workspace/jobs/narcbench-core-demo/data/activations/gemma2_9b/core/20261001T012639Z/activations_gen.npz"
+    ],
+    "gemma2_9b/core/20261001T012639Z/metadata_gen.json": [
+      "/workspace/jobs/narcbench-core-demo/data/activations/gemma2_9b/core/20261001T012639Z/metadata_gen.json"
+    ],
+    "gemma2_9b/transfer/RUNPOD/activations_gen.npz": [
+      "/workspace/jobs/narcbench-core-demo/data/activations/gemma2_9b/transfer/RUNPOD/activations_gen.npz"
+    ],
+    "gemma2_9b/transfer/RUNPOD/metadata_gen.json": [
+      "/workspace/jobs/narcbench-core-demo/data/activations/gemma2_9b/transfer/RUNPOD/metadata_gen.json"
+    ]
+  },
+  "inventory_dir": "data/volume_pull/_inventory/20261105T073331Z",
+  "terminate": {
+    "data": {
+      "podTerminate": null
+    }
+  },
+  "pod_after": null,
+  "elapsed_s": 342.7,
+  "cost_est_usd": 0.054,
+  "outcome": "ok"
+}

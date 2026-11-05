@@ -275,6 +275,39 @@ def pursuit_one(h: np.ndarray, cand: np.ndarray, J: np.ndarray, W: np.ndarray, s
             "cone": cone.astype(np.float32), "steps": steps, "filled": filled}
 
 
+def project_onto_tokens(h: np.ndarray, toks: np.ndarray, J: np.ndarray, W: np.ndarray, s: np.ndarray) -> np.ndarray:
+    """Orthogonal projection of h onto span{v_t : t in toks}, v_t = J^T (s * W_U[t]) (toks: token ids, -1 = unused)."""
+    toks = toks[toks >= 0]
+    if len(toks) == 0:
+        return np.zeros_like(h, dtype=np.float32)
+    A = ((np.asarray(W[toks], dtype=np.float32) * s[None, :]) @ J).T  # [d, m]
+    Q, _ = np.linalg.qr(A)
+    return (Q @ (Q.T @ np.asarray(h, dtype=np.float32))).astype(np.float32)
+
+
+def derangement(n: int, rng: np.random.Generator) -> np.ndarray:
+    """A permutation of range(n) with no fixed point (n >= 2), as the probe script builds its shuffled frames."""
+    perm = rng.permutation(n)
+    fixed = np.where(perm == np.arange(n))[0]
+    if len(fixed) > 1:
+        perm[fixed] = np.roll(perm[fixed], 1)
+    elif len(fixed) == 1 and n > 1:
+        j = (fixed[0] + 1) % n
+        perm[fixed[0]], perm[j] = perm[j], perm[fixed[0]]
+    return perm
+
+
+def shuffled_control(acts: np.ndarray, toks: np.ndarray, J: np.ndarray, W: np.ndarray, s: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
+    """shuffled_k: each activation projected onto the span of ANOTHER activation's chosen atoms (a derangement of the
+    rows; design section 2). Returns the projections and the permutation used."""
+    n = acts.shape[0]
+    perm = derangement(n, np.random.default_rng(seed)) if n > 1 else np.arange(n)
+    out = np.zeros_like(acts, dtype=np.float32)
+    for i in range(n):
+        out[i] = project_onto_tokens(acts[i], toks[perm[i]], J, W, s)
+    return out, perm
+
+
 def decompose_layer(acts: np.ndarray, J: np.ndarray, W: np.ndarray, s: np.ndarray, an: np.ndarray, *, k: int,
                     n_cand: int, method: str, k_read: int = 25, vocab_chunk: int = 8192, batch: int = 64,
                     select: str = "unit", fill: bool = True, log=None) -> dict:
@@ -340,6 +373,9 @@ def main() -> int:
     ap.add_argument("--vocab-chunk", type=int, default=8192)
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--out-root", type=Path, required=True)
+    ap.add_argument("--shuffled-seed", type=int, default=0,
+                    help="also write shuffled/: each activation projected onto another activation's chosen atoms (a seeded "
+                         "derangement of the rows, per layer); -1 disables")
     a = ap.parse_args()
 
     acts_dir = a.acts_dir if a.acts_dir.is_absolute() else ROOT / a.acts_dir
@@ -363,13 +399,13 @@ def main() -> int:
     if missing:
         raise SystemExit(f"activations have no layers {missing}; available {avail}")
 
-    j_dir, c_dir = out_root / "j_only", out_root / "complement"
-    for p in (j_dir, c_dir):
+    j_dir, c_dir, s_dir = out_root / "j_only", out_root / "complement", out_root / "shuffled"
+    for p in (j_dir, c_dir) + ((s_dir,) if a.shuffled_seed >= 0 else ()):
         p.mkdir(parents=True, exist_ok=True)
         shutil.copy2(meta_p, p / "metadata_gen.json")
     cache_dir = lens_p.parent / "derived"
 
-    j_arrays, c_arrays, tok_arrays, layer_stats = {}, {}, {}, {}
+    j_arrays, c_arrays, s_arrays, tok_arrays, layer_stats = {}, {}, {}, {}, {}
     for L in layers:
         acts = np.ascontiguousarray(npz[f"layer_{L}"], dtype=np.float32)
         if a.limit:
@@ -389,9 +425,20 @@ def main() -> int:
         c_arrays[f"layer_{L}"] = res["h_C"]
         for key in ("tokens", "coefs", "steps", "filled", "readout_top", "readout_scores", "fve_j"):
             tok_arrays[f"{key}_L{L}"] = res[key]
+        if a.shuffled_seed >= 0:
+            t1 = time.time()
+            h_S, perm = shuffled_control(acts, res["tokens"], J[L], W, s, a.shuffled_seed + L)
+            s_arrays[f"layer_{L}"] = h_S
+            tok_arrays[f"shuffled_perm_L{L}"] = perm
+            fve_s = np.einsum("ij,ij->i", h_S, h_S) / (np.einsum("ij,ij->i", acts, acts) + 1e-12)
+            st["mean_fve_shuffled"] = float(fve_s.mean())
+            st["shuffled_seconds"] = round(time.time() - t1, 1)
+            log(f"  shuffled control: FVE mean {st['mean_fve_shuffled']:.4f} ({st['shuffled_seconds']}s)")
 
     np.savez_compressed(j_dir / "activations_gen.npz", **j_arrays)
     np.savez_compressed(c_dir / "activations_gen.npz", **c_arrays)
+    if a.shuffled_seed >= 0:
+        np.savez_compressed(s_dir / "activations_gen.npz", **s_arrays)
     np.savez_compressed(out_root / "decomp_tokens.npz", **tok_arrays)
     meta = {
         "definition": (
@@ -400,7 +447,7 @@ def main() -> int:
             "h_J = orthogonal projection onto their span, h_C = h - h_J; cone = nonnegative fit."
         ),
         "readout": "softcap(W_U . norm(J_l h)), norm(x) = x/rms(x)*s, as jlens.hf.unembed",
-        "settings": {"layers": layers, "k": a.k, "candidates": a.candidates, "method": a.method, "select": a.select,
+        "settings": {"layers": layers, "k": a.k, "candidates": a.candidates, "method": a.method, "select": a.select, "shuffled_seed": a.shuffled_seed,
                      "fill": not a.no_fill, "norm_kind": a.norm_kind, "softcap": a.softcap, "limit": a.limit},
         "lens": lens_info,
         "basis_dir": str(basis_dir), "norm_weight": str(nw_p), "acts_dir": str(acts_dir),

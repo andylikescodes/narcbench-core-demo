@@ -124,5 +124,19 @@ check("planted rows FVE_J ~ 1", np.all(out["fve_j"][:2] > 0.999))
 check("random rows FVE_J < 1", np.all(out["fve_j"][2:] < 0.999), f"{out['fve_j'][2:].round(3).tolist()}")
 check("stats keys", {"mean_fve_j", "mean_steps", "frac_early_stop", "mean_frac_chosen_in_readout_top25"} <= set(out["stats"]))
 
+# 6. shuffled control: projection onto another row's atoms
+perm = jd.derangement(acts.shape[0], np.random.default_rng(0))
+check("derangement has no fixed point", np.all(perm != np.arange(acts.shape[0])) and sorted(perm.tolist()) == list(range(acts.shape[0])))
+own = jd.project_onto_tokens(h, out["tokens"][0], J, W, s)
+check("project_onto_tokens(own atoms) == h_J", np.allclose(own, out["h_J"][0], atol=1e-4))
+h_S, perm_used = jd.shuffled_control(acts, out["tokens"], J, W, s, seed=1)
+check("shuffled control shapes + derangement", h_S.shape == acts.shape and np.all(perm_used != np.arange(acts.shape[0])))
+fve_S = np.einsum("ij,ij->i", h_S, h_S) / np.einsum("ij,ij->i", acts, acts)
+check("shuffled projections are projections (FVE in [0, 1])", np.all(fve_S >= -1e-6) and np.all(fve_S <= 1 + 1e-6), f"{fve_S.round(3).tolist()}")
+# rows 0 and 1 are the same planted h, so a planted row shuffled onto the other planted row's atoms keeps FVE 1; onto a random row's it drops
+i_rand = [i for i in range(2) if perm_used[i] >= 2]
+if i_rand:
+    check("planted row onto a random row's atoms explains less than its own", all(fve_S[i] < 0.999 for i in i_rand), f"{[round(float(fve_S[i]), 3) for i in i_rand]}")
+
 print("\nALL PASS" if not fails else f"\nFAILED: {fails}")
 sys.exit(1 if fails else 0)

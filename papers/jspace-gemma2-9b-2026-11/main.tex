@@ -30,7 +30,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small J-space probes on Gemma-2-9B-it}
-\fancyhead[R]{\small Andy Liang · 4 November 2026}
+\fancyhead[R]{\small Andy Liang · 4 November 2026, revised 5 November}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
@@ -48,21 +48,22 @@
 \author{Andy Liang\\[0.4em]
 {\normalsize\textit{NARCBench Transfer-stable lane}}\\[0.2em]
 {\normalsize\texttt{andylikescodes/narcbench-core-demo}, branch \texttt{jspace-separability}}}
-\date{4 November 2026}
+\date{4 November 2026; revised 5 November 2026 with the paper's own J-space}
 
 \begin{document}
 \maketitle
 
 \section*{Summary}
 
-A linear probe on the hidden states of \texttt{google/gemma-2-9b-it} tells colluding committee agents from honest ones. We asked whether the part of the hidden state the probe uses lies inside \emph{J-space}, the directions that feed the model's next-word output, or outside it. To answer, we split every hidden state into a J part and a remainder, trained the same probe on each part, and tested on scenario families the probe had never seen.
+A linear probe on the hidden states of \texttt{google/gemma-2-9b-it} tells colluding committee agents from honest ones. We asked whether the part of the hidden state the probe uses lies inside \emph{J-space}, the directions that feed the model's next-word output, or outside it. To answer, we split every hidden state into a J part and a remainder, trained the same probe on each part, and tested on scenario families the probe had never seen. The first version of this report (4 November) used two stand-ins for J-space built from the output rows; this revision adds the construction of \citet{gurnee2026verbalizable} itself, run on 5 November with the published Jacobian lens for this model, together with the dimension-matched controls the first version lacked.
 
 \begin{enumerate}[leftmargin=1.6em,itemsep=0.2em]
-\item \textbf{The probe restricted to J-space does not transfer.} Trained on the Core scenarios and tested on 72 episodes from six new families, it scores \ci{0.602}{0.471}{0.733} with one J-space estimate and \ci{0.549}{0.416}{0.683} with the other (AUROC with 95\% intervals; neither is distinguishable from chance). The unrestricted probe scores 0.902.
-\item \textbf{The probe restricted to the remainder transfers as well as the unrestricted probe.} It scores 0.898 and 0.891 under the two estimates, against 0.902. The gap between remainder and J-space is $+0.30$ and $+0.34$, with $p<10^{-3}$.
+\item \textbf{A probe restricted to the output-row frames does not transfer.} Trained on the Core scenarios and tested on 72 episodes from six new families, it scores \ci{0.602}{0.471}{0.733} with the top-25 output rows and \ci{0.549}{0.416}{0.683} with a sketched Jacobian (AUROC with 95\% intervals; neither is distinguishable from chance), against 0.902 for the unrestricted probe. With the controls now run on Gemma, the output-row frame sits at the level of a random fixed 25-dimensional subspace (0.647; paired difference $-0.045$ [$-0.091$, $+0.003$]): what these frames hold on Core is no more than any 25 directions hold.
+\item \textbf{A probe restricted to the remainder transfers as well as the unrestricted probe}, under every J-space estimate: 0.898 and 0.891 for the two frames, \ci{0.891}{0.850}{0.927} for the paper's J-space, against 0.902.
+\item \textbf{A probe restricted to the paper's own J-space transfers in part.} With the published Jacobian lens and the paper's sparse nonnegative pursuit (25 atoms per hidden state, about 1\% of its variance), the J-space probe scores \ci{0.755}{0.709}{0.796} on the 72 new-family episodes: above the random 25-dimensional subspace by $+0.108$ [$+0.052$, $+0.160$], above another turn's atoms from the same dictionary (0.559) by $+0.196$ [$+0.136$, $+0.252$], and below its complement by $0.136$. Within the new families it reaches \ci{0.854}{0.820}{0.887}. The result holds under eight registered variants of the decomposition (0.721 to 0.811); the only choice that moves it is the paper's step of filling the early-stopped pursuit to exactly 25 atoms, without which the J-space probe scores \ci{0.811}{0.761}{0.856}. The transferable part sits at layers 22 and 23 and in the agents' final statements; on discussion turns of the new families the J-space probe is at the random level.
 \end{enumerate}
 
-Inside the Core scenarios both parts separate colluders (J-space 0.989 and 0.961; remainder 1.000), so the J part is not empty; what it holds does not carry over to new families. Two things to keep in mind when reading this: ``J-space'' here is an approximation of the construction of \citet{gurnee2026verbalizable}, made two ways (Section~\ref{sec:frames}), and the Gemma runs did not include a control that asks whether \emph{any} 25 directions would behave the same way (Section~\ref{sec:scope}). The rest of this document is the method, step by step, with the exact settings behind every number.
+By the reading rules fixed in the pre-registered design, the transferable colluder signal is not in the output-row frames, and the paper's J-space carries a part of it while the complement carries most. Two things to keep in mind: the published lens was fitted on WikiText prompts of 128 tokens and is applied here at the last token of long chat turns, outside its fitting range; and a probe on a one-percent-variance component reaching 0.85 to 0.94 at layers 22 and 23 says the signal there sits in a low-variance direction inside the J-lens cone, not that the model would verbalize it. The rest of this document is the method, step by step, with the exact settings behind every number.
 
 \section{What was measured}
 
@@ -98,7 +99,7 @@ This gives 1,700 Core rows and 936 Transfer rows per layer. The caches are on th
 \subsection{Step 2: choose the J-space directions for each hidden state}
 \label{sec:frames}
 
-For every hidden state $h\in\mathbb{R}^{d}$ we pick 25 directions, called its \emph{frame}, from a dictionary with one direction per vocabulary token. Two dictionaries were used.
+For every hidden state $h\in\mathbb{R}^{d}$ we pick 25 directions, called its \emph{frame}, from a dictionary with one direction per vocabulary token. Three constructions were used: two stand-ins built on 1 October (estimates A and B) and, on 5 November, the construction of \citet{gurnee2026verbalizable} on the published Jacobian lens for this model (estimate C).
 
 \paragraph{Estimate A: the output rows.} The dictionary is $\WU$ itself. Each row is scaled to unit length, $\hat W_i = W_i/\norm{W_i}$, and scored against the hidden state, $s_i=\langle \hat W_i, h\rangle$, for all 256,000 rows (float32, in chunks of 8,192 rows). The frame is the 25 rows with the largest $s_i$. No final-norm weight or logit soft-cap is applied. This is the ``logit lens'' reading of the hidden state. Script: \path{scripts/project_j_complement.py}; the dictionary file is \path{data/j_basis/gemma2_9b/unembed_fp16.npy} with float32 row norms.
 
@@ -124,7 +125,16 @@ The frame is then the 25 tokens with the largest $s_i=\langle \hat W_i, \bar J_\
 
 \paragraph{Settings of estimate B.} Layers 19, 21, 23 only, so results that use it average three layers rather than five. Eight prompts, last token only. Rank 64 per sketch (at most 512 after averaging). bfloat16 weights, float32 linear algebra, math attention kernel so that the double backward exists. One RTX PRO 4500 for about two hours on 1 October 2026.
 
-\paragraph{How these differ from the original.} The original uses a full Jacobian averaged over about a thousand prompts and all later positions, applies the final norm before $\WU$, selects directions by a sparse nonnegative decomposition rather than top-25 by inner product, and uses the nearest point of a cone rather than a projection onto a span. Estimate A has no Jacobian at all; estimate B has a small-rank, few-prompt, single-position one. Both are approximations, and the results below are results about these two frames.
+\paragraph{Estimate C: the paper's construction on the published Jacobian lens (5 November 2026).} The lens is the one Neuronpedia fitted for \texttt{gemma-2-9b-it} with Anthropic's reference code~\citep{anthropic2026jlenscode,neuronpedia2026jlens}: for each source layer $\ell$ the mean Jacobian $J_\ell=\mathbb{E}[\partial h_{N,t'}/\partial h_{\ell,t}]$ of the last block's output with respect to the layer-$\ell$ hidden state, summed over later positions $t'\ge t$ and averaged over source positions and prompts (453 WikiText-103 prompts of 128 tokens, early-stopped when the mean relative change fell below 0.002; one $3{,}584\times3{,}584$ float16 matrix per layer). The dictionary is the paper's: J-lens vectors $v_i=J_\ell^{\top}\big((1+\gamma)\odot W_i\big)$, where $1+\gamma$ is Gemma's final RMSNorm scale, so that $\langle v_i,h\rangle$ is token $i$'s J-lens logit before the soft-cap. For each hidden state (script: \path{scripts/jspace_decompose.py}):
+\begin{enumerate}[leftmargin=1.6em,itemsep=0.1em]
+\item take the 1,024 tokens with the largest unit-normalised correlation $\langle v_i,h\rangle/\norm{v_i}$ as candidates;
+\item run nonnegative orthogonal matching pursuit over them: add the candidate most positively correlated with the residual, refit all coefficients by nonnegative least squares, repeat until no candidate correlates positively or 25 atoms are active (on these caches the pursuit stops after 16 to 21 atoms for almost every hidden state);
+\item when it stops early, fill to exactly 25 atoms with the next-best candidates by correlation with $h$ itself, as the paper's minimisation over $|S|=k$ requires, and refit;
+\item the frame is the 25 chosen atoms; $\hJ$ is the orthogonal projection of $h$ onto their span and $\hC=h-\hJ$ (the paper's appendix formalisation). The nonnegative fit $\sum_i c_i v_i$ itself, the cone of the paper's prose, is kept as a variant.
+\end{enumerate}
+The run also records, per hidden state, the chosen tokens and coefficients, the J-lens readout's top tokens, and the fraction of variance explained by $\hJ$. A same-dictionary control projects each hidden state onto another, randomly paired hidden state's atoms. Registered variants, reported and not selected on: raw-score instead of unit-normalised candidate selection, the 25 largest correlations without pursuit, gradient pursuit in place of the nonnegative least-squares refit, $k\in\{8,16,50\}$, the early-stopped pursuit without the fill, and the cone fit. Everything runs on a CPU, about 0.1\,s per hidden state and layer.
+
+\paragraph{How these differ from the original.} The original uses a full Jacobian averaged over about a thousand prompts and all later positions, applies the final norm before $\WU$, selects directions by a sparse nonnegative decomposition rather than top-25 by inner product, and uses the nearest point of a cone rather than a projection onto a span. Estimate A has no Jacobian at all; estimate B has a small-rank, few-prompt, single-position one; both are approximations, and the results about them are results about these two frames. Estimate C follows the original's construction: the full mean Jacobian, the final norm folded into the dictionary, nonnegative pursuit to 25 atoms. It differs in the lens's fitting data (WikiText at 128 tokens, 453 prompts rather than about a thousand, applied here at the last token of long chat turns) and in taking the span projection as the primary split, with the cone fit as a variant that gives the same answer (Section~\ref{sec:variants}).
 
 \subsection{Step 3: split each hidden state}
 
@@ -132,7 +142,7 @@ With the 25 frame directions as the columns of a $d\times25$ matrix, take an ort
 \begin{equation}
 \hJ = QQ^{\top}h, \qquad \hC = h - \hJ .
 \end{equation}
-$\hJ$ is the J-only vector and $\hC$ the complement; they are orthogonal and sum to $h$. Every row of the Core matrix and every row of the Transfer matrix is split with its own frame. The three matrices $h$, $\hJ$ and $\hC$ all live in $\mathbb{R}^{d}$, so the probe code below runs on each without change.
+$\hJ$ is the J-only vector and $\hC$ the complement; they are orthogonal and sum to $h$. Every row of the Core matrix and every row of the Transfer matrix is split with its own frame. For estimate C the frame directions are the J-lens vectors of the chosen atoms. The three matrices $h$, $\hJ$ and $\hC$ all live in $\mathbb{R}^{d}$, so the probe code below runs on each without change.
 
 \subsection{Step 4: train the probe}
 
@@ -164,11 +174,13 @@ Script: \path{scripts/train_collusion_probe.py}, which mirrors \path{probes/repr
 \end{equation}
 The primary's standard error is the mean of the three detectors' (which treats them as perfectly correlated, a conservative choice), and a difference between two arms uses $\sqrt{\mathrm{SE}_1^2+\mathrm{SE}_2^2}$ (which treats the arms as independent although they share episodes, also conservative). Script: \path{scripts/jspace_offline_stats.py}, written 31 October 2026.
 
+\paragraph{Inference for the 5 November runs.} The 5 November runs went through the pre-registered pipeline of the three-model study (\path{scripts/jspace_separability.py}; design \path{docs/jspace/JSPACE_SEPARABILITY_DESIGN.md}; the J-space caches enter as external arms), which keeps per-episode scores. Intervals are 95\% percentile intervals from 2,000 bootstrap resamples of episodes, stratified by family and label; differences between arms are paired, from the same resamples; $p$-values against 0.5 come from 2,000 label permutations within family. Beside the paper's arms the same run carries the $\WU$ frame of estimate A and its controls at the same frame size: a random fixed 25-dimensional subspace (one Haar draw per layer), the $\WU$ frame of another, randomly paired hidden state, 25 random output rows, the top-25 principal components of the Core rows, and a supervised contrast direction. It adds a within-Transfer probe (fit on five families, scored on the sixth, pooled over the six folds) and a Core-discussion to Transfer-discussion probe that changes the family but not the phase. Post hoc companions give the same bootstrap per layer (\path{scripts/jspace_arm_layer_cis.py}) and pair arms across frame sizes (\path{scripts/jspace_arm_pairs.py}).
+
 \subsection{Which steps produce which number}
 
 \begin{table}[H]
 \centering\small
-\begin{tabularx}{\textwidth}{@{}lLL@{}}
+\begin{tabularx}{\textwidth}{@{}LLL@{}}
 \toprule
 Number & Steps & Record \\
 \midrule
@@ -177,9 +189,11 @@ J-only and complement, estimate A & 1, 2A, 3, then 4, 5, 6 on $\hJ$ and on $\hC$
 J-only and complement, estimate B & 1, 2B, 3, then 4, 5, 6 on $\hJ$ and on $\hC$ & \path{results/transfer/FULL_core_to_transfer_jac_k25_*/metrics.json} \\
 Core battery over frame sizes 8, 16, 25, 50 & as above with $k$ changed, Core protocol only & \path{docs/NEXT-SCIENCE.md} \\
 intervals, contrasts, per layer, per family & step 6 applied to the records above & \path{results/jspace/gemma2_9b_frozen/FROZEN_STATS.md} \\
+paper's J-space (estimate C) with its controls, the within-Transfer and the discussion-turn probes & 1, 2C, 3, then the pre-registered pipeline (\path{scripts/jspace_separability.py}) & \path{results/jspace/gemma2_9b_jpaper_nnomp_k25/} \\
+eight variants of estimate C & 2C with other settings, same pipeline & \path{results/jspace/gemma2_9b_jpaper_variants_all/} \\
 \bottomrule
 \end{tabularx}
-\caption{Provenance of every number in Section~\ref{sec:results}. All runs date from 1 October 2026; the intervals from 31 October.}
+\caption{Provenance of every number in Section~\ref{sec:results}. The five-arm runs date from 1 October 2026 and their intervals from 31 October; the estimate C runs from 5 November, on the same caches.}
 \end{table}
 
 \section{Results}
@@ -284,17 +298,101 @@ research integrity & 1.000 & 0.389 & 1.000 \\
 \label{tab:families}
 \end{table}
 
+\subsection{The paper's J-space (estimate C): the probe transfers in part}
+\label{sec:paper}
+
+\begin{table}[H]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}Lccccc@{}}
+\toprule
+Arm ($k=25$) & Core LDO & Core $\to$ Transfer & 95\% CI & within Transfer & 95\% CI \\
+\midrule
+full hidden state & 1.000 & \textbf{0.902} & [0.863, 0.935] & 0.977 & [0.963, 0.988] \\
+J-only, paper's J-space & 0.995 & \textbf{0.755} & [0.709, 0.796] & \textbf{0.854} & [0.820, 0.887] \\
+complement, paper's J-space & 1.000 & \textbf{0.891} & [0.850, 0.927] & 0.978 & [0.965, 0.989] \\
+another turn's atoms, same dictionary & 0.965 & 0.559 & [0.511, 0.611] & 0.608 & [0.562, 0.653] \\
+random fixed 25-dim subspace & 0.981 & 0.647 & [0.602, 0.693] & 0.742 & [0.694, 0.786] \\
+J-only, estimate A ($\WU$ frame) & 0.989 & 0.602 & [0.550, 0.658] & 0.744 & [0.702, 0.784] \\
+complement, estimate A & 1.000 & 0.898 & [0.859, 0.931] & 0.975 & [0.961, 0.988] \\
+top-25 principal components of Core & 1.000 & 0.856 & [0.807, 0.898] & 0.902 & [0.873, 0.931] \\
+\midrule
+paper's J-only $-$ random subspace & & $+0.108$ & [$+0.052$, $+0.160$] & $+0.112$ & [$+0.060$, $+0.165$] \\
+paper's J-only $-$ another turn's atoms & & $+0.196$ & [$+0.136$, $+0.252$] & $+0.246$ & [$+0.192$, $+0.298$] \\
+paper's J-only $-$ estimate A J-only & & $+0.153$ & [$+0.094$, $+0.208$] & $+0.109$ & [$+0.057$, $+0.163$] \\
+paper's complement $-$ paper's J-only & & $+0.136$ & [$+0.083$, $+0.190$] & $+0.124$ & [$+0.092$, $+0.158$] \\
+paper's complement $-$ full & & $-0.011$ & [$-0.019$, $-0.006$] & $+0.001$ & [$-0.000$, $+0.004$] \\
+estimate A J-only $-$ random subspace & & $-0.045$ & [$-0.091$, $+0.003$] & $+0.003$ & [$-0.050$, $+0.055$] \\
+\bottomrule
+\end{tabularx}
+\caption{The 5 November run: primary AUROC, band mean over layers 19 to 23; 72 Transfer episodes; bootstrap intervals over episodes, paired for differences. The J part of estimate C holds 1.1\% (Core) and 1.3\% (Transfer) of the variance; the $\WU$ frame of estimate A 5.7\% and 5.3\%; a random 25-dimensional subspace 0.7\%.}
+\label{tab:paper}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_gemma_paper_arms.pdf}
+\caption{The 5 November arms in distribution (left) and on the two out-of-distribution protocols (centre and right, 95\% bootstrap intervals; the dashed line is chance). Orange is J-only, blue the complement; circles are the paper's J-space and its controls, squares the $\WU$ frame of estimate A; the hollow circle is the same-dictionary control.}
+\label{fig:paper}
+\end{figure}
+
+Three things follow. First, the $\WU$ frame of estimate A now has its dimension-matched control on Gemma, and it sits with it: $-0.045$ against the random subspace on Core $\to$ Transfer, $+0.003$ within Transfer. The 1 October result about that frame stands and means what the three-model study found: those 25 directions hold no more transferable signal than any 25. Second, the paper's J-space does not sit with the controls. Its probe is above the random subspace and above another turn's atoms from the same dictionary, with intervals that exclude zero, on both protocols. Third, it still carries less than its complement, and the complement is within a point of the full hidden state. By the reading rules fixed in the design before any run, the ``transferable signal is not in J-space'' reading fails for the paper's J-space on its second condition (J-only above the random subspace), and the alternative clause applies: the paper's J-space carries a part of the transferable colluder signal, the complement carries most of it.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/fig_gemma_paper_layers.pdf}
+\caption{Core $\to$ Transfer per layer in the 5 November run, with 95\% bootstrap intervals. The paper's J-space probe is at the level of the random subspace at layers 19 to 21 and above it at 22 and 23 ($+0.100$ [$+0.010$, $+0.194$] and $+0.400$ [$+0.279$, $+0.512$]), where it reaches 0.852 and 0.897 against 0.930 and 0.873 for the full hidden state.}
+\label{fig:paperlayers}
+\end{figure}
+
+\paragraph{Where the part sits.} By layer (Figure~\ref{fig:paperlayers}) the paper's J-space probe scores 0.564, 0.709, 0.752, 0.852, 0.897 from layer 19 to 23, against 0.538, 0.696, 0.750, 0.753, 0.497 for the random subspace: nothing beyond a random subspace at layers 19 to 21, a clear margin at 22 and 23. By phase, the probe fit on Core discussion turns and scored on Transfer \emph{discussion} turns (the family changes, the phase does not) gives \ci{0.613}{0.567}{0.657} for the paper's J-space against 0.602 for the random subspace and 0.959 for the full hidden state, while Core discussion to Core final (the phase changes, the family does not) gives 0.930: the J component's cross-family transfer is confined to the agents' final statements. By family at layer 21 the paper's J-space probe scores 0.972, 0.972, 0.583, 0.750, 0.333, 0.833 (Split AUROC: CI/CD, code review, news, pump-and-dump, RAG corpora, research integrity), against 0.917, 0.861, 0.611, 0.750, 0.333, 0.389 for the $\WU$ frame in Table~\ref{tab:families}.
+
+\paragraph{What the atoms are.} The chosen atoms are nearly a fixed set across hidden states. At Core layer 21 the token \texttt{decision} is in the frame of 90\% of the 1,700 turns, \texttt{<eos>} in 86\%, \texttt{prioritizing} in 82\%, \texttt{recommendation} and \texttt{recommendations} in 76\% and 73\%; on Transfer the frequent atoms are \texttt{?}, \texttt{<eos>}, \texttt{:} and \texttt{discussions}. The J-lens readout's top token is \texttt{<eos>} for 98\% of Core turns and 70\% of Transfer turns: these are end-of-turn positions, and the paper's J-space there reads as end-of-turn and recommendation vocabulary. Another turn's atoms explain as much of a hidden state's variance as its own, which is why that control, and not the random subspace, is the tighter comparison.
+
+\subsection{Robustness of the estimate C result}
+\label{sec:variants}
+
+\begin{table}[H]
+\centering\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Lccccc@{}}
+\toprule
+Decomposition & $k$ & Core $\to$ Transfer & $-$ random subspace & $-$ primary & within Transfer \\
+\midrule
+primary (unit-normalised selection, nonneg.\ pursuit, filled) & 25 & \textbf{0.755} [0.709, 0.796] & $+0.108$ [$+0.052$, $+0.160$] & --- & 0.854 \\
+raw-score selection & 25 & 0.740 [0.695, 0.782] & $+0.094$ [$+0.036$, $+0.148$] & $-0.014$ [$-0.052$, $+0.025$] & 0.796 \\
+top 25 by correlation, no pursuit & 25 & 0.751 [0.714, 0.786] & $+0.104$ [$+0.054$, $+0.153$] & $-0.004$ [$-0.046$, $+0.038$] & 0.785 \\
+gradient pursuit & 25 & 0.756 [0.708, 0.801] & $+0.109$ [$+0.054$, $+0.161$] & $+0.001$ [$-0.025$, $+0.026$] & 0.843 \\
+pursuit, filled ($\approx$33 fill atoms) & 50 & 0.721 [0.684, 0.757] & $+0.082$ [$+0.030$, $+0.133$] & $-0.034$ [$-0.073$, $+0.005$] & 0.871 \\
+pursuit, filled ($\approx$1 fill atom) & 16 & 0.803 [0.756, 0.844] & $+0.202$ [$+0.141$, $+0.260$] & $+0.048$ [$+0.013$, $+0.085$] & 0.844 \\
+pursuit cut at 8 atoms & 8 & 0.768 [0.720, 0.809] & $+0.196$ [$+0.143$, $+0.245$] & $+0.013$ [$-0.027$, $+0.055$] & 0.781 \\
+pursuit, no fill & 25 & \textbf{0.811} [0.761, 0.856] & $+0.164$ [$+0.106$, $+0.215$] & $+0.056$ [$+0.019$, $+0.093$] & 0.841 \\
+cone fit $\sum_i c_i v_i$ & 25 & 0.809 [0.761, 0.854] & $+0.162$ [$+0.105$, $+0.214$] & $+0.055$ [$+0.019$, $+0.091$] & 0.840 \\
+\bottomrule
+\end{tabularx}
+\caption{The registered variants of estimate C, each a new decomposition of the same caches entered into the same pipeline at its own $k$; band mean, 72 episodes, bootstrap intervals; the random subspace is the $k$-matched one of the same run (0.572, 0.600, 0.647, 0.638 at $k=8,16,25,50$); differences to the primary are paired across $k$ blocks. Every complement is within 0.02 of the full hidden state (largest gap: raw-score selection, $-0.017$).}
+\label{tab:variants}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_gemma_variants.pdf}
+\caption{The same nine decompositions: Core $\to$ Transfer AUROC with the $k$-matched random subspace as a grey tick (left) and the paired difference to the $k=25$ primary (right).}
+\label{fig:variants}
+\end{figure}
+
+Every decomposition keeps the paper's J-space probe above its random subspace with an interval that excludes zero, and every complement within the design's 0.02 tolerance of the full hidden state, so the reading of Section~\ref{sec:paper} does not depend on the decomposition's settings. The selection normalisation and the pursuit algorithm do not move the number. One step does: filling the early-stopped pursuit to exactly $k$ atoms. The pursuit stops after 16 to 21 positively correlated atoms whatever $k$ is offered, so $k=50$ is the same pursuit atoms plus about 33 appended ones and $k=16$ is almost the pursuit alone. The arms that carry no appended atoms (no fill, the cone fit, $k=16$) score 0.80 to 0.81, $+0.056$ [$+0.019$, $+0.093$] above the primary; the arm with 33 appended atoms scores 0.721. In the cone fit the appended atoms receive exactly zero weight on every hidden state (they are the atoms whose correlation with the residual was non-positive when the pursuit stopped), which is why it coincides with the no-fill arm. The transferable part sits in the atoms the nonnegative pursuit chooses; the atoms appended to reach $k$ add directions the Core-fit probe uses that do not transfer. Within Transfer the fill costs nothing ($-0.013$ [$-0.036$, $+0.009$]). At layer 23 the no-fill and $k=16$ arms, about one percent of the variance, are level with the full hidden state (0.940 and 0.947 against 0.873; $+0.074$ [$+0.007$, $+0.137$] for $k=16$, post hoc). The paper's appendix minimises over $|S|=k$ exactly, which the fill implements; its prose describes a nonnegative cone, which the cone fit implements; the two readings differ by 0.055 on this measure and the cone reading is the stronger one. The pre-registered arm remains the filled $k=25$ primary; the variants are reported beside it.
+
 \section{What this shows, and what it does not}
 \label{sec:scope}
 
+
 \begin{itemize}[leftmargin=1.6em,itemsep=0.15em]
-\item \textbf{Shown.} On this model, a probe confined to either J-space estimate separates colluders inside the training distribution but not on new scenario families, while a probe confined to the complement transfers as well as the unrestricted probe. The two estimates agree at every layer where both exist.
-\item \textbf{Not shown: that J-space is special.} No run on Gemma asked whether an arbitrary set of 25 directions would behave the same way. In a later study on three other models (Qwen3-32B, DeepSeek-R1-Distill-Qwen-32B, GPT-OSS-20B; \path{results/jspace/}), a random fixed 25-dimensional subspace separated Core colluders as well as the J frame and sat where J-only sits on Transfer, and removing it also left the full probe intact. On that evidence the Core number of 0.989 says that Core is easy, and ``complement equals full'' says that 25 of 3,584 dimensions do not matter, whichever 25 they are. The Gemma result is therefore best read as: the transferable signal is not in these frames; it is not evidence that something sayable was removed.
-\item \textbf{Not shown: anything about the original J-space.} Both estimates are approximations (Section~\ref{sec:frames}). \citet{gurnee2026verbalizable} report that the plain output rows (estimate A) are a less reliable reader than their Jacobian lens in the middle of a network, which is where these layers are.
-\item \textbf{Not shown: why the frames fail.} On the three other models the 25 chosen output rows were nearly the same junk and formatting tokens for every hidden state, aligned with the hidden state's dominant direction. That check was not run on Gemma.
+\item \textbf{Shown: the transferable signal is not in the output-row frames.} On this model a probe confined to either 1 October frame separates colluders inside the training distribution but not on new scenario families, and with the controls now run it sits at the level of a random fixed 25-dimensional subspace, both across families and within them. The Core number of 0.989 says that Core is easy (the random subspace scores 0.981 there), and ``complement equals full'' says that 25 of 3,584 dimensions do not matter, whichever 25 they are. This is the reading the three-model study reached~\citep{liang2026jspace}.
+\item \textbf{Shown: the paper's J-space carries a part of the signal.} The construction of \citet{gurnee2026verbalizable} on the published lens behaves differently from its stand-ins: a probe confined to it is above both dimension-matched controls on new families and within them, under every registered variant of the decomposition, while its complement still carries most of the signal. The part is a late-layer, final-turn effect, and it is larger when the pursuit is not padded to exactly 25 atoms. The output-row frame was a poor stand-in for the Jacobian-lens dictionary on this model.
+\item \textbf{Not shown: that the part is sayable content.} The paper's claim is about representations the model is poised to verbalize. What the J-lens reads out at these positions is end-of-turn and recommendation vocabulary, and the probe that transfers lives in a component holding one percent of the variance; nothing here reads a coordination concept out as tokens or swaps one in. A mechanism worth testing, not claimed: colluders' and honest agents' final statements differ in which option they recommend, and the frequent atoms (\texttt{decision}, \texttt{recommendation}, \texttt{prioritizing}) read exactly that.
+\item \textbf{Not shown: the result outside the lens's range, or on another model.} The lens was fitted on WikiText prompts of 128 tokens and applied at the last token of long chat turns. Published lenses exist for this model only, so the three-model study's $\WU$-frame results are not revised by this. One model, one pre-registered run per arm, 72 Transfer episodes shared by every arm; the random subspace is one Haar draw per layer and swings between 0.50 and 0.75 across layers, which is why the same-dictionary control is the tighter comparison.
 \end{itemize}
 
-What would complete the picture on Gemma: run the controls above on the Gemma caches (\path{scripts/jspace_separability.py}, minutes on a CPU once the caches are present), estimate the Jacobian the original way (hundreds of prompts, all positions, every layer; hours on one GPU), and read J-space out as tokens at the read position rather than only restricting a probe.
+What would complete the picture: a readout-based test of the mechanism above (which option each final statement recommends, and whether the J-lens atoms track it), a lens fitted on chat-formatted long contexts, the same decomposition on another model once a lens exists for it, and a causal test that moves the J component at the final turn and watches the vote.
 
 \section{Files and commands}
 
@@ -307,10 +405,13 @@ From the repository root on branch \texttt{jspace-separability}. The probe comma
 \item \texttt{python3} \path{scripts/project_j_variants.py} \path{--acts-dir} \texttt{<acts>} \path{--variant} \path{jac_topk} \path{--jac-dir} \path{data/j_basis/gemma2_9b/jacobians} \path{--k} \texttt{25} \path{--layers} \texttt{19,21,23} \path{--out-root} \texttt{<out>}
 \item \texttt{python3} \path{scripts/train_collusion_probe.py} \path{--acts-dir} \texttt{<arm dir>} \path{--out} \texttt{<out>} \path{--layers} \texttt{19-23} \path{--phase} \texttt{discussion}
 \item \texttt{python3} \path{scripts/eval_transfer_from_core.py} \path{--core-acts} \texttt{<core arm dir>} \path{--transfer-acts} \texttt{<transfer arm dir>} \path{--out} \texttt{<out>} \path{--layers} \texttt{19-23} \path{--core-phase} \texttt{discussion} \path{--transfer-phase} \texttt{final}
-\item \texttt{python3} \path{scripts/jspace_offline_stats.py} (intervals); \texttt{python3} \path{scripts/jspace_gemma_figures.py} (figures, drawn from the frozen record)
+\item \texttt{python3} \path{scripts/runpod_pull_volume_files.py} (5 November: copies the activation caches off the RunPod volume and verifies their checksums)
+\item \texttt{python3} \path{scripts/jspace_decompose.py} \path{--acts-dir} \texttt{<acts>} \path{--lens} \path{data/j_basis/neuronpedia/gemma-2-9b-it/jlens/Salesforce-wikitext/gemma-2-9b-it_jacobian_lens.pt} \path{--layers} \texttt{19-23} \path{--k} \texttt{25} \path{--out-root} \path{<acts>/variants/jpaper_nnomp_k25} (estimate C; variants with \texttt{--method gp|topk}, \texttt{--select raw}, \texttt{--no-fill}, \texttt{--k}; \path{scripts/jspace_cone_cache.py} builds the cone arm from its saved atoms and coefficients)
+\item \texttt{python3} \path{scripts/jspace_separability.py} \path{--core-acts} \texttt{<core acts>} \path{--transfer-acts} \texttt{<transfer acts>} \path{--unembed} \path{data/j_basis/gemma2_9b} \path{--layers} \texttt{19-23} \path{--external-arm} \path{Jpaper=25:<core>/variants/jpaper_nnomp_k25/j_only:<transfer>/variants/jpaper_nnomp_k25/j_only+C} \path{--out} \texttt{<out>} (the pre-registered pipeline with the paper's arm beside the $\WU$ arms and controls; \path{scripts/jspace_arm_layer_cis.py} and \path{scripts/jspace_arm_pairs.py} add the per-layer and cross-$k$ intervals)
+\item \texttt{python3} \path{scripts/jspace_offline_stats.py} (intervals for the frozen numbers); \texttt{python3} \path{scripts/jspace_gemma_figures.py} (figures, drawn from the frozen record and the 5 November summaries)
 \end{itemize}
 
-Records: \path{results/transfer/TRANSFER_FULL_HARD_METRICS.md} (the five arms, 1 October); \path{results/jspace/gemma2_9b_frozen/FROZEN_STATS.md} (intervals, contrasts, per layer, per family, Core battery); \path{docs/NEXT-SCIENCE.md} (run log); \path{results/transfer_stable/WEEKEND_REVIEW/CLAIMS_NUMBER_SHEET.md} (the locked claims sheet, cross-checked 4 October by \path{scripts/verify_claims_sheet.py}); \path{notebooks/narcbench_jspace_colab.ipynb}, section 2b (the read position, token by token). The three-model study is \citet{liang2026jspace}. This document was built with \texttt{tectonic} \path{main.tex}.
+Records: \path{results/jspace/gemma2_9b_jpaper_nnomp_k25/} and \path{results/jspace/gemma2_9b_jpaper_variants_all/} (the 5 November runs: \path{RESULTS.md}, \path{summary.json}, per-episode scores, decomposition statistics, per-layer and cross-$k$ intervals); \path{docs/jspace/JSPACE_SEPARABILITY_DESIGN.md} (the design, with the 5 November addendum that registered estimate C and its variants before the run); \path{results/transfer/TRANSFER_FULL_HARD_METRICS.md} (the five arms, 1 October); \path{results/jspace/gemma2_9b_frozen/FROZEN_STATS.md} (intervals, contrasts, per layer, per family, Core battery); \path{docs/NEXT-SCIENCE.md} (run log); \path{results/transfer_stable/WEEKEND_REVIEW/CLAIMS_NUMBER_SHEET.md} (the locked claims sheet, cross-checked 4 October by \path{scripts/verify_claims_sheet.py}); \path{notebooks/narcbench_jspace_colab.ipynb}, section 2b (the read position, token by token). The three-model study is \citet{liang2026jspace}. This document was built with \texttt{tectonic} \path{main.tex}.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
@@ -397,6 +498,28 @@ Layer & Family & full & J-only & complement \\
 \bottomrule
 \end{tabular}
 \caption{Twelve episodes per family. Per-family values were not recorded for estimate B.}
+\end{table}
+
+\section{Decomposition statistics of estimate C}
+\label{app:decomp}
+
+\begin{table}[H]
+\centering\scriptsize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+Decomposition & $k$ & FVE$_J$ Core, L19$\to$23 & FVE$_J$ Transfer, L19$\to$23 & steps & filled & early stop, Core / Transfer \\
+\midrule
+primary & 25 & 0.0098 $\to$ 0.0128 & 0.0124 $\to$ 0.0148 & 16.4--17.7 & 7.3--8.6 & 97--100\% / 77--95\% \\
+raw-score selection & 25 & 0.0120 $\to$ 0.0179 & 0.0149 $\to$ 0.0209 & 18.3--20.1 & 4.9--6.7 & 91--96\% / 71--86\% \\
+top 25, no pursuit & 25 & 0.0097 $\to$ 0.0127 & 0.0122 $\to$ 0.0142 & 25 & 0 & --- \\
+gradient pursuit & 25 & 0.0098 $\to$ 0.0129 & 0.0124 $\to$ 0.0148 & 15.6--17.3 & 7.7--9.4 & 97--100\% / 80--97\% \\
+nonneg.\ pursuit & 50 & 0.0120 $\to$ 0.0155 & 0.0149 $\to$ 0.0176 & 16.4--17.8 & 32.2--33.6 & 100\% / 100\% \\
+nonneg.\ pursuit & 16 & 0.0093 $\to$ 0.0122 & 0.0119 $\to$ 0.0144 & 15.1--15.4 & 0.6--0.9 & 24--38\% / 8--18\% \\
+nonneg.\ pursuit & 8 & 0.0092 $\to$ 0.0120 & 0.0117 $\to$ 0.0141 & 8.0 & 0 & 0\% / 0\% \\
+no fill & 25 & 0.0093 $\to$ 0.0122 & 0.0119 $\to$ 0.0144 & 16.4--17.7 & 0 & 97--100\% / 77--95\% \\
+\bottomrule
+\end{tabular}
+\caption{Means over the 1,700 Core and 936 Transfer hidden states (\texttt{decomp\_summary.md} of each run). FVE$_J=\norm{\hJ}^2/\norm{h}^2$; steps and filled are Core means per hidden state; every hidden state is under the paper's 10\% ceiling. A random 25-dimensional subspace explains 0.70\%.}
 \end{table}
 
 \end{document}

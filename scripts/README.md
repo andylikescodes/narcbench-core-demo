@@ -131,6 +131,11 @@ Pre-registered design: [`docs/jspace/JSPACE_SEPARABILITY_DESIGN.md`](../docs/jsp
 | `scripts/jspace_separability.py` | The analysis: J-only and complement at k = 8, 16, 25, 50, 100 next to dimension-matched controls (random fixed subspace, another activation's frame, random unembedding rows, PCA, supervised contrast), Core leave-one-domain-out (A1), Core → Transfer (A2), within-Transfer leave-one-family-out (A3), phase-versus-family split (A4), probe geometry (A5); bootstrap intervals and permutation tests over episodes; the readings fixed in the design. Writes `summary.json`, `RESULTS.md`, `episode_scores.json`. |
 | `scripts/jspace_offline_stats.py` | Hanley–McNeil intervals and contrasts for the frozen Gemma-2-9B numbers, from `results/transfer/FULL_core_to_transfer_*/metrics.json` alone → `results/jspace/gemma2_9b_frozen/`. |
 | `scripts/jspace_figures.py` | Figures from the summaries → `results/jspace/figures/`. |
+| `scripts/jspace_gemma_figures.py` | Gemma-only figures from `results/jspace/gemma2_9b_frozen/frozen_stats.json` → `results/jspace/gemma2_9b_frozen/figures/` and the Gemma paper's `figures/`. |
+| `scripts/build_scenario_browser.py` | Packages the Gemma-2-9B Core and Transfer transcripts (briefing, system prompts, private round, public rounds, finals, outcome) into `data/{index,core,transfer}.json` for the scenario-browser artifact: `python3 scripts/build_scenario_browser.py --out <dir>`. |
+| `scripts/estimate_jlens_full.py` | The Jacobian lens as Gurnee et al. define it: J_ℓ = E over prompts and over every pair of positions of ∂h_N/∂h_ℓ, with h_N the residual after the last block before the final norm and BOS excluded. Two-pass randomized sketch of the mean Jacobian (batched forward-mode JVPs for the range, batched VJPs for the rows), 1,000 prompts (wikitext-103 paragraphs and alpaca turns in the Gemma chat template), rank 256, layers 19–23; checkpoints and `--resume`; writes `J_layer_{L}_fp16.npy`, the factors, `prompts.json` and `jlens_meta.json` with a held-out self-check. GPU job. |
+| `scripts/test_jlens_estimator_tiny.py` | CPU check of the estimator against an exact Jacobian on a random three-block Gemma-2 (d = 32): causality, the all-positions JVP and VJP tricks in every mode, and the full-rank two-pass sketch. All pass on 4 Nov 2026 (relative error below 1e-6). |
+| `scripts/runpod_launch_jlens_full.py` | Self-contained RunPod launcher for the estimator. Estimate-only by default; `--launch` spends (`RUNPOD_API_KEY` from the environment; `HF_TOKEN` only if the weights are not cached on the network volume). On the pod: a timing smoke, then auto-sizing (rank 256 → 128, prompts 1000 → 600 → 400) to fit 90% of `--max-minutes`, checkpoints to the volume, `results.tgz` on port 8765, self-termination after the pull window. `--status`, `--pull` and `--terminate` take a pod id. |
 
 ```bash
 python3 scripts/download_narcbench_activations.py
@@ -140,6 +145,7 @@ python3 scripts/jspace_separability.py --core-acts data/activations/official/qwe
     --layers 26-30 --ks 8,16,25,50,100 --out results/jspace/qwen3_32b --tag qwen3_32b
 python3 scripts/jspace_offline_stats.py
 python3 scripts/jspace_figures.py
+python3 scripts/jspace_gemma_figures.py
 ```
 
 Layers: Qwen3-32B and DeepSeek-R1-32B 26–30, GPT-OSS-20B 10–14, Gemma-2-9B 19–23. The Gemma caches are not in git; the Colab notebook (section 7b) writes its extraction in this layout and runs the same script. `tests/test_jspace_separability.py` runs the whole pipeline on synthetic data in about 20 s. Needs `numpy`, `scipy`, `scikit-learn` (`requests`, `huggingface_hub` for the downloads; `tokenizers` to decode frame tokens; `matplotlib` for figures).

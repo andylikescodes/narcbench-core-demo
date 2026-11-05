@@ -10,7 +10,7 @@ Core -> Transfer discussion), where the episode is the unit.
         --arms full,Jpaper,C_Jpaper,shuffled_paper,J,randsub \
         --diffs Jpaper-randsub,Jpaper-shuffled_paper,C_Jpaper-Jpaper,C_Jpaper-full,Jpaper-J
 
-Writes <run>/arm_layer_cis.json and <run>/arm_layer_cis.md.
+Writes <run>/arm_layer_cis.json and <run>/arm_layer_cis.md (another stem with --out-stem, e.g. arm_layer_cis_k16).
 """
 from __future__ import annotations
 
@@ -35,6 +35,7 @@ def main() -> int:
     ap.add_argument("--diffs", default="Jpaper-randsub,Jpaper-shuffled_paper,Jpaper-J,C_Jpaper-Jpaper,C_Jpaper-full,J-randsub")
     ap.add_argument("--analyses", default="A2,A3,A4b")
     ap.add_argument("--n-boot", type=int, default=None, help="default: the run's n_boot")
+    ap.add_argument("--out-stem", default="arm_layer_cis", help="output file stem under --run (e.g. arm_layer_cis_k16)")
     a = ap.parse_args()
     run = a.run if a.run.is_absolute() else ROOT / a.run
     summary = json.loads((run / "summary.json").read_text())
@@ -90,8 +91,8 @@ def main() -> int:
             cells = [f"{d['per_layer'][L]['est']:+.3f} [{d['per_layer'][L]['ci'][0]:+.3f}, {d['per_layer'][L]['ci'][1]:+.3f}]" for L in layers]
             md.append(f"| {name} | " + " | ".join(cells) + f" | **{d['band']['est']:+.3f}** [{d['band']['ci'][0]:+.3f}, {d['band']['ci'][1]:+.3f}] |")
         md.append("")
-    (run / "arm_layer_cis.json").write_text(json.dumps(out, indent=1) + "\n")
-    (run / "arm_layer_cis.md").write_text("\n".join(md) + "\n")
+    (run / f"{a.out_stem}.json").write_text(json.dumps(out, indent=1) + "\n")
+    (run / f"{a.out_stem}.md").write_text("\n".join(md) + "\n")
     print("\n".join(md))
     return 0
 

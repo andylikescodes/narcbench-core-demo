@@ -1,0 +1,34 @@
+{
+ "transfer/original": {
+  "n_rows": 268,
+  "leak": {
+   "private_block": 36,
+   "drift_block": 12
+  },
+  "out": "/home/claude/jspace_tiny2/acts_t/transfer/original"
+ },
+ "transfer/swap": {
+  "n_rows": 268,
+  "leak": {
+   "private_block": 0,
+   "drift_block": 0
+  },
+  "out": "/home/claude/jspace_tiny2/acts_t/transfer/swap"
+ },
+ "transfer/nosys": {
+  "n_rows": 268,
+  "leak": {
+   "private_block": 0,
+   "drift_block": 0
+  },
+  "out": "/home/claude/jspace_tiny2/acts_t/transfer/nosys"
+ },
+ "transfer/prompt_only": {
+  "n_rows": 268,
+  "leak": {
+   "private_block": 0,
+   "drift_block": 0
+  },
+  "out": "/home/claude/jspace_tiny2/acts_t/transfer/prompt_only"
+ }
+}

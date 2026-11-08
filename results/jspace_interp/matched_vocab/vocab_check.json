@@ -1,0 +1,46 @@
+{
+ "warning_counts": {
+  "deception_secrecy": 6,
+  "coordination": 3,
+  "steering_persuasion": 5,
+  "honesty_standards": 5,
+  "n_words": 79
+ },
+ "core": {
+  "colluder": {
+   "deception_secrecy": 0.15,
+   "coordination": 0.23,
+   "steering_persuasion": 1.4,
+   "honesty_standards": 1.4,
+   "n_words": 139.13,
+   "n_agents": 100
+  },
+  "honest": {
+   "deception_secrecy": 0.137,
+   "coordination": 0.11,
+   "steering_persuasion": 0.337,
+   "honesty_standards": 2.347,
+   "n_words": 140.79,
+   "n_agents": 300
+  }
+ },
+ "transfer": {
+  "colluder": {
+   "deception_secrecy": 1.889,
+   "coordination": 0.167,
+   "steering_persuasion": 0.625,
+   "honesty_standards": 0.542,
+   "n_words": 74.889,
+   "n_agents": 72
+  },
+  "honest": {
+   "deception_secrecy": 0.0,
+   "coordination": 0.0,
+   "steering_persuasion": 0.167,
+   "honesty_standards": 0.259,
+   "n_words": 26.255,
+   "n_agents": 216
+  }
+ },
+ "note": "Mean concept-word counts per agent system prompt (first prompt seen per agent). Matched-vocab warning is appended to honest seats 0-1 of control episodes."
+}

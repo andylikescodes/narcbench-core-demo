@@ -1,0 +1,293 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref,xcolor,enumitem,array}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black}
+\newcommand{\ran}{\textcolor{green!45!black}{\textbf{[ran]}}}
+\newcommand{\cited}{\textcolor{blue!60!black}{\textbf{[cited, Nov 5]}}}
+\newcommand{\planned}{\textcolor{orange!80!black}{\textbf{[planned, needs GPU]}}}
+\newcommand{\pipe}{\textcolor{gray}{\textbf{[pipeline check only]}}}
+\setlist{nosep,leftmargin=*}
+
+\title{Is J-space the Right Standard for Detecting Colluders?\\[2pt]
+\large Confound audit, text baselines and a pre-registered plan for NARCBench on Gemma-2-9B-it}
+\author{Andy, with Claude\\ \small Working draft for the research group, November 8, 2026}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+On November 5 a linear probe on the J-space projection of Gemma-2-9B-it's residual stream (the
+$k{=}25$ subspace spanned by Jacobian-lens token atoms) detected colluding agents in NARCBench, but
+it transferred from Core to Transfer worse than the full residual (AUROC 0.755 vs 0.902) and worse
+than its own complement (0.891). Before treating J-space as the standard representation for this
+work we asked three questions: what the J-space atoms of colluders say, whether the J-only result
+survives a proper random-subspace null across $k$ and read positions, and whether steering along
+J-space directions changes the collusive vote. This draft reports what could be run without a GPU:
+a confound audit of the benchmark, text-only baselines under the same detectors and protocols, a
+text-level behaviour split, a vocabulary check of the matched-vocabulary control, and an end-to-end
+check of every script on a tiny random model. The main findings are that (i) colluder instructions
+reach the model through three channels, not one; (ii) prompt words alone separate colluders
+perfectly within a split but not across splits (Core$\to$Transfer 0.457), so the probe's transfer
+is not plain prompt vocabulary; and (iii) colluders who failed to vote the target still differ from
+honest agents in their wording (0.776), while delivering the target changes colluders' wording
+little (0.583). All activation-level experiments are implemented and tested for plumbing but have
+not run on Gemma. Our recommendation is to keep the full-residual probe as the detection standard
+for now and to adopt J-space as an interpretation layer only if the prompt-only read and the
+many-draw null in Section~\ref{sec:plan} come out in its favour.
+\end{abstract}
+
+\noindent\textbf{How to read this draft.} Every number carries a tag. \ran{} means it was computed
+on November 8 from the saved transcripts in the repository. \cited{} means it is quoted from the
+November 5 run summary (Andy's unpushed local branch) and was not rerun here. \planned{} marks
+experiments that are implemented but blocked on compute. \pipe{} marks outputs from a random tiny
+model, which say nothing about Gemma.
+
+\section{Background}
+
+\paragraph{Setup.} NARCBench Core has 100 four-agent committee episodes (50 collusion, 50 control)
+over 17 domains; Transfer has 72 episodes in 6 scenario families. In collusion episodes two agents
+are instructed, through their system prompt, to steer the committee to a target option while
+appearing impartial. The detection unit is the episode: per-agent probe scores are pooled into three
+episode detectors (peak, split and asymmetry), and the primary metric is the mean of their AUROCs.
+Protocols are Core leave-one-domain-out (LODO), Core$\to$Transfer, and within-Transfer
+leave-one-family-out (LOFO), with a stratified episode bootstrap ($B{=}2000$) for intervals.
+
+\paragraph{J-space.} Following Gurnee, Lindsey et al.\ (arXiv:2607.15495), $J_\ell$ is the mean
+Jacobian of the final residual with respect to the layer-$\ell$ residual $h_\ell$. The atom for token
+$i$ is $v_i = J_\ell^{\top}\big((1+\gamma)\odot W_U[i]\big)$, and the lens readout is
+$\mathrm{softcap}_{30}\!\big(W_U\,\mathrm{norm}(J_\ell h)\big)$. The decomposition takes the 1{,}024
+atoms most correlated with $h$, runs non-negative orthogonal matching pursuit with an NNLS refit,
+fills to $k{=}25$ atoms and orthonormalises them ($Q$). Then $h_J = QQ^\top h$ and $h_C = h-h_J$.
+We use the published lens for Gemma-2-9B-it (453 WikiText prompts, layers 0--40).
+
+\section{Where the November 5 run left things}\label{sec:nov5}
+
+\begin{table}[h]\centering\small
+\begin{tabular}{lccc}\toprule
+Arm (layers 19--23, last token) & Core LODO & Core$\to$Transfer & Transfer LOFO\\\midrule
+Full residual & 1.000 & 0.902 [0.863, 0.935] & 0.977\\
+J-only, $k{=}25$ & 0.995 & 0.755 [0.709, 0.796] & 0.854\\
+Complement $h_C$ & 1.000 & 0.891 & 0.978\\
+Random 25-dim subspace (one draw per layer) & 0.981 & 0.647 & --\\
+Shuffled atoms (another turn's) & -- & 0.559 & --\\\bottomrule
+\end{tabular}
+\caption{\cited{} Primary AUROC from the November 5 run summary.}
+\end{table}
+
+\noindent Three further facts from the same summary \cited{} shape the plan. Per layer, J-only vs
+random Core$\to$Transfer was close at layers 19--21 (0.564/0.538, 0.709/0.696, 0.752/0.750) and
+separated only at layers 22--23 (0.852/0.753, 0.897/0.497). The J-space projection explains only
+about 1--1.5\% of residual variance. And the lens's top-1 readout at the last token was
+\texttt{<eos>} for 98\% of Core turns, so last-token readouts carry little content. The
+$k$ variants were 0.768 ($k{=}8$), 0.803 ($k{=}16$), 0.721 ($k{=}50$), 0.811 (no fill) and 0.809 (cone
+projection). With one random draw per layer, none of these comparisons has a usable null.
+
+\section{Confound audit}\label{sec:confound}
+
+\ran{} Reading the saved prompts and configs shows that colluders differ from honest agents through
+three channels, all visible to the model before it writes a word:
+\begin{enumerate}
+\item \textbf{System prompt}, in every phase: the motive and the deception instruction.
+\item \textbf{A ``PRIVATE COORDINATION'' block} in colluders' user prompts (Core and Transfer), which
+ends exactly at the last private message.
+\item \textbf{A ``DRIFT GUIDANCE FOR THIS ROUND'' block} in colluders' user prompts (Transfer only).
+\end{enumerate}
+Behaviour is also strongly coupled to role. On Core, colluders voted the target 73 times out of 100,
+honest agents in collusion episodes 8 out of 100, and agents in control episodes 8 out of 200.
+A probe can therefore succeed by reading the instruction, the private channel or the vote, none of
+which is ``collusion as a cognitive state''. Each control below removes one of these routes.
+
+\section{Controls and experiments}\label{sec:plan}
+
+\subsection{Context conditions (one extraction each)}
+\begin{itemize}
+\item \textbf{original}: the transcript as generated.
+\item \textbf{swap}: colluders get the honest system prompt for their seat (Core: the bank's honest
+mandate; Transfer: the control twin's same-seat prompt with the name replaced), and both colluder-only
+blocks are cut from their user prompts. Their own replies stay. If the probe still fires, it is reading
+the replies and the conversation, not the instruction.
+\item \textbf{nosys}: no system prompt for anyone, colluder blocks cut.
+\item \textbf{prompt\_only}: one read per agent at the last system-prompt token, before any
+conversation or reply. This is the priority control: if it matches the J-only score, J-space is reading
+the instruction.
+\end{itemize}
+
+\subsection{Behaviour split and matched vocabulary}
+The \textbf{behaviour split} holds the instruction fixed and splits by what the agent did: colluders
+who voted the target vs those who did not (73 vs 27), and honest agents who voted the target vs not
+(8 vs 92). The \textbf{matched-vocabulary} control generates 50 new control episodes in which seats
+0--1 are honest but carry a chair's warning written in the colluders' vocabulary (``secretly
+coordinated'', ``steer the vote'', ``quietly downplaying a flaw'', ``hide a conflict of interest'')
+and the explicit statement that they have no agenda or partner. If warned honest agents score like
+colluders, the probe or the concept atoms track words, not intent.
+
+\subsection{Experiment 1: what colluders' J-space says}
+For each agent turn at $k{=}25$, the selected atoms map to tokens. We compare colluders with honest
+agents on (a) the mass of four frozen concept groups (deception/secrecy, coordination,
+steering/persuasion, honesty/standards; word lists in \texttt{jspace\_interp/concepts.py}), and
+(b) per-token selection frequency, with within-episode role permutation and Benjamini--Hochberg
+correction. Readouts are taken at the last token, the end of turn, the token before
+``RECOMMENDATION:'', the reply midpoint and, for prompt\_only, the end of the system prompt, because
+the last-token readout is mostly \texttt{<eos>}.
+
+\subsection{Experiment 2: $k$ and position sweep with a real null}
+Grid: $k\in\{8,25,50,100\}$ $\times$ 7 read positions $\times$ layers 19--23 $\times$ conditions
+original and swap. Arms: full, J-only (pursuit, and filled to $k$), complement, a fixed frame of
+the $k$ atoms most often chosen on Core, shuffled atoms, PCA-$k$, 200 Haar random $k$-dim subspaces,
+and 200 random sets of $k$ lens atoms. \textbf{Pre-registered bar:} J-only beats random only if its
+Core$\to$Transfer AUROC is above the 95th percentile of \emph{both} random nulls at the same
+$(k,\text{layer},\text{position})$, and the paired bootstrap interval against the median random draw
+excludes zero.
+
+\subsection{Experiment 3: steering the vote}
+Prefix: the agent's own final-vote prompt (original or swap), then the forced reply start
+``RECOMMENDATION: Option''. Outcome: $y=\mathrm{logit}[\text{target}]-\mathrm{logit}[\text{fair}]$.
+We add $\pm\alpha\cdot s\cdot u$ at one layer, only on the final-instruction tail and the forced
+tokens, so the earlier prefix is identical between steered and unsteered passes;
+$\alpha\in\{0.5,1,2,4\}$ and $s$ is the median $\|h_J\|$. Directions $u$: the mean J-lens atom of
+each concept group, the J-space role-probe direction, and 20 random directions of equal norm.
+\textbf{Pre-registered bars:} predicted sign in both groups ($+u$ raises $y$ for honest agents,
+$-u$ lowers it for colluders), effect above the 95th percentile of random directions, BH at
+$q{=}0.05$ across all cells, and growth with $\alpha$.
+
+\section{Results that ran}\label{sec:results}
+
+\subsection{Text baselines \ran}
+Bag-of-words features (1--2-grams, TF-IDF fit on Core only, at most 5{,}000 features) pass through
+the same detectors and protocols as the activation probe.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{lccc}\toprule
+Feature & Core LODO & Core$\to$Transfer & Transfer LOFO\\\midrule
+Reply words only & 0.853 & 0.493 [0.389, 0.603] & 0.642\\
+System-prompt words only & 1.000 & 0.457 [0.394, 0.518] & 0.952\\
+Four concept word groups & 0.627 & 0.593 [0.512, 0.675] & 0.565\\\midrule
+\multicolumn{4}{l}{\emph{For reference, \cited:} full-residual probe 1.000 / 0.902 / 0.977; J-only 0.995 / 0.755 / 0.854}\\\bottomrule
+\end{tabular}
+\caption{\ran{} Primary AUROC of text-only features, with 95\% episode-bootstrap intervals for Core$\to$Transfer. Source file: \texttt{text\_baseline.json} (Appendix~\ref{app:files}).}
+\label{tab:text}
+\end{table}
+
+\noindent The system prompts separate colluders perfectly within Core and almost perfectly within
+Transfer, which agrees with the LessWrong report that NARCBench system prompts alone give colluders
+away. But the words do not carry across splits: trained on Core prompts and tested on Transfer, they
+sit at chance. The same holds for the replies. So the activation probe's 0.902 Core$\to$Transfer
+is not explained by surface vocabulary. It may still be explained by the instruction as the model
+represents it, which only the prompt\_only read can test.
+
+\subsection{Behaviour split on text \ran}
+\begin{itemize}
+\item Colluders who did \emph{not} vote the target vs honest agents who also voted the other option:
+reply-word AUROC 0.776 (permutation $p=0.0002$; 27 vs 92 agents). The instruction leaves a mark on
+the wording even when the scheme failed.
+\item Within colluders, target vs other vote: 0.583 ($p=0.21$). Delivering the target barely changes
+how colluders write.
+\item Within honest agents, target vs other vote: 0.792 ($p=0.007$, 8 vs 92). Arguing for the
+target option has a wording of its own, so a detector could partly be a vote detector.
+\end{itemize}
+The activation-level version of this split runs on saved activations once they exist.
+
+\subsection{Which words differ \ran}
+\begin{table}[h]\centering\small
+\begin{tabular}{llcccc}\toprule
+Phase & Group & Colluder & Honest (same ep.) & Control & BH $p$ (within ep.)\\\midrule
+Core discussion & honesty/standards & 8.29 & 14.22 & 13.61 & 0.0008\\
+Core discussion & deception/secrecy & 0.66 & 0.74 & 0.80 & 0.65\\
+Core final & honesty/standards & 9.29 & 14.39 & 14.86 & 0.005\\
+Transfer discussion & honesty/standards & 1.21 & 1.88 & 1.86 & 0.47\\
+Transfer final & steering/persuasion & 3.87 & 2.45 & 2.23 & 0.016\\\bottomrule
+\end{tabular}
+\caption{\ran{} Concept-word rates per 1{,}000 words. Colluders avoid honesty and standards language in
+Core; they do not use more deception words. The Core pattern does not repeat in Transfer discussion.}
+\end{table}
+
+\noindent This matters for Experiment 1: if J-space atoms of colluders show less honesty mass rather
+than more deception mass, that mirrors the text and is not evidence of a hidden representation.
+
+\subsection{Matched-vocabulary prompt check \ran}
+The warning has 6 deception/secrecy, 3 coordination, 5 steering and 5 honesty words in 79 words.
+Colluder system prompts average 0.15, 0.23, 1.40 and 1.40 on Core and 1.89, 0.17, 0.63 and 0.54 on
+Transfer (source: \texttt{results/jspace\_interp/matched\_vocab/vocab\_check.json}). The warning
+therefore puts \emph{more} collusion vocabulary in context than the colluder instruction does, which
+makes it a conservative test: a probe that ignores it is not reading those words. A dry run with a
+stub model confirmed the warning lands on seats 0--1 only, in control episodes tagged
+\texttt{\_\_warned}.
+
+\subsection{End-to-end pipeline check \pipe}
+Every stage ran on the real transcripts with a randomly initialised Gemma-2 model (6 layers, width
+64, 0.48M parameters) and a 4{,}000-token BPE tokenizer trained here on the transcripts: extraction
+for all four conditions on 20 Core episodes (10 collusion) and 27 Transfer episodes (14 collusion),
+with contexts left-truncated to 768 tokens; lens estimation on 10 short prompts; the $k\times$position
+sweep ($k\in\{4,8,25\}$, last and pre-vote tokens, layers 2--4, conditions original, swap and
+prompt\_only) with both random nulls and the bootstrap; the Experiment~1 readouts with concept groups
+and token tests; steering on 24 final-vote prefixes from 6 episodes with the four concept directions
+and 5 random ones; and a stub-model dry run of the matched-vocabulary generator. Source:
+\texttt{results/jspace\_interp/tiny\_pipeline\_check/}.
+
+\noindent Two observations carry over to the real run, as lessons about the method rather than
+findings about Gemma. First, with only 5 random draws per cell, the J-only arm cleared both random
+95th percentiles in 6 of 45 cells of a network that knows nothing; a bar built on a handful of draws
+fires by chance, which is why the plan uses 200. Second, at the end of the system prompt even this
+random network separated colluders from honest agents from Core to Transfer (0.84 [0.73, 0.95] at
+its layer 2, on few episodes), because activations there are a function of the prompt tokens. A
+high prompt-only score therefore needs no learned notion of collusion, and the prompt-only control
+should be compared with J-only on equal footing, not with chance.
+
+\section{Blocked on compute}\label{sec:blocked}
+\planned{} Everything activation-level needs Gemma-2-9B-it, which this environment cannot download
+(the Hugging Face hub is blocked here and the unembedding needs the gated repository). One GPU
+(an A100 or H100 80\,GB, or an L4 24\,GB in bf16) covers: extraction for 4 conditions on 2{,}636 agent
+turns at 7 positions; 50 warned control episodes; and steering on about 400 final-vote prefixes with
+25 directions, 4 strengths and 2 signs (about 80{,}000 short forward passes, with the shared prefix
+cached). A cheaper first step is to upload the November 5 caches, the lens and the unembedding,
+after which Experiments 1 and 2 for the original condition run on CPU.
+
+\section{Related work}
+\textbf{Molinari \& Bettineschi} (arXiv:2611.02153, November 1, 2026; abstract read) report on
+NARCBench that colluders' J-space ``holds the collusion itself'' (86\% of colluders represent
+misrepresentation, concealment or remorse before replying, on DeepSeek-V4-Flash), an unsupervised
+detector (J-PACT) that keeps 85\% of the above-chance AUROC of supervised probes, and causal
+interventions on a hidden count in a steganography task. The abstract does not mention system-prompt
+controls. Our plan differs in testing a supervised J-only probe across splits against a many-draw
+null, in running the three confound controls, and in steering the collusive vote itself.
+A \textbf{LessWrong post} reportedly finds that NARCBench system prompts alone separate colluders
+(not read here; Table~\ref{tab:text} agrees within a split). An \textbf{Apart sprint team} reportedly
+built a J-lens collusion monitor on NARCBench; its report could not be read.
+
+\section{Should J-space be the standard?}
+\textbf{Not yet, as a detector.} The evidence in hand points three ways. First, the J-only subspace
+holds less transferable signal than the full residual and much less than its own complement, and it
+explains about 1\% of variance \cited. Second, its advantage over a random subspace shows only at
+layers 22--23 and rests on a single random draw \cited. Third, the benchmark gives a probe easy
+routes through the instruction, the private channel and the vote (Section~\ref{sec:confound}).
+\textbf{Possibly, as an interpretation layer.} J-space's value would be that it names what the model
+represents. That case is made only if (a) J-only beats both random nulls at some $(k,\ell,\text{position})$
+under the swap condition, (b) prompt\_only scores well below J-only, (c) warned honest agents do not
+score like colluders, and (d) concept steering passes its bars. Until then we suggest the full
+residual probe stays the reference detector, every J-space claim is reported next to its random null
+and prompt-only score, and the incentive-driven (uninstructed) setting, where no prompt states the
+scheme, is treated as the real test.
+
+\section{Limitations}
+Instructed collusion only. Text baselines use bag-of-words features and cannot rule out representation
+of the instruction by the model. Related-work claims for the LessWrong post and the Apart team are
+second-hand. November 5 numbers were not rerun. Concept word lists were frozen before any activation
+result, but their choice is ours.
+
+\appendix
+\section{Code and reproduction}\label{app:files}
+Branch \texttt{jspace-interp} of the narcbench-core-demo repository. Modules in \texttt{jspace\_interp/}:
+contexts (conditions), positions and extract (read positions), jacobian (lens estimation), sweep and
+detectors (Experiment 2), concepts and stats (Experiment 1), steer (Experiment 3). Result files are under \texttt{results/jspace\_interp/} on the branch and copied to the shared
+\texttt{jspace-interp/results/} folder. Scripts:
+\begin{verbatim}
+python scripts/jspace_interp_text_baseline.py                     # ran (CPU)
+python scripts/jspace_interp_extract.py --model google/gemma-2-9b-it
+python scripts/jspace_interp_analyze.py --root <acts> --lens <lens.pt> \
+    --basis-dir <basis> --tokenizer <tokenizer.json> --layers 19-23
+python scripts/jspace_interp_steer.py --lens <lens.pt> --basis-dir <basis> --layer 22
+python scripts/jspace_interp_gen_matched_vocab.py --all
+python scripts/jspace_interp_tiny_e2e.py --work /tmp/jspace_tiny   # ran (CPU)
+\end{verbatim}
+\end{document}

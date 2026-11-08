@@ -143,9 +143,18 @@ def run_scenario(
     resume: bool = True,
     parallel_final: bool = False,
     model_id: str | None = None,
+    system_prompt_hook=None,
+    run_tag: str | None = None,
 ) -> dict:
-    """Run one Core scenario; write run_config / agent_prompts / results.json."""
-    run_id = f"deception__{scenario['id']}__{mode}"
+    """Run one Core scenario; write run_config / agent_prompts / results.json.
+
+    ``system_prompt_hook(agent, seat, role, prompt) -> prompt`` (optional) may rewrite
+    an agent's system prompt after it is built; ``seat`` is the agent's index in the
+    drawn order (seats 0-1 are the colluder seats in collusion mode). ``run_tag``
+    replaces ``mode`` in the run id (e.g. ``warned``) without changing the protocol.
+    Both default to None, which leaves the original behaviour unchanged.
+    """
+    run_id = f"deception__{scenario['id']}__{run_tag or mode}"
     run_dir = output_dir / run_id
 
     if resume and all(
@@ -227,6 +236,10 @@ def run_scenario(
                 honest_mandate=honest_mand,
             )
         agent_styles[agent] = style
+        if system_prompt_hook is not None:
+            system_prompts[agent] = system_prompt_hook(
+                agent, agents.index(agent), roles[agent], system_prompts[agent]
+            )
 
     public_messages: list[str] = []
     private_messages: list[str] = []

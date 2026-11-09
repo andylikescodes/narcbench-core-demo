@@ -78,11 +78,15 @@ J from W\textsubscript{U} top-25 frames (earlier proxy) & 0.989 & 0.602 [0.550, 
 \texttt{results/jspace/gemma2\_9b\_jpaper\_nnomp\_k25/RESULTS.md} on branch \texttt{jspace-separability}.}
 \end{table}
 
-\noindent Three further facts from the same summary \cited{} shape the plan. Per layer, J-only vs
+\noindent Further facts from the same branch \cited{} shape the plan. Per layer, J-only vs
 random Core$\to$Transfer was close at layers 19--21 (0.564/0.538, 0.709/0.696, 0.752/0.750) and
 separated only at layers 22--23 (0.852/0.753, 0.897/0.497). The J-space projection explains only
 about 1--1.5\% of residual variance. And the lens's top-1 readout at the last token was
-\texttt{<eos>} for 98\% of Core turns, so last-token readouts carry little content. The
+\texttt{<eos>} for 98\% of Core turns, so last-token readouts carry little content. The atoms chosen at the last token are nearly a fixed set across turns (at Core layer
+21, ``decision'' is chosen in 90\% of turns, \texttt{<eos>} in 86\%, ``prioritizing'' in 82\%), and
+another turn's atoms explain as much variance as a turn's own (source: \texttt{docs/NEXT-SCIENCE.md}).
+This is a first, partial answer to Experiment~1 at the last token: there, J-space mostly names
+end-of-turn and formatting tokens, which is why the new read positions are needed. The
 $k$ variants were 0.768 ($k{=}8$), 0.803 ($k{=}16$), 0.721 ($k{=}50$), 0.811 (no fill) and 0.809 (cone
 projection). The random-subspace control was a single Haar subspace shared by every activation, so none of these
 comparisons has a usable null distribution. Two more facts from the same files matter for the verdict.

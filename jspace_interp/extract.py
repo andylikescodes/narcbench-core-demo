@@ -76,7 +76,7 @@ def extract_rows(samples: list[dict], model, tokenizer, layers: list[int], out_d
                 bufs.setdefault(f"{p}__layer_{L}", []).append(v.cpu().numpy().astype(np.float16))
         meta.append({k: s.get(k) for k in ("run_id", "scenario_id", "scenario_domain", "mode", "agent_name", "role",
                                           "phase", "channel", "round", "agent_vote", "target_option", "fair_option",
-                                          "condition", "context_changed")}
+                                          "condition", "context_changed", "warned", "seat")}
                     | {"n_tokens": len(ids), "positions": {k: v for k, v in pos.items()}, "fallback": fb,
                        "truncated_to": max_tokens if (max_tokens and len(enc["input_ids"]) > max_tokens) else None})
         if (i + 1) % 25 == 0 or i == 0:

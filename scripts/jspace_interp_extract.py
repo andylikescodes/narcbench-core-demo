@@ -4,8 +4,16 @@ Reads the saved NARCBench transcripts, rewrites each agent's context for one of 
 (original, swap, nosys, prompt_only; see jspace_interp/contexts.py), and saves activations at
 several read positions for each condition into  <out>/<split>/<condition>/.
 
+Splits: core, transfer, and warned (the matched-vocabulary control episodes written by
+scripts/jspace_interp_gen_matched_vocab.py; --warned-runs points at them). --export-basis writes the unembedding
+basis (unembed_fp16.npy, unembed_row_norms_fp32.npy, final_norm_weight_fp32.npy) and tokenizer.json from the loaded
+model, which the analysis needs.
+
   # real run (needs a GPU and HF_TOKEN for the gated Gemma repo)
-  python scripts/jspace_interp_extract.py --model google/gemma-2-9b-it --out results/jspace_interp/acts
+  python scripts/jspace_interp_extract.py --model google/gemma-2-9b-it --out results/jspace_interp/acts \
+      --export-basis data/j_basis/gemma2_9b
+  python scripts/jspace_interp_extract.py --model google/gemma-2-9b-it --splits warned \
+      --conditions original prompt_only --out results/jspace_interp/acts
 
   # pipeline check on a tiny local model (CPU)
   python scripts/jspace_interp_extract.py --model /path/to/tiny --max-rows 40 --max-tokens 256 --device cpu
@@ -20,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from jspace_interp.agents import CORE_RUNS, XFER_RUNS, load_rows  # noqa: E402
+from jspace_interp.agents import SPLITS, load_rows, runs_dir_for  # noqa: E402
 from jspace_interp.contexts import CONDITIONS, apply_condition, residual_leak_report  # noqa: E402
 from jspace_interp.extract import extract_rows  # noqa: E402
 from jspace_interp.positions import POSITIONS  # noqa: E402
@@ -55,7 +63,11 @@ def subsample(rows, max_rows):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", default="google/gemma-2-9b-it")
-    ap.add_argument("--splits", nargs="+", default=["core", "transfer"])
+    ap.add_argument("--splits", nargs="+", default=["core", "transfer"], choices=list(SPLITS))
+    ap.add_argument("--warned-runs", type=Path, default=None,
+                    help="run directory of the matched-vocabulary episodes (default results/jspace_interp/matched_vocab_runs)")
+    ap.add_argument("--export-basis", type=Path, default=None,
+                    help="also write the unembedding basis + tokenizer.json for the analysis into this directory")
     ap.add_argument("--conditions", nargs="+", default=list(CONDITIONS))
     ap.add_argument("--layers", default="19,20,21,22,23")
     ap.add_argument("--positions", nargs="+", default=list(POSITIONS))
@@ -75,10 +87,19 @@ def main():
     model = AutoModelForCausalLM.from_pretrained(args.model, torch_dtype=getattr(torch, args.dtype),
                                                  attn_implementation="eager").to(args.device).eval()
     layers = [int(x) for x in args.layers.split(",")]
+    if args.export_basis:
+        from jspace_interp.jacobian import save_unembed_basis
+
+        save_unembed_basis(model, args.export_basis)
+        tok.save_pretrained(args.export_basis / "tokenizer")
+        src = args.export_basis / "tokenizer" / "tokenizer.json"
+        if src.exists():
+            src.replace(args.export_basis / "tokenizer.json")
+        print(json.dumps({"export_basis": str(args.export_basis), "vocab": int(model.get_output_embeddings().weight.shape[0])}))
     report = {}
     for split in args.splits:
-        rows = subsample(load_rows(split), args.max_rows)
-        runs_dir = CORE_RUNS if split == "core" else XFER_RUNS
+        runs_dir = runs_dir_for(split, args.warned_runs)
+        rows = subsample(load_rows(split, args.warned_runs), args.max_rows)
         for cond in args.conditions:
             samples = apply_condition(rows, cond, runs_dir, split)
             leak = residual_leak_report(samples)
@@ -86,7 +107,10 @@ def main():
                                max_tokens=args.max_tokens or None)
             report[f"{split}/{cond}"] = {"n_rows": len(samples), "leak": leak, "out": str(out)}
             print(json.dumps({f"{split}/{cond}": report[f"{split}/{cond}"]}, default=str))
-    (args.out / "extract_report.json").write_text(json.dumps(report, indent=1, default=str) + "\n")
+    rep_p = args.out / "extract_report.json"
+    old = json.loads(rep_p.read_text()) if rep_p.exists() else {}
+    old.update(report)
+    rep_p.write_text(json.dumps(old, indent=1, default=str) + "\n")
 
 
 if __name__ == "__main__":

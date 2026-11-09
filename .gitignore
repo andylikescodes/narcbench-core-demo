@@ -16,3 +16,20 @@ secrets/
 # Out of scope for the Transfer-stable weekend lane
 track-i-intention/
 interp-demo/
+
+# J-space analysis inputs (unembedding matrices, the published lens, converted caches); multi-GB, never committed
+data/j_basis/
+data/jspace_interp/
+data/volume_pull/
+
+# LaTeX build artifacts
+docs/**/*.aux
+docs/**/*.log
+docs/**/*.out
+docs/**/*.toc
+docs/**/*.fls
+docs/**/*.fdb_latexmk
+docs/**/*.synctex.gz
+results/jspace_interp/acts/
+results/jspace_interp/pod_runs/*/acts.tgz
+results/jspace_interp/pod_runs/*/results.tgz

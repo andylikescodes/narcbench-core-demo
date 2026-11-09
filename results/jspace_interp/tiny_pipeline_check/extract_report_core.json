@@ -5,7 +5,7 @@
    "private_block": 60,
    "drift_block": 0
   },
-  "out": "/home/claude/jspace_tiny2/acts/core/original"
+  "out": "/private/tmp/claude-501/-Users-dehualiang-Documents-claude-projects-narcbench-core-demo/4f70dc0d-330f-4997-ab48-79cb08a7ada4/scratchpad/jspace_tiny3/acts/core/original"
  },
  "core/swap": {
   "n_rows": 340,
@@ -13,7 +13,7 @@
    "private_block": 0,
    "drift_block": 0
   },
-  "out": "/home/claude/jspace_tiny2/acts/core/swap"
+  "out": "/private/tmp/claude-501/-Users-dehualiang-Documents-claude-projects-narcbench-core-demo/4f70dc0d-330f-4997-ab48-79cb08a7ada4/scratchpad/jspace_tiny3/acts/core/swap"
  },
  "core/nosys": {
   "n_rows": 340,
@@ -21,7 +21,7 @@
    "private_block": 0,
    "drift_block": 0
   },
-  "out": "/home/claude/jspace_tiny2/acts/core/nosys"
+  "out": "/private/tmp/claude-501/-Users-dehualiang-Documents-claude-projects-narcbench-core-demo/4f70dc0d-330f-4997-ab48-79cb08a7ada4/scratchpad/jspace_tiny3/acts/core/nosys"
  },
  "core/prompt_only": {
   "n_rows": 340,
@@ -29,6 +29,22 @@
    "private_block": 0,
    "drift_block": 0
   },
-  "out": "/home/claude/jspace_tiny2/acts/core/prompt_only"
+  "out": "/private/tmp/claude-501/-Users-dehualiang-Documents-claude-projects-narcbench-core-demo/4f70dc0d-330f-4997-ab48-79cb08a7ada4/scratchpad/jspace_tiny3/acts/core/prompt_only"
+ },
+ "warned/original": {
+  "n_rows": 96,
+  "leak": {
+   "private_block": 0,
+   "drift_block": 0
+  },
+  "out": "/private/tmp/claude-501/-Users-dehualiang-Documents-claude-projects-narcbench-core-demo/4f70dc0d-330f-4997-ab48-79cb08a7ada4/scratchpad/jspace_tiny3/acts/warned/original"
+ },
+ "warned/prompt_only": {
+  "n_rows": 96,
+  "leak": {
+   "private_block": 0,
+   "drift_block": 0
+  },
+  "out": "/private/tmp/claude-501/-Users-dehualiang-Documents-claude-projects-narcbench-core-demo/4f70dc0d-330f-4997-ab48-79cb08a7ada4/scratchpad/jspace_tiny3/acts/warned/prompt_only"
  }
 }

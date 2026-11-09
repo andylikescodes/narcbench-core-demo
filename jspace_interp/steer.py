@@ -10,6 +10,11 @@ Setup (pre-registered in the plan, Nov 8):
   * Directions u (unit norm): concept-group J-lens atoms (mean of the group's atoms), the J-space
     role-probe direction (from the analysis), and n_random Haar directions with the same norm.
   * scale = median ||h_J|| at that layer if known, else a recorded fallback (0.1 * median ||h|| on the tail).
+  * The prefix before the tail is run once per row with the KV cache kept; every steered pass re-runs only the
+    tail on a copy of that cache (the prefix is identical by construction, so this is exact up to bf16 noise;
+    the unsteered outcome is also computed without the cache on the first rows and the largest difference is
+    recorded as ``cache_check``). ``use_cache=False`` runs full passes.
+  * Only the sign the bars use is run by default (+u on honest agents, -u on colluders; ``signs="both"`` runs both).
 
 Pre-registered bars (a direction "steers" only if all hold):
   1. Sign: honest agents' mean delta-y > 0 for +u, and colluders' mean delta-y < 0 for -u.
@@ -20,6 +25,7 @@ Pre-registered bars (a direction "steers" only if all hold):
 """
 from __future__ import annotations
 
+import copy
 import json
 import re
 from pathlib import Path
@@ -84,7 +90,8 @@ def concept_directions(J_L, W, s, group_ids: dict[str, list[int]]):
 
 
 def run_steering(rows, model, tokenizer, layer: int, directions: dict[str, np.ndarray], *, alphas=ALPHAS,
-                 scale: float | None = None, log=print) -> dict:
+                 scale: float | None = None, log=print, use_cache: bool = True, signs: str = "role",
+                 check_rows: int = 3) -> dict:
     import torch
 
     device = next(model.parameters()).device
@@ -107,30 +114,69 @@ def run_steering(rows, model, tokenizer, layer: int, directions: dict[str, np.nd
         h = out[0] if isinstance(out, (tuple, list)) else out
         grab["h"] = h[0].detach().float()
 
+    def y_from_logits(logits, t_ids, f_ids):
+        return float(torch.logsumexp(logits[t_ids], 0) - torch.logsumexp(logits[f_ids], 0))
+
+    def y_full(ids, start, t_ids, f_ids):
+        """One full pass; the hook steers positions >= start."""
+        state["start"] = start
+        with torch.inference_mode():
+            logits = model(input_ids=torch.tensor([ids], device=device), use_cache=False).logits[0, -1].float()
+        return y_from_logits(logits, t_ids, f_ids)
+
+    def prefix_cache(ids, start):
+        state["vec"] = None
+        with torch.inference_mode():
+            out = model(input_ids=torch.tensor([ids[:start]], device=device), use_cache=True)
+        return out.past_key_values
+
+    def y_tail(cache, ids, start, t_ids, f_ids):
+        """Re-run only the tail on a copy of the prefix cache; the hook steers every tail position."""
+        state["start"] = 0
+        pkv = copy.deepcopy(cache)
+        with torch.inference_mode():
+            logits = model(input_ids=torch.tensor([ids[start:]], device=device), past_key_values=pkv,
+                           use_cache=True).logits[0, -1].float()
+        return y_from_logits(logits, t_ids, f_ids)
+
     records = []
+    cache_check = {"rows": 0, "max_abs_diff_y0": 0.0}
     try:
-        tail_norms = []
         prepared = []
         for r in rows:
             ids, start = build_prefix(r, tokenizer)
             t_ids = option_token_ids(tokenizer, r["target_option"])
             f_ids = option_token_ids(tokenizer, r["fair_option"])
-            if not t_ids or not f_ids:
+            if not t_ids or not f_ids or start < 1 or start >= len(ids):
                 continue
             prepared.append((r, ids, start, t_ids, f_ids))
-
-        def y_of(ids, t_ids, f_ids):
-            with torch.inference_mode():
-                logits = model(input_ids=torch.tensor([ids], device=device), use_cache=False).logits[0, -1].float()
-            return float(torch.logsumexp(logits[t_ids], 0) - torch.logsumexp(logits[f_ids], 0))
-
-        base = []
+        # unsteered outcome and the tail norms (for the fallback scale)
+        base, caches, tail_norms = [], [], []
         g = mod.register_forward_hook(grab_hook)
         try:
-            for r, ids, start, t_ids, f_ids in prepared:
+            for k, (r, ids, start, t_ids, f_ids) in enumerate(prepared):
                 state["vec"] = None
-                base.append(y_of(ids, t_ids, f_ids))
-                tail_norms.extend(grab["h"][start:].norm(dim=-1).cpu().tolist())
+                if use_cache:
+                    try:
+                        cache = prefix_cache(ids, start)
+                        y0 = y_tail(cache, ids, start, t_ids, f_ids)
+                        tail_norms.extend(grab["h"].norm(dim=-1).cpu().tolist())
+                        if k < check_rows:
+                            y_ref = y_full(ids, start, t_ids, f_ids)
+                            cache_check["rows"] += 1
+                            cache_check["max_abs_diff_y0"] = max(cache_check["max_abs_diff_y0"], abs(y_ref - y0))
+                    except Exception as e:  # noqa: BLE001  (cache API mismatch: fall back to full passes)
+                        log(f"[steer] prefix cache unavailable ({type(e).__name__}: {e}); running full passes")
+                        use_cache = False
+                        cache = None
+                        y0 = y_full(ids, start, t_ids, f_ids)
+                        tail_norms.extend(grab["h"][start:].norm(dim=-1).cpu().tolist())
+                else:
+                    cache = None
+                    y0 = y_full(ids, start, t_ids, f_ids)
+                    tail_norms.extend(grab["h"][start:].norm(dim=-1).cpu().tolist())
+                base.append(y0)
+                caches.append(cache)
         finally:
             g.remove()
         scale_src = "given (median ||h_J||)"
@@ -140,21 +186,27 @@ def run_steering(rows, model, tokenizer, layer: int, directions: dict[str, np.nd
         for k, (r, ids, start, t_ids, f_ids) in enumerate(prepared):
             rec = {"run_id": r["run_id"], "agent_name": r["agent_name"], "role": r["role"], "mode": r["mode"],
                    "vote": r.get("agent_vote"), "target": r["target_option"], "y0": base[k], "delta": {}}
-            state["start"] = start
+            row_signs = (+1, -1) if signs == "both" else ((-1,) if r["role"] == "colluder" else (+1,))
             for name, u in directions.items():
                 ut = torch.tensor(u, dtype=torch.float32, device=device)
                 for a in alphas:
-                    for sign in (+1, -1):
+                    for sign in row_signs:
                         state["vec"] = sign * a * scale * ut
-                        rec["delta"][f"{name}|{a}|{sign:+d}"] = y_of(ids, t_ids, f_ids) - base[k]
+                        if caches[k] is not None:
+                            y = y_tail(caches[k], ids, start, t_ids, f_ids)
+                        else:
+                            y = y_full(ids, start, t_ids, f_ids)
+                        rec["delta"][f"{name}|{a}|{sign:+d}"] = y - base[k]
             state["vec"] = None
+            caches[k] = None  # free the cache
             records.append(rec)
             if k == 0 or (k + 1) % 10 == 0:
                 log(f"[steer] {k + 1}/{len(prepared)}")
     finally:
         handle.remove()
     return {"layer": layer, "scale": scale, "scale_source": scale_src, "alphas": list(alphas),
-            "directions": list(directions), "records": records}
+            "directions": list(directions), "signs": signs, "prefix_cache": bool(use_cache), "cache_check": cache_check,
+            "records": records}
 
 
 def summarize(result: dict, q: float = 0.05) -> dict:
@@ -171,6 +223,9 @@ def summarize(result: dict, q: float = 0.05) -> dict:
             continue
         for a in result["alphas"]:
             key = lambda d: f"{d}|{a}|{sign:+d}"
+            rs = [r for r in rs if key(real[0] if real else rand[0]) in r["delta"]] if (real or rand) else rs
+            if not rs:
+                continue
             null = np.array([np.mean([r["delta"][key(d)] for r in rs]) for d in rand]) if rand else np.array([])
             for d in real:
                 m = float(np.mean([r["delta"][key(d)] for r in rs]))

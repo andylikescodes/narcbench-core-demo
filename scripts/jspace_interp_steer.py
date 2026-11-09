@@ -42,6 +42,9 @@ def main():
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--no-cache", action="store_true", help="full forward passes instead of re-running only the tail on the cached prefix")
+    ap.add_argument("--signs", choices=["role", "both"], default="role",
+                    help="role: +u on honest agents and -u on colluders (what the bars use); both: both signs for every row")
     ap.add_argument("--out", type=Path, default=ROOT / "results/jspace_interp/steer")
     args = ap.parse_args()
 
@@ -76,7 +79,7 @@ def main():
         dirs[f"random:{i}"] = v / np.linalg.norm(v)
 
     res = run_steering(fr, model, tok, args.layer, dirs, alphas=[float(a) for a in args.alphas.split(",")],
-                       scale=args.hj_norm)
+                       scale=args.hj_norm, use_cache=not args.no_cache, signs=args.signs)
     res["summary"] = summarize(res)
     res["lens"] = lens_info
     res["config"] = {k: str(v) for k, v in vars(args).items()}
@@ -85,6 +88,7 @@ def main():
     out = args.out / f"steer_{args.split}_{args.condition}_L{args.layer}.json"
     out.write_text(json.dumps(res, indent=1) + "\n")
     print(json.dumps(res["summary"]["passes_all_bars"], indent=1))
+    print("prefix cache:", res["prefix_cache"], "check:", res["cache_check"], "rows:", len(res["records"]))
     print("wrote", out)
 
 

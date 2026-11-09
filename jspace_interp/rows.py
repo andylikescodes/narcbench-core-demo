@@ -15,7 +15,7 @@ def load_extraction(folder: Path):
 
 
 def domain(m: dict, split: str) -> str:
-    if split == "core":
+    if split in ("core", "warned"):
         p = (m.get("scenario_id") or "").split("_")
         return "_".join(p[:-1]) if len(p) >= 2 else m.get("scenario_id", "")
     return m.get("scenario_domain") or m["run_id"].split("__")[0]
@@ -46,6 +46,7 @@ def to_agents(meta, idx, X, split: str) -> list[dict]:
         a = acc.setdefault(k, {"run_id": m["run_id"], "agent_name": m["agent_name"], "role": m["role"],
                                "mode": m["mode"], "domain": domain(m, split), "vote": m.get("agent_vote"),
                                "target": m.get("target_option"), "scenario_id": m.get("scenario_id"),
+                               "warned": bool(m.get("warned", False)), "seat": m.get("seat", -1),
                                "_x": []})
         a["_x"].append(X[j])
     out = []

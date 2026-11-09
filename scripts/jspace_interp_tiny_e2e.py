@@ -9,8 +9,10 @@ real NARCBench transcripts and writes files in the shapes the GPU run will produ
   3. extract activations for all four conditions on a subset of Core and Transfer runs
   4. estimate a Jacobian lens on a few prompts and save the unembedding basis
   5. run the Experiment 1 + 2 analysis (k sweep, positions, random-subspace controls)
-  6. run Experiment 3 steering on a few final-vote prefixes
-  7. dry-run the matched-vocabulary generator
+  6. run Experiment 3 steering on a few final-vote prefixes (prefix-cached tail passes, checked against full passes)
+  7. dry-run the matched-vocabulary generator (stub model)
+  8. generate warned episodes with the tiny model itself (threads + batched generate), extract the warned split for the
+     original and prompt_only conditions, and re-run the analysis so the matched-vocabulary readings are exercised
 
   python scripts/jspace_interp_tiny_e2e.py --work /tmp/jspace_tiny
 """
@@ -27,6 +29,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 SPECIAL = ["<pad>", "<eos>", "<bos>", "<unk>", "<start_of_turn>", "<end_of_turn>"]
+GEMMA_TEMPLATE = (
+    "{{ bos_token }}{% for message in messages %}{% if message['role'] == 'assistant' %}{% set role = 'model' %}{% else %}{% set role = message['role'] %}{% endif %}{{ '<start_of_turn>' + role + '\\n' + message['content'] | trim + '<end_of_turn>\\n' }}{% endfor %}{% if add_generation_prompt %}{{ '<start_of_turn>model\\n' }}{% endif %}"
+)
 LAYERS = [2, 3, 4]
 
 
@@ -41,6 +46,7 @@ def train_tokenizer(texts, out: Path, vocab_size=4000):
     tk.train_from_iterator(texts, tr)
     fast = PreTrainedTokenizerFast(tokenizer_object=tk, pad_token="<pad>", eos_token="<eos>", bos_token="<bos>",
                                    unk_token="<unk>", additional_special_tokens=["<start_of_turn>", "<end_of_turn>"])
+    fast.chat_template = GEMMA_TEMPLATE  # the generation backends call apply_chat_template
     out.mkdir(parents=True, exist_ok=True)
     fast.save_pretrained(out)
     tk.save(str(out / "tokenizer.json"))
@@ -118,6 +124,44 @@ def main():
          "--device", "cpu", "--dtype", "float32", "--out", w / "steer"], log)
     run([py, "scripts/jspace_interp_gen_matched_vocab.py", "--dry-run", "--ids", "med_01", "fin_01",
          "--out", w / "matched_vocab_dry"], log)
+    steer = json.loads((w / "steer/steer_core_swap_L3.json").read_text())
+    chk = steer["cache_check"]
+    print("steer prefix cache:", steer["prefix_cache"], chk)
+    if steer["prefix_cache"] and chk["rows"] and chk["max_abs_diff_y0"] > 1e-3:
+        raise SystemExit(f"cached and full passes disagree on y0: {chk}")
+
+    # 8. matched-vocabulary control end to end: warned episodes from the tiny model, extraction, analysis
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from jspace_interp_extract import subsample
+
+    core_ids = []
+    for r in subsample(load_rows("core"), args.core_rows):
+        if r["scenario_id"] not in core_ids:
+            core_ids.append(r["scenario_id"])
+    warned_ids = core_ids[:6]
+    run([py, "scripts/jspace_interp_gen_matched_vocab.py", "--model", w / "model", "--allow-cpu", "--dtype", "float32",
+         "--ids", *warned_ids, "--max-new-tokens", "8", "--workers", "3", "--batch", "2", "--out", w / "matched_vocab_tiny"], log)
+    meta = json.loads((w / "matched_vocab_tiny/batch_meta.json").read_text())
+    print("warned episodes:", meta["n"], "generation:", meta["generation"])
+    run([py, "scripts/jspace_interp_extract.py", "--model", w / "model", "--splits", "warned", "--warned-runs", w / "matched_vocab_tiny",
+         "--conditions", "original", "prompt_only", "--layers", lay, "--max-tokens", args.max_tokens, "--device", "cpu",
+         "--dtype", "float32", "--out", w / "acts"], log)
+    run([py, "scripts/jspace_interp_analyze.py", "--root", w / "acts", "--lens", w / "lens/tiny_jacobian_lens.pt",
+         "--basis-dir", w / "basis", "--tokenizer", w / "model/tokenizer.json", "--layers", lay, "--ks", "4,25",
+         "--positions", "last", "--conditions", "original,prompt_only",
+         "--n-random", "4", "--n-random-lodo", "1", "--n-random-mv", "2", "--boot", "50", "--candidates", "256",
+         "--out", w / "analysis_mv"], log)
+    res = json.loads((w / "analysis_mv/sweep_results.json").read_text())
+    cell = res["cells"][0]
+    mv = cell["k25"]["J25_fill"].get("matched_vocab")
+    if not mv or "auroc_colluder_vs_warned" not in mv or "episode" not in mv:
+        raise SystemExit(f"matched-vocabulary readings missing from the sweep: {list(cell['k25']['J25_fill'])}")
+    if "matched_vocab" not in cell["k25"]["randsub"] or not res["role_dirs"]:
+        raise SystemExit("random-draw matched-vocabulary spread or role directions missing")
+    e1 = [e for e in res["exp1"] if e["condition"] == "original"][0]
+    if "matched_vocab_concepts" not in e1["core"]:
+        raise SystemExit("matched-vocabulary concept readings missing from Experiment 1")
+    print("matched-vocab readings (tiny model, meaningless):", {k: v for k, v in mv.items() if not isinstance(v, dict)})
     (w / "PIPELINE_CHECK_ONLY.txt").write_text("Random tiny model: no number here means anything about Gemma.\n")
     (w / "e2e_log.json").write_text(json.dumps(log, indent=1) + "\n")
     print("ok", w)

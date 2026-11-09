@@ -12,7 +12,18 @@ bootstrap) and within-Transfer leave-one-family-out:
   J-lens atoms), pca_k (top-k principal components of Core rows).
 
 Random controls are scored on Core -> Transfer (N draws) and on Core LODO for the first
-``--n-random-lodo`` draws. Experiment 1 readouts use the k=25 filled atoms and the lens readout.
+``--n-random-lodo`` draws; the episode bootstrap is not run on the random draws (their spread is the null).
+Experiment 1 readouts use the k=25 filled atoms and the lens readout.
+
+Matched-vocabulary control (control 2): when <root>/warned/<condition>/ exists (extraction of the warned
+control episodes, scripts/jspace_interp_gen_matched_vocab.py), every arm is also scored on the warned
+agents with probes fit out of fold on Core (jspace_interp/matched_vocab.py): warned honest vs unwarned
+honest within the warned episodes, colluders vs warned honest, the detectors on warned vs control
+episodes, and the concept-atom mass of warned agents. The first --n-random-mv random subspaces give the
+null for those readings.
+
+Role directions for Experiment 3: at k=25 the mean filled J component of colluders minus honest agents
+(Core discussion rows, collusion episodes) and the median ||h_J|| are written to <out>/role_dirs/.
 
   python scripts/jspace_interp_analyze.py --root data/jspace_interp/gemma2_9b \\
       --lens <lens.pt> --basis-dir data/j_basis/gemma2_9b --tokenizer <tokenizer.json> \\
@@ -32,7 +43,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from jspace_interp import concepts, detectors, stats, sweep  # noqa: E402
+from jspace_interp import concepts, detectors, matched_vocab, stats, sweep  # noqa: E402
 from jspace_interp.nov5_jspace_decompose import (atom_norms, load_lens, load_unembed, norm_scale,  # noqa: E402
                                                  parse_layers, shuffled_control)
 from jspace_interp.rows import load_extraction, select_rows, to_agents  # noqa: E402
@@ -61,9 +72,30 @@ def shared_boot_idx(xfer_agents, B, seed):
     return np.vstack([np.concatenate([rng.choice(g, len(g), replace=True) for g in groups]) for _ in range(B)])
 
 
+def clean(r: dict) -> dict:
+    return {kk: vv for kk, vv in r.items() if not kk.startswith("_")}
+
+
+def mv_summary(draws: list[dict]) -> dict:
+    """Spread of the matched-vocabulary readings over random draws."""
+    out = {"n": len(draws)}
+    for key in ("auroc_colluder_vs_warned", "auroc_warned_vs_unwarned", "auroc_warned_vs_control_honest", "echo_ratio"):
+        vals = [d[key] for d in draws if d.get(key) is not None]
+        if vals:
+            out[key] = {"mean": float(np.mean(vals)), "p5": float(np.percentile(vals, 5)), "p95": float(np.percentile(vals, 95)),
+                        "draws": [float(v) for v in vals]}
+    ep = [d["episode"].get("warned_vs_control_primary") for d in draws if d.get("episode")]
+    ep = [v for v in ep if v is not None]
+    if ep:
+        out["episode_warned_vs_control_primary"] = {"mean": float(np.mean(ep)), "p5": float(np.percentile(ep, 5)),
+                                                    "p95": float(np.percentile(ep, 95))}
+    return out
+
+
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--root", type=Path, required=True, help="has core/<condition>/ and transfer/<condition>/")
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--root", type=Path, required=True, help="has core/<condition>/ and transfer/<condition>/ (and warned/<condition>/)")
+    ap.add_argument("--warned-root", type=Path, default=None, help="folder with <condition>/ extractions of the warned episodes (default <root>/warned)")
     ap.add_argument("--lens", type=Path, required=True)
     ap.add_argument("--basis-dir", type=Path, required=True)
     ap.add_argument("--tokenizer", type=Path, required=True)
@@ -73,14 +105,18 @@ def main():
     ap.add_argument("--conditions", default="original,swap")
     ap.add_argument("--n-random", type=int, default=200)
     ap.add_argument("--n-random-lodo", type=int, default=20)
+    ap.add_argument("--n-random-mv", type=int, default=20, help="random subspaces also scored on the matched-vocabulary control")
     ap.add_argument("--boot", type=int, default=2000)
+    ap.add_argument("--boot-random", action="store_true", help="also bootstrap every random draw (slow; off by default)")
     ap.add_argument("--candidates", type=int, default=1024)
     ap.add_argument("--norm-kind", default="gemma")
     ap.add_argument("--no-lodo", action="store_true", help="skip Core LODO for every arm (fast smoke)")
+    ap.add_argument("--no-warned", action="store_true", help="ignore warned extractions even if present")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
+    (args.out / "role_dirs").mkdir(exist_ok=True)
 
     layers = parse_layers(args.layers)
     ks = [int(k) for k in args.ks.split(",")]
@@ -93,9 +129,13 @@ def main():
     vocab = vocab_from_tokenizer(args.tokenizer)
     inv_vocab = {i: t for t, i in vocab.items()}
     gids = concepts.group_token_ids(vocab)
+    gnames = list(gids)
     rng = np.random.default_rng(args.seed)
+    warned_root = args.warned_root or (args.root / "warned")
     results = {"lens": lens_info, "layers": layers, "ks": ks, "positions": positions,
-               "concept_token_counts": {g: len(v) for g, v in gids.items()}, "cells": [], "exp1": []}
+               "concept_token_counts": {g: len(v) for g, v in gids.items()},
+               "settings": {k: (str(v) if isinstance(v, Path) else v) for k, v in vars(args).items()},
+               "cells": [], "exp1": [], "role_dirs": []}
 
     for cond in args.conditions.split(","):
         cm, cz = load_extraction(args.root / "core" / cond)
@@ -103,6 +143,11 @@ def main():
         prompt_only = cond == "prompt_only"
         ci = select_rows(cm, "discussion", prompt_only)
         ti = select_rows(tm, "final", prompt_only)
+        have_warned = (not args.no_warned) and (warned_root / cond / "metadata.json").exists()
+        if have_warned:
+            wm, wz = load_extraction(warned_root / cond)
+            wi = select_rows(wm, "discussion", prompt_only)
+            log(cond, "warned episodes present:", len({wm[i]["run_id"] for i in wi}), "episodes,", len(wi), "rows")
         pos_list = ["prompt_end"] if prompt_only else positions
         for pos in pos_list:
             for L in layers:
@@ -112,101 +157,152 @@ def main():
                     continue
                 Xc = cz[key][ci].astype(np.float32)
                 Xt = tz[key][ti].astype(np.float32)
+                Xw = wz[key][wi].astype(np.float32) if have_warned and key in wz.files else None
                 d = Xc.shape[1]
                 base_c = to_agents(cm, ci, Xc, "core")
                 base_t = to_agents(tm, ti, Xt, "transfer")
+                base_w = to_agents(wm, wi, Xw, "warned") if Xw is not None else None
                 boot_idx = shared_boot_idx(base_t, args.boot, args.seed + 1)
                 lodo = not args.no_lodo
 
-                def score(Fc, Ft, lodo_on=lodo):
-                    ca = [dict(a) for a in base_c]
-                    ta = [dict(a) for a in base_t]
-                    for a, x in zip(ca, to_agents(cm, ci, Fc, "core")):
+                def with_x(base, meta, idx, F, split):
+                    out = [dict(a) for a in base]
+                    for a, x in zip(out, to_agents(meta, idx, F, split)):
                         a["x"] = x["x"]
-                    for a, x in zip(ta, to_agents(tm, ti, Ft, "transfer")):
-                        a["x"] = x["x"]
-                    return sweep.protocol_scores(ca, ta, lodo=lodo_on, lofo=lodo_on, boot_idx=boot_idx)
+                    return out
+
+                def score(Fc, Ft, Fw=None, lodo_on=lodo, boot=True, mv=True):
+                    ca = with_x(base_c, cm, ci, Fc, "core")
+                    ta = with_x(base_t, tm, ti, Ft, "transfer")
+                    r = sweep.protocol_scores(ca, ta, lodo=lodo_on, lofo=lodo_on, boot_idx=boot_idx if boot else None)
+                    if Fw is not None and mv:
+                        wa = with_x(base_w, wm, wi, Fw, "warned")
+                        r["matched_vocab"] = matched_vocab.score(ca, wa, seed=args.seed)
+                    return r
 
                 cell = {"condition": cond, "position": pos, "layer": L, "n_core_rows": len(ci),
-                        "n_transfer_rows": len(ti)}
-                full = score(Xc, Xt)
-                cell["full"] = {k: v for k, v in full.items() if not k.startswith("_")}
-                log(cond, pos, L, "full", cell["full"])
+                        "n_transfer_rows": len(ti), "n_warned_rows": int(len(wi)) if Xw is not None else 0}
+                t_cell = time.time()
+                full = score(Xc, Xt, Xw)
+                cell["full"] = clean(full)
+                log(cond, pos, L, "full", {k: v for k, v in cell["full"].items() if k != "matched_vocab"},
+                    "| warned:", {k: round(v, 3) for k, v in cell["full"].get("matched_vocab", {}).items()
+                                  if isinstance(v, float)} if Xw is not None else "-")
                 dc = sweep.decompose_nested(Xc, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates)
                 dt = sweep.decompose_nested(Xt, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates)
+                dw = sweep.decompose_nested(Xw, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates) if Xw is not None else None
                 cell["pursuit_steps_core_mean"] = float(dc["steps"].mean())
                 cell["pursuit_steps_transfer_mean"] = float(dt["steps"].mean())
+                cell["decompose_seconds"] = round(time.time() - t_cell, 1)
                 Fc_mean = np.linalg.norm(Xc, axis=1) ** 2
                 for k in ks:
+                    t_k = time.time()
                     arms = {}
                     for fill in (False, True):
                         hc, tc = sweep.j_arms(Xc, dc, J[L], W, s, k, fill)
                         ht, tt = sweep.j_arms(Xt, dt, J[L], W, s, k, fill)
+                        hw, tw = sweep.j_arms(Xw, dw, J[L], W, s, k, fill) if Xw is not None else (None, None)
                         name = f"J{k}_fill" if fill else f"J{k}"
-                        r = score(hc, ht)
+                        r = score(hc, ht, hw)
                         arms[name] = r
                         arms[name]["fve_core"] = float(np.mean((hc ** 2).sum(1) / Fc_mean))
                         if fill:
-                            arms[f"C{k}_fill"] = score(Xc - hc, Xt - ht)
+                            arms[f"C{k}_fill"] = score(Xc - hc, Xt - ht, (Xw - hw) if Xw is not None else None)
                             # shuffled: another row's (filled) atoms
                             shc, _ = shuffled_control(Xc, tc, J[L], W, s, args.seed + L)
                             sht, _ = shuffled_control(Xt, tt, J[L], W, s, args.seed + L + 1000)
-                            arms[f"shuffled{k}"] = score(shc, sht, lodo_on=False)
+                            arms[f"shuffled{k}"] = score(shc, sht, lodo_on=False, mv=False)
                             # fixed frame: most frequent atoms over Core rows
                             freq = Counter(int(t) for row in tc for t in row if t >= 0)
                             fixed = np.array([t for t, _ in freq.most_common(k)], dtype=np.int64)
                             Qf = sweep.atoms_basis(fixed, J[L], W, s)
-                            arms[f"fixedframe{k}"] = score(sweep.project_fixed(Xc, Qf), sweep.project_fixed(Xt, Qf))
-                            if k == 25 and pos in ("last", "prevote", "frac50", "prompt_end"):
-                                results["exp1"].append(exp1_readouts(cond, pos, L, cm, ci, tm, ti, tc, tt,
-                                                                     dc, dt, gids, inv_vocab))
+                            arms[f"fixedframe{k}"] = score(sweep.project_fixed(Xc, Qf), sweep.project_fixed(Xt, Qf),
+                                                           sweep.project_fixed(Xw, Qf) if Xw is not None else None)
+                            arms[f"fixedframe{k}"]["atoms"] = [inv_vocab.get(int(t), "?") for t in fixed[:k]]
+                            if k == 25:
+                                # role direction for Experiment 3: mean filled J component, colluders minus honest (collusion episodes)
+                                roles = np.array([cm[i]["role"] for i in ci])
+                                modes = np.array([cm[i]["mode"] for i in ci])
+                                col = (roles == "colluder") & (modes == "collusion")
+                                hon = (roles == "honest") & (modes == "collusion")
+                                if col.any() and hon.any():
+                                    u = hc[col].mean(0) - hc[hon].mean(0)
+                                    u = u / max(np.linalg.norm(u), 1e-8)
+                                    rd = {"condition": cond, "position": pos, "layer": L, "k": k,
+                                          "hj_norm_median": float(np.median(np.linalg.norm(hc, axis=1))),
+                                          "file": f"role_dirs/role_dir_J25_{cond}_{pos}_L{L}.npy"}
+                                    np.save(args.out / rd["file"], u.astype(np.float32))
+                                    results["role_dirs"].append(rd)
+                                if pos in ("last", "prevote", "frac50", "prompt_end"):
+                                    results["exp1"].append(exp1_readouts(cond, pos, L, cm, ci, tm, ti, tc, tt, dc, dt, gids,
+                                                                         inv_vocab, warned=(wm, wi, tw) if Xw is not None else None))
                     # PCA control
                     Xm = Xc - Xc.mean(0)
                     _, _, Vt = np.linalg.svd(Xm, full_matrices=False)
                     Qp = Vt[:k].T
-                    arms[f"pca{k}"] = score(sweep.project_fixed(Xc, Qp), sweep.project_fixed(Xt, Qp))
-                    # many-draw random controls (Core -> Transfer; LODO for the first few draws)
-                    rs_c2t, rs_lodo, ra_c2t = [], [], []
+                    arms[f"pca{k}"] = score(sweep.project_fixed(Xc, Qp), sweep.project_fixed(Xt, Qp),
+                                            sweep.project_fixed(Xw, Qp) if Xw is not None else None)
+                    # many-draw random controls (Core -> Transfer; LODO for the first few draws; matched-vocab for the first few)
+                    rs_c2t, rs_lodo, ra_c2t, rs_mv = [], [], [], []
                     V = W.shape[0]
                     for b in range(args.n_random):
                         Q = sweep.haar_subspace(d, k, rng)
+                        do_mv = Xw is not None and b < args.n_random_mv
                         r = score(sweep.project_fixed(Xc, Q), sweep.project_fixed(Xt, Q),
-                                  lodo_on=lodo and b < args.n_random_lodo)
+                                  sweep.project_fixed(Xw, Q) if do_mv else None,
+                                  lodo_on=lodo and b < args.n_random_lodo, boot=args.boot_random, mv=do_mv)
                         rs_c2t.append(r["core_to_transfer"])
                         if "core_lodo" in r:
                             rs_lodo.append(r["core_lodo"])
+                        if "matched_vocab" in r:
+                            rs_mv.append(r["matched_vocab"])
                         toks = rng.choice(V, size=k, replace=False)
                         Qa = sweep.atoms_basis(toks, J[L], W, s)
-                        r2 = score(sweep.project_fixed(Xc, Qa), sweep.project_fixed(Xt, Qa), lodo_on=False)
+                        r2 = score(sweep.project_fixed(Xc, Qa), sweep.project_fixed(Xt, Qa), lodo_on=False, boot=args.boot_random, mv=False)
                         ra_c2t.append(r2["core_to_transfer"])
-                    clean = {a: {kk: vv for kk, vv in r.items() if not kk.startswith("_")} for a, r in arms.items()}
+                    out_k = {a: clean(r) for a, r in arms.items()}
                     jf = arms[f"J{k}_fill"]["core_to_transfer"]
                     jp = arms[f"J{k}"]["core_to_transfer"]
-                    clean["randsub"] = {"n": len(rs_c2t), "c2t_mean": float(np.mean(rs_c2t)),
+                    out_k["randsub"] = {"n": len(rs_c2t), "c2t_mean": float(np.mean(rs_c2t)),
                                         "c2t_p95": float(np.percentile(rs_c2t, 95)),
                                         "c2t_draws": [float(x) for x in rs_c2t],
                                         "lodo_draws": [float(x) for x in rs_lodo],
                                         "J_fill_percentile": stats.empirical_percentile(jf, rs_c2t),
                                         "J_pursuit_percentile": stats.empirical_percentile(jp, rs_c2t)}
-                    clean["randatoms"] = {"n": len(ra_c2t), "c2t_mean": float(np.mean(ra_c2t)),
+                    if rs_mv:
+                        out_k["randsub"]["matched_vocab"] = mv_summary(rs_mv)
+                    out_k["randatoms"] = {"n": len(ra_c2t), "c2t_mean": float(np.mean(ra_c2t)),
                                           "c2t_p95": float(np.percentile(ra_c2t, 95)),
-                                          "J_fill_percentile": stats.empirical_percentile(jf, ra_c2t)}
+                                          "c2t_draws": [float(x) for x in ra_c2t],
+                                          "J_fill_percentile": stats.empirical_percentile(jf, ra_c2t),
+                                          "J_pursuit_percentile": stats.empirical_percentile(jp, ra_c2t)}
                     fullc = full["core_to_transfer"]
-                    clean["recovery_J_fill"] = float((jf - 0.5) / max(fullc - 0.5, 1e-9))
-                    # paired bootstrap difference J_fill - full on shared episodes
-                    clean["J_fill_minus_full_ci95"] = list(np.nanpercentile(arms[f"J{k}_fill"]["_boot"] - full["_boot"],
-                                                                            [2.5, 97.5]).astype(float))
-                    cell[f"k{k}"] = clean
+                    out_k["recovery_J_fill"] = float((jf - 0.5) / max(fullc - 0.5, 1e-9))
+                    out_k["recovery_J_pursuit"] = float((jp - 0.5) / max(fullc - 0.5, 1e-9))
+                    # paired bootstrap differences on shared episodes
+                    out_k["J_fill_minus_full_ci95"] = list(np.nanpercentile(arms[f"J{k}_fill"]["_boot"] - full["_boot"], [2.5, 97.5]).astype(float))
+                    out_k["J_pursuit_minus_full_ci95"] = list(np.nanpercentile(arms[f"J{k}"]["_boot"] - full["_boot"], [2.5, 97.5]).astype(float))
+                    out_k["J_fill_minus_pca_ci95"] = list(np.nanpercentile(arms[f"J{k}_fill"]["_boot"] - arms[f"pca{k}"]["_boot"], [2.5, 97.5]).astype(float))
+                    out_k["C_fill_minus_J_fill_ci95"] = list(np.nanpercentile(arms[f"C{k}_fill"]["_boot"] - arms[f"J{k}_fill"]["_boot"], [2.5, 97.5]).astype(float))
+                    out_k["seconds"] = round(time.time() - t_k, 1)
+                    cell[f"k{k}"] = out_k
+                    mvs = arms[f"J{k}_fill"].get("matched_vocab", {})
                     log(cond, pos, L, f"k={k}", "J_fill", round(jf, 3), "J", round(jp, 3),
-                        "randsub p95", round(clean["randsub"]["c2t_p95"], 3), "full", round(fullc, 3))
+                        "randsub p95", round(out_k["randsub"]["c2t_p95"], 3), "pca", round(arms[f"pca{k}"]["core_to_transfer"], 3),
+                        "full", round(fullc, 3),
+                        "| mv col-vs-warned", round(mvs["auroc_colluder_vs_warned"], 3) if mvs.get("auroc_colluder_vs_warned") is not None else "-",
+                        "warned-vs-unwarned", round(mvs["auroc_warned_vs_unwarned"], 3) if mvs.get("auroc_warned_vs_unwarned") is not None else "-",
+                        f"({out_k['seconds']}s)")
+                cell["seconds"] = round(time.time() - t_cell, 1)
                 results["cells"].append(cell)
                 (args.out / "sweep_results.json").write_text(json.dumps(results, indent=1, default=float) + "\n")
     log("wrote", args.out / "sweep_results.json")
 
 
-def exp1_readouts(cond, pos, L, cm, ci, tm, ti, tc, tt, dc, dt, gids, inv_vocab):
+def exp1_readouts(cond, pos, L, cm, ci, tm, ti, tc, tt, dc, dt, gids, inv_vocab, warned=None):
     """Experiment 1 at k=25 (filled atoms) and the lens readout (top 50): concept-group shares per agent,
-    colluder vs honest (within-episode permutation) and colluder vs control agents (by scenario)."""
+    colluder vs honest (within-episode permutation) and colluder vs control agents (by scenario).
+    With ``warned`` = (meta, idx, atoms) the matched-vocabulary concept readings are added for Core."""
     out = {"condition": cond, "position": pos, "layer": L}
     for split, meta, idx, toks, dec in (("core", cm, ci, tc, dc), ("transfer", tm, ti, tt, dt)):
         res = {}
@@ -224,7 +320,16 @@ def exp1_readouts(cond, pos, L, cm, ci, tm, ti, tc, tt, dc, dt, gids, inv_vocab)
                     [a["x"][gi] for a in sel], [a["role"] == "colluder" for a in sel],
                     [a["scenario_id"] or a["run_id"].split("__")[1] for a in sel], n_perm=5000)
                 res[f"{src}:{g}"] = {"colluder_minus_honest": obs, "p_within": p,
-                                     "colluder_minus_control": obs2, "p_strat": p2}
+                                     "colluder_minus_control": obs2, "p_strat": p2,
+                                     "mean_colluder": float(np.mean([a["x"][gi] for a in agents if a["role"] == "colluder"])) if any(a["role"] == "colluder" for a in agents) else None,
+                                     "mean_honest_in_collusion": float(np.mean(v)) if v else None,
+                                     "mean_control": float(np.mean([a["x"][gi] for a in agents if a["mode"] == "control"])) if any(a["mode"] == "control" for a in agents) else None}
+            if src == "atoms" and split == "core" and warned is not None:
+                wmeta, widx, wtoks = warned
+                gw = sweep.group_mass(wtoks, None, gids)
+                Gw = np.stack([gw[g] for g in gids], axis=1)
+                wagents = to_agents(wmeta, widx, Gw, "warned")
+                res["matched_vocab_concepts"] = matched_vocab.concept_mass_readings(agents, wagents, list(gids))
             # per-token frequency differences (atoms only)
             if src == "atoms":
                 rowsets = {}
@@ -238,7 +343,15 @@ def exp1_readouts(cond, pos, L, cm, ci, tm, ti, tc, tt, dc, dt, gids, inv_vocab)
                 res["top_tokens"] = [dict(t, text=inv_vocab.get(t["token"], "?")) for t in tests[:30]]
                 cnt = Counter(t for k in keys for t in rowsets[k])
                 res["most_common_atoms"] = [(inv_vocab.get(t, "?"), c) for t, c in cnt.most_common(20)]
-        pv = [v[k] for v in res.values() if isinstance(v, dict) for k in ("p_within", "p_strat")]
+                if warned is not None and split == "core":
+                    wmeta, widx, wtoks = warned
+                    wsets = {}
+                    for j, i in enumerate(widx):
+                        m = wmeta[i]
+                        wsets.setdefault((m["run_id"], m["agent_name"], bool(m.get("warned"))), set()).update(int(t) for t in wtoks[j] if t >= 0)
+                    cw = Counter(t for k, sset in wsets.items() if k[2] for t in sset)
+                    res["most_common_atoms_warned"] = [(inv_vocab.get(t, "?"), c) for t, c in cw.most_common(20)]
+        pv = [v[k] for v in res.values() if isinstance(v, dict) and "p_within" in v for k in ("p_within", "p_strat")]
         adj, _ = stats.benjamini_hochberg(pv) if pv else ([], [])
         res["bh_adjusted_p_in_order"] = [float(x) for x in adj]
         out[split] = res

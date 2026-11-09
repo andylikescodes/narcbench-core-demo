@@ -103,7 +103,8 @@ def apply_condition(samples: list[dict], condition: str, runs_dir: Path, split: 
     """
     if condition not in CONDITIONS:
         raise ValueError(condition)
-    bank = load_core_bank() if split == "core" else {}
+    core_like = split in ("core", "warned")  # warned episodes reuse the Core scenarios
+    bank = load_core_bank() if core_like else {}
     private_cache: dict[str, list[str]] = {}
     seat_cache: dict[str, list[str]] = {}
     twin_cache: dict[str, dict] = {}
@@ -138,7 +139,7 @@ def apply_condition(samples: list[dict], condition: str, runs_dir: Path, split: 
             t["system_prompt"] = ""
             t["context_changed"] = True
         elif condition == "swap" and is_col:
-            if split == "core":
+            if core_like:
                 t["system_prompt"] = core_honest_system(s["agent_name"], bank[s["scenario_id"]])
             else:
                 if rid not in twin_cache:

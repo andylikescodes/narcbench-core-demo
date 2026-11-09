@@ -104,8 +104,9 @@ PY
 }
 package() {
   ELAPSED_MIN=$(elapsed_min) st packaging package
-  mkdir -p "$OUT/pod_logs"; cp -a "$LOGS"/. "$OUT/pod_logs/" 2>/dev/null; cp "$RUN"/job.log "$RUN"/stages.json "$RUN"/status.json "$OUT/pod_logs/" 2>/dev/null
-  nvidia-smi --query-gpu=name,memory.total --format=csv,noheader > "$OUT/pod_logs/gpu.txt" 2>/dev/null || true
+  PL="$OUT/pod_logs/${RUNPOD_POD_ID:-pod}"  # per pod, so a later pod's archive does not replace an earlier pod's logs
+  mkdir -p "$PL"; cp -a "$LOGS"/. "$PL/" 2>/dev/null; cp "$RUN"/job.log "$RUN"/stages.json "$RUN"/status.json "$PL/" 2>/dev/null
+  nvidia-smi --query-gpu=name,memory.total --format=csv,noheader > "$PL/gpu.txt" 2>/dev/null || true
   (cd "$REPO" && tar --exclude='results/jspace_interp/acts' -czf "$RUN/results.tgz" results/jspace_interp) 2>>"$RUN/job.log"
   (cd "$REPO" && [ -d results/jspace_interp/acts ] && tar -cf "$RUN/acts.tgz" results/jspace_interp/acts) 2>>"$RUN/job.log"
   python3 - <<'PY'

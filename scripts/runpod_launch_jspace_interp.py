@@ -320,6 +320,9 @@ def download(url: str, dest: Path, size: int, sha: str) -> dict:
     return {"status": "downloaded", "seconds": round(el, 1)}
 
 
+EXTRACT_ACTS = True  # --no-acts: keep acts.tgz in pod_runs/<pod>/ without extracting it over results/jspace_interp/acts
+
+
 def safe_extract(tgz: Path, prefix: str):
     with tarfile.open(tgz) as t:
         members = [m for m in t.getmembers() if m.name.startswith(prefix) and ".." not in m.name.split("/")]
@@ -340,7 +343,8 @@ def pull(pod: str, dest_dir: Path) -> dict:
     if (dest_dir / "results.tgz").exists():
         rec["extracted_results"] = safe_extract(dest_dir / "results.tgz", "results/jspace_interp/")
     if (dest_dir / "acts.tgz").exists():
-        rec["extracted_acts"] = safe_extract(dest_dir / "acts.tgz", "results/jspace_interp/acts")
+        # one activations.npz per split/condition: a partial run's archive (fewer layers) must not replace the full run's files
+        rec["extracted_acts"] = safe_extract(dest_dir / "acts.tgz", "results/jspace_interp/acts") if EXTRACT_ACTS else "skipped (--no-acts)"
     for name in ("status.json", "stages.json", "job.log"):
         b = fetch(f"{base}/{name}", 60)
         if b:
@@ -392,6 +396,7 @@ def watch(pod: str, dest_dir: Path, hours: float, do_terminate: bool, poll: int 
 
 
 def main() -> int:
+    global EXTRACT_ACTS
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--sha", default=None, help="commit the pod checks out (default: local HEAD; must be on origin)")
     ap.add_argument("--gpu", default=None, help="force one gpuTypeId")
@@ -420,11 +425,13 @@ def main() -> int:
     ap.add_argument("--watch", action="store_true", help="after --launch: poll, pull when done, terminate")
     ap.add_argument("--watch-hours", type=float, default=11.0)
     ap.add_argument("--no-terminate", action="store_true", help="watch/pull without terminating the pod")
+    ap.add_argument("--no-acts", action="store_true", help="pull: keep acts.tgz under pod_runs/<pod>/ without extracting it over results/jspace_interp/acts")
     ap.add_argument("--status", metavar="POD_ID")
     ap.add_argument("--watch-pod", metavar="POD_ID")
     ap.add_argument("--pull", metavar="POD_ID")
     ap.add_argument("--terminate", metavar="POD_ID")
     a = ap.parse_args()
+    EXTRACT_ACTS = not a.no_acts
     a.sha = a.sha or local_sha()
     runs_dir = ROOT / "results/jspace_interp/pod_runs"
 

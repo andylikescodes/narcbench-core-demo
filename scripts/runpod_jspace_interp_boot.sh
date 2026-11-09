@@ -22,7 +22,26 @@ MAX_MIN=${JOB_MAX_MINUTES:-480}
 GRACE_MIN=${JOB_GRACE_MINUTES:-240}
 SKIP=",${JOB_SKIP:-},"
 NPROC=$(nproc)
-PROCS=${JOB_ANALYSIS_PROCS:-$(( NPROC > 3 ? NPROC - 2 : 1 ))}
+# nproc and free report the host inside a RunPod container; the pod's own allocation is in its cgroup limits
+cg_cpus() {
+  local q p
+  if [ -r /sys/fs/cgroup/cpu.max ]; then read -r q p < /sys/fs/cgroup/cpu.max; if [ "$q" != max ]; then echo $(( (q + p - 1) / p )); return; fi; fi
+  if [ -r /sys/fs/cgroup/cpu/cpu.cfs_quota_us ]; then q=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us); p=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us)
+    if [ "$q" -gt 0 ] 2>/dev/null; then echo $(( (q + p - 1) / p )); return; fi; fi
+  nproc
+}
+cg_mem_gb() {
+  local m f
+  for f in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory/memory.limit_in_bytes; do
+    if [ -r "$f" ]; then m=$(cat "$f"); if [ "$m" != max ] && [ "$m" -lt 1000000000000000 ] 2>/dev/null; then echo $(( m / 1073741824 )); return; fi; fi
+  done
+  free -g | awk '/^Mem:/{print $2}'
+}
+CG_CPUS=$(cg_cpus); CG_MEM_GB=$(cg_mem_gb)
+# one single-threaded analysis job per usable core, keeping one core for the GPU process, and at most one per JOB_GB_PER_PROC of RAM
+GB_PER_PROC=${JOB_GB_PER_PROC:-6}
+PROCS_CPU=$(( CG_CPUS > 2 ? CG_CPUS - 1 : 1 )); PROCS_MEM=$(( CG_MEM_GB / GB_PER_PROC )); [ "$PROCS_MEM" -lt 1 ] && PROCS_MEM=1
+PROCS=${JOB_ANALYSIS_PROCS:-$(( PROCS_CPU < PROCS_MEM ? PROCS_CPU : PROCS_MEM ))}
 export HF_HOME=${HF_HOME:-/workspace/nb/hf}; mkdir -p "$HF_HOME"
 export HF_TOKEN="${HF_TOKEN:-}"; export HF_HUB_ENABLE_HF_TRANSFER=0; export TOKENIZERS_PARALLELISM=false
 LENS=$HF_HOME/lens/gemma-2-9b-it_jacobian_lens.pt
@@ -137,8 +156,8 @@ queue_analysis_for() {  # queue_analysis_for CONDITION POSITIONS_CSV TAG_PREFIX
 # ---- status server (Range-capable; replaces the bootstrap's plain server) ----
 pkill -f "http.server 8765" 2>/dev/null || true
 nohup python3 scripts/runpod_range_server.py "$RUN" 8765 > /tmp/http.log 2>&1 &
-ELAPSED_MIN=0 st running boot "repo $(git rev-parse --short HEAD); gpu $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1); nproc $NPROC; analysis procs $PROCS"
-log "config: model=$MODEL layers=$LAYERS positions=$POSITIONS n_random=$N_RANDOM steer=$STEER_RUNS max=$MAX_MIN min grace=$GRACE_MIN min procs=$PROCS skip=$SKIP"
+ELAPSED_MIN=0 st running boot "repo $(git rev-parse --short HEAD); gpu $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1); nproc $NPROC; cgroup cpus $CG_CPUS mem ${CG_MEM_GB}G; analysis procs $PROCS"
+log "config: model=$MODEL layers=$LAYERS positions=$POSITIONS n_random=$N_RANDOM steer=$STEER_RUNS max=$MAX_MIN min grace=$GRACE_MIN min procs=$PROCS (cgroup cpus $CG_CPUS, mem ${CG_MEM_GB}G, nproc $NPROC) skip=$SKIP"
 run_queue &
 QUEUE_PID=$!
 
@@ -179,14 +198,16 @@ for L in layers:
 PY
 
 # ---- 4. main extraction, one condition at a time; each queues its CPU analysis ----
-for cond in original swap prompt_only nosys; do
+# prompt_only first (short contexts, one job, the priority control), then original and swap; the queue runs lower names first,
+# so when slots are scarce the controls and the earlier positions in JOB_POSITIONS go ahead of the frac positions and nosys
+for cond in prompt_only original swap nosys; do
   if stage "extract_$cond" python3 scripts/jspace_interp_extract.py --model "$MODEL" --splits core transfer --conditions "$cond" \
        --layers "$LAYERS_CSV" --out "$OUT/acts"; then
     case $cond in
+      prompt_only) queue_analysis_for prompt_only prompt_end 0 ;;
       original) queue_analysis_for original "$POSITIONS" 1 ;;
       swap) queue_analysis_for swap "$POSITIONS" 2 ;;
-      prompt_only) queue_analysis_for prompt_only prompt_end 3 ;;
-      nosys) queue_analysis_for nosys last 4 ;;
+      nosys) queue_analysis_for nosys last 3 ;;
     esac
   else
     log "extract_$cond failed; its analysis is not queued"

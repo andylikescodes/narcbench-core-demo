@@ -287,8 +287,15 @@ one-sided $p$ of J fill against the 200 random subspaces.}
 \end{table}
 
 \subsection{The three controls}
-%% FILL: prompt_only at prompt_end and nosys at last vs original and swap at last (tab_controls_k25); the matched-vocabulary
-%% readings (tab_matched_vocab_k25): colluder vs warned, warned vs unwarned, echo ratio, episode detectors.
+%% FILL: prompt_only at prompt_end and nosys at last vs original and swap at last (tab_controls_k25, tab_protocols_k25); the
+%% matched-vocabulary readings (tab_matched_vocab_k25): colluder vs warned, warned vs unwarned, echo ratio, episode detectors.
+\begin{table}[h]\centering\footnotesize
+\input{tables/tab_protocols_k25}
+\caption{\gpu{} The three protocols per condition at the main read position, band mean over layers 19--23: Core
+leave-one-domain-out (LODO), Core$\to$Transfer (C$\to$T) and Transfer leave-one-family-out (LOFO), for the full residual, the
+filled J-only arm at $k{=}25$ and PCA-25.}
+\label{tab:protocols}
+\end{table}
 \begin{table}[h]\centering\footnotesize
 \input{tables/tab_controls_k25}
 \caption{\gpu{} Core$\to$Transfer primary AUROC per layer, full residual and filled J-only arm at $k{=}25$, for the four context

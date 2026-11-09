@@ -248,6 +248,29 @@ def tab_controls(rows, layers, k, out):
     (out / f"tab_controls_k{k}.tex").write_text("\n".join(lines) + "\n")
 
 
+def tab_protocols(rows, k, out):
+    """Per condition and read position (last, prevote, prompt_end): band mean over layers of Core LODO, Core->Transfer and Transfer LOFO
+    for the full residual, the filled J-only arm and PCA-k. Within-split numbers show whether a probe still finds colluders when the
+    instruction is removed (swap, nosys) even if nothing transfers."""
+    arms = [("full", "Full"), ("J_fill", f"J fill $k{{=}}{k}$"), ("pca", f"PCA-{k}")]
+    lines = [r"\begin{tabular}{ll" + "ccc" * len(arms) + r"}\toprule", "Cond. & Pos. & " + " & ".join(
+        rf"\multicolumn{{3}}{{c}}{{{lab}}}" for _, lab in arms) + r"\\",
+        " & & " + " & ".join(["LODO & C$\\to$T & LOFO"] * len(arms)) + r"\\\midrule"]
+    for cond in ["original", "swap", "nosys", "prompt_only"]:
+        first = True
+        for pos in ["last", "prevote", "prompt_end"]:
+            rr = [r for r in rows if r["condition"] == cond and r["position"] == pos and r["k"] == k]
+            if not rr:
+                continue
+            cells = []
+            for name, _ in arms:
+                cells += [f3(band(rr, f"{name}_lodo")), f3(band(rr, name)), f3(band(rr, f"{name}_lofo"))]
+            lines.append(" & ".join([tex(cond) if first else "", tex(pos)] + cells) + r"\\")
+            first = False
+    lines.append(r"\bottomrule\end{tabular}")
+    (out / f"tab_protocols_k{k}.tex").write_text("\n".join(lines) + "\n")
+
+
 def mv_fields(m):
     if not m:
         return None
@@ -464,6 +487,11 @@ def main() -> int:
                 "best_J_fill": {k: best[k] for k in ("position", "layer", "J_fill", "J_fill_ci", "full", "pca", "randsub_p95", "randatoms_p95",
                                                      "J_fill_clears_both_nulls", "J_fill_minus_pca_ci", "recovery_J_fill")},
                 "band_by_position": {p: {"full": band([r for r in rr if r["position"] == p], "full"),
+                                         "full_lodo": band([r for r in rr if r["position"] == p], "full_lodo"),
+                                         "full_lofo": band([r for r in rr if r["position"] == p], "full_lofo"),
+                                         "J_fill_lodo": band([r for r in rr if r["position"] == p], "J_fill_lodo"),
+                                         "J_fill_lofo": band([r for r in rr if r["position"] == p], "J_fill_lofo"),
+                                         "pca_lodo": band([r for r in rr if r["position"] == p], "pca_lodo"),
                                          "J_fill": band([r for r in rr if r["position"] == p], "J_fill"),
                                          "J_pursuit": band([r for r in rr if r["position"] == p], "J_pursuit"),
                                          "pca": band([r for r in rr if r["position"] == p], "pca"),
@@ -505,6 +533,7 @@ def main() -> int:
         for k in ks:
             tab_headline(rows, [c for c in conds if c in ("original", "swap")], positions, layers, k, a.out)
         tab_controls(rows, layers, k0, a.out)
+        tab_protocols(rows, k0, a.out)
         sel = []
         for cond in ("swap", "original"):
             if cond in verdict:

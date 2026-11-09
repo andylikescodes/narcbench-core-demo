@@ -117,17 +117,20 @@ def run_steering(rows, model, tokenizer, layer: int, directions: dict[str, np.nd
     def y_from_logits(logits, t_ids, f_ids):
         return float(torch.logsumexp(logits[t_ids], 0) - torch.logsumexp(logits[f_ids], 0))
 
+    import inspect
+    last_only = {"logits_to_keep": 1} if "logits_to_keep" in inspect.signature(model.forward).parameters else {}
+
     def y_full(ids, start, t_ids, f_ids):
         """One full pass; the hook steers positions >= start."""
         state["start"] = start
         with torch.inference_mode():
-            logits = model(input_ids=torch.tensor([ids], device=device), use_cache=False).logits[0, -1].float()
+            logits = model(input_ids=torch.tensor([ids], device=device), use_cache=False, **last_only).logits[0, -1].float()
         return y_from_logits(logits, t_ids, f_ids)
 
     def prefix_cache(ids, start):
         state["vec"] = None
         with torch.inference_mode():
-            out = model(input_ids=torch.tensor([ids[:start]], device=device), use_cache=True)
+            out = model(input_ids=torch.tensor([ids[:start]], device=device), use_cache=True, **last_only)
         return out.past_key_values
 
     def y_tail(cache, ids, start, t_ids, f_ids):
@@ -136,8 +139,14 @@ def run_steering(rows, model, tokenizer, layer: int, directions: dict[str, np.nd
         pkv = copy.deepcopy(cache)
         with torch.inference_mode():
             logits = model(input_ids=torch.tensor([ids[start:]], device=device), past_key_values=pkv,
-                           use_cache=True).logits[0, -1].float()
+                           use_cache=True, **last_only).logits[0, -1].float()
         return y_from_logits(logits, t_ids, f_ids)
+
+    def mem_gb():
+        try:
+            return round(torch.cuda.memory_allocated(device) / 2**30, 2) if device.type == "cuda" else None
+        except Exception:  # noqa: BLE001
+            return None
 
     records = []
     cache_check = {"rows": 0, "max_abs_diff_y0": 0.0}
@@ -150,56 +159,57 @@ def run_steering(rows, model, tokenizer, layer: int, directions: dict[str, np.nd
             if not t_ids or not f_ids or start < 1 or start >= len(ids):
                 continue
             prepared.append((r, ids, start, t_ids, f_ids))
-        # unsteered outcome and the tail norms (for the fallback scale)
-        base, caches, tail_norms = [], [], []
-        g = mod.register_forward_hook(grab_hook)
-        try:
-            for k, (r, ids, start, t_ids, f_ids) in enumerate(prepared):
-                state["vec"] = None
-                if use_cache:
-                    try:
-                        cache = prefix_cache(ids, start)
-                        y0 = y_tail(cache, ids, start, t_ids, f_ids)
-                        tail_norms.extend(grab["h"].norm(dim=-1).cpu().tolist())
-                        if k < check_rows:
-                            y_ref = y_full(ids, start, t_ids, f_ids)
-                            cache_check["rows"] += 1
-                            cache_check["max_abs_diff_y0"] = max(cache_check["max_abs_diff_y0"], abs(y_ref - y0))
-                    except Exception as e:  # noqa: BLE001  (cache API mismatch: fall back to full passes)
-                        log(f"[steer] prefix cache unavailable ({type(e).__name__}: {e}); running full passes")
-                        use_cache = False
-                        cache = None
-                        y0 = y_full(ids, start, t_ids, f_ids)
-                        tail_norms.extend(grab["h"][start:].norm(dim=-1).cpu().tolist())
-                else:
-                    cache = None
-                    y0 = y_full(ids, start, t_ids, f_ids)
-                    tail_norms.extend(grab["h"][start:].norm(dim=-1).cpu().tolist())
-                base.append(y0)
-                caches.append(cache)
-        finally:
-            g.remove()
+        # scale: the median ||h_J|| when given; otherwise one unsteered pass over the rows for 0.1 * median tail norm
         scale_src = "given (median ||h_J||)"
         if scale is None:
+            tail_norms = []
+            g = mod.register_forward_hook(grab_hook)
+            try:
+                for r, ids, start, t_ids, f_ids in prepared:
+                    state["vec"] = None
+                    y_full(ids, start, t_ids, f_ids)
+                    tail_norms.extend(grab["h"][start:].norm(dim=-1).cpu().tolist())
+            finally:
+                g.remove()
             scale = 0.1 * float(np.median(tail_norms)) if tail_norms else 1.0
             scale_src = "fallback: 0.1 * median ||h|| on the tail"
+        log(f"[steer] {len(prepared)} prefixes, scale {scale:.3f} ({scale_src}), gpu mem {mem_gb()} GB before the loop")
+        dir_t = {name: torch.tensor(u, dtype=torch.float32, device=device) for name, u in directions.items()}
+        # one row at a time: its prefix cache lives only while its unsteered and steered tail passes run
         for k, (r, ids, start, t_ids, f_ids) in enumerate(prepared):
+            state["vec"] = None
+            cache = None
+            if use_cache:
+                try:
+                    cache = prefix_cache(ids, start)
+                    y0 = y_tail(cache, ids, start, t_ids, f_ids)
+                    if k < check_rows:
+                        y_ref = y_full(ids, start, t_ids, f_ids)
+                        cache_check["rows"] += 1
+                        cache_check["max_abs_diff_y0"] = max(cache_check["max_abs_diff_y0"], abs(y_ref - y0))
+                except Exception as e:  # noqa: BLE001  (cache API mismatch or memory: fall back to full passes)
+                    log(f"[steer] prefix cache unavailable at row {k} ({type(e).__name__}: {str(e)[:120]}); running full passes")
+                    use_cache = False
+                    cache = None
+                    if device.type == "cuda":
+                        torch.cuda.empty_cache()
+                    y0 = y_full(ids, start, t_ids, f_ids)
+            else:
+                y0 = y_full(ids, start, t_ids, f_ids)
             rec = {"run_id": r["run_id"], "agent_name": r["agent_name"], "role": r["role"], "mode": r["mode"],
-                   "vote": r.get("agent_vote"), "target": r["target_option"], "y0": base[k], "delta": {}}
+                   "vote": r.get("agent_vote"), "target": r["target_option"], "y0": y0, "delta": {}}
             row_signs = (+1, -1) if signs == "both" else ((-1,) if r["role"] == "colluder" else (+1,))
-            for name, u in directions.items():
-                ut = torch.tensor(u, dtype=torch.float32, device=device)
+            for name, ut in dir_t.items():
                 for a in alphas:
                     for sign in row_signs:
                         state["vec"] = sign * a * scale * ut
-                        if caches[k] is not None:
-                            y = y_tail(caches[k], ids, start, t_ids, f_ids)
-                        else:
-                            y = y_full(ids, start, t_ids, f_ids)
-                        rec["delta"][f"{name}|{a}|{sign:+d}"] = y - base[k]
+                        y = y_tail(cache, ids, start, t_ids, f_ids) if cache is not None else y_full(ids, start, t_ids, f_ids)
+                        rec["delta"][f"{name}|{a}|{sign:+d}"] = y - y0
             state["vec"] = None
-            caches[k] = None  # free the cache
+            del cache
             records.append(rec)
+            if k % 50 == 0:
+                log(f"[steer] row {k}/{len(prepared)} done, gpu mem {mem_gb()} GB")
             if k == 0 or (k + 1) % 10 == 0:
                 log(f"[steer] {k + 1}/{len(prepared)}")
     finally:

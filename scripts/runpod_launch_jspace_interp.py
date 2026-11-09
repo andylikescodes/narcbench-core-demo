@@ -127,9 +127,23 @@ def sha_is_on_remote(sha: str) -> bool:
     return r.returncode == 0
 
 
+STEER_STAGES = {"setup+download": 8, "export_basis": 3, "extract Core, 2 conditions (measured 25 min/condition for Core+Transfer on Nov 9)": 32,
+                "role_dirs": 6, "steer (4 runs, one cached prefix at a time)": 80, "package": 3}
+
+
 def estimate(a) -> dict:
     gpus = [a.gpu] if a.gpu else (GPU_FAST if a.fast else GPU_PREFS)
     rows = {}
+    if getattr(a, "mode", "full") == "steer":
+        for g in gpus:
+            sp = SPEED.get(g, 1.0)
+            total_h = min(sum(STEER_STAGES.values()) / sp, a.max_minutes) / 60
+            rate = RATES.get(g)
+            rows[g] = {"rate_usd_hr": rate, "gpu_chain_hours": round(total_h, 1), "expected_hours": round(total_h, 1),
+                       "expected_usd": round(total_h * rate, 2) if rate else None,
+                       "worst_case_usd": round((a.max_minutes + a.grace_minutes) / 60 * rate, 2) if rate else None}
+        return {"mode": "steer", "stages_minutes_on_A40": STEER_STAGES, "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes,
+                "settings": {"steer_runs": a.steer_runs}, "by_gpu": rows}
     for g in gpus:
         sp = SPEED.get(g, 1.0)
         gpu_min = sum(GPU_STAGES.values()) / sp
@@ -200,13 +214,15 @@ def create_pod(a, est: dict) -> dict:
         env["JOB_ANALYSIS_PROCS"] = str(a.analysis_procs_env)
     if a.skip:
         env["JOB_SKIP"] = a.skip
+    if a.mode != "full":
+        env["JOB_MODE"] = a.mode
     docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
     gpus = [a.gpu] if a.gpu else (GPU_FAST if a.fast else GPU_PREFS)
     attempts = []
     for vcpu, mem in ((a.min_vcpu, a.min_memory_gb), (4, 24)):
         for cloud in ("SECURE", "COMMUNITY"):
             for g in gpus:
-                inp = {"name": POD_NAME, "imageName": IMAGE, "gpuTypeId": g, "cloudType": cloud, "gpuCount": 1,
+                inp = {"name": POD_NAME + ("-steer" if a.mode == "steer" else ""), "imageName": IMAGE, "gpuTypeId": g, "cloudType": cloud, "gpuCount": 1,
                        "volumeInGb": 0, "containerDiskInGb": a.disk_gb, "minVcpuCount": vcpu, "minMemoryInGb": mem,
                        "ports": "8765/http", "env": [{"key": k, "value": v} for k, v in env.items()],
                        "dockerArgs": docker_args, "supportPublicIp": False, "startSsh": False}
@@ -386,6 +402,9 @@ def main() -> int:
     ap.add_argument("--positions", default="last,prevote,eot,reply_mean,frac50,frac25,frac75")
     ap.add_argument("--layers", default="19-23")
     ap.add_argument("--steer-runs", default="swap:22,original:22,swap:23,original:23")
+    ap.add_argument("--mode", choices=["full", "steer"], default="full",
+                    help="steer: steering-only rerun (Core extraction at the steer layers for the steer conditions, role directions, "
+                         "steering; no warned episodes, no analysis queue)")
     ap.add_argument("--warned-workers", type=int, default=8)
     ap.add_argument("--warned-batch", type=int, default=8)
     ap.add_argument("--analysis-procs", type=int, default=7, help="assumed CPU analysis processes for the estimate")
@@ -444,7 +463,7 @@ def main() -> int:
         return 3
     pod = res["created"]["id"]
     rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "image": IMAGE,
-           "settings": {k: getattr(a, k) for k in ("max_minutes", "grace_minutes", "n_random", "positions", "layers", "steer_runs",
+           "settings": {k: getattr(a, k) for k in ("mode", "max_minutes", "grace_minutes", "n_random", "positions", "layers", "steer_runs",
                                                      "warned_workers", "warned_batch", "skip", "min_vcpu", "min_memory_gb", "disk_gb")},
            "estimate": est["by_gpu"].get(res["created"]["gpu"]), "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
     (runs_dir / pod).mkdir(parents=True, exist_ok=True)

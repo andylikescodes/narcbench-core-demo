@@ -21,6 +21,14 @@ STEER_RUNS=${JOB_STEER_RUNS:-swap:22,original:22,swap:23,original:23}
 MAX_MIN=${JOB_MAX_MINUTES:-480}
 GRACE_MIN=${JOB_GRACE_MINUTES:-240}
 SKIP=",${JOB_SKIP:-},"
+MODE=${JOB_MODE:-full}
+EXTRACT_SPLITS="core transfer"; NO_ANALYSIS=0
+if [ "$MODE" = steer ]; then
+  # steering-only rerun: Core activations at the steer layers for the steer conditions, role directions, steering; no analysis queue
+  SKIP="${SKIP}gen_warned,extract_warned,atom_norms,extract_prompt_only,extract_nosys,"
+  LAYERS=$(echo "$STEER_RUNS" | tr ',' '\n' | cut -d: -f2 | sort -un | paste -sd, -); LAYERS_CSV=$LAYERS
+  EXTRACT_SPLITS="core"; NO_ANALYSIS=1
+fi
 NPROC=$(nproc)
 # nproc and free report the host inside a RunPod container; the pod's own allocation is in its cgroup limits
 cg_cpus() {
@@ -144,6 +152,7 @@ run_queue() {
 }
 queue_analysis_for() {  # queue_analysis_for CONDITION POSITIONS_CSV TAG_PREFIX
   local cond=$1 poss=$2 pre=$3 i=0
+  if [ "$NO_ANALYSIS" = 1 ]; then log "analysis for $cond not queued (JOB_MODE=$MODE)"; return 0; fi
   IFS=',' read -ra PA <<< "$poss"
   for pos in "${PA[@]}"; do
     i=$((i+1))
@@ -157,7 +166,7 @@ queue_analysis_for() {  # queue_analysis_for CONDITION POSITIONS_CSV TAG_PREFIX
 pkill -f "http.server 8765" 2>/dev/null || true
 nohup python3 scripts/runpod_range_server.py "$RUN" 8765 > /tmp/http.log 2>&1 &
 ELAPSED_MIN=0 st running boot "repo $(git rev-parse --short HEAD); gpu $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1); nproc $NPROC; cgroup cpus $CG_CPUS mem ${CG_MEM_GB}G; analysis procs $PROCS"
-log "config: model=$MODEL layers=$LAYERS positions=$POSITIONS n_random=$N_RANDOM steer=$STEER_RUNS max=$MAX_MIN min grace=$GRACE_MIN min procs=$PROCS (cgroup cpus $CG_CPUS, mem ${CG_MEM_GB}G, nproc $NPROC) skip=$SKIP"
+log "config: mode=$MODE model=$MODEL layers=$LAYERS positions=$POSITIONS n_random=$N_RANDOM steer=$STEER_RUNS max=$MAX_MIN min grace=$GRACE_MIN min procs=$PROCS (cgroup cpus $CG_CPUS, mem ${CG_MEM_GB}G, nproc $NPROC) skip=$SKIP"
 run_queue &
 QUEUE_PID=$!
 
@@ -201,7 +210,7 @@ PY
 # prompt_only first (short contexts, one job, the priority control), then original and swap; the queue runs lower names first,
 # so when slots are scarce the controls and the earlier positions in JOB_POSITIONS go ahead of the frac positions and nosys
 for cond in prompt_only original swap nosys; do
-  if stage "extract_$cond" python3 scripts/jspace_interp_extract.py --model "$MODEL" --splits core transfer --conditions "$cond" \
+  if stage "extract_$cond" python3 scripts/jspace_interp_extract.py --model "$MODEL" --splits $EXTRACT_SPLITS --conditions "$cond" \
        --layers "$LAYERS_CSV" --out "$OUT/acts"; then
     case $cond in
       prompt_only) queue_analysis_for prompt_only prompt_end 0 ;;
@@ -227,6 +236,7 @@ for run in "${SR[@]}"; do
   hj=$(python3 -c "import json,sys; r=[x for x in json.load(open('$OUT/role_dirs/role_dirs.json')) if x['condition']=='$cond' and x['layer']==$L]; print(r[0]['hj_norm_median'] if r else '')" 2>/dev/null)
   extra=(); [ -f "$rd" ] && extra+=(--role-direction "$rd"); [ -n "$hj" ] && extra+=(--hj-norm "$hj")
   if [ "$(remaining_min)" -lt 45 ]; then log "steer_${cond}_L${L}: skipped, under 45 min left"; record_stage "steer_${cond}_L${L}" 98 0; continue; fi
+  nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader 2>/dev/null | sed "s/^/gpu before steer_${cond}_L${L}: /" | tee -a "$RUN/job.log"
   stage "steer_${cond}_L${L}" python3 scripts/jspace_interp_steer.py --model "$MODEL" --lens "$LENS" --basis-dir "$BASIS" --layer "$L" \
     --condition "$cond" --n-random 20 "${extra[@]}" --out "$OUT/steer" || log "steer_${cond}_L${L} failed"
 done

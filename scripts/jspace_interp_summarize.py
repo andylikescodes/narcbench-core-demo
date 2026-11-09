@@ -32,6 +32,25 @@ def tex(s: str) -> str:
     return str(s).replace("_", r"\_").replace("%", r"\%").replace("&", r"\&")
 
 
+def tex_tok(t: str) -> str:
+    """A token string inside \\texttt{}: escape TeX specials, show the SentencePiece space and newlines."""
+    if t is None or t == "":
+        return r"\textit{(empty)}"
+    out = []
+    for ch in str(t):
+        if ch == "\u2581":
+            out.append(r"\textvisiblespace{}")
+        elif ch == "\n":
+            out.append(r"\textbackslash{}n")
+        elif ch in "\\{}$&#%_^~":
+            out.append({"\\": r"\textbackslash{}", "^": r"\^{}", "~": r"\~{}"}.get(ch, "\\" + ch))
+        elif ord(ch) < 32:
+            out.append("?")
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
 def f3(x, nd=3) -> str:
     if x is None or (isinstance(x, float) and np.isnan(x)):
         return "--"
@@ -262,10 +281,11 @@ def tab_matched_vocab(rows, cells_sel, k, out):
         rs = r["mv"].get("randsub")
         if rs:
             g = lambda key, stat: (rs.get(key) or {}).get(stat)  # noqa: E731
-            lines.append(" & ".join(["", f"Random {k}-dim (mean, {rs.get('n')} draws)", f3(g("auroc_colluder_vs_warned", "mean")),
+            echo_draws = (rs.get("echo_ratio") or {}).get("draws")
+            echo_med = float(np.median(echo_draws)) if echo_draws else None  # the ratio blows up for weak probes, so the median
+            lines.append(" & ".join(["", f"Random {k}-dim (mean of {rs.get('n')} draws; echo: median)", f3(g("auroc_colluder_vs_warned", "mean")),
                                      f3(g("auroc_warned_vs_unwarned", "mean")), f3(g("auroc_warned_vs_control_honest", "mean")),
-                                     f3(g("echo_ratio", "mean"), 2), f3(g("episode_warned_vs_control_primary", "mean")),
-                                     f3(g("episode_collusion_vs_warned_primary", "mean"))]) + r"\\")
+                                     f3(echo_med, 2), f3(g("episode_warned_vs_control_primary", "mean")), "n/a"]) + r"\\")
         lines.append(r"\midrule")
     if lines[-1] == r"\midrule":
         lines.pop()
@@ -307,7 +327,7 @@ def tab_exp1(recs, exp1, cells_sel, out):
         e = exp1.get((cond, pos, L), {}).get("core", {})
         mca = e.get("most_common_atoms") or []
         if mca:
-            toks = ", ".join(f"\\texttt{{{tex(t[0]).strip()}}} ({t[1]})" for t in mca[:6])
+            toks = ", ".join(f"\\texttt{{{tex_tok(t[0])}}} ({t[1]})" for t in mca[:6])
             lines.append(r"\multicolumn{6}{l}{\footnotesize most common atoms (Core): " + toks + r"}\\")
         lines.append(r"\midrule")
     if lines[-1] == r"\midrule":
@@ -379,7 +399,9 @@ def main() -> int:
     ap.add_argument("--plan-ks", default="8,25,50,100")
     a = ap.parse_args()
 
-    files = a.files if a.files is not None else sorted(glob.glob(str(a.root / "gemma2_9b" / "*" / "sweep_results.json")))
+    # the pod writes gemma2_9b/<cond>_<pos>/sweep_results.json; cells finished later on another machine go in subdirectories
+    # (gemma2_9b/<cond>_<pos>/local_L22/sweep_results.json) and override the pod's cell of the same key
+    files = a.files if a.files is not None else sorted(glob.glob(str(a.root / "gemma2_9b" / "**" / "sweep_results.json"), recursive=True))
     steer_files = a.steer if a.steer is not None else sorted(glob.glob(str(a.root / "steer" / "*.json")))
     pod_json = a.pod_json
     if pod_json is None:
@@ -489,6 +511,11 @@ def main() -> int:
                 bp = max(verdict[cond]["band_by_position"].items(), key=lambda kv: kv[1]["J_fill"] or -1)[0]
                 tab_ksweep(rows, cond, bp, ks, a.out)
                 tab_layers(rows, cond, bp, k0, a.out)
+                # fixed-name copies for the paper's \input{}: the best position of each condition
+                import shutil
+                shutil.copy(a.out / f"tab_ksweep_{cond}_{bp}.tex", a.out / f"tab_ksweep_{cond}_best.tex")
+                shutil.copy(a.out / f"tab_layers_{cond}_{bp}_k{k0}.tex", a.out / f"tab_layers_{cond}_best_k{k0}.tex")
+                verdict[cond]["best_position_by_band"] = bp
                 bl = verdict[cond]["best_J_fill"]["layer"]
                 sel += [(cond, bp, bl)]
                 for p in ("last", "prevote"):

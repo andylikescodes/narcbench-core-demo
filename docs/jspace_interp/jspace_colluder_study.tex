@@ -6,6 +6,8 @@
 \newcommand{\cited}{\textcolor{blue!60!black}{\textbf{[cited, Nov 5]}}}
 \newcommand{\planned}{\textcolor{orange!80!black}{\textbf{[planned, needs GPU]}}}
 \newcommand{\pipe}{\textcolor{gray}{\textbf{[pipeline check only]}}}
+\newcommand{\gpu}{\textcolor{teal!70!black}{\textbf{[ran, Nov 9 pod]}}}
+\newcommand{\notrun}{\textcolor{red!70!black}{\textbf{[not run]}}}
 \setlist{nosep,leftmargin=*}
 
 \title{Is J-space the Right Standard for Detecting Colluders?\\[2pt]
@@ -39,9 +41,10 @@ many-draw null in Section~\ref{sec:plan} come out in its favour.
 
 \noindent\textbf{How to read this draft.} Every number carries a tag. \ran{} means it was computed
 on November 8 from the saved transcripts in the repository. \cited{} means it is quoted from the
-November 5 results on branch \texttt{jspace-separability} (pushed November 9) and was not rerun here. \planned{} marks
-experiments that are implemented but blocked on compute. \pipe{} marks outputs from a random tiny
-model, which say nothing about Gemma.
+November 5 results on branch \texttt{jspace-separability} (pushed November 9) and was not rerun here. \gpu{} means it
+was computed on November 9 on one RunPod A40 from fresh Gemma-2-9B-it activations (commit \texttt{5c300ad} of branch
+\texttt{jspace-interp}; Section~\ref{sec:gpu}). \notrun{} marks planned cells that did not run, listed in
+Section~\ref{sec:notrun}. \pipe{} marks outputs from a random tiny model, which say nothing about Gemma.
 
 \section{Background}
 
@@ -252,20 +255,77 @@ its layer 2, on few episodes), because activations there are a function of the p
 high prompt-only score therefore needs no learned notion of collusion, and the prompt-only control
 should be compared with J-only on equal footing, not with chance.
 
-\section{Blocked on compute}\label{sec:blocked}
-\planned{} Everything activation-level needs Gemma-2-9B-it, which this environment cannot download
-(the Hugging Face hub is blocked here and the unembedding needs the gated repository).
-The November 9 push of \texttt{jspace-separability} brought the November 5 code and results but not
-the caches, the lens or the unembedding, which the repository deliberately keeps out of git. A
-converter (\texttt{scripts/jspace\_interp\_convert\_paper\_cache.py}, tested on synthetic data) turns
-the November 5 caches into this pipeline's layout, so Experiment 1 at the last token and Experiment 2's
-$k$ sweep with 200 random draws (original condition, last token) can run on any CPU machine that holds
-the caches, the lens and the unembedding. For the rest, one GPU
-(an A100 or H100 80\,GB, or an L4 24\,GB in bf16) covers: extraction for 4 conditions on 2{,}636 agent
-turns at 7 positions; 50 warned control episodes; and steering on about 400 final-vote prefixes with
-25 directions, 4 strengths and 2 signs (about 80{,}000 short forward passes, with the shared prefix
-cached). A cheaper first step is to upload the November 5 caches, the lens and the unembedding,
-after which Experiments 1 and 2 for the original condition run on CPU.
+\section{Results of the November 9 GPU run}\label{sec:gpu}
+%% FILL: prose for every subsection once SUMMARY.json is in; tables come from scripts/jspace_interp_summarize.py
+\subsection{The run}
+\gpu{} %% FILL: pod, GPU, hours, cost, what was regenerated (warned episodes, 4 conditions x 7 positions x layers 19-23),
+%% the queue, the time cap, where the files are.
+
+\subsection{Experiment 2: $k$ and position sweep against 200-draw nulls}
+%% FILL: headline table at k=25 (band means over layers 19-23 per condition and position), the k sweep at the best position,
+%% the per-layer table, the bar count, the comparison with PCA-k and the full residual.
+\begin{table}[h]\centering\footnotesize
+\input{tables/tab_headline_k25}
+\caption{\gpu{} Core$\to$Transfer primary AUROC at $k{=}25$, band mean over layers 19--23, per condition and read position.
+``Layers clearing both'' counts layers at which the filled J-only arm exceeds the 95th percentile of both random nulls
+(200 Haar subspaces and 200 random atom sets).}
+\label{tab:headline}
+\end{table}
+
+\begin{table}[h]\centering\footnotesize
+\input{tables/tab_ksweep_swap_best}
+\caption{\gpu{} $k$ sweep at the best position of the swap condition, band mean over layers 19--23; the paired bootstrap
+interval of J fill minus PCA-$k$ is given for the layer with the best J fill.}
+\label{tab:ksweep}
+\end{table}
+
+\begin{table}[h]\centering\footnotesize
+\input{tables/tab_layers_swap_best_k25}
+\caption{\gpu{} Per-layer Core$\to$Transfer AUROC at $k{=}25$, swap condition, with 95\% episode-bootstrap intervals and the
+one-sided $p$ of J fill against the 200 random subspaces.}
+\label{tab:layers}
+\end{table}
+
+\subsection{The three controls}
+%% FILL: prompt_only at prompt_end and nosys at last vs original and swap at last (tab_controls_k25); the matched-vocabulary
+%% readings (tab_matched_vocab_k25): colluder vs warned, warned vs unwarned, echo ratio, episode detectors.
+\begin{table}[h]\centering\footnotesize
+\input{tables/tab_controls_k25}
+\caption{\gpu{} Core$\to$Transfer primary AUROC per layer, full residual and filled J-only arm at $k{=}25$, for the four context
+conditions at their read position. ``n/r'' marks cells that did not run.}
+\label{tab:controls}
+\end{table}
+
+\begin{table}[h]\centering\scriptsize
+\input{tables/tab_matched_vocab_k25}
+\caption{\gpu{} Matched-vocabulary control, scored out of fold with leave-one-Core-domain-out probes. Agent AUROCs: colluders
+vs warned honest agents, warned vs unwarned honest agents in the same episodes (within-episode permutation $p$), warned vs
+control honest agents. Echo ratio: (mean warned $-$ mean control honest)/(mean colluder $-$ mean control honest). Episode
+detectors: primary AUROC of warned vs control episodes and of collusion vs warned episodes.}
+\label{tab:mv}
+\end{table}
+
+\subsection{Experiment 1: what the atoms say}
+%% FILL: concept-atom mass table and the most common atoms per position; significant tokens if any.
+\begin{table}[h]\centering\footnotesize
+\input{tables/tab_exp1_concepts}
+\caption{\gpu{} Mass of the four frozen concept groups among the $k{=}25$ selected atoms, mean per agent turn (Core), with
+Benjamini--Hochberg adjusted within-episode permutation $p$ over all concept tests of the run.}
+\label{tab:exp1}
+\end{table}
+
+\subsection{Experiment 3: steering the vote}
+%% FILL: scale, prefixes, directions, bars passed.
+\begin{table}[h]\centering\footnotesize
+\input{tables/tab_steer}
+\caption{\gpu{} Mean change of $y=\mathrm{logit}[\text{target}]-\mathrm{logit}[\text{fair}]$ under $+u$ for honest agents and
+$-u$ for colluders. Sign: predicted sign at every $\alpha$. $>$ rand.\ p95: effect above the 95th percentile of 20 random
+directions at every $\alpha$. BH: rejected at $q{=}0.05$ at some $\alpha$.}
+\label{tab:steer}
+\end{table}
+
+\section{What did not run}\label{sec:notrun}
+\notrun{} %% FILL from SUMMARY.json not_run: cells cut by the 480-minute cap, steering runs skipped, anything that failed.
 
 \section{Related work}
 \textbf{Molinari \& Bettineschi} (arXiv:2611.02153, November 1, 2026; abstract read) report on

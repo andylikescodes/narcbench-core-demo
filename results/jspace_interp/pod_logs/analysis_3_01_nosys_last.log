@@ -1,0 +1,26 @@
+13:04:11 nosys last 19 full {'core_lodo': 0.9601333333333333, 'core_to_transfer': 0.5028292181069959, 'core_to_transfer_ci95': [0.3976273148148148, 0.6083333333333331], 'transfer_lofo': 0.6198559670781894} | warned: -
+13:11:39 nosys last 19 k=8 J_fill 0.468 J 0.468 randsub p95 0.607 pca 0.445 full 0.503 | mv col-vs-warned - warned-vs-unwarned - (169.0s)
+13:15:40 nosys last 19 k=25 J_fill 0.504 J 0.572 randsub p95 0.626 pca 0.527 full 0.503 | mv col-vs-warned - warned-vs-unwarned - (241.0s)
+13:20:21 nosys last 19 k=50 J_fill 0.477 J 0.572 randsub p95 0.605 pca 0.524 full 0.503 | mv col-vs-warned - warned-vs-unwarned - (281.8s)
+13:25:59 nosys last 19 k=100 J_fill 0.497 J 0.572 randsub p95 0.614 pca 0.521 full 0.503 | mv col-vs-warned - warned-vs-unwarned - (337.9s)
+13:26:09 nosys last 20 full {'core_lodo': 0.9442666666666666, 'core_to_transfer': 0.47196502057613166, 'core_to_transfer_ci95': [0.36959876543209874, 0.5735789609053497], 'transfer_lofo': 0.6165123456790124} | warned: -
+13:33:34 nosys last 20 k=8 J_fill 0.478 J 0.478 randsub p95 0.613 pca 0.454 full 0.472 | mv col-vs-warned - warned-vs-unwarned - (162.8s)
+13:37:35 nosys last 20 k=25 J_fill 0.414 J 0.475 randsub p95 0.604 pca 0.463 full 0.472 | mv col-vs-warned - warned-vs-unwarned - (241.3s)
+13:42:10 nosys last 20 k=50 J_fill 0.499 J 0.475 randsub p95 0.62 pca 0.525 full 0.472 | mv col-vs-warned - warned-vs-unwarned - (275.2s)
+13:47:40 nosys last 20 k=100 J_fill 0.627 J 0.475 randsub p95 0.584 pca 0.504 full 0.472 | mv col-vs-warned - warned-vs-unwarned - (329.8s)
+13:47:49 nosys last 21 full {'core_lodo': 0.9404, 'core_to_transfer': 0.4735082304526748, 'core_to_transfer_ci95': [0.38090277777777776, 0.5735789609053498], 'transfer_lofo': 0.6080246913580246} | warned: -
+13:54:29 nosys last 21 k=8 J_fill 0.483 J 0.483 randsub p95 0.614 pca 0.455 full 0.474 | mv col-vs-warned - warned-vs-unwarned - (152.5s)
+13:58:32 nosys last 21 k=25 J_fill 0.501 J 0.488 randsub p95 0.611 pca 0.459 full 0.474 | mv col-vs-warned - warned-vs-unwarned - (242.8s)
+14:03:26 nosys last 21 k=50 J_fill 0.472 J 0.488 randsub p95 0.602 pca 0.496 full 0.474 | mv col-vs-warned - warned-vs-unwarned - (293.8s)
+14:09:11 nosys last 21 k=100 J_fill 0.498 J 0.488 randsub p95 0.588 pca 0.502 full 0.474 | mv col-vs-warned - warned-vs-unwarned - (345.8s)
+14:09:21 nosys last 22 full {'core_lodo': 0.9201333333333334, 'core_to_transfer': 0.49022633744855965, 'core_to_transfer_ci95': [0.39042566872427986, 0.5931069958847736], 'transfer_lofo': 0.6324588477366255} | warned: -
+14:16:02 nosys last 22 k=8 J_fill 0.497 J 0.497 randsub p95 0.601 pca 0.457 full 0.49 | mv col-vs-warned - warned-vs-unwarned - (149.5s)
+14:19:54 nosys last 22 k=25 J_fill 0.496 J 0.46 randsub p95 0.588 pca 0.441 full 0.49 | mv col-vs-warned - warned-vs-unwarned - (231.4s)
+14:24:39 nosys last 22 k=50 J_fill 0.505 J 0.46 randsub p95 0.582 pca 0.471 full 0.49 | mv col-vs-warned - warned-vs-unwarned - (285.0s)
+14:30:28 nosys last 22 k=100 J_fill 0.549 J 0.46 randsub p95 0.591 pca 0.577 full 0.49 | mv col-vs-warned - warned-vs-unwarned - (349.2s)
+14:30:37 nosys last 23 full {'core_lodo': 0.9073333333333334, 'core_to_transfer': 0.503858024691358, 'core_to_transfer_ci95': [0.4094650205761317, 0.6005787037037038], 'transfer_lofo': 0.6800411522633745} | warned: -
+14:37:33 nosys last 23 k=8 J_fill 0.406 J 0.403 randsub p95 0.622 pca 0.463 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (153.5s)
+14:41:50 nosys last 23 k=25 J_fill 0.462 J 0.444 randsub p95 0.61 pca 0.441 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (256.8s)
+14:46:45 nosys last 23 k=50 J_fill 0.497 J 0.444 randsub p95 0.602 pca 0.512 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (295.5s)
+14:52:45 nosys last 23 k=100 J_fill 0.576 J 0.444 randsub p95 0.586 pca 0.485 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (360.3s)
+14:52:45 wrote /workspace/nb/repo/results/jspace_interp/gemma2_9b/nosys_last/sweep_results.json

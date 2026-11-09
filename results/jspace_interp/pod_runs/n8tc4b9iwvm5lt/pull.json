@@ -1,0 +1,21 @@
+{
+ "pod": "n8tc4b9iwvm5lt",
+ "files": {
+  "results.tgz": {
+   "size": 2600043,
+   "sha256": "64cd92689184c9e678c4a3267522b0cb7e3ed8300f6bec163ecad4bcc1c34c95",
+   "status": "downloaded",
+   "seconds": 0.8,
+   "local": "results/jspace_interp/pod_runs/n8tc4b9iwvm5lt/results.tgz"
+  },
+  "acts.tgz": {
+   "size": 2315673600,
+   "sha256": "75d81a7900f78191a80c399ad051ca432b7c86bdfad483d3f86515e9a89d1f00",
+   "status": "downloaded",
+   "seconds": 651.9,
+   "local": "results/jspace_interp/pod_runs/n8tc4b9iwvm5lt/acts.tgz"
+  }
+ },
+ "extracted_results": 388,
+ "extracted_acts": 35
+}

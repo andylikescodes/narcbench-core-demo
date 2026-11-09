@@ -1,0 +1,26 @@
+11:24:56 swap reply_mean 19 full {'core_lodo': 0.9797333333333333, 'core_to_transfer': 0.5434670781893004, 'core_to_transfer_ci95': [0.4655349794238683, 0.624485596707819], 'transfer_lofo': 0.7268518518518517} | warned: -
+11:31:50 swap reply_mean 19 k=8 J_fill 0.562 J 0.569 randsub p95 0.659 pca 0.603 full 0.543 | mv col-vs-warned - warned-vs-unwarned - (162.5s)
+11:34:52 swap reply_mean 19 k=25 J_fill 0.575 J 0.598 randsub p95 0.663 pca 0.517 full 0.543 | mv col-vs-warned - warned-vs-unwarned - (182.1s)
+11:39:18 swap reply_mean 19 k=50 J_fill 0.576 J 0.598 randsub p95 0.639 pca 0.577 full 0.543 | mv col-vs-warned - warned-vs-unwarned - (266.3s)
+11:45:00 swap reply_mean 19 k=100 J_fill 0.488 J 0.598 randsub p95 0.623 pca 0.605 full 0.543 | mv col-vs-warned - warned-vs-unwarned - (341.8s)
+11:45:09 swap reply_mean 20 full {'core_lodo': 0.9766666666666666, 'core_to_transfer': 0.5527263374485596, 'core_to_transfer_ci95': [0.46963734567901233, 0.632201646090535], 'transfer_lofo': 0.7471707818930041} | warned: -
+11:51:51 swap reply_mean 20 k=8 J_fill 0.574 J 0.584 randsub p95 0.666 pca 0.606 full 0.553 | mv col-vs-warned - warned-vs-unwarned - (163.1s)
+11:54:52 swap reply_mean 20 k=25 J_fill 0.592 J 0.568 randsub p95 0.639 pca 0.578 full 0.553 | mv col-vs-warned - warned-vs-unwarned - (181.1s)
+11:59:17 swap reply_mean 20 k=50 J_fill 0.542 J 0.568 randsub p95 0.628 pca 0.562 full 0.553 | mv col-vs-warned - warned-vs-unwarned - (264.3s)
+12:04:51 swap reply_mean 20 k=100 J_fill 0.58 J 0.568 randsub p95 0.626 pca 0.583 full 0.553 | mv col-vs-warned - warned-vs-unwarned - (334.9s)
+12:05:01 swap reply_mean 21 full {'core_lodo': 0.9708, 'core_to_transfer': 0.5565843621399177, 'core_to_transfer_ci95': [0.4711934156378601, 0.6432677469135802], 'transfer_lofo': 0.695216049382716} | warned: -
+12:11:14 swap reply_mean 21 k=8 J_fill 0.564 J 0.561 randsub p95 0.665 pca 0.598 full 0.557 | mv col-vs-warned - warned-vs-unwarned - (161.8s)
+12:14:19 swap reply_mean 21 k=25 J_fill 0.587 J 0.57 randsub p95 0.644 pca 0.548 full 0.557 | mv col-vs-warned - warned-vs-unwarned - (185.2s)
+12:18:55 swap reply_mean 21 k=50 J_fill 0.551 J 0.57 randsub p95 0.646 pca 0.536 full 0.557 | mv col-vs-warned - warned-vs-unwarned - (276.2s)
+12:24:38 swap reply_mean 21 k=100 J_fill 0.603 J 0.57 randsub p95 0.626 pca 0.602 full 0.557 | mv col-vs-warned - warned-vs-unwarned - (342.9s)
+12:24:48 swap reply_mean 22 full {'core_lodo': 0.9629333333333333, 'core_to_transfer': 0.5462962962962963, 'core_to_transfer_ci95': [0.45549125514403294, 0.6332368827160494], 'transfer_lofo': 0.6790123456790124} | warned: -
+12:31:13 swap reply_mean 22 k=8 J_fill 0.534 J 0.55 randsub p95 0.657 pca 0.597 full 0.546 | mv col-vs-warned - warned-vs-unwarned - (159.1s)
+12:34:14 swap reply_mean 22 k=25 J_fill 0.57 J 0.579 randsub p95 0.656 pca 0.548 full 0.546 | mv col-vs-warned - warned-vs-unwarned - (181.3s)
+12:38:46 swap reply_mean 22 k=50 J_fill 0.618 J 0.579 randsub p95 0.64 pca 0.563 full 0.546 | mv col-vs-warned - warned-vs-unwarned - (272.1s)
+12:44:08 swap reply_mean 22 k=100 J_fill 0.574 J 0.579 randsub p95 0.632 pca 0.591 full 0.546 | mv col-vs-warned - warned-vs-unwarned - (322.4s)
+12:44:18 swap reply_mean 23 full {'core_lodo': 0.9644, 'core_to_transfer': 0.5715020576131686, 'core_to_transfer_ci95': [0.4758037551440329, 0.6623006687242797], 'transfer_lofo': 0.6985596707818931} | warned: -
+12:50:45 swap reply_mean 23 k=8 J_fill 0.499 J 0.495 randsub p95 0.67 pca 0.569 full 0.572 | mv col-vs-warned - warned-vs-unwarned - (161.6s)
+12:53:50 swap reply_mean 23 k=25 J_fill 0.601 J 0.582 randsub p95 0.64 pca 0.512 full 0.572 | mv col-vs-warned - warned-vs-unwarned - (184.6s)
+12:58:22 swap reply_mean 23 k=50 J_fill 0.529 J 0.582 randsub p95 0.645 pca 0.524 full 0.572 | mv col-vs-warned - warned-vs-unwarned - (272.3s)
+13:03:47 swap reply_mean 23 k=100 J_fill 0.41 J 0.582 randsub p95 0.636 pca 0.566 full 0.572 | mv col-vs-warned - warned-vs-unwarned - (325.2s)
+13:03:47 wrote /workspace/nb/repo/results/jspace_interp/gemma2_9b/swap_reply_mean/sweep_results.json

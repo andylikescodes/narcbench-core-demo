@@ -1,0 +1,26 @@
+11:18:52 swap prevote 19 full {'core_lodo': 0.9083999999999999, 'core_to_transfer': 0.43647119341563784, 'core_to_transfer_ci95': [0.3538966049382716, 0.5172518004115225], 'transfer_lofo': 0.5941358024691358} | warned: -
+11:26:33 swap prevote 19 k=8 J_fill 0.429 J 0.43 randsub p95 0.581 pca 0.51 full 0.436 | mv col-vs-warned - warned-vs-unwarned - (165.8s)
+11:30:35 swap prevote 19 k=25 J_fill 0.502 J 0.511 randsub p95 0.566 pca 0.447 full 0.436 | mv col-vs-warned - warned-vs-unwarned - (241.8s)
+11:34:56 swap prevote 19 k=50 J_fill 0.542 J 0.511 randsub p95 0.579 pca 0.467 full 0.436 | mv col-vs-warned - warned-vs-unwarned - (261.0s)
+11:40:21 swap prevote 19 k=100 J_fill 0.496 J 0.511 randsub p95 0.58 pca 0.442 full 0.436 | mv col-vs-warned - warned-vs-unwarned - (325.1s)
+11:40:30 swap prevote 20 full {'core_lodo': 0.8977333333333334, 'core_to_transfer': 0.46759259259259256, 'core_to_transfer_ci95': [0.3783114711934156, 0.5560699588477366], 'transfer_lofo': 0.6774691358024691} | warned: -
+11:48:06 swap prevote 20 k=8 J_fill 0.503 J 0.504 randsub p95 0.582 pca 0.521 full 0.468 | mv col-vs-warned - warned-vs-unwarned - (166.9s)
+11:52:04 swap prevote 20 k=25 J_fill 0.481 J 0.597 randsub p95 0.581 pca 0.487 full 0.468 | mv col-vs-warned - warned-vs-unwarned - (238.3s)
+11:56:23 swap prevote 20 k=50 J_fill 0.55 J 0.6 randsub p95 0.576 pca 0.47 full 0.468 | mv col-vs-warned - warned-vs-unwarned - (259.0s)
+12:01:44 swap prevote 20 k=100 J_fill 0.507 J 0.6 randsub p95 0.578 pca 0.452 full 0.468 | mv col-vs-warned - warned-vs-unwarned - (320.9s)
+12:01:54 swap prevote 21 full {'core_lodo': 0.9138666666666667, 'core_to_transfer': 0.45627572016460904, 'core_to_transfer_ci95': [0.37267875514403287, 0.5393518518518519], 'transfer_lofo': 0.664866255144033} | warned: -
+12:09:25 swap prevote 21 k=8 J_fill 0.48 J 0.478 randsub p95 0.586 pca 0.495 full 0.456 | mv col-vs-warned - warned-vs-unwarned - (161.0s)
+12:13:18 swap prevote 21 k=25 J_fill 0.481 J 0.563 randsub p95 0.584 pca 0.492 full 0.456 | mv col-vs-warned - warned-vs-unwarned - (233.1s)
+12:17:52 swap prevote 21 k=50 J_fill 0.505 J 0.562 randsub p95 0.581 pca 0.493 full 0.456 | mv col-vs-warned - warned-vs-unwarned - (273.7s)
+12:23:23 swap prevote 21 k=100 J_fill 0.591 J 0.562 randsub p95 0.568 pca 0.475 full 0.456 | mv col-vs-warned - warned-vs-unwarned - (331.2s)
+12:23:33 swap prevote 22 full {'core_lodo': 0.9028, 'core_to_transfer': 0.5043724279835392, 'core_to_transfer_ci95': [0.42052469135802467, 0.5823045267489712], 'transfer_lofo': 0.6422325102880659} | warned: -
+12:31:18 swap prevote 22 k=8 J_fill 0.47 J 0.47 randsub p95 0.588 pca 0.478 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (160.4s)
+12:35:14 swap prevote 22 k=25 J_fill 0.622 J 0.6 randsub p95 0.594 pca 0.501 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (236.3s)
+12:39:32 swap prevote 22 k=50 J_fill 0.575 J 0.6 randsub p95 0.593 pca 0.511 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (257.8s)
+12:44:57 swap prevote 22 k=100 J_fill 0.527 J 0.6 randsub p95 0.581 pca 0.539 full 0.504 | mv col-vs-warned - warned-vs-unwarned - (324.7s)
+12:45:06 swap prevote 23 full {'core_lodo': 0.9157333333333333, 'core_to_transfer': 0.4819958847736625, 'core_to_transfer_ci95': [0.3909465020576131, 0.573051697530864], 'transfer_lofo': 0.6676954732510287} | warned: -
+12:52:50 swap prevote 23 k=8 J_fill 0.512 J 0.516 randsub p95 0.597 pca 0.529 full 0.482 | mv col-vs-warned - warned-vs-unwarned - (165.0s)
+12:56:40 swap prevote 23 k=25 J_fill 0.489 J 0.413 randsub p95 0.608 pca 0.47 full 0.482 | mv col-vs-warned - warned-vs-unwarned - (230.2s)
+13:01:01 swap prevote 23 k=50 J_fill 0.461 J 0.416 randsub p95 0.603 pca 0.526 full 0.482 | mv col-vs-warned - warned-vs-unwarned - (261.4s)
+13:06:30 swap prevote 23 k=100 J_fill 0.502 J 0.416 randsub p95 0.587 pca 0.513 full 0.482 | mv col-vs-warned - warned-vs-unwarned - (329.3s)
+13:06:30 wrote /workspace/nb/repo/results/jspace_interp/gemma2_9b/swap_prevote/sweep_results.json

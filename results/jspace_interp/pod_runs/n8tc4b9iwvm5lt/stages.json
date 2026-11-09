@@ -1,0 +1,62 @@
+{
+ "setup": {
+  "rc": 0,
+  "seconds": 23
+ },
+ "download": {
+  "rc": 0,
+  "seconds": 12
+ },
+ "gen_warned": {
+  "rc": 0,
+  "seconds": 1370
+ },
+ "extract_warned": {
+  "rc": 0,
+  "seconds": 394
+ },
+ "atom_norms": {
+  "rc": 0,
+  "seconds": 111
+ },
+ "extract_prompt_only": {
+  "rc": 0,
+  "seconds": 159
+ },
+ "extract_original": {
+  "rc": 0,
+  "seconds": 1605
+ },
+ "extract_swap": {
+  "rc": 0,
+  "seconds": 1530
+ },
+ "extract_nosys": {
+  "rc": 0,
+  "seconds": 1418
+ },
+ "role_dirs_swap": {
+  "rc": 0,
+  "seconds": 1427
+ },
+ "role_dirs_original": {
+  "rc": 0,
+  "seconds": 1620
+ },
+ "steer_swap_L22": {
+  "rc": 1,
+  "seconds": 46
+ },
+ "steer_original_L22": {
+  "rc": 1,
+  "seconds": 49
+ },
+ "steer_swap_L23": {
+  "rc": 1,
+  "seconds": 46
+ },
+ "steer_original_L23": {
+  "rc": 1,
+  "seconds": 46
+ }
+}

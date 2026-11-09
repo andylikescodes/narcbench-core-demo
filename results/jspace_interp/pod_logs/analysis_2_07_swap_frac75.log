@@ -1,0 +1,26 @@
+12:14:05 swap frac75 19 full {'core_lodo': 0.8284000000000001, 'core_to_transfer': 0.5920781893004116, 'core_to_transfer_ci95': [0.48222736625514406, 0.7019161522633746], 'transfer_lofo': 0.5625} | warned: -
+12:20:46 swap frac75 19 k=8 J_fill 0.534 J 0.542 randsub p95 0.609 pca 0.471 full 0.592 | mv col-vs-warned - warned-vs-unwarned - (158.9s)
+12:23:40 swap frac75 19 k=25 J_fill 0.425 J 0.516 randsub p95 0.618 pca 0.504 full 0.592 | mv col-vs-warned - warned-vs-unwarned - (173.3s)
+12:27:09 swap frac75 19 k=50 J_fill 0.489 J 0.516 randsub p95 0.601 pca 0.497 full 0.592 | mv col-vs-warned - warned-vs-unwarned - (209.0s)
+12:33:05 swap frac75 19 k=100 J_fill 0.4 J 0.516 randsub p95 0.612 pca 0.512 full 0.592 | mv col-vs-warned - warned-vs-unwarned - (355.7s)
+12:33:14 swap frac75 20 full {'core_lodo': 0.8660000000000001, 'core_to_transfer': 0.6414609053497943, 'core_to_transfer_ci95': [0.5354873971193415, 0.7525848765432098], 'transfer_lofo': 0.5388374485596708} | warned: -
+12:39:53 swap frac75 20 k=8 J_fill 0.452 J 0.466 randsub p95 0.604 pca 0.47 full 0.641 | mv col-vs-warned - warned-vs-unwarned - (156.7s)
+12:42:46 swap frac75 20 k=25 J_fill 0.551 J 0.499 randsub p95 0.591 pca 0.505 full 0.641 | mv col-vs-warned - warned-vs-unwarned - (173.0s)
+12:46:15 swap frac75 20 k=50 J_fill 0.496 J 0.498 randsub p95 0.611 pca 0.55 full 0.641 | mv col-vs-warned - warned-vs-unwarned - (208.6s)
+12:51:53 swap frac75 20 k=100 J_fill 0.519 J 0.498 randsub p95 0.603 pca 0.504 full 0.641 | mv col-vs-warned - warned-vs-unwarned - (337.8s)
+12:52:01 swap frac75 21 full {'core_lodo': 0.8736, 'core_to_transfer': 0.6072530864197531, 'core_to_transfer_ci95': [0.5041152263374485, 0.7109053497942387], 'transfer_lofo': 0.5136316872427983} | warned: -
+12:58:15 swap frac75 21 k=8 J_fill 0.459 J 0.465 randsub p95 0.613 pca 0.424 full 0.607 | mv col-vs-warned - warned-vs-unwarned - (158.8s)
+13:01:06 swap frac75 21 k=25 J_fill 0.451 J 0.486 randsub p95 0.601 pca 0.543 full 0.607 | mv col-vs-warned - warned-vs-unwarned - (171.9s)
+13:04:32 swap frac75 21 k=50 J_fill 0.44 J 0.486 randsub p95 0.603 pca 0.52 full 0.607 | mv col-vs-warned - warned-vs-unwarned - (205.7s)
+13:10:14 swap frac75 21 k=100 J_fill 0.6 J 0.486 randsub p95 0.589 pca 0.557 full 0.607 | mv col-vs-warned - warned-vs-unwarned - (342.0s)
+13:10:23 swap frac75 22 full {'core_lodo': 0.8728000000000001, 'core_to_transfer': 0.5264917695473251, 'core_to_transfer_ci95': [0.42232510288065844, 0.6365805041152263], 'transfer_lofo': 0.503858024691358} | warned: -
+13:16:13 swap frac75 22 k=8 J_fill 0.401 J 0.397 randsub p95 0.601 pca 0.432 full 0.526 | mv col-vs-warned - warned-vs-unwarned - (144.8s)
+13:19:01 swap frac75 22 k=25 J_fill 0.464 J 0.405 randsub p95 0.597 pca 0.505 full 0.526 | mv col-vs-warned - warned-vs-unwarned - (167.9s)
+13:22:29 swap frac75 22 k=50 J_fill 0.501 J 0.405 randsub p95 0.602 pca 0.494 full 0.526 | mv col-vs-warned - warned-vs-unwarned - (207.5s)
+13:28:02 swap frac75 22 k=100 J_fill 0.537 J 0.405 randsub p95 0.603 pca 0.525 full 0.526 | mv col-vs-warned - warned-vs-unwarned - (332.8s)
+13:28:10 swap frac75 23 full {'core_lodo': 0.8773333333333332, 'core_to_transfer': 0.4953703703703704, 'core_to_transfer_ci95': [0.38784079218107, 0.6051954732510287], 'transfer_lofo': 0.5007716049382717} | warned: -
+13:34:18 swap frac75 23 k=8 J_fill 0.461 J 0.447 randsub p95 0.612 pca 0.42 full 0.495 | mv col-vs-warned - warned-vs-unwarned - (147.6s)
+13:37:03 swap frac75 23 k=25 J_fill 0.464 J 0.438 randsub p95 0.598 pca 0.514 full 0.495 | mv col-vs-warned - warned-vs-unwarned - (165.9s)
+13:40:27 swap frac75 23 k=50 J_fill 0.458 J 0.438 randsub p95 0.602 pca 0.422 full 0.495 | mv col-vs-warned - warned-vs-unwarned - (203.9s)
+13:45:55 swap frac75 23 k=100 J_fill 0.52 J 0.438 randsub p95 0.597 pca 0.499 full 0.495 | mv col-vs-warned - warned-vs-unwarned - (327.8s)
+13:45:55 wrote /workspace/nb/repo/results/jspace_interp/gemma2_9b/swap_frac75/sweep_results.json

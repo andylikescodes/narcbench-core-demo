@@ -1,0 +1,44 @@
+{
+ "created_utc": "20261109T070856Z",
+ "pod": {
+  "id": "gqis29byzjkdlr",
+  "desiredStatus": "RUNNING",
+  "costPerHr": 0.59,
+  "machine": {
+   "podHostId": "gqis29byzjkdlr-64412554",
+   "gpuDisplayName": "A40",
+   "dataCenterId": "EU-SE-1",
+   "cpuCount": 2
+  },
+  "gpu": "NVIDIA A40",
+  "cloud": "SECURE",
+  "min_vcpu": 8,
+  "min_memory_gb": 40
+ },
+ "attempts_before": [],
+ "sha": "0cf729a975904b1faef5c422305918660de0c0cd",
+ "image": "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404",
+ "settings": {
+  "max_minutes": 480,
+  "grace_minutes": 180,
+  "n_random": 200,
+  "positions": "last,prevote,eot,reply_mean,frac50,frac25,frac75",
+  "layers": "19-23",
+  "steer_runs": "swap:22,original:22,swap:23,original:23",
+  "warned_workers": 8,
+  "warned_batch": 8,
+  "skip": "",
+  "min_vcpu": 8,
+  "min_memory_gb": 40,
+  "disk_gb": 60
+ },
+ "estimate": {
+  "rate_usd_hr": 0.59,
+  "gpu_chain_hours": 3.6,
+  "analysis_hours_after_extraction": 4.8,
+  "expected_hours": 6.3,
+  "expected_usd": 3.69,
+  "worst_case_usd": 6.49
+ },
+ "status_url": "https://gqis29byzjkdlr-8765.proxy.runpod.net/status.json"
+}

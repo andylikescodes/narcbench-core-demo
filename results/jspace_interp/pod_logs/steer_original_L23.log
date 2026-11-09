@@ -1,0 +1,61 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/464 [00:00<?, ?it/s]Loading weights:  91%|█████████ | 421/464 [00:00<00:00, 4208.60it/s]Loading weights: 100%|██████████| 464/464 [00:00<00:00, 4170.61it/s]
+[load] 100 dirs → 1700 samples from /workspace/nb/repo/upstream/scenarios/gemma2_9b/core/20261001T012639Z
+[steer] prefix cache unavailable (OutOfMemoryError: CUDA out of memory. Tried to allocate 854.00 MiB. GPU 0 has a total capacity of 44.42 GiB of which 765.81 MiB is free. Including non-PyTorch memory, this process has 43.67 GiB memory in use. Of the allocated memory 39.72 GiB is allocated by PyTorch, and 3.63 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)); running full passes
+Traceback (most recent call last):
+  File "/workspace/nb/repo/jspace_interp/steer.py", line 161, in run_steering
+    cache = prefix_cache(ids, start)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/jspace_interp/steer.py", line 130, in prefix_cache
+    out = model(input_ids=torch.tensor([ids[:start]], device=device), use_cache=True)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 943, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 519, in forward
+    logits = logits / self.config.final_logit_softcapping
+             ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 854.00 MiB. GPU 0 has a total capacity of 44.42 GiB of which 765.81 MiB is free. Including non-PyTorch memory, this process has 43.67 GiB memory in use. Of the allocated memory 39.72 GiB is allocated by PyTorch, and 3.63 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/nb/repo/scripts/jspace_interp_steer.py", line 96, in <module>
+    main()
+  File "/workspace/nb/repo/scripts/jspace_interp_steer.py", line 81, in main
+    res = run_steering(fr, model, tok, args.layer, dirs, alphas=[float(a) for a in args.alphas.split(",")],
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/jspace_interp/steer.py", line 172, in run_steering
+    y0 = y_full(ids, start, t_ids, f_ids)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/jspace_interp/steer.py", line 124, in y_full
+    logits = model(input_ids=torch.tensor([ids], device=device), use_cache=False).logits[0, -1].float()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 943, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 517, in forward
+    logits = self.lm_head(hidden_states)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 874.00 MiB. GPU 0 has a total capacity of 44.42 GiB of which 765.81 MiB is free. Including non-PyTorch memory, this process has 43.67 GiB memory in use. Of the allocated memory 39.74 GiB is allocated by PyTorch, and 3.62 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

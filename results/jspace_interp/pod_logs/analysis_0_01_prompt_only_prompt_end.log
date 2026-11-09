@@ -1,0 +1,27 @@
+08:00:14 prompt_only warned episodes present: 50 episodes, 200 rows
+08:00:24 prompt_only prompt_end 19 full {'core_lodo': 1.0, 'core_to_transfer': 1.0, 'core_to_transfer_ci95': [1.0, 1.0], 'transfer_lofo': 1.0} | warned: {'auroc_warned_vs_unwarned': 0.801, 'warned_minus_unwarned': 4.876, 'p_warned_vs_unwarned_within_episode': 0.0, 'auroc_colluder_vs_warned': 1.0, 'auroc_colluder_vs_warned_perm_p': 0.0, 'auroc_warned_vs_control_honest': 0.807, 'auroc_colluder_vs_control_honest': 1.0, 'echo_ratio': 0.152}
+08:05:38 prompt_only prompt_end 19 k=8 J_fill 0.985 J 0.985 randsub p95 0.999 pca 1.0 full 1.0 | mv col-vs-warned 0.903 warned-vs-unwarned 0.801 (153.1s)
+08:09:56 prompt_only prompt_end 19 k=25 J_fill 0.985 J 0.991 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.927 warned-vs-unwarned 0.785 (257.6s)
+08:12:52 prompt_only prompt_end 19 k=50 J_fill 0.999 J 0.991 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.775 warned-vs-unwarned 0.93 (176.1s)
+08:16:32 prompt_only prompt_end 19 k=100 J_fill 0.988 J 0.991 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.955 warned-vs-unwarned 0.833 (220.7s)
+08:16:42 prompt_only prompt_end 20 full {'core_lodo': 1.0, 'core_to_transfer': 1.0, 'core_to_transfer_ci95': [1.0, 1.0], 'transfer_lofo': 1.0} | warned: {'auroc_warned_vs_unwarned': 0.854, 'warned_minus_unwarned': 5.643, 'p_warned_vs_unwarned_within_episode': 0.0, 'auroc_colluder_vs_warned': 1.0, 'auroc_colluder_vs_warned_perm_p': 0.0, 'auroc_warned_vs_control_honest': 0.847, 'auroc_colluder_vs_control_honest': 1.0, 'echo_ratio': 0.176}
+08:21:54 prompt_only prompt_end 20 k=8 J_fill 0.973 J 0.973 randsub p95 0.996 pca 0.975 full 1.0 | mv col-vs-warned 0.801 warned-vs-unwarned 0.919 (153.3s)
+08:26:15 prompt_only prompt_end 20 k=25 J_fill 0.998 J 0.986 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.811 warned-vs-unwarned 0.931 (261.0s)
+08:29:39 prompt_only prompt_end 20 k=50 J_fill 1.0 J 0.986 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.884 warned-vs-unwarned 0.919 (204.5s)
+08:33:51 prompt_only prompt_end 20 k=100 J_fill 0.985 J 0.986 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.99 warned-vs-unwarned 0.831 (251.3s)
+08:34:01 prompt_only prompt_end 21 full {'core_lodo': 1.0, 'core_to_transfer': 1.0, 'core_to_transfer_ci95': [1.0, 1.0], 'transfer_lofo': 1.0} | warned: {'auroc_warned_vs_unwarned': 0.876, 'warned_minus_unwarned': 6.247, 'p_warned_vs_unwarned_within_episode': 0.0, 'auroc_colluder_vs_warned': 1.0, 'auroc_colluder_vs_warned_perm_p': 0.0, 'auroc_warned_vs_control_honest': 0.865, 'auroc_colluder_vs_control_honest': 1.0, 'echo_ratio': 0.199}
+08:39:32 prompt_only prompt_end 21 k=8 J_fill 0.953 J 0.956 randsub p95 0.999 pca 1.0 full 1.0 | mv col-vs-warned 0.949 warned-vs-unwarned 0.565 (172.1s)
+08:44:20 prompt_only prompt_end 21 k=25 J_fill 0.997 J 0.995 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.968 warned-vs-unwarned 0.739 (288.3s)
+08:47:34 prompt_only prompt_end 21 k=50 J_fill 0.985 J 0.995 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.993 warned-vs-unwarned 0.658 (193.4s)
+08:51:40 prompt_only prompt_end 21 k=100 J_fill 0.94 J 0.995 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.974 warned-vs-unwarned 0.837 (245.7s)
+08:51:51 prompt_only prompt_end 22 full {'core_lodo': 1.0, 'core_to_transfer': 1.0, 'core_to_transfer_ci95': [1.0, 1.0], 'transfer_lofo': 1.0} | warned: {'auroc_warned_vs_unwarned': 0.925, 'warned_minus_unwarned': 7.36, 'p_warned_vs_unwarned_within_episode': 0.0, 'auroc_colluder_vs_warned': 1.0, 'auroc_colluder_vs_warned_perm_p': 0.0, 'auroc_warned_vs_control_honest': 0.912, 'auroc_colluder_vs_control_honest': 1.0, 'echo_ratio': 0.236}
+08:57:37 prompt_only prompt_end 22 k=8 J_fill 0.944 J 0.943 randsub p95 0.99 pca 1.0 full 1.0 | mv col-vs-warned 0.945 warned-vs-unwarned 0.902 (177.0s)
+09:02:45 prompt_only prompt_end 22 k=25 J_fill 0.968 J 0.967 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.966 warned-vs-unwarned 0.86 (307.8s)
+09:05:58 prompt_only prompt_end 22 k=50 J_fill 0.967 J 0.967 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.986 warned-vs-unwarned 0.901 (192.7s)
+09:09:56 prompt_only prompt_end 22 k=100 J_fill 0.995 J 0.967 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 0.996 warned-vs-unwarned 0.857 (238.2s)
+09:10:07 prompt_only prompt_end 23 full {'core_lodo': 1.0, 'core_to_transfer': 1.0, 'core_to_transfer_ci95': [1.0, 1.0], 'transfer_lofo': 1.0} | warned: {'auroc_warned_vs_unwarned': 0.884, 'warned_minus_unwarned': 7.046, 'p_warned_vs_unwarned_within_episode': 0.0, 'auroc_colluder_vs_warned': 1.0, 'auroc_colluder_vs_warned_perm_p': 0.0, 'auroc_warned_vs_control_honest': 0.871, 'auroc_colluder_vs_control_honest': 1.0, 'echo_ratio': 0.229}
+09:15:50 prompt_only prompt_end 23 k=8 J_fill 0.942 J 0.94 randsub p95 0.994 pca 1.0 full 1.0 | mv col-vs-warned 0.992 warned-vs-unwarned 0.55 (168.9s)
+09:49:31 prompt_only prompt_end 23 k=25 J_fill 0.952 J 0.962 randsub p95 0.999 pca 1.0 full 1.0 | mv col-vs-warned 0.981 warned-vs-unwarned 0.702 (2020.4s)
+10:07:47 prompt_only prompt_end 23 k=50 J_fill 0.962 J 0.962 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 1.0 warned-vs-unwarned 0.508 (1096.1s)
+10:11:57 prompt_only prompt_end 23 k=100 J_fill 0.923 J 0.962 randsub p95 1.0 pca 1.0 full 1.0 | mv col-vs-warned 1.0 warned-vs-unwarned 0.746 (249.8s)
+10:11:57 wrote /workspace/nb/repo/results/jspace_interp/gemma2_9b/prompt_only_prompt_end/sweep_results.json

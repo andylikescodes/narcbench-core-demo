@@ -33,3 +33,5 @@ docs/**/*.synctex.gz
 results/jspace_interp/acts/
 results/jspace_interp/pod_runs/*/acts.tgz
 results/jspace_interp/pod_runs/*/results.tgz
+# role-direction vectors from the J-space runs (never commit .npy direction files)
+results/jspace_interp/**/*.npy

@@ -1,6 +1,6 @@
 \documentclass[10pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,booktabs,hyperref,xcolor,enumitem,array}
+\usepackage{amsmath,amssymb,booktabs,hyperref,xcolor,enumitem,array,graphicx}
 \hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black}
 \newcommand{\ran}{\textcolor{green!45!black}{\textbf{[ran]}}}
 \newcommand{\cited}{\textcolor{blue!60!black}{\textbf{[cited, Nov 5]}}}
@@ -11,32 +11,35 @@
 \setlist{nosep,leftmargin=*}
 
 \title{Is J-space the Right Standard for Detecting Colluders?\\[2pt]
-\large Confound audit, text baselines and a pre-registered plan for NARCBench on Gemma-2-9B-it}
-\author{Andy, with Claude\\ \small Working draft for the research group, November 8, 2026}
+\large Confound controls, a 200-draw random null and a prompt-only read for NARCBench on Gemma-2-9B-it}
+\author{Andy, with Claude\\ \small Working draft for the research group, November 10, 2026 (first draft November 8; GPU run November 9)}
 \date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-On November 5 a linear probe on the J-space projection of Gemma-2-9B-it's residual stream (the
-$k{=}25$ subspace spanned by Jacobian-lens token atoms) detected colluding agents in NARCBench, but
-it transferred from Core to Transfer worse than the full residual (AUROC 0.755 vs 0.902) and worse
-than its own complement (0.891). Before treating J-space as the standard representation for this
-work we asked three questions: what the J-space atoms of colluders say, whether the J-only result
-survives a proper random-subspace null across $k$ and read positions, and whether steering along
-J-space directions changes the collusive vote. This draft reports what could be run without a GPU:
-a confound audit of the benchmark, text-only baselines under the same detectors and protocols, a
-text-level behaviour split, a vocabulary check of the matched-vocabulary control, and an end-to-end
-check of every script on a tiny random model. The main findings are that (i) colluder instructions
-reach the model through three channels, not one; (ii) prompt words alone separate colluders
-perfectly within a split but not across splits (Core$\to$Transfer 0.457), so the probe's transfer
-is not plain prompt vocabulary; and (iii) colluders who failed to vote the target still differ from
-honest agents in their wording (0.776), while delivering the target changes colluders' wording
-little (0.583). All activation-level experiments are implemented and tested for plumbing but have
-not run on Gemma. Our recommendation is to keep the full-residual probe as the detection standard
-for now and to adopt J-space as an interpretation layer only if the prompt-only read and the
-many-draw null in Section~\ref{sec:plan} come out in its favour.
+On November 5 a linear probe on the J-space projection of Gemma-2-9B-it's residual stream (the $k{=}25$ subspace spanned by
+Jacobian-lens token atoms) detected colluding agents in NARCBench, but it transferred from Core to Transfer worse than the
+full residual (AUROC 0.755 vs 0.902) and worse than its own complement. Before treating J-space as the standard
+representation we asked what colluders' J-space atoms say, whether the J-only result survives a 200-draw random-subspace
+null across $k$ and read positions, and whether steering along J-space directions changes the collusive vote, and we added
+three confound controls: a prompt-only read, a system-prompt swap and a matched-vocabulary warning. On November 9 everything
+except steering ran on fresh Gemma-2-9B-it activations (one A40 for 7.7 hours; 320 analysis cells). The answers:
+(i) J-space is not a privileged subspace for this task. Filled to $k{=}25$ at the last token it transfers at 0.773 (band mean
+over layers 19--23) against 0.945 for the full residual and 0.879 for a 25-component PCA subspace; it exceeds the 95th
+percentile of 200 random subspaces at two layers only (layer 22: 0.899 vs 0.851) and never exceeds the 95th percentile of
+200 random sets of 25 lens atoms, which reach 0.969 at layer 22. (ii) The transferable signal is the instruction. A read at
+the end of the system prompt, before any conversation, transfers at 1.000 for every arm including random subspaces; with the
+colluders' system prompt swapped for the honest one and their private blocks cut, every arm falls to chance Core$\to$Transfer
+(full residual 0.479) although the probe still separates colluders within Core (0.935 leave-one-domain-out). (iii) The
+chosen atoms are a near-fixed set of decision, formatting and end-of-turn tokens (``decision'' in 189 of 200 final turns at
+layer 22); the four concept groups hold under 2\% of the selections in every cell. (iv) Honest agents warned in the
+colluders' vocabulary do not score like colluders (colluders vs warned 1.000), but J-space echoes the vocabulary three to
+four times more than the full residual does. Steering did not run on the pod (an out-of-memory bug in our loop, since
+fixed) and is being rerun. Our recommendation: the full-residual probe stays the reference detector, and the swap and
+prompt-only reads become mandatory controls for any detector claim on this benchmark, because the detectors that transfer
+do so by reading the instruction.
 \end{abstract}
 
 \noindent\textbf{How to read this draft.} Every number carries a tag. \ran{} means it was computed
@@ -172,7 +175,7 @@ each concept group, the J-space role-probe direction, and 20 random directions o
 $-u$ lowers it for colluders), effect above the 95th percentile of random directions, BH at
 $q{=}0.05$ across all cells, and growth with $\alpha$.
 
-\section{Results that ran}\label{sec:results}
+\section{Results without a GPU (November 8)}\label{sec:results}
 
 \subsection{Text baselines \ran}
 Bag-of-words features (1--2-grams, TF-IDF fit on Core only, at most 5{,}000 features) pass through
@@ -256,15 +259,41 @@ high prompt-only score therefore needs no learned notion of collusion, and the p
 should be compared with J-only on equal footing, not with chance.
 
 \section{Results of the November 9 GPU run}\label{sec:gpu}
-%% FILL: prose for every subsection once SUMMARY.json is in; tables come from scripts/jspace_interp_summarize.py
 \subsection{The run}
-\gpu{} %% FILL: pod, GPU, hours, cost, what was regenerated (warned episodes, 4 conditions x 7 positions x layers 19-23),
-%% the queue, the time cap, where the files are.
+\gpu{} One RunPod A40 (48\,GB, secure cloud, \$0.59 per hour) ran commit \texttt{5c300ad} of \texttt{jspace-interp} from
+07:22 to about 15:05 UTC on November 9: 7.7 hours, about \$4.60 including a first pod terminated after ten minutes for a
+queue-sizing fix. Stages: 50 warned control episodes generated with Gemma-2-9B-it (800 prompts, 23 minutes); activations
+at seven read positions and layers 19--23 for the four context conditions (Core 1{,}700 turns, Transfer 936, warned 850 per
+condition; about 25 minutes per condition); then 16 CPU jobs, one per condition and read position, each running the five
+layers at $k\in\{8,25,50,100\}$ with 200 Haar random subspaces and 200 random sets of $k$ lens atoms per cell (20 of each
+also scored under LODO and on the warned episodes), the episode bootstrap ($B{=}2000$) on the named arms, and the
+Experiment~1 readouts at the last, pre-vote, midpoint and prompt-end positions. All 320 planned cells finished, about 27
+minutes each for original and swap. As on November 5, probes are logistic regressions fit on Core discussion turns (1{,}200
+rows) and tested on Transfer final-vote turns (288 rows); prompt\_only uses one row per agent. The per-cell results are in
+\texttt{results/jspace\_interp/gemma2\_9b/<condition>\_<position>/sweep\_results.json}; \texttt{scripts/jspace\_interp\_summarize.py}
+turns them into \texttt{SUMMARY.json}, \texttt{RESULTS.md} and the tables below; the pod's records and logs are under
+\texttt{results/jspace\_interp/pod\_runs/} and \texttt{pod\_logs/}.
 
 \subsection{Experiment 2: $k$ and position sweep against 200-draw nulls}
-%% FILL: headline table at k=25 (band means over layers 19-23 per condition and position), the k sweep at the best position,
-%% the per-layer table, the bar count, the comparison with PCA-k and the full residual.
-\begin{table}[h]\centering\footnotesize
+\gpu{} Table~\ref{tab:headline} gives band means over layers 19--23. With the instruction present (original), the full
+residual transfers at 0.945 at the last token, PCA-25 at 0.879, the filled J-only arm at 0.773 and the pursuit arm at 0.765;
+the 200 random 25-dimensional subspaces average 0.65 with a 95th percentile of 0.808, and 200 random sets of 25 lens atoms
+have a 95th percentile of 0.875. No other read position carries much transferable signal for any arm: at the end of turn
+the full residual gives 0.780, at the pre-vote token 0.517 (while its Core LODO is 0.999 and its Transfer LOFO 0.817), and
+the reply midpoint and fractions stay between 0.52 and 0.71. Per layer at the last token (Table~\ref{tab:layers}) the
+filled J arm rises from 0.596 at layer 19 to 0.899 at layer 22 and falls to 0.831 at layer 23, the November 5 profile
+(0.564 to 0.897) with a proper null. It exceeds the random-subspace 95th percentile at layers 21 and 22 only (one-sided
+$p$ = 0.040 and 0.010), and it never exceeds the random-atom 95th percentile: 25 random lens atoms, orthonormalised,
+transfer at 0.969 (95th percentile; mean 0.805) at layer 22 and 0.961 at layer 23, better than the pursuit-chosen atoms.
+The pre-registered bar (both nulls) is cleared in none of the 35 original cells at $k{=}25$ except two at frac25, where every
+arm is at chance, and once for the pursuit arm. PCA-$k$ is at least as good as J at every layer and $k$
+(Table~\ref{tab:ksweep}): at layer 22 the paired difference J fill minus PCA is $[-0.09, 0.02]$ at $k{=}25$ and
+$[-0.10, -0.00]$ at $k{=}50$; over the 35 cells PCA beats J in 9 and J beats PCA in 1 (paired 95\% intervals). The
+complement beats the filled J arm at every layer (layer 22: $[0.016, 0.118]$). The pursuit stops after 16--18 atoms on
+average, so the pursuit arm is identical for $k\ge 25$; filling raises the score only at $k{=}100$ (0.930 at layer 22),
+where the random 95th percentile has risen to 0.942. Shuffled atoms give 0.747 and the fixed frame of the most common
+atoms 0.881 at layer 22.
+\begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \input{tables/tab_headline_k25}
 \caption{\gpu{} Core$\to$Transfer primary AUROC at $k{=}25$, band mean over layers 19--23, per condition and read position.
 ``Layers clearing both'' counts layers at which the filled J-only arm exceeds the 95th percentile of both random nulls
@@ -273,23 +302,45 @@ should be compared with J-only on equal footing, not with chance.
 \end{table}
 
 \begin{table}[h]\centering\footnotesize
-\input{tables/tab_ksweep_swap_best}
-\caption{\gpu{} $k$ sweep at the best position of the swap condition, band mean over layers 19--23; the paired bootstrap
-interval of J fill minus PCA-$k$ is given for the layer with the best J fill.}
+\input{tables/tab_ksweep_original_last}
+\caption{\gpu{} $k$ sweep, original condition, last token, band mean over layers 19--23; the paired bootstrap interval of J
+fill minus PCA-$k$ is for layer 22, the layer with the best J fill.}
 \label{tab:ksweep}
 \end{table}
 
 \begin{table}[h]\centering\footnotesize
-\input{tables/tab_layers_swap_best_k25}
-\caption{\gpu{} Per-layer Core$\to$Transfer AUROC at $k{=}25$, swap condition, with 95\% episode-bootstrap intervals and the
-one-sided $p$ of J fill against the 200 random subspaces.}
+\input{tables/tab_layers_original_last_k25}
+\caption{\gpu{} Per-layer Core$\to$Transfer AUROC at $k{=}25$, original condition, last token, with 95\% episode-bootstrap
+intervals and the one-sided $p$ of J fill against the 200 random subspaces. ``Clears both'' is the pre-registered bar.}
 \label{tab:layers}
 \end{table}
 
-\subsection{The three controls}
-%% FILL: prompt_only at prompt_end and nosys at last vs original and swap at last (tab_controls_k25, tab_protocols_k25); the
-%% matched-vocabulary readings (tab_matched_vocab_k25): colluder vs warned, warned vs unwarned, echo ratio, episode detectors.
 \begin{table}[h]\centering\footnotesize
+\input{tables/tab_layers_swap_last_k25}
+\caption{\gpu{} The same at the last token under the swap condition (honest system prompt, colluder blocks cut): every arm
+at chance, at every layer.}
+\label{tab:layers_swap}
+\end{table}
+
+\subsection{The three controls}
+\gpu{} Tables~\ref{tab:protocols} and~\ref{tab:controls}. \textbf{prompt\_only.} At the end of the system prompt the full
+residual, PCA-25 and the 95th percentile of random subspaces all transfer at 1.000 at every layer, and the J arm at
+0.95--1.00. The system prompts differ so systematically between roles that any 25 directions separate them; the tiny-model
+lesson of Section~\ref{sec:results} holds for Gemma. \textbf{swap.} With the honest system prompt and no private blocks,
+Core$\to$Transfer falls to chance for every arm at every layer and position (full residual 0.45--0.54 at the last token;
+Table~\ref{tab:layers_swap}). The best J cell of 35 is 0.622 at the pre-vote token of layer 22, against nulls of 0.594 and
+0.606, which is the count expected by chance. The probe still separates colluders within Core (LODO 0.935 for the full
+residual, 0.898 PCA, 0.831 J) and partly within Transfer (LOFO 0.667), so the conversation does carry a split-specific
+signal, but nothing that carries across splits. \textbf{nosys} agrees (0.488 Core$\to$Transfer; 0.934 LODO). The 0.945 of
+the original condition is therefore the instruction as the model represents it. \textbf{Matched vocabulary}
+(Table~\ref{tab:mv}; original condition, 50 warned control episodes, 600 warned-episode turns). Warned honest agents do not
+score like colluders: colluders vs warned 1.000 for the full residual at every layer, 0.90--0.99 for J. The warning does move
+honest agents a little: warned vs unwarned 0.62--0.70 for the full residual (within-episode $p<0.001$), an echo of 4--6\% of
+the colluder--honest gap, rising to 0.71--0.83 at the end of turn. J-space echoes more: warned vs unwarned 0.58--0.76 and an
+echo ratio of 0.13--0.21, three to four times the full residual's and above PCA (0.01--0.05) and the random subspaces
+(0.55--0.62 AUROC). At the episode level warned episodes are not mistaken for collusion (collusion vs warned 1.000) but look
+slightly more collusive than plain control episodes (0.59--0.65).
+\begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \input{tables/tab_protocols_k25}
 \caption{\gpu{} The three protocols per condition at the main read position, band mean over layers 19--23: Core
 leave-one-domain-out (LODO), Core$\to$Transfer (C$\to$T) and Transfer leave-one-family-out (LOFO), for the full residual, the
@@ -303,8 +354,8 @@ conditions at their read position. ``n/r'' marks cells that did not run.}
 \label{tab:controls}
 \end{table}
 
-\begin{table}[h]\centering\scriptsize
-\input{tables/tab_matched_vocab_k25}
+\begin{table}[h]\centering\footnotesize
+\resizebox{\linewidth}{!}{\input{tables/tab_matched_vocab_k25}}
 \caption{\gpu{} Matched-vocabulary control, scored out of fold with leave-one-Core-domain-out probes. Agent AUROCs: colluders
 vs warned honest agents, warned vs unwarned honest agents in the same episodes (within-episode permutation $p$), warned vs
 control honest agents. Echo ratio: (mean warned $-$ mean control honest)/(mean colluder $-$ mean control honest). Episode
@@ -313,18 +364,33 @@ detectors: primary AUROC of warned vs control episodes and of collusion vs warne
 \end{table}
 
 \subsection{Experiment 1: what the atoms say}
-%% FILL: concept-atom mass table and the most common atoms per position; significant tokens if any.
+\gpu{} Table~\ref{tab:exp1}. The four concept groups together hold under 2\% of the $k{=}25$ atom selections in every cell,
+and the colluder--honest differences that survive BH are below 0.01 (deception/secrecy $+0.008$ on Transfer at the last
+token of layer 22; $+0.007$ to $+0.014$, with honesty/standards $-0.009$, at the end of the system prompt, where the words
+themselves are in context). The atoms are a near-fixed set across turns, as on November 5: at the last token of layer 22
+``decision'' is selected in 189 of the 200 collusion-episode final turns, ``prioritizing'' in 177, \texttt{<eos>} in 161,
+``eloquently'' in 161 and ``recommendation'' in 154; at the pre-vote token \texttt{<eos>}, ``acknowledging'' and
+``prioriti'' appear in 199--200 of 200. Token-level selection frequencies do differ by role in 30 of the 40 readout cells
+after BH, but the tokens are stance and register words (under nosys at the last token colluders select ``understandably'',
+``verdict'', ``compelling'' and ``eloquently'' less often and ``advisors'' and ``considering'' more), not the deception or
+coordination vocabulary. J-space at these positions names how the turn ends, not what the agent is doing.
 \begin{table}[h]\centering\footnotesize
 \input{tables/tab_exp1_concepts}
-\caption{\gpu{} Mass of the four frozen concept groups among the $k{=}25$ selected atoms, mean per agent turn (Core), with
-Benjamini--Hochberg adjusted within-episode permutation $p$ over all concept tests of the run.}
+\caption{\gpu{} Share of the four frozen concept groups among the $k{=}25$ selected atoms, mean per agent turn (Core
+collusion episodes, final turns), with Benjamini--Hochberg adjusted within-episode permutation $p$ over all concept tests of the
+run; below each cell, the atoms selected most often with the number of the 200 turns that select them.}
 \label{tab:exp1}
 \end{table}
 
 \subsection{Experiment 3: steering the vote}
-%% FILL: scale, prefixes, directions, bars passed.
+\notrun{} The four steering runs (swap and original, layers 22 and 23) failed on the pod with CUDA out-of-memory after
+about 35 of the 400 prefixes: our loop kept every prefix's key--value cache on the GPU. The bug is fixed (one cache per
+row, commit \texttt{bdd30cd}; outcomes identical to $10^{-7}$ on the tiny model) and a steering-only rerun on a second pod
+was approved and is in progress at the time of writing. The role directions it uses (mean filled J component, colluders
+minus honest, with median $\|h_J\|$ 33.9 and 39.5 at layers 22 and 23 under swap) are in
+\texttt{results/jspace\_interp/role\_dirs/}. Table~\ref{tab:steer} is filled when the rerun lands.
 \begin{table}[h]\centering\footnotesize
-\input{tables/tab_steer}
+\IfFileExists{tables/tab_steer.tex}{\resizebox{\linewidth}{!}{\input{tables/tab_steer}}}{\notrun{} no steering results yet}
 \caption{\gpu{} Mean change of $y=\mathrm{logit}[\text{target}]-\mathrm{logit}[\text{fair}]$ under $+u$ for honest agents and
 $-u$ for colluders. Sign: predicted sign at every $\alpha$. $>$ rand.\ p95: effect above the 95th percentile of 20 random
 directions at every $\alpha$. BH: rejected at $q{=}0.05$ at some $\alpha$.}
@@ -332,7 +398,12 @@ directions at every $\alpha$. BH: rejected at $q{=}0.05$ at some $\alpha$.}
 \end{table}
 
 \section{What did not run}\label{sec:notrun}
-\notrun{} %% FILL from SUMMARY.json not_run: cells cut by the 480-minute cap, steering runs skipped, anything that failed.
+\notrun{} Of the 15 pod stages, 11 ran; the four steering stages failed as described above. All 320 analysis cells ran, so
+no sweep cell is missing. Not planned and therefore not run: the matched-vocabulary readings under swap and nosys (the warned
+episodes were extracted for original and prompt\_only only); Experiment~1 readouts at the end-of-turn and reply positions (the
+analysis ran them at the last, pre-vote, midpoint and prompt-end positions); and the paired-interval half of the
+Experiment~2 bar against the median random draw, because the random draws ran without the episode bootstrap to fit the
+time cap (the one-sided empirical $p$ against the 200 draws is reported instead).
 
 \section{Related work}
 \textbf{Molinari \& Bettineschi} (arXiv:2611.02153, November 1, 2026; abstract read) report on
@@ -347,25 +418,29 @@ A \textbf{LessWrong post} reportedly finds that NARCBench system prompts alone s
 built a J-lens collusion monitor on NARCBench; its report could not be read.
 
 \section{Should J-space be the standard?}
-\textbf{Not yet, as a detector.} The evidence in hand points four ways. First, the J-only subspace
-holds less transferable signal than the full residual and much less than its own complement, and it
-explains about 1\% of variance \cited. A plain 25-component PCA subspace transfers better (0.856 vs
-0.755) \cited. Second, its advantage over a random subspace shows only at
-layers 22--23, only in final turns, and rests on a single random draw \cited. Third, on three other
-models the earlier J-space proxy sat at chance across splits \cited. Fourth, the benchmark gives a probe easy
-routes through the instruction, the private channel and the vote (Section~\ref{sec:confound}).
-\textbf{Possibly, as an interpretation layer.} J-space's value would be that it names what the model
-represents. That case is made only if (a) J-only beats both random nulls at some $(k,\ell,\text{position})$
-under the swap condition, (b) prompt\_only scores well below J-only, (c) warned honest agents do not
-score like colluders, and (d) concept steering passes its bars. Until then we suggest the full
-residual probe stays the reference detector, every J-space claim is reported next to its random null
-and prompt-only score, and the incentive-driven (uninstructed) setting, where no prompt states the
-scheme, is treated as the real test.
+\textbf{No, not as a detector, and on this benchmark not as an interpretation layer either.} The standard set before the run
+was that J-space beat the random-subspace null, the prompt-only probe and the 25-component PCA subspace. It beats none of
+them. (1) Against 200 random subspaces it wins at two layers at one read position and loses to random sets of its own lens
+atoms everywhere. (2) The prompt-only probe transfers at 1.000 against J's 0.77 (band) to 0.90 (best layer). (3) PCA-25
+transfers at 0.879 against 0.773, and 0.937 against 0.899 at the best layer; the paired interval never favours J. The
+pre-registered conditions for the interpretation case fail as well: (a) under swap no J cell beats both nulls beyond the
+chance count, because nothing transfers under swap; (b) prompt\_only is far above J-only; (c) warned honest agents are not
+mistaken for colluders, but J-space tracks the warning's words more than the full residual does; (d) steering is pending.
+\textbf{What the run says about detection in general.} The detectors that transfer across NARCBench splits are instruction
+detectors: remove the system prompt and the private channel and transfer vanishes for every representation, while a read
+before the first word of conversation is perfect. Within a split a probe can still find colluders from the conversation
+(0.93 LODO under swap), which is where a behaviour-based detector would have to prove itself. We therefore recommend keeping
+the full-residual probe as the reference detector, reporting every detector next to its swap and prompt-only reads, and
+treating the incentive-driven (uninstructed) setting as the real test, since on the instructed benchmark the instruction
+itself is the signal.
 
 \section{Limitations}
-Instructed collusion only. Text baselines use bag-of-words features and cannot rule out representation
-of the instruction by the model. Related-work claims for the LessWrong post and the Apart team are
-second-hand. November 5 numbers were not rerun. Concept word lists were frozen before any activation
+Instructed collusion only, one model, one published lens, one run. Text baselines use bag-of-words features. Related-work
+claims for the LessWrong post and the Apart team are second-hand. The November 5 numbers were reproduced in profile, not
+rerun: the activations were regenerated (seven positions, bf16) and the full residual now transfers at 0.945 rather than
+0.902. Thirty-five cells per condition at $k{=}25$ invite a multiplicity caveat, which is why cell counts are reported
+against their chance expectation. The random-atom null uses orthonormalised random lens atoms, which is the natural null for
+the atom selection but not for the lens itself. Steering is pending. Concept word lists were frozen before any activation
 result, but their choice is ours.
 
 \appendix
@@ -382,5 +457,9 @@ python scripts/jspace_interp_analyze.py --root <acts> --lens <lens.pt> \
 python scripts/jspace_interp_steer.py --lens <lens.pt> --basis-dir <basis> --layer 22
 python scripts/jspace_interp_gen_matched_vocab.py --all
 python scripts/jspace_interp_tiny_e2e.py --work /tmp/jspace_tiny   # ran (CPU)
+python scripts/runpod_launch_jspace_interp.py --preflight | --launch --watch  # the Nov 9 pod (estimate, gates, pull)
+python scripts/runpod_launch_jspace_interp.py --mode steer --launch --watch  # steering-only rerun
+python scripts/jspace_interp_summarize.py                          # SUMMARY.json, RESULTS.md, tables/
+python scripts/jspace_interp_finish_cells.py --from-summary ...    # cells a time cap cut, on CPU
 \end{verbatim}
 \end{document}

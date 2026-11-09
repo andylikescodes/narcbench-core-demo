@@ -448,3 +448,10 @@ the real test.
 
 **Not run / open.** original L23 steering; matched-vocab under swap/nosys (not planned); Exp 1 at eot/reply positions; steering
 null with random *lens* directions (the Gaussian null does not share the lens's common component); the uninstructed setting.
+
+**Addendum 2026-11-09 20:30 UTC — steering null with random lens directions.** Pod `rt34fhh908ja7p` (A40, `--mode steer_null`,
+0.9 h, ≈$0.55) reran swap L23 against 20 size-matched random lens-atom directions (cos 0.85–0.94 with the concept directions).
+They move the vote the same way (honest α=4: +2.2 to +3.0, median +2.5; colluders −0.8 to −1.2): deception/secrecy (+3.6/−1.6)
+and steering/persuasion (+3.1/−1.3) exceed all 20 draws in both groups (p = 1/21), coordination and honesty/standards sit inside
+the null, no direction passes the full bar set. File `results/jspace_interp/steer/steer_core_swap_L23_lensnull.json`. Total
+GPU spend for the study ≈ $7.60; balance ≈ $14.3; no pods running.

@@ -1,0 +1,13 @@
+{
+ "pod": "rt34fhh908ja7p",
+ "files": {
+  "results.tgz": {
+   "size": 2547550,
+   "sha256": "e18e2fdc6a5b434f41769b0c0fa9e8e9b58b860daf9695346cbc5a6a25b7956c",
+   "status": "downloaded",
+   "seconds": 3.6,
+   "local": "results/jspace_interp/pod_runs/rt34fhh908ja7p/results.tgz"
+  }
+ },
+ "extracted_results": 336
+}

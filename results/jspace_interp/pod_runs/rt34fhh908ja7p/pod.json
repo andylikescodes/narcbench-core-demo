@@ -1,0 +1,46 @@
+{
+ "created_utc": "20261109T191719Z",
+ "pod": {
+  "id": "rt34fhh908ja7p",
+  "desiredStatus": "RUNNING",
+  "costPerHr": 0.59,
+  "machine": {
+   "podHostId": "rt34fhh908ja7p-64412533",
+   "gpuDisplayName": "A40",
+   "dataCenterId": "EU-SE-1",
+   "cpuCount": 2
+  },
+  "gpu": "NVIDIA A40",
+  "cloud": "SECURE",
+  "min_vcpu": 8,
+  "min_memory_gb": 40
+ },
+ "attempts_before": [],
+ "sha": "1c740de22c5224150a5dd5795e89c675ae3f1a4a",
+ "image": "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404",
+ "settings": {
+  "mode": "steer_null",
+  "random_kind": "lens",
+  "steer_suffix": "_lensnull",
+  "max_minutes": 120,
+  "grace_minutes": 30,
+  "n_random": 200,
+  "positions": "last,prevote,eot,reply_mean,frac50,frac25,frac75",
+  "layers": "19-23",
+  "steer_runs": "swap:23",
+  "warned_workers": 8,
+  "warned_batch": 8,
+  "skip": "",
+  "min_vcpu": 8,
+  "min_memory_gb": 40,
+  "disk_gb": 60
+ },
+ "estimate": {
+  "rate_usd_hr": 0.59,
+  "gpu_chain_hours": 1.1,
+  "expected_hours": 1.1,
+  "expected_usd": 0.62,
+  "worst_case_usd": 1.47
+ },
+ "status_url": "https://rt34fhh908ja7p-8765.proxy.runpod.net/status.json"
+}

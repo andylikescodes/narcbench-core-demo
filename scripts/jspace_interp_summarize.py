@@ -122,7 +122,7 @@ def load_steer(files):
         cond = cfg.get("condition") or Path(f).stem.split("_")[-2]
         split = cfg.get("split") or (Path(f).stem.split("_")[1] if Path(f).stem.count("_") >= 3 else "core")
         suffix = cfg.get("out_suffix") or ""
-        key = (split, cond + suffix.replace("_", " "), int(d["layer"]))  # e.g. ("core", "swap lensnull", 23)
+        key = (split, cond, int(d["layer"]), suffix)  # the suffix keeps runs with different nulls apart
         out[key] = {"file": str(f), **d}
     return out
 
@@ -418,7 +418,7 @@ def tab_steer(steers, out):
     lines = [r"\begin{tabular}{lllccccccccc}\toprule",
              r"Run & Direction & Group ($n$) & $\Delta y$ at $\alpha{=}1$ & $\alpha{=}2$ & $\alpha{=}4$ & Flips $\alpha{=}2$ & $\alpha{=}4$ & Sign & $>$ rand.\ p95 & BH & All bars\\\midrule"]
     for key, s in steers.items():
-        split, cond, L = key
+        split, cond, L = key[:3]
         first = True
         for r in s["rows"]:
             d = r["mean_delta_by_alpha"]; f = r["flip_by_alpha"]
@@ -559,7 +559,7 @@ def main() -> int:
     summary["exp1_most_common_atoms"] = {f"{c}/{p}/L{L}": {s: (e.get(s) or {}).get("most_common_atoms", [])[:12] for s in ("core", "transfer")}
                                          for (c, p, L), e in exp1.items()}
     steers = {k: steer_summary(v) for k, v in steers_raw.items()}
-    summary["steer"] = {f"{s}/{c}/L{L}": v for (s, c, L), v in steers.items()}
+    summary["steer"] = {f"{s}/{c}/L{L}{suf}": v for (s, c, L, suf), v in steers.items()}
 
     # tables
     if k0 is not None:
@@ -625,7 +625,7 @@ def main() -> int:
     if steers:
         md += ["## steering", ""]
         for key, s in steers.items():
-            md.append(f"- {key[1]} L{key[2]}: scale {f3(s['scale'], 2)} ({s['scale_source']}), signs {s['signs']}, prefix cache {s['prefix_cache']} "
+            md.append(f"- {key[1]} L{key[2]}{' (lens null)' if s.get('random_kind') == 'lens' else ''}: scale {f3(s['scale'], 2)} ({s['scale_source']}), signs {s['signs']}, prefix cache {s['prefix_cache']} "
                       f"(check {json.dumps(s['cache_check'])}), {s['n_records']} prefixes, {s['n_random']} random directions")
             md.append(f"  baseline: {json.dumps(s['baseline'])}; random at alpha 4: {json.dumps({k: v for k, v in s['random_by_group_alpha'].items() if k.endswith('|4.0')})}")
             for r in s["rows"]:

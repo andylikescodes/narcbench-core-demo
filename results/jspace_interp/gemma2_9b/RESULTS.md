@@ -1,6 +1,6 @@
 # jspace-interp results summary
 
-Inputs: 16 sweep file(s), 3 steering file(s). Planned cells 320, ran 320.
+Inputs: 16 sweep file(s), 4 steering file(s). Planned cells 320, ran 320.
 
 ## original (k=25)
 
@@ -223,8 +223,18 @@ Inputs: 16 sweep file(s), 3 steering file(s). Planned cells 320, ran 320.
   - concept:honesty_standards / honest (n=300): dy at alpha 0.5/1/2/4 = 0.395/0.840/1.931/2.662; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
   - jspace_role_probe / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.298/-0.628/-1.327/-2.045; flips at alpha 2/4 = 0.06/0.10; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
   - jspace_role_probe / honest (n=300): dy at alpha 0.5/1/2/4 = 0.314/0.628/1.147/1.853; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+- swap L23 (lens null): scale 39.48 (given (median ||h_J||)), signs role, prefix cache True (check {"rows": 3, "max_abs_diff_y0": 0.125}), 400 prefixes, 20 random directions
+  baseline: {"colluder": {"n": 100, "y0_mean": -3.84608154296875, "frac_target": 0.24}, "honest": {"n": 300, "y0_mean": -8.631031370162964, "frac_target": 0.04666666666666667}}; random at alpha 4: {"colluder|4.0": {"mean_delta_min": -1.2295494079589844, "mean_delta_max": -0.8044942378997803, "abs_p95": 1.1829898352622985}, "honest|4.0": {"mean_delta_min": 2.180951566696167, "mean_delta_max": 2.9485335032145183, "abs_p95": 2.870173971494039}}
+  - concept:deception_secrecy / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.254/-0.522/-0.982/-1.600; flips at alpha 2/4 = 0.01/0.03; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:deception_secrecy / honest (n=300): dy at alpha 0.5/1/2/4 = 0.503/1.059/2.330/3.611; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:coordination / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.185/-0.365/-0.636/-0.916; flips at alpha 2/4 = 0.00/0.03; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
+  - concept:coordination / honest (n=300): dy at alpha 0.5/1/2/4 = 0.429/0.919/2.089/2.962; flips at alpha 2/4 = 0.01/0.01; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
+  - concept:steering_persuasion / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.212/-0.446/-0.818/-1.265; flips at alpha 2/4 = 0.00/0.03; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:steering_persuasion / honest (n=300): dy at alpha 0.5/1/2/4 = 0.483/1.001/2.196/3.133; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:honesty_standards / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.141/-0.245/-0.473/-0.613; flips at alpha 2/4 = 0.00/0.02; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
+  - concept:honesty_standards / honest (n=300): dy at alpha 0.5/1/2/4 = 0.395/0.840/1.931/2.662; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
 
 ## not run
 
 - condition/position pairs with missing cells: none
-- steering runs missing: original:L23
+- steering runs missing: swap:L23

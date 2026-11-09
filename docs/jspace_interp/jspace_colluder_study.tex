@@ -269,8 +269,8 @@ layers at $k\in\{8,25,50,100\}$ with 200 Haar random subspaces and 200 random se
 also scored under LODO and on the warned episodes), the episode bootstrap ($B{=}2000$) on the named arms, and the
 Experiment~1 readouts at the last, pre-vote, midpoint and prompt-end positions. All 320 planned cells finished, about 27
 minutes each for original and swap. As on November 5, probes are logistic regressions fit on Core discussion turns (1{,}200
-rows) and tested on Transfer final-vote turns (288 rows); prompt\_only uses one row per agent. The per-cell results are in
-\texttt{results/jspace\_interp/gemma2\_9b/} \texttt{<condition>\_<position>/sweep\_results.json};
+rows) and tested on Transfer final-vote turns (288 rows); prompt\_only uses one row per agent. The per-cell results are the \texttt{sweep\_results.json} files under
+\texttt{results/jspace\_interp/gemma2\_9b/}, one folder per condition and read position, and
 \texttt{scripts/jspace\_interp\_summarize.py} turns them into \texttt{SUMMARY.json}, \texttt{RESULTS.md} and the tables below; the pod's records and logs are under
 \texttt{results/jspace\_interp/pod\_runs/} and \texttt{pod\_logs/}.
 
@@ -354,8 +354,8 @@ conditions at their read position. ``n/r'' marks cells that did not run.}
 \label{tab:controls}
 \end{table}
 
-\begin{table}[h]\centering\scriptsize\setlength{\tabcolsep}{3.5pt}
-\input{tables/tab_matched_vocab_k25}
+\begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{\input{tables/tab_matched_vocab_k25}}
 \caption{\gpu{} Matched-vocabulary control, scored out of fold with leave-one-Core-domain-out probes. Agent AUROCs: colluders
 vs warned honest agents, warned vs unwarned honest agents in the same episodes (within-episode permutation $p$), warned vs
 control honest agents. Echo ratio: (mean warned $-$ mean control honest)/(mean colluder $-$ mean control honest). Episode

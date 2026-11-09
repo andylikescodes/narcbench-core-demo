@@ -270,8 +270,8 @@ also scored under LODO and on the warned episodes), the episode bootstrap ($B{=}
 Experiment~1 readouts at the last, pre-vote, midpoint and prompt-end positions. All 320 planned cells finished, about 27
 minutes each for original and swap. As on November 5, probes are logistic regressions fit on Core discussion turns (1{,}200
 rows) and tested on Transfer final-vote turns (288 rows); prompt\_only uses one row per agent. The per-cell results are in
-\texttt{results/jspace\_interp/gemma2\_9b/<condition>\_<position>/sweep\_results.json}; \texttt{scripts/jspace\_interp\_summarize.py}
-turns them into \texttt{SUMMARY.json}, \texttt{RESULTS.md} and the tables below; the pod's records and logs are under
+\texttt{results/jspace\_interp/gemma2\_9b/} \texttt{<condition>\_<position>/sweep\_results.json};
+\texttt{scripts/jspace\_interp\_summarize.py} turns them into \texttt{SUMMARY.json}, \texttt{RESULTS.md} and the tables below; the pod's records and logs are under
 \texttt{results/jspace\_interp/pod\_runs/} and \texttt{pod\_logs/}.
 
 \subsection{Experiment 2: $k$ and position sweep against 200-draw nulls}
@@ -294,7 +294,7 @@ average, so the pursuit arm is identical for $k\ge 25$; filling raises the score
 where the random 95th percentile has risen to 0.942. Shuffled atoms give 0.747 and the fixed frame of the most common
 atoms 0.881 at layer 22.
 \begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{4pt}
-\input{tables/tab_headline_k25}
+\resizebox{\linewidth}{!}{\input{tables/tab_headline_k25}}
 \caption{\gpu{} Core$\to$Transfer primary AUROC at $k{=}25$, band mean over layers 19--23, per condition and read position.
 ``Layers clearing both'' counts layers at which the filled J-only arm exceeds the 95th percentile of both random nulls
 (200 Haar subspaces and 200 random atom sets).}
@@ -309,14 +309,14 @@ fill minus PCA-$k$ is for layer 22, the layer with the best J fill.}
 \end{table}
 
 \begin{table}[h]\centering\footnotesize
-\input{tables/tab_layers_original_last_k25}
+\resizebox{\linewidth}{!}{\input{tables/tab_layers_original_last_k25}}
 \caption{\gpu{} Per-layer Core$\to$Transfer AUROC at $k{=}25$, original condition, last token, with 95\% episode-bootstrap
 intervals and the one-sided $p$ of J fill against the 200 random subspaces. ``Clears both'' is the pre-registered bar.}
 \label{tab:layers}
 \end{table}
 
 \begin{table}[h]\centering\footnotesize
-\input{tables/tab_layers_swap_last_k25}
+\resizebox{\linewidth}{!}{\input{tables/tab_layers_swap_last_k25}}
 \caption{\gpu{} The same at the last token under the swap condition (honest system prompt, colluder blocks cut): every arm
 at chance, at every layer.}
 \label{tab:layers_swap}
@@ -341,7 +341,7 @@ echo ratio of 0.13--0.21, three to four times the full residual's and above PCA 
 (0.55--0.62 AUROC). At the episode level warned episodes are not mistaken for collusion (collusion vs warned 1.000) but look
 slightly more collusive than plain control episodes (0.59--0.65).
 \begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{4pt}
-\input{tables/tab_protocols_k25}
+\resizebox{\linewidth}{!}{\input{tables/tab_protocols_k25}}
 \caption{\gpu{} The three protocols per condition at the main read position, band mean over layers 19--23: Core
 leave-one-domain-out (LODO), Core$\to$Transfer (C$\to$T) and Transfer leave-one-family-out (LOFO), for the full residual, the
 filled J-only arm at $k{=}25$ and PCA-25.}
@@ -354,8 +354,8 @@ conditions at their read position. ``n/r'' marks cells that did not run.}
 \label{tab:controls}
 \end{table}
 
-\begin{table}[h]\centering\footnotesize
-\resizebox{\linewidth}{!}{\input{tables/tab_matched_vocab_k25}}
+\begin{table}[h]\centering\scriptsize\setlength{\tabcolsep}{3.5pt}
+\input{tables/tab_matched_vocab_k25}
 \caption{\gpu{} Matched-vocabulary control, scored out of fold with leave-one-Core-domain-out probes. Agent AUROCs: colluders
 vs warned honest agents, warned vs unwarned honest agents in the same episodes (within-episode permutation $p$), warned vs
 control honest agents. Echo ratio: (mean warned $-$ mean control honest)/(mean colluder $-$ mean control honest). Episode
@@ -375,7 +375,7 @@ after BH, but the tokens are stance and register words (under nosys at the last 
 ``verdict'', ``compelling'' and ``eloquently'' less often and ``advisors'' and ``considering'' more), not the deception or
 coordination vocabulary. J-space at these positions names how the turn ends, not what the agent is doing.
 \begin{table}[h]\centering\footnotesize
-\input{tables/tab_exp1_concepts}
+\resizebox{\linewidth}{!}{\input{tables/tab_exp1_concepts}}
 \caption{\gpu{} Share of the four frozen concept groups among the $k{=}25$ selected atoms, mean per agent turn (Core
 collusion episodes, final turns), with Benjamini--Hochberg adjusted within-episode permutation $p$ over all concept tests of the
 run; below each cell, the atoms selected most often with the number of the 200 turns that select them.}
@@ -457,9 +457,10 @@ python scripts/jspace_interp_analyze.py --root <acts> --lens <lens.pt> \
 python scripts/jspace_interp_steer.py --lens <lens.pt> --basis-dir <basis> --layer 22
 python scripts/jspace_interp_gen_matched_vocab.py --all
 python scripts/jspace_interp_tiny_e2e.py --work /tmp/jspace_tiny   # ran (CPU)
-python scripts/runpod_launch_jspace_interp.py --preflight | --launch --watch  # the Nov 9 pod (estimate, gates, pull)
-python scripts/runpod_launch_jspace_interp.py --mode steer --launch --watch  # steering-only rerun
-python scripts/jspace_interp_summarize.py                          # SUMMARY.json, RESULTS.md, tables/
-python scripts/jspace_interp_finish_cells.py --from-summary ...    # cells a time cap cut, on CPU
+python scripts/runpod_launch_jspace_interp.py --preflight         # gates
+python scripts/runpod_launch_jspace_interp.py --launch --watch     # ran Nov 9
+python scripts/runpod_launch_jspace_interp.py --mode steer --launch --watch
+python scripts/jspace_interp_summarize.py           # SUMMARY, RESULTS.md, tables/
+python scripts/jspace_interp_finish_cells.py --from-summary SUMMARY.json
 \end{verbatim}
 \end{document}

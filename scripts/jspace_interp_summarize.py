@@ -286,7 +286,7 @@ def mv_fields(m):
 
 def tab_matched_vocab(rows, cells_sel, k, out):
     lines = [r"\begin{tabular}{llcccccc}\toprule",
-             r"Cell & Arm & Colluder vs warned & Warned vs unwarned ($p$) & Warned vs control & Echo ratio & Ep.\ warned vs control & Ep.\ collusion vs warned\\\midrule"]
+             r"Cell & Arm & Coll.\ vs warned & Warned vs unwarned ($p$) & Warned vs control & Echo & Ep.\ warned vs control & Ep.\ coll.\ vs warned\\\midrule"]
     for (cond, pos, L) in cells_sel:
         rr = [r for r in rows if (r["condition"], r["position"], r["layer"], r["k"]) == (cond, pos, L, k)]
         if not rr or not rr[0]["mv"].get("full"):
@@ -306,7 +306,7 @@ def tab_matched_vocab(rows, cells_sel, k, out):
             g = lambda key, stat: (rs.get(key) or {}).get(stat)  # noqa: E731
             echo_draws = (rs.get("echo_ratio") or {}).get("draws")
             echo_med = float(np.median(echo_draws)) if echo_draws else None  # the ratio blows up for weak probes, so the median
-            lines.append(" & ".join(["", f"Random {k}-dim (mean of {rs.get('n')} draws; echo: median)", f3(g("auroc_colluder_vs_warned", "mean")),
+            lines.append(" & ".join(["", f"Random {k}-dim, mean of {rs.get('n')} (echo: median)", f3(g("auroc_colluder_vs_warned", "mean")),
                                      f3(g("auroc_warned_vs_unwarned", "mean")), f3(g("auroc_warned_vs_control_honest", "mean")),
                                      f3(echo_med, 2), f3(g("episode_warned_vs_control_primary", "mean")), "n/a"]) + r"\\")
         lines.append(r"\midrule")

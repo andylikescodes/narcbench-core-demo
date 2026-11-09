@@ -37,6 +37,10 @@ def main():
     ap.add_argument("--role-direction", type=Path, default=None)
     ap.add_argument("--hj-norm", type=float, default=None)
     ap.add_argument("--n-random", type=int, default=20)
+    ap.add_argument("--random-kind", choices=["gaussian", "lens"], default="gaussian",
+                    help="null directions: unit Gaussian vectors (pre-registered), or 'lens': unit mean J-lens atom of a random set of "
+                         "vocabulary tokens, size-matched to the concept groups, which shares the lens atoms' common component")
+    ap.add_argument("--out-suffix", default="", help="appended to the output file name (e.g. _lensnull)")
     ap.add_argument("--alphas", default=",".join(str(a) for a in ALPHAS))
     ap.add_argument("--max-episodes", type=int, default=0)
     ap.add_argument("--device", default="cuda")
@@ -74,9 +78,17 @@ def main():
         dirs["jspace_role_probe"] = u / np.linalg.norm(u)
     rng = np.random.default_rng(args.seed)
     d = J.shape[0]
-    for i in range(args.n_random):
-        v = rng.standard_normal(d).astype(np.float32)
-        dirs[f"random:{i}"] = v / np.linalg.norm(v)
+    random_tokens = {}
+    if args.random_kind == "lens":
+        sizes = [len(v) for v in gids.values() if v]
+        for i in range(args.n_random):
+            ids = [int(x) for x in rng.choice(W.shape[0], size=sizes[i % len(sizes)], replace=False)]
+            random_tokens[f"random:{i}"] = ids
+            dirs[f"random:{i}"] = concept_directions(J, W, s, {"r": ids})["concept:r"]
+    else:
+        for i in range(args.n_random):
+            v = rng.standard_normal(d).astype(np.float32)
+            dirs[f"random:{i}"] = v / np.linalg.norm(v)
 
     res = run_steering(fr, model, tok, args.layer, dirs, alphas=[float(a) for a in args.alphas.split(",")],
                        scale=args.hj_norm, use_cache=not args.no_cache, signs=args.signs)
@@ -84,8 +96,13 @@ def main():
     res["lens"] = lens_info
     res["config"] = {k: str(v) for k, v in vars(args).items()}
     res["concept_groups"] = {g: len(v) for g, v in gids.items()}
+    res["random_kind"] = args.random_kind
+    if random_tokens:
+        res["random_tokens"] = random_tokens
+        unit = {k: v / np.linalg.norm(v) for k, v in dirs.items()}
+        res["random_cosine_with_concepts"] = {r: {c: float(unit[r] @ unit[c]) for c in dirs if c.startswith("concept:")} for r in random_tokens}
     args.out.mkdir(parents=True, exist_ok=True)
-    out = args.out / f"steer_{args.split}_{args.condition}_L{args.layer}.json"
+    out = args.out / f"steer_{args.split}_{args.condition}_L{args.layer}{args.out_suffix}.json"
     out.write_text(json.dumps(res, indent=1) + "\n")
     print(json.dumps(res["summary"]["passes_all_bars"], indent=1))
     print("prefix cache:", res["prefix_cache"], "check:", res["cache_check"], "rows:", len(res["records"]))

@@ -121,7 +121,9 @@ def load_steer(files):
         cfg = d.get("config") or {}
         cond = cfg.get("condition") or Path(f).stem.split("_")[-2]
         split = cfg.get("split") or (Path(f).stem.split("_")[1] if Path(f).stem.count("_") >= 3 else "core")
-        out[(split, cond, int(d["layer"]))] = {"file": str(f), **d}
+        suffix = cfg.get("out_suffix") or ""
+        key = (split, cond + suffix.replace("_", " "), int(d["layer"]))  # e.g. ("core", "swap lensnull", 23)
+        out[key] = {"file": str(f), **d}
     return out
 
 
@@ -408,6 +410,7 @@ def steer_summary(st):
     return {"layer": st.get("layer"), "scale": st.get("scale"), "scale_source": st.get("scale_source"), "alphas": alphas,
             "signs": st.get("signs"), "prefix_cache": st.get("prefix_cache"), "cache_check": st.get("cache_check"),
             "n_records": len(st.get("records", [])), "n_random": sum(str(d).startswith("random:") for d in (st.get("directions") or [])),
+            "random_kind": st.get("random_kind", "gaussian"), "random_cosine_with_concepts": st.get("random_cosine_with_concepts"),
             "baseline": base, "random_by_group_alpha": rand_by_alpha, "rows": rows, "file": st.get("file")}
 
 
@@ -419,7 +422,8 @@ def tab_steer(steers, out):
         first = True
         for r in s["rows"]:
             d = r["mean_delta_by_alpha"]; f = r["flip_by_alpha"]
-            lines.append(" & ".join([f"{tex(cond)} L{L}" if first else "", tex(r["direction"].replace("concept:", "").replace("jspace_role_probe", "J role probe")),
+            run_label = f"{tex(cond)} L{L}" + (" (lens null)" if s.get("random_kind") == "lens" else "")
+            lines.append(" & ".join([run_label if first else "", tex(r["direction"].replace("concept:", "").replace("jspace_role_probe", "J role probe")),
                                      f"{r['group']} ({r['n']})", f3(d.get("1.0"), 2), f3(d.get("2.0"), 2), f3(d.get("4.0"), 2),
                                      f3(f.get("2.0"), 2), f3(f.get("4.0"), 2), mark(r["predicted_sign_ok_all"]),
                                      mark(r["beats_random_all"]), mark(r["bh_reject_any"]), mark(r["passes_all_bars"])]) + r"\\")

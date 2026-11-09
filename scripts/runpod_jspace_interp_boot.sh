@@ -28,7 +28,14 @@ if [ "$MODE" = steer ]; then
   SKIP="${SKIP}gen_warned,extract_warned,atom_norms,extract_prompt_only,extract_nosys,"
   LAYERS=$(echo "$STEER_RUNS" | tr ',' '\n' | cut -d: -f2 | sort -un | paste -sd, -); LAYERS_CSV=$LAYERS
   EXTRACT_SPLITS="core"; NO_ANALYSIS=1
+elif [ "$MODE" = steer_null ]; then
+  # steering with a different null only: no extraction, no role directions (the scale comes from the committed role_dirs.json)
+  SKIP="${SKIP}gen_warned,extract_warned,atom_norms,extract_prompt_only,extract_original,extract_swap,extract_nosys,role_dirs_swap,role_dirs_original,"
+  NO_ANALYSIS=1
 fi
+STEER_EXTRA=()
+[ -n "${JOB_RANDOM_KIND:-}" ] && STEER_EXTRA+=(--random-kind "$JOB_RANDOM_KIND")
+[ -n "${JOB_STEER_SUFFIX:-}" ] && STEER_EXTRA+=(--out-suffix "$JOB_STEER_SUFFIX")
 NPROC=$(nproc)
 # nproc and free report the host inside a RunPod container; the pod's own allocation is in its cgroup limits
 cg_cpus() {
@@ -239,7 +246,7 @@ for run in "${SR[@]}"; do
   if [ "$(remaining_min)" -lt 45 ]; then log "steer_${cond}_L${L}: skipped, under 45 min left"; record_stage "steer_${cond}_L${L}" 98 0; continue; fi
   nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader 2>/dev/null | sed "s/^/gpu before steer_${cond}_L${L}: /" | tee -a "$RUN/job.log"
   stage "steer_${cond}_L${L}" python3 scripts/jspace_interp_steer.py --model "$MODEL" --lens "$LENS" --basis-dir "$BASIS" --layer "$L" \
-    --condition "$cond" --n-random 20 "${extra[@]}" --out "$OUT/steer" || log "steer_${cond}_L${L} failed"
+    --condition "$cond" --n-random 20 "${extra[@]}" "${STEER_EXTRA[@]}" --out "$OUT/steer" || log "steer_${cond}_L${L} failed"
 done
 
 # ---- 6. wait for the analysis queue, then package and serve ----

@@ -538,8 +538,10 @@ def main() -> int:
         for cond in ("swap", "original"):
             if cond in verdict:
                 bp = max(verdict[cond]["band_by_position"].items(), key=lambda kv: kv[1]["J_fill"] or -1)[0]
-                tab_ksweep(rows, cond, bp, ks, a.out)
-                tab_layers(rows, cond, bp, k0, a.out)
+                for pos_ in {bp, "last"}:  # the best position by band mean, and always the last token for comparability
+                    if any(r["condition"] == cond and r["position"] == pos_ for r in rows):
+                        tab_ksweep(rows, cond, pos_, ks, a.out)
+                        tab_layers(rows, cond, pos_, k0, a.out)
                 # fixed-name copies for the paper's \input{}: the best position of each condition
                 import shutil
                 shutil.copy(a.out / f"tab_ksweep_{cond}_{bp}.tex", a.out / f"tab_ksweep_{cond}_best.tex")

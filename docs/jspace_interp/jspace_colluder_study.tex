@@ -39,7 +39,7 @@ many-draw null in Section~\ref{sec:plan} come out in its favour.
 
 \noindent\textbf{How to read this draft.} Every number carries a tag. \ran{} means it was computed
 on November 8 from the saved transcripts in the repository. \cited{} means it is quoted from the
-November 5 run summary (Andy's unpushed local branch) and was not rerun here. \planned{} marks
+November 5 results on branch \texttt{jspace-separability} (pushed November 9) and was not rerun here. \planned{} marks
 experiments that are implemented but blocked on compute. \pipe{} marks outputs from a random tiny
 model, which say nothing about Gemma.
 
@@ -69,10 +69,13 @@ Arm (layers 19--23, last token) & Core LODO & Core$\to$Transfer & Transfer LOFO\
 Full residual & 1.000 & 0.902 [0.863, 0.935] & 0.977\\
 J-only, $k{=}25$ & 0.995 & 0.755 [0.709, 0.796] & 0.854\\
 Complement $h_C$ & 1.000 & 0.891 & 0.978\\
-Random 25-dim subspace (one draw per layer) & 0.981 & 0.647 & --\\
-Shuffled atoms (another turn's) & -- & 0.559 & --\\\bottomrule
+Random 25-dim subspace (one Haar draw, shared) & 0.981 & 0.647 [0.602, 0.693] & 0.742\\
+Shuffled atoms (another turn's) & -- & 0.559 [0.511, 0.611] & --\\
+PCA, top 25 components of Core & 1.000 & 0.856 [0.807, 0.898] & 0.902\\
+J from W\textsubscript{U} top-25 frames (earlier proxy) & 0.989 & 0.602 [0.550, 0.658] & --\\\bottomrule
 \end{tabular}
-\caption{\cited{} Primary AUROC from the November 5 run summary.}
+\caption{\cited{} Primary AUROC at $k{=}25$, band mean over layers 19--23. Source:
+\texttt{results/jspace/gemma2\_9b\_jpaper\_nnomp\_k25/RESULTS.md} on branch \texttt{jspace-separability}.}
 \end{table}
 
 \noindent Three further facts from the same summary \cited{} shape the plan. Per layer, J-only vs
@@ -81,7 +84,18 @@ separated only at layers 22--23 (0.852/0.753, 0.897/0.497). The J-space projecti
 about 1--1.5\% of residual variance. And the lens's top-1 readout at the last token was
 \texttt{<eos>} for 98\% of Core turns, so last-token readouts carry little content. The
 $k$ variants were 0.768 ($k{=}8$), 0.803 ($k{=}16$), 0.721 ($k{=}50$), 0.811 (no fill) and 0.809 (cone
-projection). With one random draw per layer, none of these comparisons has a usable null.
+projection). The random-subspace control was a single Haar subspace shared by every activation, so none of these
+comparisons has a usable null distribution. Two more facts from the same files matter for the verdict.
+A 25-component PCA subspace of Core activations transfers better than the J-space subspace of the
+same size (0.856 vs 0.755). And on Transfer discussion turns J-space is at the random level (0.613 vs
+0.602), so its advantage sits in final turns at layers 22--23 only.
+
+\paragraph{Other models.} On the three models with public NARCBench activations, the earlier
+W\textsubscript{U}-frame J-only probe was at chance from Core to Transfer and level with a random
+25-dim subspace: Qwen3-32B 0.513 vs 0.508, DeepSeek-R1-32B 0.500 vs 0.550, GPT-OSS-20B 0.568 vs 0.611,
+while the complement matched the full residual on each \cited{} (source:
+\texttt{results/jspace/CROSS\_MODEL\_TABLES.md}). No Jacobian lens is published for those models, so the
+Gemma Jacobian-lens result has not been tested elsewhere.
 
 \section{Confound audit}\label{sec:confound}
 
@@ -236,7 +250,13 @@ should be compared with J-only on equal footing, not with chance.
 
 \section{Blocked on compute}\label{sec:blocked}
 \planned{} Everything activation-level needs Gemma-2-9B-it, which this environment cannot download
-(the Hugging Face hub is blocked here and the unembedding needs the gated repository). One GPU
+(the Hugging Face hub is blocked here and the unembedding needs the gated repository).
+The November 9 push of \texttt{jspace-separability} brought the November 5 code and results but not
+the caches, the lens or the unembedding, which the repository deliberately keeps out of git. A
+converter (\texttt{scripts/jspace\_interp\_convert\_paper\_cache.py}, tested on synthetic data) turns
+the November 5 caches into this pipeline's layout, so Experiment 1 at the last token and Experiment 2's
+$k$ sweep with 200 random draws (original condition, last token) can run on any CPU machine that holds
+the caches, the lens and the unembedding. For the rest, one GPU
 (an A100 or H100 80\,GB, or an L4 24\,GB in bf16) covers: extraction for 4 conditions on 2{,}636 agent
 turns at 7 positions; 50 warned control episodes; and steering on about 400 final-vote prefixes with
 25 directions, 4 strengths and 2 signs (about 80{,}000 short forward passes, with the shared prefix
@@ -256,10 +276,12 @@ A \textbf{LessWrong post} reportedly finds that NARCBench system prompts alone s
 built a J-lens collusion monitor on NARCBench; its report could not be read.
 
 \section{Should J-space be the standard?}
-\textbf{Not yet, as a detector.} The evidence in hand points three ways. First, the J-only subspace
+\textbf{Not yet, as a detector.} The evidence in hand points four ways. First, the J-only subspace
 holds less transferable signal than the full residual and much less than its own complement, and it
-explains about 1\% of variance \cited. Second, its advantage over a random subspace shows only at
-layers 22--23 and rests on a single random draw \cited. Third, the benchmark gives a probe easy
+explains about 1\% of variance \cited. A plain 25-component PCA subspace transfers better (0.856 vs
+0.755) \cited. Second, its advantage over a random subspace shows only at
+layers 22--23, only in final turns, and rests on a single random draw \cited. Third, on three other
+models the earlier J-space proxy sat at chance across splits \cited. Fourth, the benchmark gives a probe easy
 routes through the instruction, the private channel and the vote (Section~\ref{sec:confound}).
 \textbf{Possibly, as an interpretation layer.} J-space's value would be that it names what the model
 represents. That case is made only if (a) J-only beats both random nulls at some $(k,\ell,\text{position})$

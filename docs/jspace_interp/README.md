@@ -17,6 +17,7 @@ Branch for the next J-space direction on NARCBench (Gemma-2-9B-it, instructed co
 | `scripts/jspace_interp_analyze.py` | Experiments 1 and 2 on saved activations | CPU once activations exist |
 | `scripts/jspace_interp_steer.py` | Experiment 3 | needs GPU for Gemma |
 | `scripts/jspace_interp_gen_matched_vocab.py` | Matched-vocabulary control episodes (warned honest seats 0-1) | needs GPU; dry run tested |
+| `scripts/jspace_interp_convert_paper_cache.py` | Turns the Nov 5 Gemma caches (activations_gen.npz + metadata_gen.json) into this layout so Exp 1 and 2 (last token, original) run on CPU | tested on synthetic data |
 | `scripts/jspace_interp_tiny_e2e.py` | Whole pipeline on a random tiny Gemma-2 (numbers meaningless) | ran |
 | `generation/core_protocol.py` | Optional `system_prompt_hook` and `run_tag` on `run_scenario` (defaults unchanged) | used by matched-vocab |
 

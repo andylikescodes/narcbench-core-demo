@@ -391,3 +391,60 @@ Consolidated study pack (soft-stop: no Track I / Paper 2 / interp-demo / family-
 
 Safety claim: **monitorable Transfer-stable coordination signature (attn_L22 / non-J); editability unproven** — matched-prefix + checkpoint assays next (`WEEKEND_REVIEW/06_METHODS_LADDER.md`).
 
+
+
+## J-space colluder study, GPU run — 2026-11-09 (branch `jspace-interp`)
+
+**Question.** Is the Jacobian-lens J-space the right standard for detecting colluders on NARCBench (Gemma-2-9B-it)? Standard set
+before the run: J-space must beat a 200-draw random-subspace null, the prompt-only probe and the 25-component PCA subspace
+(0.856 Core→Transfer on Nov 5). Plan: Claude Docs "J-space colluder study: interpretability, k sweep and steering plan".
+
+**Run.** Pod `n8tc4b9iwvm5lt` (A40 secure, $0.59/h, commit `5c300ad`, 07:22–15:05 UTC, 7.7 h) regenerated everything: 50 warned
+control episodes (matched-vocabulary control), activations for original/swap/nosys/prompt_only at 7 read positions × layers
+19–23, 320 analysis cells (k 8/25/50/100; 200 Haar subspaces + 200 random atom sets per cell). Its four steering runs OOM'd
+(my loop kept every prefix KV cache; fixed in `bdd30cd`). Pod `lz7gdscc09o0on` (A40, `--mode steer`, 15:08–18:55 UTC, 3.8 h)
+reran role directions + 3 of 4 steering runs (original L23 skipped by its 4-h cap). Both pods terminated; spend ≈ $7 (balance
+$22.10 → $14.89 incl. volume idle). A first pod was killed after 10 min for a queue-sizing bug (the container reports the
+host's 96 CPUs; the queue now reads the cgroup limits).
+
+**Results (k=25, last token, band mean over layers 19–23, Core→Transfer primary AUROC).**
+| Arm | original | swap | nosys | prompt_only (prompt_end) |
+| --- | ---: | ---: | ---: | ---: |
+| full residual | **0.945** (LODO 1.000, LOFO 0.974) | 0.479 (LODO 0.935) | 0.488 (LODO 0.934) | **1.000** |
+| J-only filled k=25 | 0.773 | 0.436 | 0.475 | 0.980 |
+| J pursuit (stops at ~17 atoms) | 0.765 | 0.473 | 0.488 | 0.980 |
+| PCA-25 | 0.879 | 0.465 | 0.466 | 1.000 |
+| 200 random 25-dim subspaces, p95 | 0.808 | 0.609 | 0.608 | 1.000 |
+| 200 random atom sets, p95 | 0.875 | 0.595 | 0.586 | 0.997 |
+- Per layer (original/last): J fill 0.596/0.718/0.819/0.899/0.831 (L19–23); beats the random-subspace p95 at L21–22 only (p 0.040,
+  0.010); never beats random atom sets (p95 0.969 at L22); PCA ≥ J at every layer and k (L22: 0.937 vs 0.899; paired CI
+  [−0.09, 0.02] at k=25, [−0.10, −0.00] at k=50). Pre-registered "both nulls" bar cleared in 0 informative cells (2 of 35 at
+  frac25 where everything is at chance).
+- The transferable signal is the instruction: prompt_only = 1.000 for every arm (even random subspaces); swap/nosys = chance
+  for every arm while within-Core LODO stays 0.93. No read position other than the last token carries transfer (prevote full
+  0.517 with LODO 0.999).
+- Matched vocabulary (original/last): colluders vs warned 1.000 (full); warned vs unwarned 0.62–0.70 (p<0.001, echo 0.04–0.06);
+  J-space echo 0.13–0.21 (3–4× the full residual), PCA 0.01–0.05. Episode: collusion vs warned 1.000; warned vs control 0.59–0.65.
+- Exp 1: concept-group mass < 2% of k=25 selections everywhere; atoms near-fixed ("decision" 189/200, "prioritizing" 177,
+  <eos> 161 at original/last/L22; at prevote <eos>/"acknowledging"/"prioriti" 199–200/200). BH-significant token differences are
+  stance words, not deception vocabulary.
+- Exp 3 (steering, 400 Core final-vote prefixes, +u honest / −u colluders, α·median‖h_J‖): baselines y0 honest −8.6 (5% favour
+  target), colluders +3.5 under original (73%) but −3.9 under swap (24%) → the prefix instruction carries the target preference.
+  Δy up to +3.6 (honest, α=4) / −2.0 (colluders, role direction, swap L23); all bars pass at swap L23 for all 5 directions, but
+  flips ≤1% (honest) and ≤10% (colluders). The 4 concept directions are one direction (pairwise cos 0.82–0.92; cos 0.88–0.94
+  with the mean lens atom; mean of 20k unit atoms has norm 0.75); the role direction is orthogonal to it (cos 0.02–0.17).
+
+**Verdict.** J-space beats none of the three baselines; it is not the standard, as detector or as interpretation layer, on this
+benchmark. Detectors that transfer across splits read the instruction. Recommendation: keep the full-residual probe as the
+reference; report swap and prompt-only reads with every detector claim; treat the incentive-driven (uninstructed) setting as
+the real test.
+
+**Files.** Paper `docs/jspace_interp/jspace_colluder_study.{tex,pdf}` (tags [ran]/[cited]/[ran, Nov 9 pod]/[not run]);
+`results/jspace_interp/gemma2_9b/{SUMMARY.json,RESULTS.md,<cond>_<pos>/sweep_results.json}`; `results/jspace_interp/steer/`;
+`results/jspace_interp/matched_vocab_runs/`; `results/jspace_interp/pod_runs/<pod>/`. Activations (2.3 GB) in
+`results/jspace_interp/acts/` on this Mac only (git-ignored); `.npy` role vectors ignored. Tooling: `scripts/runpod_launch_jspace_interp.py`
+(estimate/preflight/launch/watch/pull, `--mode steer`, `--no-acts`), `scripts/jspace_interp_summarize.py`,
+`scripts/jspace_interp_finish_cells.py`.
+
+**Not run / open.** original L23 steering; matched-vocab under swap/nosys (not planned); Exp 1 at eot/reply positions; steering
+null with random *lens* directions (the Gaussian null does not share the lens's common component); the uninstructed setting.

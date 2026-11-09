@@ -31,7 +31,7 @@ Branch for the next J-space direction on NARCBench (Gemma-2-9B-it, instructed co
 - `results/jspace_interp/gemma2_9b/<condition>_<position>/sweep_results.json`: **real, Nov 9 pod run** (pod n8tc4b9iwvm5lt, A40, commit 5c300ad): 16 files, 320 cells (original and swap at 7 positions, prompt_only at prompt_end, nosys at last; layers 19-23; k 8/25/50/100; 200 random subspaces and 200 random atom sets per cell). `SUMMARY.json`, `RESULTS.md` and `docs/jspace_interp/tables/tab_*.tex` come from `scripts/jspace_interp_summarize.py`.
 - `results/jspace_interp/matched_vocab_runs/`: the 50 warned control episodes generated on the pod (`batch_meta.json` has the decoding settings).
 - `results/jspace_interp/role_dirs/role_dirs.json`: role directions for steering (the `.npy` vectors are git-ignored; regenerate with `scripts/jspace_interp_role_dir.py` from the activations).
-- `results/jspace_interp/steer/`: Experiment 3; the four runs failed on the first pod (CUDA OOM, fixed in bdd30cd) and were rerun on a steering-only pod (`--mode steer`).
+- `results/jspace_interp/steer/`: Experiment 3, **real, Nov 9** (steering-only pod lz7gdscc09o0on, `--mode steer`): `steer_core_swap_L22.json`, `steer_core_original_L22.json`, `steer_core_swap_L23.json` (400 Core final-vote prefixes each; original L23 skipped by the 4-hour cap). The four runs on the first pod had failed with CUDA OOM (fixed in bdd30cd).
 - `results/jspace_interp/text_baseline/text_baseline.json`: real, Nov 8.
 - `results/jspace_interp/matched_vocab/vocab_check.json`: real, Nov 8.
 - `results/jspace_interp/tiny_pipeline_check/`: pipeline check only, random model (refreshed Nov 8 late with the warned-episode generation, extraction and matched-vocabulary analysis; `analysis_mv_sweep_results.json`).

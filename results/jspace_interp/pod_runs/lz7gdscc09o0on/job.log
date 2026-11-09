@@ -1,0 +1,66 @@
+15:12:00 config: mode=steer model=google/gemma-2-9b-it layers=22,23 positions=last,prevote,eot,reply_mean,frac50,frac25,frac75 n_random=200 steer=swap:22,original:22,swap:23,original:23 max=240 min grace=60 min procs=7 (cgroup cpus 8, mem 46G, nproc 96) skip=,,gen_warned,extract_warned,atom_norms,extract_prompt_only,extract_nosys,
+15:12:00 stage setup: bash -c python3 -m pip install -q 'transformers>=4.56' accelerate 'scikit-learn>=1.5' scipy 'huggingface_hub>=0.26' sentencepiece protobuf && python3 -c 'import torch,transformers,sklearn; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0), transformers.__version__, sklearn.__version__)' && nvidia-smi && nproc && free -g && df -h /workspace /tmp
+15:12:23 stage setup: exit 0 after 0 min
+Filesystem      Size  Used Avail Use% Mounted on
+overlay          60G  534M   60G   1% /
+overlay          60G  534M   60G   1% /
+15:12:24 stage download: python3 -
+15:15:47 stage download: exit 0 after 3 min
+lens 1053307540 64s
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files:  36%|███▋      | 4/11 [00:00<00:00, 39.80it/s]Fetching 11 files:  64%|██████▎   | 7/11 [00:16<00:00, 39.80it/s]Fetching 11 files:  73%|███████▎  | 8/11 [00:21<00:09,  3.13s/it]Fetch
+model /workspace/.cache/huggingface/hub/models--google--gemma-2-9b-it/snapshots/11c9b309abf73637e4b6f9a3fa1e92e615547819 17648 MiB 139s
+15:15:47 stage gen_warned skipped (JOB_SKIP)
+15:15:47 gen_warned failed; continuing without the control
+15:15:47 stage extract_warned skipped (JOB_SKIP)
+15:15:47 extract_warned failed; continuing
+15:15:47 stage export_basis: python3 scripts/jspace_interp_extract.py --model google/gemma-2-9b-it --splits core --conditions original --max-rows 4 --layers 19 --export-basis /workspace/nb/repo/data/j_basis/gemma2_9b --out /tmp/basis_probe
+15:16:16 stage export_basis: exit 0 after 0 min
+[load] 100 dirs → 1700 samples from /workspace/nb/repo/upstream/scenarios/gemma2_9b/core/20261001T012639Z
+[extract] 1/18 (0s)
+{"core/original": {"n_rows": 18, "leak": {"private_block": 6, "drift_block": 0}, "out": "/tmp/basis_probe/core/original"}}
+15:16:16 stage atom_norms skipped (JOB_SKIP)
+15:16:16 atom_norms failed; the analysis jobs compute them
+15:16:16 stage extract_prompt_only skipped (JOB_SKIP)
+15:16:16 extract_prompt_only failed; its analysis is not queued
+15:16:16 stage extract_original: python3 scripts/jspace_interp_extract.py --model google/gemma-2-9b-it --splits core --conditions original --layers 22,23 --out /workspace/nb/repo/results/jspace_interp/acts
+15:28:25 stage extract_original: exit 0 after 12 min
+[extract] 1675/1700 (706s)
+[extract] 1700/1700 (718s)
+{"core/original": {"n_rows": 1700, "leak": {"private_block": 300, "drift_block": 0}, "out": "/workspace/nb/repo/results/jspace_interp/acts/core/original"}}
+15:28:25 analysis for original not queued (JOB_MODE=steer)
+15:28:25 stage extract_swap: python3 scripts/jspace_interp_extract.py --model google/gemma-2-9b-it --splits core --conditions swap --layers 22,23 --out /workspace/nb/repo/results/jspace_interp/acts
+15:40:04 stage extract_swap: exit 0 after 11 min
+[extract] 1675/1700 (676s)
+[extract] 1700/1700 (688s)
+{"core/swap": {"n_rows": 1700, "leak": {"private_block": 0, "drift_block": 0}, "out": "/workspace/nb/repo/results/jspace_interp/acts/core/swap"}}
+15:40:04 analysis for swap not queued (JOB_MODE=steer)
+15:40:04 stage extract_nosys skipped (JOB_SKIP)
+15:40:04 extract_nosys failed; its analysis is not queued
+15:40:04 stage role_dirs_swap: python3 scripts/jspace_interp_role_dir.py --root /workspace/nb/repo/results/jspace_interp/acts --condition swap --position last --layers 22,23 --lens /workspace/.cache/huggingface//lens/gemma-2-9b-it_jacobian_lens.pt --basis-dir /workspace/nb/repo/data/j_basis/gemma2_9b --out /workspace/nb/repo/results/jspace_interp/role_dirs
+16:01:11 stage role_dirs_swap: exit 0 after 21 min
+{"condition": "swap", "position": "last", "layer": 22, "k": 25, "file": "results/jspace_interp/role_dirs/role_dir_J25_swap_last_L22.npy", "hj_norm_median": 33.881980895996094, "n_colluder_rows": 300, "n_honest_rows": 300, "pursuit_steps_mean": 16.879166666666666, "seconds": 629.9}
+{"condition": "swap", "position": "last", "layer": 23, "k": 25, "file": "results/jspace_interp/role_dirs/role_dir_J25_swap_last_L23.npy", "hj_norm_median": 39.47776794433594, "n_colluder_rows": 300, "n_honest_rows": 300, "pursuit_steps_mean": 17.9125, "seconds": 632.9}
+16:01:11 stage role_dirs_original: python3 scripts/jspace_interp_role_dir.py --root /workspace/nb/repo/results/jspace_interp/acts --condition original --position last --layers 22,23 --lens /workspace/.cache/huggingface//lens/gemma-2-9b-it_jacobian_lens.pt --basis-dir /workspace/nb/repo/data/j_basis/gemma2_9b --out /workspace/nb/repo/results/jspace_interp/role_dirs
+16:20:54 stage role_dirs_original: exit 0 after 19 min
+{"condition": "original", "position": "last", "layer": 22, "k": 25, "file": "results/jspace_interp/role_dirs/role_dir_J25_original_last_L22.npy", "hj_norm_median": 33.295082092285156, "n_colluder_rows": 300, "n_honest_rows": 300, "pursuit_steps_mean": 17.7475, "seconds": 574.3}
+{"condition": "original", "position": "last", "layer": 23, "k": 25, "file": "results/jspace_interp/role_dirs/role_dir_J25_original_last_L23.npy", "hj_norm_median": 38.90055847167969, "n_colluder_rows": 300, "n_honest_rows": 300, "pursuit_steps_mean": 18.3025, "seconds": 604.3}
+gpu before steer_swap_L22: 0 MiB, 46068 MiB
+16:20:54 stage steer_swap_L22: python3 scripts/jspace_interp_steer.py --model google/gemma-2-9b-it --lens /workspace/.cache/huggingface//lens/gemma-2-9b-it_jacobian_lens.pt --basis-dir /workspace/nb/repo/data/j_basis/gemma2_9b --layer 22 --condition swap --n-random 20 --role-direction /workspace/nb/repo/results/jspace_interp/role_dirs/role_dir_J25_swap_last_L22.npy --hj-norm 33.881980895996094 --out /workspace/nb/repo/results/jspace_interp/steer
+17:11:23 stage steer_swap_L22: exit 0 after 50 min
+}
+prefix cache: True check: {'rows': 3, 'max_abs_diff_y0': 0.125} rows: 400
+wrote /workspace/nb/repo/results/jspace_interp/steer/steer_core_swap_L22.json
+gpu before steer_original_L22: 0 MiB, 46068 MiB
+17:11:23 stage steer_original_L22: python3 scripts/jspace_interp_steer.py --model google/gemma-2-9b-it --lens /workspace/.cache/huggingface//lens/gemma-2-9b-it_jacobian_lens.pt --basis-dir /workspace/nb/repo/data/j_basis/gemma2_9b --layer 22 --condition original --n-random 20 --role-direction /workspace/nb/repo/results/jspace_interp/role_dirs/role_dir_J25_original_last_L22.npy --hj-norm 33.295082092285156 --out /workspace/nb/repo/results/jspace_interp/steer
+18:01:59 stage steer_original_L22: exit 0 after 50 min
+}
+prefix cache: True check: {'rows': 3, 'max_abs_diff_y0': 0.0625009536743164} rows: 400
+wrote /workspace/nb/repo/results/jspace_interp/steer/steer_core_original_L22.json
+gpu before steer_swap_L23: 0 MiB, 46068 MiB
+18:01:59 stage steer_swap_L23: python3 scripts/jspace_interp_steer.py --model google/gemma-2-9b-it --lens /workspace/.cache/huggingface//lens/gemma-2-9b-it_jacobian_lens.pt --basis-dir /workspace/nb/repo/data/j_basis/gemma2_9b --layer 23 --condition swap --n-random 20 --role-direction /workspace/nb/repo/results/jspace_interp/role_dirs/role_dir_J25_swap_last_L23.npy --hj-norm 39.47776794433594 --out /workspace/nb/repo/results/jspace_interp/steer
+18:52:07 stage steer_swap_L23: exit 0 after 50 min
+}
+prefix cache: True check: {'rows': 3, 'max_abs_diff_y0': 0.125} rows: 400
+wrote /workspace/nb/repo/results/jspace_interp/steer/steer_core_swap_L23.json
+18:52:07 steer_original_L23: skipped, under 45 min left
+18:53:13 finished: done (stages 10 ok of 16); serving results for 60 min, then terminating

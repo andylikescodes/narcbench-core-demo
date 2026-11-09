@@ -1,6 +1,6 @@
 # jspace-interp results summary
 
-Inputs: 16 sweep file(s), 0 steering file(s). Planned cells 320, ran 320.
+Inputs: 16 sweep file(s), 3 steering file(s). Planned cells 320, ran 320.
 
 ## original (k=25)
 
@@ -185,7 +185,46 @@ Inputs: 16 sweep file(s), 0 steering file(s). Planned cells 320, ran 320.
 | prompt_only/prompt_end/L23 | J_fill | 0.981 | 0.702 (0.00) | 0.693 | 0.15 | 0.697 | 0.960 |
 | prompt_only/prompt_end/L23 | pca | 1.000 | 0.833 (0.00) | 0.828 | 0.19 | 0.831 | 1.000 |
 
+## steering
+
+- original L22: scale 33.30 (given (median ||h_J||)), signs role, prefix cache True (check {"rows": 3, "max_abs_diff_y0": 0.0625009536743164}), 400 prefixes, 20 random directions
+  baseline: {"colluder": {"n": 100, "y0_mean": 3.54286301612854, "frac_target": 0.73}, "honest": {"n": 300, "y0_mean": -8.631031370162964, "frac_target": 0.04666666666666667}}; random at alpha 4: {"colluder|4.0": {"mean_delta_min": -0.9495815753936767, "mean_delta_max": 0.38129464149475095, "abs_p95": 0.860556393146515}, "honest|4.0": {"mean_delta_min": -0.1119172477722168, "mean_delta_max": 1.9425266710917155, "abs_p95": 1.3321047981580103}}
+  - concept:deception_secrecy / colluder (n=100): dy at alpha 0.5/1/2/4 = 0.037/-0.007/-0.119/-0.468; flips at alpha 2/4 = 0.03/0.06; sign ok False, beats random all False, BH any False, dose monotone False, passes all bars False
+  - concept:deception_secrecy / honest (n=300): dy at alpha 0.5/1/2/4 = 0.389/0.830/1.868/3.205; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:coordination / colluder (n=100): dy at alpha 0.5/1/2/4 = 0.075/0.115/0.171/0.195; flips at alpha 2/4 = 0.01/0.03; sign ok False, beats random all False, BH any False, dose monotone True, passes all bars False
+  - concept:coordination / honest (n=300): dy at alpha 0.5/1/2/4 = 0.345/0.741/1.763/2.495; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:steering_persuasion / colluder (n=100): dy at alpha 0.5/1/2/4 = 0.072/0.099/0.129/0.050; flips at alpha 2/4 = 0.01/0.04; sign ok False, beats random all False, BH any False, dose monotone False, passes all bars False
+  - concept:steering_persuasion / honest (n=300): dy at alpha 0.5/1/2/4 = 0.374/0.786/1.817/2.681; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:honesty_standards / colluder (n=100): dy at alpha 0.5/1/2/4 = 0.106/0.187/0.293/0.377; flips at alpha 2/4 = 0.01/0.03; sign ok False, beats random all False, BH any False, dose monotone True, passes all bars False
+  - concept:honesty_standards / honest (n=300): dy at alpha 0.5/1/2/4 = 0.345/0.733/1.727/2.413; flips at alpha 2/4 = 0.00/0.01; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - jspace_role_probe / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.066/-0.137/-0.310/-0.665; flips at alpha 2/4 = 0.00/0.01; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
+  - jspace_role_probe / honest (n=300): dy at alpha 0.5/1/2/4 = 0.053/0.170/0.554/1.902; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
+- swap L22: scale 33.88 (given (median ||h_J||)), signs role, prefix cache True (check {"rows": 3, "max_abs_diff_y0": 0.125}), 400 prefixes, 20 random directions
+  baseline: {"colluder": {"n": 100, "y0_mean": -3.84608154296875, "frac_target": 0.24}, "honest": {"n": 300, "y0_mean": -8.631031370162964, "frac_target": 0.04666666666666667}}; random at alpha 4: {"colluder|4.0": {"mean_delta_min": -0.6278294944763183, "mean_delta_max": 0.6873270225524902, "abs_p95": 0.630804370880127}, "honest|4.0": {"mean_delta_min": -0.10765312194824218, "mean_delta_max": 1.988994820912679, "abs_p95": 1.3719005265235906}}
+  - concept:deception_secrecy / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.173/-0.348/-0.582/-0.879; flips at alpha 2/4 = 0.01/0.03; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:deception_secrecy / honest (n=300): dy at alpha 0.5/1/2/4 = 0.393/0.843/1.911/3.250; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:coordination / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.092/-0.184/-0.287/-0.335; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
+  - concept:coordination / honest (n=300): dy at alpha 0.5/1/2/4 = 0.354/0.758/1.793/2.526; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:steering_persuasion / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.122/-0.266/-0.430/-0.613; flips at alpha 2/4 = 0.00/0.02; sign ok True, beats random all False, BH any False, dose monotone True, passes all bars False
+  - concept:steering_persuasion / honest (n=300): dy at alpha 0.5/1/2/4 = 0.379/0.805/1.851/2.706; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - concept:honesty_standards / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.092/-0.188/-0.281/-0.256; flips at alpha 2/4 = 0.00/0.02; sign ok True, beats random all False, BH any False, dose monotone False, passes all bars False
+  - concept:honesty_standards / honest (n=300): dy at alpha 0.5/1/2/4 = 0.349/0.743/1.747/2.446; flips at alpha 2/4 = 0.00/0.01; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - jspace_role_probe / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.202/-0.414/-0.824/-1.540; flips at alpha 2/4 = 0.03/0.10; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+  - jspace_role_probe / honest (n=300): dy at alpha 0.5/1/2/4 = 0.238/0.512/1.108/2.379; flips at alpha 2/4 = 0.01/0.01; sign ok True, beats random all True, BH any False, dose monotone True, passes all bars False
+- swap L23: scale 39.48 (given (median ||h_J||)), signs role, prefix cache True (check {"rows": 3, "max_abs_diff_y0": 0.125}), 400 prefixes, 20 random directions
+  baseline: {"colluder": {"n": 100, "y0_mean": -3.84608154296875, "frac_target": 0.24}, "honest": {"n": 300, "y0_mean": -8.631031370162964, "frac_target": 0.04666666666666667}}; random at alpha 4: {"colluder|4.0": {"mean_delta_min": -0.41941452980041505, "mean_delta_max": 0.6440356159210205, "abs_p95": 0.4306455841064455}, "honest|4.0": {"mean_delta_min": -0.29547542889912926, "mean_delta_max": 1.8823740323384603, "abs_p95": 1.4158366368611657}}
+  - concept:deception_secrecy / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.254/-0.522/-0.982/-1.600; flips at alpha 2/4 = 0.01/0.03; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - concept:deception_secrecy / honest (n=300): dy at alpha 0.5/1/2/4 = 0.503/1.059/2.330/3.611; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - concept:coordination / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.185/-0.365/-0.636/-0.916; flips at alpha 2/4 = 0.00/0.03; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - concept:coordination / honest (n=300): dy at alpha 0.5/1/2/4 = 0.429/0.919/2.089/2.962; flips at alpha 2/4 = 0.01/0.01; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - concept:steering_persuasion / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.212/-0.446/-0.818/-1.265; flips at alpha 2/4 = 0.00/0.03; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - concept:steering_persuasion / honest (n=300): dy at alpha 0.5/1/2/4 = 0.483/1.001/2.196/3.133; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - concept:honesty_standards / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.141/-0.245/-0.473/-0.613; flips at alpha 2/4 = 0.00/0.02; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - concept:honesty_standards / honest (n=300): dy at alpha 0.5/1/2/4 = 0.395/0.840/1.931/2.662; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - jspace_role_probe / colluder (n=100): dy at alpha 0.5/1/2/4 = -0.298/-0.628/-1.327/-2.045; flips at alpha 2/4 = 0.06/0.10; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+  - jspace_role_probe / honest (n=300): dy at alpha 0.5/1/2/4 = 0.314/0.628/1.147/1.853; flips at alpha 2/4 = 0.00/0.00; sign ok True, beats random all True, BH any True, dose monotone True, passes all bars True
+
 ## not run
 
 - condition/position pairs with missing cells: none
-- steering runs missing: swap:L22, original:L22, swap:L23, original:L23
+- steering runs missing: original:L23

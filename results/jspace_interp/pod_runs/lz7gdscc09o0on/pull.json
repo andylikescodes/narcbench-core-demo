@@ -1,0 +1,21 @@
+{
+ "pod": "lz7gdscc09o0on",
+ "files": {
+  "results.tgz": {
+   "size": 2033164,
+   "sha256": "4300730191fbbdf3f3a5947963225ee74fe2bb16fe5000bdbebab175a50fd9e5",
+   "status": "downloaded",
+   "seconds": 1.0,
+   "local": "results/jspace_interp/pod_runs/lz7gdscc09o0on/results.tgz"
+  },
+  "acts.tgz": {
+   "size": 343592960,
+   "sha256": "0d83358ade4a1d74ed1fd1bea66611d5d3541bac6b124d5ecb86360a8a4bb7de",
+   "status": "downloaded",
+   "seconds": 11.2,
+   "local": "results/jspace_interp/pod_runs/lz7gdscc09o0on/acts.tgz"
+  }
+ },
+ "extracted_results": 321,
+ "extracted_acts": "skipped (--no-acts)"
+}

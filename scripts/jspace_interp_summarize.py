@@ -364,7 +364,30 @@ def steer_summary(st):
     passes = (st.get("summary") or {}).get("passes_all_bars", {})
     alphas = st.get("alphas") or sorted({c["alpha"] for c in cells})
     dirs = [d for d in (st.get("directions") or []) if not str(d).startswith("random:")]
+    rnd = [d for d in (st.get("directions") or []) if str(d).startswith("random:")]
     groups = sorted({c["group"] for c in cells})
+    recs = st.get("records", [])
+    # baseline forced-vote logit difference y0 = logit[target] - logit[fair] per group, and vote flips under the steered sign
+    base = {}
+    for g in groups:
+        y0 = np.array([r["y0"] for r in recs if r["role"] == g], float)
+        base[g] = {"n": int(len(y0)), "y0_mean": float(y0.mean()) if len(y0) else None, "frac_target": float(np.mean(y0 > 0)) if len(y0) else None}
+    def flips(d, g, a):
+        sign = "+1" if g == "honest" else "-1"
+        pairs = [(r["y0"], r["y0"] + r["delta"][f"{d}|{a}|{sign}"]) for r in recs if r["role"] == g and f"{d}|{a}|{sign}" in r["delta"]]
+        if not pairs:
+            return None
+        y0 = np.array([p[0] for p in pairs]); y1 = np.array([p[1] for p in pairs])
+        return float(np.mean((y0 <= 0) & (y1 > 0))) if g == "honest" else float(np.mean((y0 > 0) & (y1 <= 0)))
+    rand_by_alpha = {}
+    for g in groups:
+        sign = "+1" if g == "honest" else "-1"
+        for a in alphas:
+            means = [np.mean([r["delta"].get(f"{x}|{a}|{sign}", np.nan) for r in recs if r["role"] == g]) for x in rnd]
+            means = [m for m in means if m == m]
+            if means:
+                rand_by_alpha[f"{g}|{a}"] = {"mean_delta_min": float(min(means)), "mean_delta_max": float(max(means)),
+                                             "abs_p95": float(np.percentile(np.abs(means), 95))}
     rows = []
     for d in dirs:
         for g in groups:
@@ -375,6 +398,7 @@ def steer_summary(st):
             mags = [abs(x) for x in deltas if x is not None]
             rows.append({"direction": d, "group": g, "n": next(iter(cc.values()))["n"],
                          "mean_delta_by_alpha": dict(zip([str(a) for a in alphas], deltas)),
+                         "flip_by_alpha": {str(a): flips(d, g, a) for a in alphas},
                          "predicted_sign_ok_all": all(c["predicted_sign_ok"] for c in cc.values()),
                          "beats_random_any": any(c["beats_random"] for c in cc.values()),
                          "beats_random_all": all(c["beats_random"] for c in cc.values()),
@@ -384,21 +408,26 @@ def steer_summary(st):
     return {"layer": st.get("layer"), "scale": st.get("scale"), "scale_source": st.get("scale_source"), "alphas": alphas,
             "signs": st.get("signs"), "prefix_cache": st.get("prefix_cache"), "cache_check": st.get("cache_check"),
             "n_records": len(st.get("records", [])), "n_random": sum(str(d).startswith("random:") for d in (st.get("directions") or [])),
-            "rows": rows, "file": st.get("file")}
+            "baseline": base, "random_by_group_alpha": rand_by_alpha, "rows": rows, "file": st.get("file")}
 
 
 def tab_steer(steers, out):
-    lines = [r"\begin{tabular}{llllcccccc}\toprule",
-             r"Run & Direction & Group & $n$ & $\Delta y$ at $\alpha{=}1$ & $\alpha{=}2$ & $\alpha{=}4$ & Sign & $>$ rand.\ p95 & BH\\\midrule"]
+    lines = [r"\begin{tabular}{lllccccccccc}\toprule",
+             r"Run & Direction & Group ($n$) & $\Delta y$ at $\alpha{=}1$ & $\alpha{=}2$ & $\alpha{=}4$ & Flips $\alpha{=}2$ & $\alpha{=}4$ & Sign & $>$ rand.\ p95 & BH & All bars\\\midrule"]
     for key, s in steers.items():
         split, cond, L = key
         first = True
         for r in s["rows"]:
-            d = r["mean_delta_by_alpha"]
-            lines.append(" & ".join([f"{tex(cond)} L{L}" if first else "", tex(r["direction"].replace("concept:", "")), r["group"], str(r["n"]),
-                                     f3(d.get("1.0"), 3), f3(d.get("2.0"), 3), f3(d.get("4.0"), 3), mark(r["predicted_sign_ok_all"]),
-                                     mark(r["beats_random_all"]), mark(r["bh_reject_any"])]) + r"\\")
+            d = r["mean_delta_by_alpha"]; f = r["flip_by_alpha"]
+            lines.append(" & ".join([f"{tex(cond)} L{L}" if first else "", tex(r["direction"].replace("concept:", "").replace("jspace_role_probe", "J role probe")),
+                                     f"{r['group']} ({r['n']})", f3(d.get("1.0"), 2), f3(d.get("2.0"), 2), f3(d.get("4.0"), 2),
+                                     f3(f.get("2.0"), 2), f3(f.get("4.0"), 2), mark(r["predicted_sign_ok_all"]),
+                                     mark(r["beats_random_all"]), mark(r["bh_reject_any"]), mark(r["passes_all_bars"])]) + r"\\")
             first = False
+        for g, b in s["baseline"].items():
+            ra = s["random_by_group_alpha"].get(f"{g}|4.0", {})
+            lines.append(r"\multicolumn{12}{l}{\footnotesize " + f"{g}: baseline $y_0$ mean {f3(b['y0_mean'], 2)}, share with $y_0>0$ {f3(b['frac_target'], 2)}; "
+                         f"20 random directions at $\\alpha{{=}}4$: mean $\\Delta y$ from {f3(ra.get('mean_delta_min'), 2)} to {f3(ra.get('mean_delta_max'), 2)}" + r"}\\")
         lines.append(r"\midrule")
     if lines[-1] == r"\midrule":
         lines.pop()
@@ -594,9 +623,11 @@ def main() -> int:
         for key, s in steers.items():
             md.append(f"- {key[1]} L{key[2]}: scale {f3(s['scale'], 2)} ({s['scale_source']}), signs {s['signs']}, prefix cache {s['prefix_cache']} "
                       f"(check {json.dumps(s['cache_check'])}), {s['n_records']} prefixes, {s['n_random']} random directions")
+            md.append(f"  baseline: {json.dumps(s['baseline'])}; random at alpha 4: {json.dumps({k: v for k, v in s['random_by_group_alpha'].items() if k.endswith('|4.0')})}")
             for r in s["rows"]:
-                d = r["mean_delta_by_alpha"]
+                d = r["mean_delta_by_alpha"]; f = r["flip_by_alpha"]
                 md.append(f"  - {r['direction']} / {r['group']} (n={r['n']}): dy at alpha 0.5/1/2/4 = " + "/".join(f3(d.get(str(float(x))), 3) for x in (0.5, 1, 2, 4)) +
+                          "; flips at alpha 2/4 = " + "/".join(f3(f.get(str(float(x))), 2) for x in (2, 4)) +
                           f"; sign ok {r['predicted_sign_ok_all']}, beats random all {r['beats_random_all']}, BH any {r['bh_reject_any']}, dose monotone {r['dose_monotone']}, passes all bars {r['passes_all_bars']}")
         md.append("")
     md += ["## not run", "", f"- condition/position pairs with missing cells: {', '.join(f'{c}/{p}' for c, p in by_cell_missing) or 'none'}",

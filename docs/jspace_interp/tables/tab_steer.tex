@@ -1,0 +1,41 @@
+\begin{tabular}{lllccccccccc}\toprule
+Run & Direction & Group ($n$) & $\Delta y$ at $\alpha{=}1$ & $\alpha{=}2$ & $\alpha{=}4$ & Flips $\alpha{=}2$ & $\alpha{=}4$ & Sign & $>$ rand.\ p95 & BH & All bars\\\midrule
+original L22 & deception\_secrecy & colluder (100) & -0.01 & -0.12 & -0.47 & 0.03 & 0.06 & -- & -- & -- & --\\
+ & deception\_secrecy & honest (300) & 0.83 & 1.87 & 3.21 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & coordination & colluder (100) & 0.11 & 0.17 & 0.20 & 0.01 & 0.03 & -- & -- & -- & --\\
+ & coordination & honest (300) & 0.74 & 1.76 & 2.49 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & steering\_persuasion & colluder (100) & 0.10 & 0.13 & 0.05 & 0.01 & 0.04 & -- & -- & -- & --\\
+ & steering\_persuasion & honest (300) & 0.79 & 1.82 & 2.68 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & honesty\_standards & colluder (100) & 0.19 & 0.29 & 0.38 & 0.01 & 0.03 & -- & -- & -- & --\\
+ & honesty\_standards & honest (300) & 0.73 & 1.73 & 2.41 & 0.00 & 0.01 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & J role probe & colluder (100) & -0.14 & -0.31 & -0.66 & 0.00 & 0.01 & $\checkmark$ & -- & -- & --\\
+ & J role probe & honest (300) & 0.17 & 0.55 & 1.90 & 0.00 & 0.00 & $\checkmark$ & -- & -- & --\\
+\multicolumn{12}{l}{\footnotesize colluder: baseline $y_0$ mean 3.54, share with $y_0>0$ 0.73; 20 random directions at $\alpha{=}4$: mean $\Delta y$ from -0.95 to 0.38}\\
+\multicolumn{12}{l}{\footnotesize honest: baseline $y_0$ mean -8.63, share with $y_0>0$ 0.05; 20 random directions at $\alpha{=}4$: mean $\Delta y$ from -0.11 to 1.94}\\
+\midrule
+swap L22 & deception\_secrecy & colluder (100) & -0.35 & -0.58 & -0.88 & 0.01 & 0.03 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & deception\_secrecy & honest (300) & 0.84 & 1.91 & 3.25 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & coordination & colluder (100) & -0.18 & -0.29 & -0.33 & 0.00 & 0.00 & $\checkmark$ & -- & -- & --\\
+ & coordination & honest (300) & 0.76 & 1.79 & 2.53 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & steering\_persuasion & colluder (100) & -0.27 & -0.43 & -0.61 & 0.00 & 0.02 & $\checkmark$ & -- & -- & --\\
+ & steering\_persuasion & honest (300) & 0.81 & 1.85 & 2.71 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & honesty\_standards & colluder (100) & -0.19 & -0.28 & -0.26 & 0.00 & 0.02 & $\checkmark$ & -- & -- & --\\
+ & honesty\_standards & honest (300) & 0.74 & 1.75 & 2.45 & 0.00 & 0.01 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & J role probe & colluder (100) & -0.41 & -0.82 & -1.54 & 0.03 & 0.10 & $\checkmark$ & $\checkmark$ & -- & --\\
+ & J role probe & honest (300) & 0.51 & 1.11 & 2.38 & 0.01 & 0.01 & $\checkmark$ & $\checkmark$ & -- & --\\
+\multicolumn{12}{l}{\footnotesize colluder: baseline $y_0$ mean -3.85, share with $y_0>0$ 0.24; 20 random directions at $\alpha{=}4$: mean $\Delta y$ from -0.63 to 0.69}\\
+\multicolumn{12}{l}{\footnotesize honest: baseline $y_0$ mean -8.63, share with $y_0>0$ 0.05; 20 random directions at $\alpha{=}4$: mean $\Delta y$ from -0.11 to 1.99}\\
+\midrule
+swap L23 & deception\_secrecy & colluder (100) & -0.52 & -0.98 & -1.60 & 0.01 & 0.03 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & deception\_secrecy & honest (300) & 1.06 & 2.33 & 3.61 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & coordination & colluder (100) & -0.37 & -0.64 & -0.92 & 0.00 & 0.03 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & coordination & honest (300) & 0.92 & 2.09 & 2.96 & 0.01 & 0.01 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & steering\_persuasion & colluder (100) & -0.45 & -0.82 & -1.27 & 0.00 & 0.03 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & steering\_persuasion & honest (300) & 1.00 & 2.20 & 3.13 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & honesty\_standards & colluder (100) & -0.24 & -0.47 & -0.61 & 0.00 & 0.02 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & honesty\_standards & honest (300) & 0.84 & 1.93 & 2.66 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & J role probe & colluder (100) & -0.63 & -1.33 & -2.05 & 0.06 & 0.10 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+ & J role probe & honest (300) & 0.63 & 1.15 & 1.85 & 0.00 & 0.00 & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$\\
+\multicolumn{12}{l}{\footnotesize colluder: baseline $y_0$ mean -3.85, share with $y_0>0$ 0.24; 20 random directions at $\alpha{=}4$: mean $\Delta y$ from -0.42 to 0.64}\\
+\multicolumn{12}{l}{\footnotesize honest: baseline $y_0$ mean -8.63, share with $y_0>0$ 0.05; 20 random directions at $\alpha{=}4$: mean $\Delta y$ from -0.30 to 1.88}\\
+\bottomrule\end{tabular}

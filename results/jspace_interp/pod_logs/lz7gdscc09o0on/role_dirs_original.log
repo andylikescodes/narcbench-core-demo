@@ -1,0 +1,2 @@
+{"condition": "original", "position": "last", "layer": 22, "k": 25, "file": "results/jspace_interp/role_dirs/role_dir_J25_original_last_L22.npy", "hj_norm_median": 33.295082092285156, "n_colluder_rows": 300, "n_honest_rows": 300, "pursuit_steps_mean": 17.7475, "seconds": 574.3}
+{"condition": "original", "position": "last", "layer": 23, "k": 25, "file": "results/jspace_interp/role_dirs/role_dir_J25_original_last_L23.npy", "hj_norm_median": 38.90055847167969, "n_colluder_rows": 300, "n_honest_rows": 300, "pursuit_steps_mean": 18.3025, "seconds": 604.3}

@@ -1,0 +1,67 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/464 [00:00<?, ?it/s]Loading weights:  39%|███▉      | 181/464 [00:00<00:00, 1808.51it/s]Loading weights:  78%|███████▊  | 362/464 [00:00<00:00, 1385.87it/s]Loading weights: 100%|██████████| 464/464 [00:00<00:00, 1540.40it/s]
+[load] 100 dirs → 1700 samples from /workspace/nb/repo/upstream/scenarios/gemma2_9b/core/20261001T012639Z
+[steer] 400 prefixes, scale 39.478 (given (median ||h_J||)), gpu mem 17.21 GB before the loop
+[steer] row 0/400 done, gpu mem 17.22 GB
+[steer] 1/400
+[steer] 10/400
+[steer] 20/400
+[steer] 30/400
+[steer] 40/400
+[steer] 50/400
+[steer] row 50/400 done, gpu mem 17.22 GB
+[steer] 60/400
+[steer] 70/400
+[steer] 80/400
+[steer] 90/400
+[steer] 100/400
+[steer] row 100/400 done, gpu mem 17.22 GB
+[steer] 110/400
+[steer] 120/400
+[steer] 130/400
+[steer] 140/400
+[steer] 150/400
+[steer] row 150/400 done, gpu mem 17.22 GB
+[steer] 160/400
+[steer] 170/400
+[steer] 180/400
+[steer] 190/400
+[steer] 200/400
+[steer] row 200/400 done, gpu mem 17.22 GB
+[steer] 210/400
+[steer] 220/400
+[steer] 230/400
+[steer] 240/400
+[steer] 250/400
+[steer] row 250/400 done, gpu mem 17.22 GB
+[steer] 260/400
+[steer] 270/400
+[steer] 280/400
+[steer] 290/400
+[steer] 300/400
+[steer] row 300/400 done, gpu mem 17.22 GB
+[steer] 310/400
+[steer] 320/400
+[steer] 330/400
+[steer] 340/400
+[steer] 350/400
+[steer] row 350/400 done, gpu mem 17.22 GB
+[steer] 360/400
+[steer] 370/400
+[steer] 380/400
+[steer] 390/400
+[steer] 400/400
+{
+ "honest:concept:deception_secrecy": true,
+ "honest:concept:coordination": true,
+ "honest:concept:steering_persuasion": true,
+ "honest:concept:honesty_standards": true,
+ "honest:jspace_role_probe": true,
+ "colluder:concept:deception_secrecy": true,
+ "colluder:concept:coordination": true,
+ "colluder:concept:steering_persuasion": true,
+ "colluder:concept:honesty_standards": true,
+ "colluder:jspace_role_probe": true
+}
+prefix cache: True check: {'rows': 3, 'max_abs_diff_y0': 0.125} rows: 400
+wrote /workspace/nb/repo/results/jspace_interp/steer/steer_core_swap_L23.json

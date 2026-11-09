@@ -1,0 +1,6 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/464 [00:00<?, ?it/s]Loading weights: 100%|██████████| 464/464 [00:00<00:00, 5148.43it/s]
+{"export_basis": "/workspace/nb/repo/data/j_basis/gemma2_9b", "vocab": 256000}
+[load] 100 dirs → 1700 samples from /workspace/nb/repo/upstream/scenarios/gemma2_9b/core/20261001T012639Z
+[extract] 1/18 (0s)
+{"core/original": {"n_rows": 18, "leak": {"private_block": 6, "drift_block": 0}, "out": "/tmp/basis_probe/core/original"}}

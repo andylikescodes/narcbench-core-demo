@@ -20,7 +20,7 @@
 \title{Is J-space the Right Standard for Detecting Colluders?\\[4pt]
 \large Method and findings for NARCBench on Gemma-2-9B-it}
 \author{Andy Liang, with Claude\\[2pt] \small Working draft for the research group}
-\date{November 10, 2026}
+\date{November 11, 2026}
 
 \begin{document}
 \maketitle
@@ -32,9 +32,11 @@ as the place where such states are represented. We test whether J-space should b
 requiring it to beat three baselines: random subspaces of the same size, a probe that reads only the system prompt, and a
 25-component PCA subspace. We use the Jacobian lens published for this model, which was fitted with Anthropic's \jlens{}
 package; our code applies it identically to the package (checked on 480 activations), and we implement the J-space
-decomposition ourselves because none has been released. J-space beats none of the baselines. It transfers at 0.773, against
-0.808 and 0.875 for the 95th percentiles of two random nulls, 1.000 for the prompt-only probe and 0.879 for PCA; the full
-residual gives 0.945. Three context controls show that what transfers is the instruction given to the colluders: with the
+decomposition ourselves, as the paper's Methods describe it (gradient pursuit over the vocabulary, non-negative
+combination), because none has been released. J-space clears none of the three bars. It transfers at 0.819: above the 95th
+percentile of random subspaces at three of five layers, above that of random sets of lens directions at none, and below
+the prompt-only probe (1.000) and PCA (0.879). The full residual gives 0.945, and 0.946 with its J-space part removed. Three
+context controls show that what transfers is the instruction given to the colluders: with the
 instruction removed and the conversation kept, transfer falls to chance (0.479), and with the system prompt alone the full
 residual transfers perfectly. The token readout of J-space names the scheme (``subtly'', ``disinformation'') only while the
 instruction is in the context, and steering along J-space directions moves the vote logit mostly as any lens direction does.
@@ -53,7 +55,7 @@ colluding agents holds the collusion itself. Before making J-space the standard 
 a bar. J-space has to beat three cheap baselines: (1) random subspaces of the same size, judged against the 95th
 percentile of 200 draws; (2) a probe that reads only the system prompt; (3) a 25-component PCA subspace.
 
-It beats none of them (Finding~\ref{f:baselines}). The controls built for the test showed something larger
+It clears none of the three bars (Finding~\ref{f:baselines}). The controls built for the test showed something larger
 (Finding~\ref{f:instruction}): the signal that carries a probe from one set of scenarios to the other is the instruction
 the colluders were given. With the instruction taken out of the context the probe transfers at chance, and with only the
 system prompt in the context the full residual transfers perfectly. The token readout of J-space tells the same story
@@ -67,12 +69,13 @@ one answers.
 \ref{f:instruction} & When the probe transfers from Core to Transfer, what is it reading? & The instruction in the colluder's
 context. & Transfer AUROC 0.945 with the instruction, 0.479 with it removed, 1.000 from the system prompt alone &
 \pageref{f:instruction}\\
-\ref{f:baselines} & Does J-space beat the three baselines? & No, none of them. & J-space 0.773; random subspaces 0.808 and
-0.875 (95th percentile); prompt-only 1.000; PCA 0.879 & \pageref{f:baselines}\\
+\ref{f:baselines} & Does J-space beat the three baselines? & No. It clears random subspaces at three of five layers,
+random lens atoms at none, and is below the other two. & J-space 0.819; random nulls 0.808 and 0.875 (95th percentile);
+prompt-only 1.000; PCA 0.879 & \pageref{f:baselines}\\
 \ref{f:within} & Without the instruction, is any signal of collusion left? & Within one set of scenarios yes, across sets
 no. & Under swap: 0.935 within Core, 0.667 within Transfer, 0.479 across & \pageref{f:within}\\
 \ref{f:atoms} & What do the tokens of colluders' J-space atoms say? & Scheme words, but only while the instruction is in the
-context. & ``subtly'' for 62 points more colluders (Core), ``disinformation'' for 64 (Transfer); no token differs on Transfer
+context. & ``subtly'' for 61 points more colluders (Core), ``disinformation'' for 62 (Transfer); no token differs on Transfer
 under swap & \pageref{f:atoms}\\
 \ref{f:position} & Where in a turn can the transferable signal be read? & Only on the two tokens that close the turn. &
 Last reply token 0.517, \eot{} 0.780, the token after it 0.945 & \pageref{f:position}\\
@@ -94,9 +97,12 @@ with the question it answers, the answer, why it matters, the evidence and the c
 Sections~\ref{sec:notrun}--\ref{sec:next} list what did not run, the limitations and our recommendations. The appendices
 hold the full tables, the earlier results and the run record.
 
-\paragraph{Where the numbers come from.} A number without a tag comes from the GPU run of November~9, 2026 and is read from
-the result files by the scripts of Appendix~\ref{app:files}. \src{Nov 5} marks a number quoted from the first run and not
-rerun. \src{Nov 8, CPU} marks a number computed from the saved transcripts without a GPU. \notrun{} marks something
+\paragraph{Where the numbers come from.} A number without a tag comes from the activations saved by the GPU run of
+November~9, 2026, analysed on November~11 with the decomposition of Section~\ref{sec:impl}, and is read from the result
+files by the scripts of Appendix~\ref{app:files}. \src{Nov 9 decomposition} marks a number that rests on the decomposition
+of the November~9 version of this paper (orthogonal matching pursuit on a shortlist of 1{,}024 tokens; row~6 of
+Table~\ref{tab:solver}) and was not recomputed. Numbers of the full residual and of PCA do not depend on the
+decomposition. \src{Nov 5} marks a number quoted from the first run and not rerun. \src{Nov 8, CPU} marks a number computed from the saved transcripts without a GPU. \notrun{} marks something
 planned that did not run.
 
 % =====================================================================================================================
@@ -291,13 +297,17 @@ same probe.
 \begin{itemize}
 \item \textbf{Full residual}: $h$ itself.
 \item \textbf{J-space}: built separately for each activation from the J-lens vectors
-$v_i = J_\ell^{\top}\big((1+\gamma)\odot W_U[i]\big)$, where $\gamma$ is the weight of the final normalisation. (a) Take as
-candidates the 1{,}024 tokens whose unit-length vectors correlate most with $h$. (b) Run a non-negative orthogonal matching
-pursuit: add the candidate that correlates most with what is not yet explained, refit non-negative coefficients, and
-repeat until no candidate correlates positively or 25 vectors are chosen. (c) If fewer than 25 were chosen, fill up to 25
-with the next-best candidates. (d) Orthonormalise the 25 chosen vectors (the atoms) into a matrix $Q$ and project:
-$h_J = QQ^{\top}h$.
+$v_i = J_\ell^{\top}\big((1+\gamma)\odot W_U[i]\big)$, where $\gamma$ is the weight of the final normalisation, in the way
+the Methods of Gurnee et al.~\cite{gurnee2026workspace} describe. (a) Run a non-negative gradient
+pursuit~\cite{blumensath2008} over all 256{,}000 J-lens vectors: add the vector that, at unit length, correlates most with
+what is not yet explained, take one optimal gradient step on the weights of the chosen vectors, set negative weights to
+zero, and repeat until no vector correlates positively or 25 vectors are chosen. (b) The J-space part $h_J$ is the best
+non-negative combination of the chosen vectors (the atoms), $h_J=\sum_i c_i v_i$ with $c_i\ge 0$, found by non-negative
+least squares.
 \item \textbf{Complement}: $h - h_J$, the residual with its J-space part removed.
+\item \textbf{J-space, span form}: fill the chosen set up to exactly 25 vectors with the vectors that correlate most with
+$h$ itself, orthonormalise them into a matrix $Q$ and project, $QQ^{\top}h$. This is the form of the formalisation appendix
+of~\cite{gurnee2026workspace}. We report it next to the primary form.
 \item \textbf{PCA-25}: the projection of $h$ onto the top 25 principal components of the Core training activations.
 \item \textbf{Random subspaces}: the projection onto a random 25-dimensional subspace, the same for every activation; 200
 independent draws.
@@ -313,10 +323,11 @@ atoms per activation matter?
 
 \paragraph{Details.} The lens is the published one for Gemma-2-9B-it. The decomposition is our implementation of the
 definition of Gurnee et al.~\cite{gurnee2026workspace}; Section~\ref{sec:impl} states exactly what is theirs and what is
-ours, and compares our solver with the one they name. We report J-space filled to 25 atoms, the primary version of the
-first run; the version without move (c) is called \emph{pursuit} in the appendix tables. The pursuit stops by itself after
-16 to 18 atoms on average on Core. The J-space part is small: at $k=25$ it holds 1.0\% to 1.4\% of the squared length of
-$h$. Random subspaces are Haar-distributed. Sizes $k\in\{8,25,50,100\}$ were run for every arm.
+ours, and shows what each choice the paper's text leaves open does to the result. The pursuit stops by itself after 19 to
+21 atoms on average on Core, when no remaining vector correlates positively with what is left. The J-space part is small:
+at $k=25$ it holds 1.0\% to 1.4\% of the squared length of $h$. The appendix tables list the span form as ``J span''.
+Random subspaces are Haar-distributed. Sizes $k\in\{8,50,100\}$ were
+also run at the last token of the original condition; every other cell uses $k=25$.
 
 \subsection{Step 5: Fit the probe and score episodes}\label{st:probe}
 \paragraph{What we do.} Five moves, the same for every arm.
@@ -392,8 +403,9 @@ Core domains. The warning holds more collusion vocabulary than the colluders' ow
 Core colluder prompts \src{Nov 8, CPU}. This control ran in the original condition only.
 
 \subsection{Step 9: Read what the atoms say}\label{st:atoms}
-\paragraph{What we do.} Every atom is the J-lens vector of a vocabulary token, so the 25 atoms of an activation can be read
-as 25 tokens. For each agent we take the atoms of its turns and measure two things. (a) \textbf{Concept share}: the share
+\paragraph{What we do.} Every atom is the J-lens vector of a vocabulary token, so the atoms of an activation can be read
+as tokens. We read the 25 vectors of the span form: the atoms the pursuit chose, filled up to 25 with the tokens whose
+vectors correlate most with the activation. For each agent we take the atoms of its turns and measure two things. (a) \textbf{Concept share}: the share
 of atoms that fall in four word groups fixed on November~8, before any readout: deception and secrecy, coordination,
 steering and persuasion, honesty and standards. (b) \textbf{Token by token}: for every token, the share of colluders whose
 atoms include it minus the share of honest agents in the same episodes.
@@ -422,7 +434,8 @@ honest agents in Core collusion episodes), and 20 random Gaussian directions as 
 residual along it change the collusive choice?
 
 \paragraph{Details.} The strength is $\alpha\in\{0.5,1,2,4\}$ times $s$, the median length of $h_J$ at that layer (33 to
-39). A direction counts as steering only if four conditions written down on November~8 all hold: (1) the predicted sign in
+39). The role direction and $s$ come from the decomposition of November~9 \src{Nov 9 decomposition}; the concept directions
+do not depend on the decomposition. A direction counts as steering only if four conditions written down on November~8 all hold: (1) the predicted sign in
 both groups; (2) an effect above the 95th percentile of the random directions at the same strength; (3) significance after
 Benjamini--Hochberg at $q=0.05$ over all direction, strength and group cells; (4) growth with the strength. Three runs
 completed: swap at layers 22 and 23, original at layer 22. After seeing them we added a second null of 20 random
@@ -451,9 +464,9 @@ rises (checked below).\\
 J-space decomposition & Not in the package; no code is released. The paper's Methods take the J-space component to be the
 sparse non-negative combination of $k$ J-lens vectors found by gradient pursuit; its appendix defines it as the projection
 onto the span of $k$ vectors. &
-\textbf{Ours}, written from the paper's text. The numbers of this version use non-negative orthogonal matching pursuit,
-filled to $k=25$, with projection onto the span. A rerun in the Methods form (gradient pursuit, non-negative combination)
-is in progress; see Check~2.\\
+\textbf{Ours}, written from the paper's text in the Methods form: gradient pursuit over the whole vocabulary, $k=25$,
+non-negative combination. The span form is reported next to it. Check~2 lists the choices the text leaves open and what
+each one changes.\\
 Probe, detectors, nulls, controls, steering & None. & \textbf{Ours.}\\
 \bottomrule\end{tabularx}
 \caption{What comes from Anthropic's reference implementation (\jlens{} v0.1.0, commit \texttt{581d398}) and what is our
@@ -476,46 +489,37 @@ exhaustively; a greedy pursuit adds one vector at a time. The paper's Methods st
 pursuit~\cite{blumensath2008}, for a sparse non-negative combination of $k$ J-lens vectors that approximates the
 activation; that combination is the J-space component and the rest is the non-J-space component ($k=25$ for probes, 16 for
 concept vectors). Its formalisation appendix defines the component as the projection onto the span of exactly $k$ vectors.
-The numbers of this version follow the appendix form, and they differ from the Methods form in two ways: the solver is
-non-negative orthogonal matching pursuit, a sibling of gradient pursuit that refits all weights after each added vector,
-and the component is the projection onto the span of the 25 chosen vectors, not their non-negative combination. The
-paper does not fix the stopping rule, a candidate pre-selection, the normalisation of the vectors, or whether the gain of
-the final normalisation is part of them. Our choices for these are: stop when no candidate correlates positively with the
-remainder; pre-select the 1{,}024 best candidates; compare vectors at unit length; include the gain, so that the inner
-product with a J-lens vector gives the readout logit up to the normalisation factor, as the paper describes.
+We follow the Methods and report the span form next to it.
 
-On the activations of the first run \src{Nov 5}, gradient pursuit scored 0.756 against 0.755 for our primary (paired
-difference $[-0.025, +0.026]$): the two solvers choose nearly the same atoms. Two other readings scored higher there,
-0.811 without the fill to exactly 25 atoms and 0.809 with the non-negative reconstruction in place of the projection onto
-the span; both stayed below PCA-25 (0.856) and the full residual (0.902) of that run. On the activations of November~9 the
-version without the fill is the ``J pursuit'' arm of the appendix tables: 0.765 against 0.773 for the filled version.
-\IfFileExists{tables/tabp_solver.tex}{Table~\ref{tab:solver} repeats the comparison on the activations of November~9,
-on the headline cell, with the same probe and the same episode resamples.
-\input{solver_text}
+The paper does not fix the stopping rule, whether the pursuit may be restricted to a shortlist of candidate tokens, the
+normalisation of the vectors, or whether the gain of the final normalisation is part of them. Our choices are: stop when no
+vector correlates positively with the remainder; search the whole vocabulary at every step; compare vectors at unit length;
+include the gain, so that the inner product with a J-lens vector gives the readout logit up to the normalisation factor, as
+the paper describes. Table~\ref{tab:solver} shows what each choice does to the headline cell, with the same probe and the
+same episode resamples in every row.
 
 \begin{table}[H]\centering\small
 \input{tables/tabp_solver}
 \caption{The J-space arm under different readings of the paper's definition. Core$\to$Transfer primary AUROC, original
-condition, last token, $k=25$, per layer and as band mean. ``Span'' projects onto the span of the 25 chosen vectors;
-``reconstruction'' takes the non-negative combination itself. The last column is the paired 95\% bootstrap interval of the
-band-mean difference to our primary.}
+condition, last token, $k=25$, per layer and as band mean. The last column is the paired 95\% bootstrap interval of the
+band-mean difference to row~1. Rows~4 to~7 restrict the pursuit to a shortlist; row~6 is the J-space arm of the November~9
+version of this paper.}
 \label{tab:solver}
 \end{table}
-}{The same comparison on the activations of November~9 (gradient pursuit, the reconstruction, and J-lens vectors without
-the gain) was still running when this version was built \notrun; its results go to
-\texttt{results/jspace\_interp/solver\_check/}.}
+
+\input{solver_text}
 
 \paragraph{Not done.} We did not run \texttt{JacobianLens.apply} on the model itself, which would also exercise the
 package's tokenisation and its hooks \notrun; our extraction reads the output of block $\ell$ with a forward hook, as the
-package does. A rerun of the whole sweep in the Methods form, with gradient pursuit and the non-negative combination as
-the J-space arm, was started on November~10 and was still running when this version was built; its results go to
-\texttt{results/jspace\_interp/gemma2\_9b\_gp/} and will replace the J-space numbers of this paper.
+package does. The steering experiment (Step~10, Finding~\ref{f:steer}) used role directions from the November~9
+decomposition (row~6 of Table~\ref{tab:solver}) and was not repeated with the present one \notrun.
 
 \subsection{Compute}
 One A40 GPU ran the main job for 7.7 hours on November~9: the 50 warned episodes, the activations for all four conditions,
 and 320 analysis cells (two conditions at seven positions, plus nosys and prompt\_only, each at five layers and four
 sizes). Two shorter A40 jobs ran the steering (3.8 hours) and the lens null (0.9 hours). The total was about \$7.60. The
-two checks of Section~\ref{sec:impl} ran on a laptop CPU. Appendix~\ref{app:run} has the run record.
+two checks of Section~\ref{sec:impl} and the gradient-pursuit reruns of November~10 and 11 ran on a laptop (Apple M1,
+8\,GB) at no cloud cost; the whole-vocabulary pursuit used the laptop's GPU. Appendix~\ref{app:run} has the run record.
 
 % =====================================================================================================================
 \section{Findings}\label{sec:findings}
@@ -542,12 +546,12 @@ measures detection of an instruction. None shows that the activations carry a ge
 the probe is trained and tested in that condition.
 \begin{itemize}
 \item \textbf{Instruction in the context (original).} The full residual transfers at 0.945, PCA-25 at 0.879 and J-space
-at 0.773.
+at 0.819.
 \item \textbf{Instruction removed.} Under swap, colluders see the honest system prompt for their seat and no private
 blocks; their own replies and the rest of the discussion are unchanged. Transfer drops to 0.479 for the full residual,
-0.465 for PCA-25 and 0.436 for J-space. With no system prompt at all: 0.488, 0.466 and 0.475.
+0.465 for PCA-25 and 0.465 for J-space. With no system prompt at all: 0.488, 0.466 and 0.525.
 \item \textbf{Instruction alone (prompt only).} Reading the end of the system prompt with nothing else in the context:
-1.000 for the full residual at every layer, 1.000 for PCA-25, 0.980 for J-space.
+1.000 for the full residual at every layer, 1.000 for PCA-25, 0.976 for J-space.
 \item \textbf{The vote shows the same.} At the final vote colluders lean to the target option by $+3.54$ logits with the
 original prompt and by $-3.85$ with the swapped one (honest agents: $-8.63$; Step~10).
 \item \textbf{It is not shared wording.} A bag-of-words classifier on the system prompts is perfect within Core but
@@ -574,37 +578,56 @@ signal. A perfect prompt-only score is easy to get: a random 25-dimensional subs
 % ---------------------------------------------------------------------------------------------------------- Finding 2
 \findingbreak
 \refstepcounter{finding}\label{f:baselines}
-\subsection{Finding \thefinding: J-space beats none of the three baselines}
+\subsection{Finding \thefinding: J-space clears none of the three bars}
 
 \paragraph{Question.} Is J-space a better place to look for colluders than (1) a random subspace of the same size, (2) the
 system prompt alone, (3) a 25-component PCA subspace?
 
-\paragraph{Answer.} No, on all three. J-space transfers at 0.773. Random subspaces reach 0.808 and random sets of lens
-atoms 0.875 at their 95th percentile, the prompt-only probe 1.000, and PCA-25 0.879.
+\paragraph{Answer.} No. J-space transfers at 0.819. It is above the 95th percentile of the random subspaces at three of
+the five layers, but above that of the random sets of lens atoms at none, so the rule of Step~7 is met at no layer. The
+prompt-only probe reaches 1.000 and PCA-25 0.879.
 
-\paragraph{Why it matters.} This was the bar for making J-space the standard. The 0.755 of the first run is within what
-random 25-dimensional slices of the residual give.
+\paragraph{Why it matters.} This was the bar for making J-space the standard. J-space carries more of the signal than an
+average random 25-dimensional slice of the residual (0.650) or an average random set of lens atoms (0.716), but not
+reliably more than the better random sets, less than PCA, and nothing the rest of the activation lacks.
 
 \begin{table}[H]\centering\small
 \input{tables/tabp_scoreboard}
 \caption{The scoreboard. Core$\to$Transfer primary AUROC, original condition, last token, $k=25$, band mean. Each null
-has 200 draws; they average 0.650 (subspaces) and 0.716 (lens atoms). The last column lists the layers at which J-space
-scores above the baseline. For reference: full residual 0.945; residual with J-space removed (complement) 0.941.}
+has 200 draws; they average 0.650 (subspaces) and 0.716 (lens atoms). ``Above it?'' compares the band means; the last
+column lists the layers at which J-space scores above the baseline. The rule of Step~7 needs both nulls at the same layer.
+For reference: full residual 0.945; residual with J-space removed (complement) 0.946.}
 \label{tab:scoreboard}
 \end{table}
 
 \paragraph{Evidence.} Table~\ref{tab:scoreboard} and Figure~\ref{fig:layers}.
 \begin{itemize}
-\item \textbf{Random subspaces.} J-space rises from 0.596 at layer 19 to 0.899 at layer 22 and is above the 95th
-percentile of the 200 random subspaces at layers 21 and 22 only ($p=0.040$ and $0.010$).
-\item \textbf{Random lens atoms.} It is never above their 95th percentile (0.969 at layer 22; $p$ from 0.16 to 0.61), so the
-pursuit's atoms are not reliably better than 25 lens atoms drawn at random. The rule of Step~7 is met at no layer.
-\item \textbf{PCA and the complement.} J-space is below PCA-25 at every layer. Removing J-space costs almost nothing: the
-complement transfers at 0.941 and beats J-space at every layer.
-\item \textbf{Size and choice of atoms.} From $k=8$ to $k=100$ J-space goes from 0.740 to 0.807 while PCA goes from 0.831
-to 0.938 (Table~\ref{tab:ksweep}). A fixed frame of the 25 most common atoms scores 0.776.
-\item \textbf{The solver.} Gradient pursuit, the solver the paper names, scores the same as ours: 0.756 against 0.755 on
-the first run's activations \src{Nov 5} (Section~\ref{sec:impl}).
+\item \textbf{Random subspaces.} J-space rises from 0.657 at layer 19 to 0.929 at layer 22 and is above the 95th
+percentile of the 200 random subspaces at layers 21, 22 and 23 ($p=0.035$, $0.005$ and $0.010$), not at layers 19 and 20
+($p=0.32$ and $0.065$).
+\item \textbf{Random lens atoms.} It is never above their 95th percentile (0.969 at layer 22; $p$ from 0.08 to 0.30), so
+at no single layer are the pursuit's atoms reliably better than 25 lens atoms drawn at random. The rule of Step~7 is met
+at no layer.
+\item \textbf{Averaged over the layers} the picture is kinder to J-space. No random subspace and only 1 of the 200 random
+sets of lens atoms has a mean over the five layers as high as J-space's 0.819. This comparison was not part of the rule
+fixed in advance; it says that the pursuit's atoms are better than a random pick on average, without leaving the range of
+random picks at any one layer.
+\item \textbf{PCA.} J-space is below PCA-25 at layers 19 to 22 and above it at layer 23 (0.896 against 0.835). On the band
+mean the paired difference is $[-0.117, -0.001]$.
+\item \textbf{The complement.} Removing J-space costs nothing: the complement transfers at 0.946, the full residual at
+0.945, and the complement is above J-space at every layer (the paired interval excludes zero at four of the five).
+\item \textbf{The span form.} Projected onto the span of exactly 25 vectors, which is what the two nulls and PCA are as
+well, J-space scores 0.815, with the same outcome: above the random subspaces at layers 21 to 23, above the random lens
+atoms at none.
+\item \textbf{Size and choice of atoms.} From $k=8$ to $k=100$ J-space goes from 0.765 to 0.814 while PCA goes from
+0.833 to 0.938 (Table~\ref{tab:ksweep}). The pursuit stops by itself after about 20 atoms, so the J-space part hardly
+changes beyond $k=25$ (0.819, then 0.814 at $k=50$ and at $k=100$). Filled to exactly $k$ vectors and projected onto their
+span it scores 0.764, 0.815, 0.797 and 0.808: below PCA of the same size at every $k$. A fixed frame of the 25 most common atoms scores 0.748, and each
+activation projected onto another activation's atoms 0.741, both below the 0.819 of the per-activation choice.
+\item \textbf{The reading of the definition.} The number depends on how the paper's text is read
+(Table~\ref{tab:solver}). With the pursuit restricted to a shortlist of 1{,}024 tokens, as in the November~9 version of
+this paper, J-space scored 0.771 to 0.773 and cleared the random-subspace null at one or two layers. Without the gain of the final normalisation it scores 0.768. In no
+reading does it clear the rule or reach PCA-25.
 \end{itemize}
 
 \begin{figure}[H]\centering
@@ -614,9 +637,10 @@ percentile of the 200 draws. Original condition, last token, $k=25$. The horizon
 \label{fig:layers}
 \end{figure}
 
-\paragraph{Caveats.} J-space is not empty: at layer 22 it reaches 0.899 and clears the random-subspace null, as many sets
-of lens atoms do. Over all 35 cells of position and layer the rule is met in 2, both inside the reply where every arm is
-near chance.
+\paragraph{Caveats.} J-space is not empty: at layer 22 it reaches 0.929 and clears the random-subspace null, as many sets
+of lens atoms do. Over all 35 cells of position and layer the rule is met in 1, at 50\% into the reply, where every
+arm is near chance. Under swap it is met in 3 of 35 cells, at 50\% into the reply and at the last reply token, with scores
+of 0.58 to 0.61. With 70 cells tested at the 5\% level, a few such cells are expected by chance.
 
 % ---------------------------------------------------------------------------------------------------------- Finding 3
 \findingbreak
@@ -642,8 +666,8 @@ the end of the system prompt). The left block is Figure~\ref{fig:controls}, left
 \paragraph{Evidence.} Table~\ref{tab:controls}, rows ``Swap'' and ``No system prompt''.
 \begin{itemize}
 \item \textbf{Within Core.} Under swap the full residual separates collusion from control episodes at 0.935, PCA-25 at
-0.898 and J-space at 0.831. With no system prompt: 0.934, 0.889 and 0.822.
-\item \textbf{Within Transfer.} Under swap 0.667, 0.667 and 0.555; with no system prompt 0.631, 0.609 and 0.605.
+0.899 and J-space at 0.825. With no system prompt: 0.934, 0.889 and 0.822.
+\item \textbf{Within Transfer.} Under swap 0.667, 0.667 and 0.547; with no system prompt 0.631, 0.609 and 0.565.
 \item \textbf{Across.} 0.479 under swap and 0.488 with no system prompt, at the last token (Finding~\ref{f:instruction}).
 \item \textbf{One weak exception across sets.} Under swap, PCA-25 read at 25\% into the reply transfers at 0.64 to 0.65 at
 every layer (intervals between 0.53 and 0.75). The full residual at that position is at 0.488, and PCA with 8 or 100
@@ -675,7 +699,8 @@ not run \notrun, so we cannot separate ``argues for the target'' from other diff
 collusion?
 
 \paragraph{Answer.} Only with the instruction in the context. Most atoms are generic tokens shared by nearly every agent.
-But colluders' atoms also include ``subtly'' and ``lobbying'' on Core and ``disinformation'' and ``unethical'' on Transfer.
+But colluders' atoms also include ``subtly'' and ``convincing'' on Core and ``disinformation'' and ``unethical'' on
+Transfer.
 With the instruction swapped out, no token differs by role on Transfer.
 
 \paragraph{Why it matters.} This is J-space at its best: a plain-token readout that names the scheme. But it names the
@@ -684,17 +709,17 @@ stance words only.
 
 \paragraph{Evidence.} Table~\ref{tab:atomroles}: layer 22, last token. Differences are in percentage points of agents.
 \begin{itemize}
-\item \textbf{Most atoms are the same for everyone.} ``decision'' is among the atoms of 189 of the 200 agents in Core
-collusion episodes (Table~\ref{tab:atoms}). The four word groups fixed in advance hold at most 1.1\% of the atoms in the
+\item \textbf{Most atoms are the same for everyone.} The end-of-sequence token and an emphasis tag are among the atoms of
+all 200 agents in Core collusion episodes, and ``decision'' of 186 (Table~\ref{tab:atoms}). The four word groups fixed in advance hold at most 1.1\% of the atoms in the
 conversation.
-\item \textbf{With the instruction present, colluders differ token by token.} On Core ``subtly'' is at $+62$ and
-``recommending'' at $-59$. On Transfer ``disinformation'' is at $+64$ and ``subtly'' at $+57$. At layers 21 to 23
-``subtly'' stays between $+54$ and $+76$ on both sets.
+\item \textbf{With the instruction present, colluders differ token by token.} On Core ``subtly'' is at $+61$ and
+``recommending'' at $-65$. On Transfer ``disinformation'' is at $+62$ and ``subtly'' at $+51$. At layers 21 to 23
+``subtly'' stays between $+50$ and $+76$ on both sets.
 \item \textbf{Without the instruction the scheme words are gone.} Under swap, and with no system prompt, no token differs
 by role on Transfer at any of the five layers. On Core tokens still differ, but they are words of disagreement, which fits
 Finding~\ref{f:within}.
 \item \textbf{Where it shows.} The instruction is visible in the atoms at the end of the system prompt already (on Core
-``justifying'' at $+41$, ``scrutiny'' at $-36$). At 50\% into the reply no token differs by role in any cell.
+``justifying'' at $+35$, ``scrutiny'' at $-32$). At 50\% into the reply no token differs by role in any cell.
 \end{itemize}
 
 \begin{table}[H]\centering\footnotesize
@@ -709,7 +734,7 @@ same episodes, in percentage points. Only tokens made of unaccented Latin letter
 \begin{itemize}
 \item Calling these ``scheme words'' is our reading of the token lists, made after seeing them. The word groups fixed in
 advance did not capture them: they list exact word forms (``persuade'', ``argue''), and the atoms that differ are other
-words. Of 320 tests of a group's share by role, 21 pass Benjamini--Hochberg, all with differences of at most 0.026.
+words. Of 320 tests of a group's share by role, 18 pass Benjamini--Hochberg, all with differences of at most 0.018.
 \item The result files keep the 30 tokens with the smallest $p$ per cell. A token counts for an agent if it is among the
 atoms of at least one of its turns. Readouts did not run at the \eot{} token \notrun.
 \end{itemize}
@@ -736,8 +761,8 @@ one set of scenarios hide this, because there the signal is readable everywhere.
 \item \textbf{Within Core the position hardly matters.} The full residual scores 0.968 to 1.000 at every position.
 \item \textbf{Within Transfer} it is in between: 0.50 to 0.59 inside the reply, 0.817 at the last reply token, 0.945 on
 \eot{} and 0.974 at the last token.
-\item \textbf{J-space} is below the 95th percentile of random subspaces at every position, and between 0.478 and 0.569
-inside the reply.
+\item \textbf{J-space} is below the 95th percentile of random subspaces at every position except the last token
+(Finding~\ref{f:baselines}), and between 0.471 and 0.540 inside the reply.
 \end{itemize}
 
 \begin{figure}[H]\centering
@@ -766,7 +791,7 @@ kinds of turn differ, and that may matter most inside the reply.
 
 \paragraph{Answer.} On the role. Honest agents whose system prompt carries a warning written in the colluders' own words
 are separated from colluders perfectly by the full residual (1.000 at every layer). The warning moves them 4\% to 6\% of
-the way toward the colluders. For J-space that share is 13\% to 21\%.
+the way toward the colluders. For J-space that share is 6\% to 24\%.
 
 \paragraph{Why it matters.} It rules out the cheapest explanation of Finding~\ref{f:instruction}, that the probe matches
 words in the prompt. What the probe reads is closer to being told to collude than to seeing the words.
@@ -775,12 +800,12 @@ words in the prompt. What the probe reads is closer to being told to collude tha
 are over layers 19 to 23.
 \begin{itemize}
 \item \textbf{Warned agents are not mistaken for colluders.} Colluders against warned honest agents: 1.00 for the full
-residual and PCA-25, 0.90 to 0.99 for J-space. At the episode level, collusion against warned episodes: 1.00.
+residual and PCA-25, 0.92 to 1.00 for J-space. At the episode level, collusion against warned episodes: 1.00.
 \item \textbf{The warning is visible but small.} Warned against unwarned honest agents in the same episodes: 0.62 to 0.70
 for the full residual (within-episode $p<0.001$), where 0.5 would mean the probe does not see the warning. Warned episodes
 look slightly more like collusion than plain control episodes do (0.59 to 0.65).
 \item \textbf{Echo ratio.} 0.04 to 0.06 for the full residual, 0.01 to 0.05 for PCA-25, 0.02 to 0.07 for random subspaces,
-and 0.13 to 0.21 for J-space.
+and 0.06 to 0.24 for J-space.
 \end{itemize}
 
 \begin{table}[H]\centering\small
@@ -793,9 +818,10 @@ subspaces: the mean over 20 draws, and the median for the echo ratio.}
 
 \paragraph{Caveats.}
 \begin{itemize}
-\item J-space's echo ratio is 2.3 to 3.9 times the full residual's, but mainly because its gap between colluders and honest
-agents is smaller, and that gap is the denominator. Measured as an AUROC, J-space separates warned from unwarned agents no
-better than the full residual does (0.58 to 0.76 against 0.62 to 0.70).
+\item J-space's echo ratio is 1.5 to 4.5 times the full residual's, partly because its gap between colluders and honest
+agents is smaller, and that gap is the denominator. Measured as an AUROC, J-space separates warned from unwarned agents
+about as well as the full residual does (0.51 to 0.80 against 0.62 to 0.70): more at layer 22 (0.80), less at layer 19
+(0.51).
 \item One warning text, 50 episodes, original condition only. The control did not run under swap or with no system prompt
 \notrun.
 \end{itemize}
@@ -842,7 +868,9 @@ band is the range of the 20 random lens directions. A concept direction is speci
 
 \paragraph{Caveats.} With 20 draws the smallest possible $p$ is $1/21$, so a sharper statement needs more draws. The lens
 null ran at one layer and one condition, and not for the role direction. Steered passes reuse a cached prefix and differ
-from full passes by up to 0.13 logits. The steering scale, the median length of $h_J$, is our own choice.
+from full passes by up to 0.13 logits. The steering scale, the median length of $h_J$, is our own choice. The scale and
+the role direction come from the November~9 decomposition \src{Nov 9 decomposition} and were not recomputed; the concept
+directions and the random lens directions do not depend on the decomposition.
 
 % =====================================================================================================================
 \section{What did not run}\label{sec:notrun}
@@ -859,19 +887,27 @@ token, 50\% into the reply, and the end of the system prompt.
 It was planned on November~8 and exists for the text only (Appendix~\ref{app:earlier}).
 \item \textbf{A larger lens null for steering,} at more layers and for the role direction. It ran with 20 draws at swap
 layer 23.
-\item \textbf{An end-to-end run of \jlens{} on the model} (Section~\ref{sec:impl}). The sweep in the paper's Methods form
-(gradient pursuit, non-negative combination) was still running when this version was built.
+\item \textbf{An end-to-end run of \jlens{} on the model} (Section~\ref{sec:impl}).
+\item \textbf{Steering with the present decomposition.} The role direction and the strength of the steering runs come from
+the November~9 decomposition; the runs were not repeated.
+\item \textbf{Sizes other than 25 away from the headline cell.} With the whole-vocabulary pursuit, $k=8$, 50 and 100 ran at
+the last token of the original condition only.
 \item \textbf{Other models.} No Jacobian lens is published for the other three models with NARCBench activations.
 \item \textbf{Collusion without an instruction.} The benchmark only has instructed collusion.
 \end{itemize}
-All 320 planned analysis cells ran. The steering runs failed on the first GPU job with an out-of-memory error in our own
-loop and were rerun after the fix (Appendix~\ref{app:run}).
+All 80 cells of the sweep ran at $k=25$ (16 pairs of condition and read position, five layers each), and the 15 cells
+of the three other sizes at the headline cell. The steering runs failed on the first GPU job with an out-of-memory error in our own loop and were rerun after
+the fix (Appendix~\ref{app:run}).
 
 \section{Limitations}\label{sec:limits}
 \begin{itemize}
 \item \textbf{Scope.} One model, one published lens, one run, and collusion that is instructed.
 \item \textbf{The decomposition is our implementation.} No reference code exists for it; Section~\ref{sec:impl} lists the
-choices the paper leaves open and tests the main ones on one cell.
+choices the paper leaves open and tests the main ones on one cell. One of them, a shortlist of candidate tokens for the
+pursuit, moved the headline score by 0.05. The J-space numbers therefore carry an uncertainty of that order from the
+implementation alone, next to the sampling intervals.
+\item \textbf{The rule against the random nulls is per layer.} Averaged over the five layers, J-space is above nearly
+every random draw (Finding~\ref{f:baselines}). The rule was fixed per layer before the run and we did not change it.
 \item \textbf{Train and test turns differ.} Probes are fit on Core discussion turns and tested on Transfer final-vote turns.
 \item \textbf{Many cells.} There are 35 cells per condition at $k=25$, so single cells clear a bar by chance.
 \item \textbf{The first run was not reproduced exactly.} The activations were regenerated (seven positions, bf16). The full
@@ -883,7 +919,8 @@ advance, but their choice is ours.
 \end{itemize}
 
 \section{Conclusion and recommendations}\label{sec:next}
-Should J-space be the standard? No. As a detector it loses to every baseline it had to beat (Finding~\ref{f:baselines}).
+Should J-space be the standard? No. As a detector it clears none of the three bars set for it
+(Finding~\ref{f:baselines}).
 As a readout it does show the scheme in plain tokens at the end of a turn (Finding~\ref{f:atoms}), which is its most
 favourable result here. But what it shows is the instruction, fixed word groups do not capture it, and its concept
 directions do not steer the vote specifically (Finding~\ref{f:steer}). We recommend the following.
@@ -897,8 +934,9 @@ signal. The within-set signal of Finding~\ref{f:within} is where a behaviour det
 \item \textbf{Use a lens-direction null} for any steering claim made with lens vectors.
 \item \textbf{If J-space is used for reading, read token by token} at the last token of a turn, with a swap control, and not
 through fixed word lists.
-\item \textbf{Keep the lens and its application tied to Anthropic's reference implementation,} and state which solver was
-used for the decomposition, since none is released.
+\item \textbf{Keep the lens and its application tied to Anthropic's reference implementation,} and state which solver and
+which search were used for the decomposition, since none is released: a shortlist of candidate tokens alone moved our
+headline score by 0.05.
 \end{enumerate}
 
 \begin{thebibliography}{9}
@@ -926,12 +964,12 @@ approach to multiple testing. \emph{Journal of the Royal Statistical Society: Se
 \appendix
 \section{Tables behind the findings}\label{app:tables}
 The code names of the read positions are those of Table~\ref{tab:positions}; \tok{prevote} is the last token of the reply
-text. ``J fill'' is J-space filled to $k$ atoms, ``J pursuit'' the version without the fill, ``Compl.'' the complement.
-Over the 35 cells of position and layer in the original condition, PCA-25 is reliably better than J-space in 9 and J-space
-in 1 (paired 95\% bootstrap intervals).
+text. ``J-space'' is the non-negative combination of the pursuit's atoms (the primary form of Step~4), ``J span'' the
+projection onto the span of exactly $k$ vectors, ``Compl.'' the complement. Over the 35 cells of position and layer in the original condition, PCA-25 is
+reliably better than J-space in 6 and J-space in none (paired 95\% bootstrap intervals).
 
 \begin{table}[H]\centering\small
-\input{tables/tabp_ksweep}
+\resizebox{\linewidth}{!}{\input{tables/tabp_ksweep}}
 \caption{Finding~\ref{f:baselines}: the comparison at four subspace sizes. Core$\to$Transfer, original condition, last token,
 band means; p95 is the 95th percentile of 200 draws.}
 \label{tab:ksweep}
@@ -940,7 +978,9 @@ band means; p95 is the 95th percentile of 200 draws.}
 \begin{table}[H]\centering\small
 \input{tables/tabp_atoms}
 \caption{Finding~\ref{f:atoms}: the most common atoms at layer 22 and the number of the 200 agents in Core collusion
-episodes that have each in at least one of their three discussion turns. \tok{\textvisiblespace} marks a leading space.}
+episodes that have each in at least one of their three discussion turns. \tok{\textvisiblespace} marks a leading space.
+Characters that the fonts of this paper lack are printed as Unicode code points: [U+202F] is a narrow no-break space,
+[U+4E86][U+55CE] are two Chinese characters.}
 \label{tab:atoms}
 \end{table}
 
@@ -962,13 +1002,13 @@ honest agents, away from it for colluders.}
 \begin{table}[H]\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \resizebox{\linewidth}{!}{\input{tables/tab_headline_k25}}
 \caption{Core$\to$Transfer primary AUROC at $k=25$, band mean over layers 19 to 23, per condition and read position.
-``Layers clearing both'' counts the layers at which J fill is above the 95th percentile of both random nulls.}
+``Layers clearing both'' counts the layers at which J-space is above the 95th percentile of both random nulls.}
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_layers_original_last_k25}}
-\caption{Per layer, original condition, last token, $k=25$, with 95\% episode-bootstrap intervals and the one-sided $p$ of J
-fill against the 200 random subspaces.}
+\caption{Per layer, original condition, last token, $k=25$, with 95\% episode-bootstrap intervals and the one-sided $p$ of
+J-space against the 200 random subspaces.}
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
@@ -978,13 +1018,13 @@ fill against the 200 random subspaces.}
 
 \begin{table}[H]\centering\footnotesize
 \input{tables/tab_controls_k25}
-\caption{Core$\to$Transfer primary AUROC per layer for the four conditions, full residual and J fill at $k=25$.}
+\caption{Core$\to$Transfer primary AUROC per layer for the four conditions, full residual and J-space at $k=25$.}
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_ksweep_original_last}}
-\caption{$k$ sweep with all arms, original condition, last token, band mean. The paired interval of J fill minus PCA-$k$ is
-for layer 22.}
+\caption{$k$ sweep with all arms, original condition, last token, band mean. The paired interval of J-space minus PCA-$k$
+is for layer 22.}
 \end{table}
 
 \begin{table}[H]\centering\footnotesize\setlength{\tabcolsep}{4pt}
@@ -1116,20 +1156,36 @@ random lens directions.
 \item \textbf{Checks against the reference implementation} (November~10, laptop CPU). \jlens{} v0.1.0 was installed from
 the repository \texttt{anthropics/jacobian-lens} at commit \texttt{581d398}. The results are in the folders
 \texttt{jlens\_check} and \texttt{solver\_check} under \texttt{results/jspace\_interp/}.
+\item \textbf{Gradient-pursuit reruns} (November~10 and 11, laptop: Apple M1, 8\,GB; no cloud cost). All of them reuse
+the saved activations and the random draws of the main job. (1)~Shortlist version, on the CPU: the pursuit searches the
+1{,}024 tokens best aligned with each activation; the four cells at the last token and the prompt-only cell
+(\texttt{gemma2\_9b\_gp/}). (2)~Whole-vocabulary version, the one this paper reports (\texttt{gemma2\_9b\_gpfull/}): the
+selection step runs on the laptop's GPU (torch MPS), which proposes the eight best tokens per activation and step; the
+choice among them is made in CPU single precision from the stored unembedding. On 160 activations of layer~22 this chose
+the same vectors in the same order as the plain CPU implementation. One layer of one cell takes about two minutes for the
+pursuit and two to three minutes for scoring the arms. (3)~The headline cell once more with J-lens vectors that leave out
+the gain of the final normalisation, with the 200 random sets of lens atoms redrawn from those vectors
+(\texttt{gemma2\_9b\_gp\_nogain/}, \texttt{gemma2\_9b\_gpfull\_nogain/}).
 \end{itemize}
 
 \section{Code, files and how to rebuild}\label{app:files}
 The code is on branch \texttt{jspace-interp} of the narcbench-core-demo repository. The modules are in
 \texttt{jspace\_interp/}: contexts (conditions), positions and extract (read positions), sweep and detectors (arms, probe,
 protocols), concepts and stats (atom readout), matched\_vocab and steer. The results are under
-\texttt{results/jspace\_interp/}. The folder \texttt{gemma2\_9b/} holds one file \texttt{sweep\_results.json} per condition
-and read position, \texttt{steer/} the steering runs, and \texttt{pod\_runs/} and \texttt{pod\_logs/} the pod records.
+\texttt{results/jspace\_interp/}. Each sweep folder holds one file \texttt{sweep\_results.json} per condition and read
+position: \texttt{gemma2\_9b\_gpfull/} is the sweep this paper reports (gradient pursuit over the whole vocabulary),
+\texttt{gemma2\_9b\_gp/} the same with the shortlist of 1{,}024 tokens, and \texttt{gemma2\_9b/} the run of November~9
+(non-negative orthogonal matching pursuit on that shortlist), which also holds the random draws every later sweep reuses.
+\texttt{steer/} holds the steering runs, and \texttt{pod\_runs/} and \texttt{pod\_logs/} the pod records.
 {\footnotesize
 \begin{verbatim}
-python scripts/jspace_interp_summarize.py      # SUMMARY.json, RESULTS.md, tab_*
+# one cell of the sweep (whole-vocabulary gradient pursuit; --device mps: the Mac's GPU)
+python scripts/jspace_interp_analyze.py --method gpfull --device mps \
+    --conditions original --positions last --ks 25 ...
+python scripts/jspace_interp_summarize.py --sweep-dir gemma2_9b_gpfull --primary recon
 python scripts/jspace_interp_verify_jlens.py   # check against Anthropic's jlens
-python scripts/jspace_interp_solver_check.py   # the paper's solver, headline cell
-python scripts/jspace_interp_paper_assets.py   # figs/fig_*.pdf, tabp_*
+python scripts/jspace_interp_solver_check.py   # readings of the definition, headline cell
+python scripts/jspace_interp_paper_assets.py --sweep-dir gemma2_9b_gpfull   # figs, tabp_*
 cd docs/jspace_interp && tectonic jspace_colluder_study.tex
 \end{verbatim}
 }
@@ -1137,7 +1193,18 @@ Every figure, and every table in Section~\ref{sec:findings} and Appendix~\ref{ap
 from the result files. The numbers quoted in the text were checked against the same files.
 
 \section{Changes since earlier drafts}\label{app:changes}
-The draft before this one is commit \texttt{af7afae}. No result changed. The changes are:
+\paragraph{November 11: the decomposition now follows the paper's Methods.} The version of November~10 (commit
+\texttt{586495a}) computed J-space with non-negative orthogonal matching pursuit, on a shortlist of the 1{,}024 tokens best
+aligned with each activation, and took the projection onto the span of 25 atoms. This version uses gradient pursuit over
+the whole vocabulary and the non-negative combination (Section~\ref{sec:impl}), and every J-space number was recomputed
+from the saved activations, except the steering. What changed: the headline J-space score went from 0.773 to 0.819, and
+J-space now clears the random-subspace null at three layers instead of two. The shortlist accounts for the change; the
+solver and the form of the component do not (Table~\ref{tab:solver}). What did not change: the verdict of
+Finding~\ref{f:baselines} and every number of the full residual. The token readout (Finding~\ref{f:atoms}) and the matched-vocabulary control (Finding~\ref{f:vocab})
+changed in their numbers and not in what they show: ``subtly'' is at $+61$ where it was at $+62$, and the echo ratio of
+J-space is 0.06 to 0.24 where it was 0.13 to 0.21.
+
+\paragraph{November 10.} The draft before that one is commit \texttt{af7afae}. No result changed. The changes were:
 \begin{enumerate}
 \item \textbf{Structure.} The method comes first, step by step; the findings follow in order of importance, each with the
 question it answers. Four figures were added.

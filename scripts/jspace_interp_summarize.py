@@ -32,6 +32,20 @@ def tex(s: str) -> str:
     return str(s).replace("_", r"\_").replace("%", r"\%").replace("&", r"\&")
 
 
+def rel(path) -> str:
+    """A path as it is recorded in the summary: relative to the repository when it lies inside it."""
+    try:
+        return str(Path(path).resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return str(path)
+
+
+def _typesettable(ch: str) -> bool:
+    """Characters the paper's Latin Modern fonts have: ASCII, Latin-1 and Latin Extended-A letters, curly quotes, dashes."""
+    o = ord(ch)
+    return 32 <= o < 127 or 0xA1 <= o <= 0x17F or o in (0x2013, 0x2014, 0x2018, 0x2019, 0x201C, 0x201D, 0x2026)
+
+
 def tex_tok(t: str) -> str:
     """A token string inside \\texttt{}: escape TeX specials, show the SentencePiece space and newlines."""
     if t is None or t == "":
@@ -46,6 +60,8 @@ def tex_tok(t: str) -> str:
             out.append({"\\": r"\textbackslash{}", "^": r"\^{}", "~": r"\~{}"}.get(ch, "\\" + ch))
         elif ord(ch) < 32:
             out.append("?")
+        elif not _typesettable(ch):
+            out.append(rf"\textrm{{[U+{ord(ch):04X}]}}")       # no glyph in the paper's fonts: print the code point
         else:
             out.append(ch)
     return "".join(out)
@@ -95,7 +111,7 @@ def load_sweeps(files):
         except Exception as e:  # noqa: BLE001
             print(f"[skip] {f}: {e}", file=sys.stderr)
             continue
-        settings.append({"file": str(f), **{k: d.get(k) for k in ("ks", "layers", "positions")},
+        settings.append({"file": rel(f), **{k: d.get(k) for k in ("ks", "layers", "positions")},
                          "n_random": (d.get("settings") or {}).get("n_random"), "lens": (d.get("lens") or {}).get("path")})
         for c in d.get("cells", []):
             key = (c["condition"], c["position"], int(c["layer"]))
@@ -123,7 +139,7 @@ def load_steer(files):
         split = cfg.get("split") or (Path(f).stem.split("_")[1] if Path(f).stem.count("_") >= 3 else "core")
         suffix = cfg.get("out_suffix") or ""
         key = (split, cond, int(d["layer"]), suffix)  # the suffix keeps runs with different nulls apart
-        out[key] = {"file": str(f), **d}
+        out[key] = {"file": rel(f), **d}
     return out
 
 
@@ -536,7 +552,8 @@ def main() -> int:
                "primary_j_arm_note": ("the keys named J_fill*/C_fill* hold the primary J-space arm: with 'recon' the non-negative combination of the "
                                       "vectors the pursuit chose (J{k}_recon in the sweep files), with 'fill' the span of exactly k vectors; J_span* "
                                       "is always the span of exactly k vectors"),
-               "inputs": {"sweep_files": files, "steer_files": steer_files, "pod_json": str(pod_json) if pod_json else None},
+               "inputs": {"sweep_files": [rel(f) for f in files], "steer_files": [rel(f) for f in steer_files],
+                          "pod_json": rel(pod_json) if pod_json else None},
                "plan": plan, "ks": ks, "layers": layers, "positions": positions, "conditions": conds, "settings": settings,
                "nov5_reference": NOV5, "rows": rows, "role_dirs": role_dirs,
                "not_run": {"cells": [{"condition": c, "position": p, "layer": L, "k": k} for c, p, L, k in not_run_cells],
@@ -654,7 +671,9 @@ def main() -> int:
                f"- cells: {v['n_cells']}; J fill clears both nulls in {v['cells_J_fill_clears_both_nulls']}, J pursuit in {v['cells_J_pursuit_clears_both_nulls']}; "
                f"J fill beats PCA (paired CI) in {v['cells_J_fill_beats_pca_ci']}, PCA beats J fill in {v['cells_pca_beats_J_fill_ci']}; full beats J fill in {v['cells_full_beats_J_fill_ci']}",
                f"- best J fill: {b['position']} L{b['layer']} = {f3(b['J_fill'])} {ci(b['J_fill_ci'])} (full {f3(b['full'])}, PCA {f3(b['pca'])}, rand sub p95 {f3(b['randsub_p95'])}, "
-               f"rand atoms p95 {f3(b['randatoms_p95'])}, clears both: {b['J_fill_clears_both_nulls']}, J-PCA CI {ci(b['J_fill_minus_pca_ci'])}, recovery {f3(b['recovery_J_fill'], 2)})", "",
+               f"rand atoms p95 {f3(b['randatoms_p95'])}, clears both: {b['J_fill_clears_both_nulls']}, J-PCA CI {ci(b['J_fill_minus_pca_ci'])}, "
+               # the share of the full residual's margin over chance is undefined when the full residual is itself at chance
+               f"recovery {f3(b['recovery_J_fill'], 2) if abs((b['full'] or 0.5) - 0.5) >= 0.05 else 'n/a (full residual at chance)'})", "",
                "| position | full | J fill | J pursuit | PCA | rand sub p95 | rand atoms p95 | clears |", "|---|---|---|---|---|---|---|---|"]
         md += [f"| {p} | {f3(x['full'])} | {f3(x['J_fill'])} | {f3(x['J_pursuit'])} | {f3(x['pca'])} | {f3(x['randsub_p95'])} | {f3(x['randatoms_p95'])} | {x['clears']}/{x['n']} |"
                for p, x in v["band_by_position"].items()]

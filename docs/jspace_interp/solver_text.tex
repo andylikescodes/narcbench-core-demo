@@ -1,1 +1,32 @@
-%
+% What Table~\ref{tab:solver} shows. Numbers from results/jspace_interp/solver_check/solver_check.json and the two
+% sweeps without the gain; checked by the claims script.
+\noindent Four things follow from the table.
+\begin{itemize}
+\item \textbf{The form of the component barely matters.} With the whole-vocabulary search, the non-negative combination
+scores 0.819 (row~1, interval $[0.779, 0.858]$), the span of the chosen vectors 0.815 (row~2) and gradient pursuit's own
+weights without the final refit 0.800 (row~3).
+\item \textbf{The search matters.} The November~9 version of this paper let the pursuit choose, for speed, only among the
+1{,}024 tokens best aligned with each activation. With that shortlist the same procedure scores 0.771 (row~4), a paired
+difference of $[-0.084, -0.014]$ to row~1. Between 20\% and 33\% of the whole-vocabulary picks lie outside the shortlist,
+depending on the layer. The two J-space parts have a cosine of 0.98, yet the probe on them differs: the arm is sensitive to
+details of its construction. At layer~22 alone the two searches agree (0.919 and 0.929), so a check at one layer does not
+show the difference.
+\item \textbf{Given the search, the solver does not matter.} With the shortlist, gradient pursuit and non-negative
+orthogonal matching pursuit give 0.765 to 0.783 in either form (rows~4 to~7).
+\item \textbf{The gain.} The paper calls the J-lens vectors the rows of $W_U J_\ell$. Read literally, that leaves out the
+gain of the final normalisation. With the whole-vocabulary search that lowers the arm to 0.768 (row~8; paired difference
+to row~1 $[-0.092, -0.011]$), and the pursuit then runs to 25 vectors for nearly every activation. With the shortlist the
+two no-gain readings score 0.782 and 0.820 (rows~9 and~10). For the vectors without the gain we drew the 200 random sets of
+lens atoms again, from the same vectors: the arm of row~8 is above the random-subspace null at layers 21 to 23 and above
+the random lens atoms at no layer, as with the gain. We keep the gain, because with it the inner product
+$\langle v_i,h\rangle$ reproduces the package's logit (Check~1).
+\end{itemize}
+In every row the arm is below PCA-25 (0.879) and the full residual (0.945).
+
+\paragraph{How the whole-vocabulary search was run.} One step of the pursuit needs the inner products of the remainder
+with all 256{,}000 J-lens vectors. They are computed on the GPU of a laptop: the device proposes the eight best tokens for
+each activation, and the choice among them is made in CPU single precision from the stored unembedding, so that it does not
+depend on the device's arithmetic. On 160 activations of layer~22 this chose the same vectors in the same order as the
+plain CPU implementation, and that implementation equals the one-activation reference on synthetic dictionaries, including
+the cases where the pursuit stops early. The pursuit stops by itself, when no remaining vector correlates positively with
+the remainder, after 19 to 21 vectors on average on Core and at most 36; the J-space arm at $k=25$ uses the first 25.

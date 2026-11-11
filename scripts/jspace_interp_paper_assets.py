@@ -355,13 +355,16 @@ def tables(D):
     how = lambda ls_: ", ".join(str(x) for x in ls_) if ls_ else "none"  # noqa: E731
     po = D.band("prompt_only", "prompt_end", "full")
     lpo = [L_ for L_ in LAYERS if D.cell("original", "last", L_)["J_fill"] > D.cell("prompt_only", "prompt_end", L_)["full"]]
+    yn = lambda base: "yes" if j > base else "no"  # noqa: E731
+    both = [L_ for L_ in LAYERS if L_ in ls and L_ in la]
     write("tabp_scoreboard", [
         r"\begin{tabularx}{\linewidth}{@{}Xcccc@{}}\toprule",
-        r"Baseline J-space had to beat & Baseline & J-space & Beaten? & Above it at layers\\\midrule",
-        rf"1a. Random 25-dim subspaces, 95th percentile & {f3(b('randsub_p95'))} & {f3(j)} & No & {how(ls)}\\",
-        rf"1b. Random sets of 25 lens atoms, 95th percentile & {f3(b('randatoms_p95'))} & {f3(j)} & No & {how(la)}\\",
-        rf"2. Prompt-only probe (system prompt alone) & {f3(po)} & {f3(j)} & No & {how(lpo)}\\",
-        rf"3. PCA subspace, 25 components fit on Core & {f3(b('pca'))} & {f3(j)} & No & {how(lp)}\\",
+        r"Baseline J-space had to beat & Baseline & J-space & Above it? & Above it at layers\\\midrule",
+        rf"1a. Random 25-dim subspaces, 95th percentile & {f3(b('randsub_p95'))} & {f3(j)} & {yn(b('randsub_p95'))} & {how(ls)}\\",
+        rf"1b. Random sets of 25 lens atoms, 95th percentile & {f3(b('randatoms_p95'))} & {f3(j)} & {yn(b('randatoms_p95'))} & {how(la)}\\",
+        rf"1. Both nulls at the same layer (the rule of Step~7) &  &  & {'yes' if both else 'no'} & {how(both)}\\",
+        rf"2. Prompt-only probe (system prompt alone) & {f3(po)} & {f3(j)} & {yn(po)} & {how(lpo)}\\",
+        rf"3. PCA subspace, 25 components fit on Core & {f3(b('pca'))} & {f3(j)} & {yn(b('pca'))} & {how(lp)}\\",
         r"\bottomrule\end{tabularx}"])
     # --- controls: three protocols per condition (Findings 1 and 3)
     L = [r"\begin{tabular}{@{}lccccccccc@{}}\toprule",
@@ -411,8 +414,18 @@ def tables(D):
     mc = D.S["exp1_most_common_atoms"]
 
     def tok(t):
-        t = t.replace("▁", r"\textvisiblespace{}")
-        return r"\texttt{" + t.replace("_", r"\_") + "}"
+        out = []
+        for ch in t:
+            o = ord(ch)
+            if ch == "▁":
+                out.append(r"\textvisiblespace{}")
+            elif ch in "\\{}$&#%_^~":
+                out.append({"\\": r"\textbackslash{}", "^": r"\^{}", "~": r"\~{}"}.get(ch, "\\" + ch))
+            elif 32 <= o < 127 or 0xA1 <= o <= 0x17F or o in (0x2013, 0x2014, 0x2018, 0x2019, 0x201C, 0x201D, 0x2026):
+                out.append(ch)
+            else:
+                out.append(rf"\textrm{{[U+{o:04X}]}}")           # no glyph in the paper's fonts: print the code point
+        return r"\texttt{" + "".join(out) + "}"
 
     a_last = mc["original/last/L22"]["core"][:8]
     a_prev = mc["original/prevote/L22"]["core"][:8]
@@ -600,10 +613,29 @@ def numbers(D):
     N["positions_original"] = {p: {a: b(a, pos=p) for a in ("full", "pca", "J_fill", "randsub_p95", "full_lodo", "full_lofo")} for p, _ in POSITIONS}
     N["ksweep"] = {k: {a: b(a, k=k) for a in ("J_fill", "J_pursuit", "J_span", "pca", "randsub_p95", "randatoms_p95", "full")} for k in (8, 25, 50, 100)}
     N["primary_j_arm"] = D.S.get("primary_j_arm", "fill")
+    # the headline cell against the nulls as a mean over the five layers: draw i of every layer averaged (the draws of
+    # different layers are independent), and how many of those 200 means reach the J-space band mean
+    jb = D.band("original", "last", "J_fill")
+    N["band_nulls"] = {}
+    for kind in ("randsub", "randatoms"):
+        bm = np.mean(np.stack([D.draws(L, kind) for L in LAYERS]), axis=0)
+        N["band_nulls"][kind] = {"n_draws": int(len(bm)), "n_at_or_above_J": int((bm >= jb).sum()), "p95_of_band_means": round(float(np.percentile(bm, 95)), 4),
+                                 "max_of_band_means": round(float(bm.max()), 4)}
+    # intervals of the band mean and of paired band-mean differences, from the saved bootstrap draws (when they are there)
+    bf = [RES / SWEEP / f"original_last/boot_original_last_L{L}_k{K}.npz" for L in LAYERS]
+    if all(f.exists() for f in bf):
+        zs = [np.load(f) for f in bf]
+        bb = {a: np.mean(np.stack([z[a] for z in zs]), axis=0) for a in zs[0].files}
+        jk = f"J{K}_recon" if D.recon else f"J{K}_fill"
+        ck = f"C{K}_recon" if D.recon else f"C{K}_fill"
+        pct = lambda x: [round(float(v), 3) for v in np.nanpercentile(x, [2.5, 97.5])]  # noqa: E731
+        N["band_boot_original_last"] = {"J_ci": pct(bb[jk]), "J_minus_pca_ci": pct(bb[jk] - bb[f"pca{K}"]), "J_minus_full_ci": pct(bb[jk] - bb["full"]),
+                                        "C_minus_full_ci": pct(bb[ck] - bb["full"]), "J_span_ci": pct(bb[f"J{K}_fill"]),
+                                        "J_span_minus_J_ci": pct(bb[f"J{K}_fill"] - bb[jk])}
     N["band_original_last"].update({a: b(a) for a in ("J_span", "C_span", "J_fve", "J_span_fve") if D.cell("original", "last", 22).get(a) is not None})
     for L in LAYERS:
         c = D.cell("original", "last", L)
-        N["per_layer_original_last"][L].update({a: (round(c[a], 4) if c.get(a) is not None else None) for a in ("J_span", "C_span", "J_fve", "J_atoms_used")})
+        N["per_layer_original_last"][L].update({a: (round(c[a], 4) if c.get(a) is not None else None) for a in ("J_span", "C_span", "J_fve", "J_atoms_used", "p_J_span_vs_randsub", "p_J_span_vs_randatoms")})
         if c.get("J_recon_minus_J_span_ci"):
             N["per_layer_original_last"][L]["J_minus_J_span_ci"] = [round(x, 3) for x in c["J_recon_minus_J_span_ci"]]
     for cond in ("original", "swap"):

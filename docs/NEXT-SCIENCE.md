@@ -561,3 +561,69 @@ and in span-versus-combination.
   Expected 7 to 9 hours. Steering is NOT rerun (GPU): its role direction and scale come from the non-negative OMP
   decomposition; the concept directions do not depend on the solver.
 - Until it finishes the paper keeps the non-negative OMP numbers and says so in Section 3.11.
+
+**Note 2026-11-11 (early morning, local) — the candidate shortlist matters; sweep rerun with whole-vocabulary gradient
+pursuit on the Mac's GPU; deck refocused on the method and Finding 2.** User (10 Nov, late): tomorrow's talk covers only
+the method from Anthropic's J-lens to the decomposition (with the math) and Finding 2, and Finding 2 under the controls if
+time; update the deck after the rerun; keep going overnight.
+- **What the extra check found.** `scripts/jspace_interp_solver_check.py --extra` on all five layers of the headline cell
+  (original, last, k = 25; same probe and resamples in every row): gradient pursuit over the whole vocabulary, non-negative
+  combination: 0.819 [0.779, 0.858]; the same with the pursuit restricted to the 1,024 tokens best aligned with each
+  activation: 0.771 [0.731, 0.811]; paired difference [+0.014, +0.084]. 20% to 33% of the whole-vocabulary picks lie
+  outside the shortlist; the two parts have a cosine of 0.98. At layer 22 alone the two agree (0.929 vs 0.919), which is
+  why the first check, run at layer 22 only, had said the search does not matter. Given the search, solver and form do not
+  matter: shortlist 0.762 to 0.783 (gradient pursuit or non-negative OMP, combination or span), whole vocabulary 0.800 to
+  0.819 (combination, span, gradient pursuit's own weights). The paper (Gurnee et al., read in the saved page text)
+  describes no shortlist, so the shortlist was our deviation, made for speed on 5 November.
+- **New primary J-space arm:** gradient pursuit over the whole vocabulary, k = 25, non-negative combination (NNLS on the
+  chosen vectors), final-norm gain kept inside the J-lens vectors. `results/jspace_interp/gemma2_9b_gpfull/`.
+  `gemma2_9b_gp/` (shortlist, 10–11 Nov, CPU: the four last-token cells and original_prevote) and `gemma2_9b/` (9 Nov:
+  non-negative OMP on the shortlist, span) are kept as the comparison; the shortlist position jobs were stopped when the
+  check came in.
+- **How it ran without a cloud GPU.** `scripts/jspace_interp_analyze.py --method gpfull --device mps`:
+  `sweep.TorchVocabSearch` keeps the unembedding on the Mac's GPU (torch MPS, fp16 as stored, widened per chunk), proposes
+  the eight best tokens per activation and step, and the pick is made in CPU float32 from the stored unembedding. On 160
+  real activations (layer 22) the picks are identical to the CPU version; on the tiny model the CPU run and the
+  device-plus-cache run give identical result files, and the nnomp and gp results are unchanged. About 19 times faster than
+  the loaded CPU: roughly 2 minutes per layer of a cell for the pursuit, 2 to 3 for scoring. `--decomp-cache` (in
+  `results/jspace_interp/acts/decomp_cache`, git-ignored) lets one GPU process decompose while CPU workers score
+  (`--require-cache`); `--k-max` decouples the pursuit length from `--ks`; `scripts/jspace_interp_merge_k.py` merges the
+  k = 25 and k = 8/50/100 runs of the headline cell. The analysis now saves the bootstrap draws of every arm
+  (`boot_*.npz`, not committed) so band-level intervals can be formed. No pod was started; the RunPod balance is unchanged.
+- **Headline cell, whole vocabulary** (band means, Core→Transfer): J-space 0.819 [0.779, 0.858]; span form 0.815;
+  complement 0.946; PCA-25 0.879; full residual 0.945; random subspaces mean 0.650 / p95 0.808; random lens-atom sets
+  mean 0.716 / p95 0.875. Per layer 19–23: 0.657, 0.761, 0.852, 0.929, 0.896. By the pre-registered rule (per layer, above
+  the 95th percentile of both nulls): above the random subspaces at layers 21, 22, 23 (p = 0.035, 0.005, 0.010), above the
+  random lens atoms at none (p 0.08 to 0.30), so the rule is met at 0 of 5 layers. J-space minus PCA-25 on the band:
+  [−0.117, −0.001]; below PCA at layers 19–22, above at 23. Not pre-registered: averaged over the five layers, none of the
+  200 random subspaces and 1 of the 200 random lens-atom sets reach 0.819. Sizes: 0.765 (k = 8), 0.819, 0.814, 0.814
+  (k = 100); PCA 0.831 to 0.938. Pursuit stops after 19 to 21 vectors on average (at most 36).
+- **Controls, whole vocabulary** (J-space, band): swap 0.465, nosys 0.525, prompt-only 0.976 (full residual 0.479, 0.488,
+  1.000). Within Core (LODO): 0.825 under swap, 0.822 with no system prompt.
+- **Gain.** J-lens vectors without the final-norm gain, whole vocabulary: 0.768 [0.729, 0.806], paired difference to the
+  primary [−0.092, −0.011]; the pursuit then runs to 25 vectors for nearly every activation. (Shortlist, no gain: 0.782
+  combination, 0.820 OMP span.) So no reading reaches PCA-25, and the with-gain reading is the highest.
+- **Other read positions, whole vocabulary** (J-space, band, original): 0.535 / 0.540 / 0.471 at 25 / 50 / 75% into the
+  reply, 0.538 at the last reply token, 0.590 on the end-of-turn token, 0.819 at the last token, 0.582 for the mean over
+  the reply. The rule is met in 1 of the 35 original cells (frac50, layer 20, 0.612) and in 3 of the 35 swap cells (frac50
+  layer 19, prevote layers 20 and 22; 0.58 to 0.61): about what 70 tests at the 5% level give. PCA-25 is reliably better
+  than J-space in 6 of the 35 original cells, J-space in none. All 80 cells at k = 25 ran, plus k = 8/50/100 at the
+  headline cell (`results/jspace_interp/gemma2_9b_gpfull/SUMMARY.json`, `RESULTS.md`).
+- **Token readout and matched vocabulary, whole vocabulary:** same picture as on 9 November. Layer 22, last token:
+  "subtly" +61 points among colluders on Core (was +62), "disinformation" +62 and "subtly" +51 on Transfer; no token
+  differs on Transfer under swap or nosys at any layer. Echo ratio of J-space 0.06 to 0.24 (was 0.13 to 0.21); colluders
+  against warned agents 0.92 to 1.00.
+- **Paper** (`docs/jspace_interp/jspace_colluder_study.tex/.pdf`, 32 pages): every J-space number recomputed from the
+  whole-vocabulary sweep; Step 4 and Section 3.11 rewritten (Table 5 lists ten readings of the definition with paired
+  differences to the primary one); Finding 2 retitled "J-space clears none of the three bars"; the appendix "Changes since
+  earlier drafts" says what moved. 108 numeric claims of the text were asserted against the result files. Still on the
+  9 November decomposition and marked so: the steering (role direction and scale).
+- **Deck** "Collusion Signatures Beyond J-Space" (claude.ai/artifact/HyGfCP6XjFiyo1copKLhys): rebuilt for the 11 November
+  meeting as 37 slides: cover, today, test-bed recap; method in seven slides (lens, J-lens vectors, definition of
+  J-space, gradient pursuit, provenance, the choices the text leaves open, the arms); Finding 2 in five (the three bars,
+  scoreboard, layer by layer, size, answer); three optional slides on the controls; status; close; backup (the other six
+  findings, the earlier test-bed and probe slides, sources). Formulas are typeset with LaTeX and embedded as outlines.
+  Ten earlier result slides were taken out of the deck (they remain in its version 28).
+- **Not run / open:** steering with the present decomposition (GPU; needs the user's OK); sizes other than 25 away from
+  the headline cell; the no-gain reading away from the headline cell; the comparison of band means with the nulls is
+  reported but was not part of the pre-registered rule.

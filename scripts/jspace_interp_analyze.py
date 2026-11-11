@@ -113,6 +113,11 @@ def main():
     ap.add_argument("--no-lodo", action="store_true", help="skip Core LODO for every arm (fast smoke)")
     ap.add_argument("--no-warned", action="store_true", help="ignore warned extractions even if present")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--method", default="nnomp", choices=("nnomp", "gp"),
+                    help="pursuit solver: nnomp (non-negative OMP, NNLS refit) or gp (gradient pursuit, the solver Gurnee et al. name)")
+    ap.add_argument("--reuse-random-from", type=Path, default=None,
+                    help="root of an earlier sweep (<root>/<condition>_<position>/sweep_results.json): copy its random-subspace and "
+                         "random-atom draws instead of redrawing them (they do not depend on the decomposition)")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -150,6 +155,13 @@ def main():
             log(cond, "warned episodes present:", len({wm[i]["run_id"] for i in wi}), "episodes,", len(wi), "rows")
         pos_list = ["prompt_end"] if prompt_only else positions
         for pos in pos_list:
+            prev_random = {}
+            if args.reuse_random_from is not None:
+                pf = args.reuse_random_from / f"{cond}_{pos}" / "sweep_results.json"
+                for pc in json.loads(pf.read_text())["cells"]:
+                    if pc["condition"] == cond and pc["position"] == pos:
+                        prev_random[pc["layer"]] = pc
+                log(cond, pos, "random draws reused from", pf, "layers", sorted(prev_random))
             for L in layers:
                 key = f"{pos}__layer_{L}"
                 if key not in cz.files:
@@ -188,9 +200,10 @@ def main():
                 log(cond, pos, L, "full", {k: v for k, v in cell["full"].items() if k != "matched_vocab"},
                     "| warned:", {k: round(v, 3) for k, v in cell["full"].get("matched_vocab", {}).items()
                                   if isinstance(v, float)} if Xw is not None else "-")
-                dc = sweep.decompose_nested(Xc, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates)
-                dt = sweep.decompose_nested(Xt, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates)
-                dw = sweep.decompose_nested(Xw, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates) if Xw is not None else None
+                dc = sweep.decompose_nested(Xc, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates, method=args.method)
+                dt = sweep.decompose_nested(Xt, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates, method=args.method)
+                dw = (sweep.decompose_nested(Xw, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates, method=args.method)
+                      if Xw is not None else None)
                 cell["pursuit_steps_core_mean"] = float(dc["steps"].mean())
                 cell["pursuit_steps_transfer_mean"] = float(dt["steps"].mean())
                 cell["decompose_seconds"] = round(time.time() - t_cell, 1)
@@ -236,6 +249,15 @@ def main():
                                 if pos in ("last", "prevote", "frac50", "prompt_end"):
                                     results["exp1"].append(exp1_readouts(cond, pos, L, cm, ci, tm, ti, tc, tt, dc, dt, gids,
                                                                          inv_vocab, warned=(wm, wi, tw) if Xw is not None else None))
+                    # the J-space component as Gurnee et al. operationalise it: the non-negative combination of the (at most k)
+                    # pursuit atoms; the remainder is their non-J-space component
+                    rc, uc = sweep.j_recon(Xc, dc, J[L], W, s, k)
+                    rt, _ = sweep.j_recon(Xt, dt, J[L], W, s, k)
+                    rw = sweep.j_recon(Xw, dw, J[L], W, s, k)[0] if Xw is not None else None
+                    arms[f"J{k}_recon"] = score(rc, rt, rw)
+                    arms[f"J{k}_recon"]["fve_core"] = float(np.mean((rc ** 2).sum(1) / Fc_mean))
+                    arms[f"J{k}_recon"]["atoms_used_core_mean"] = float(uc.mean())
+                    arms[f"C{k}_recon"] = score(Xc - rc, Xt - rt, (Xw - rw) if Xw is not None else None)
                     # PCA control
                     Xm = Xc - Xc.mean(0)
                     _, _, Vt = np.linalg.svd(Xm, full_matrices=False)
@@ -245,7 +267,12 @@ def main():
                     # many-draw random controls (Core -> Transfer; LODO for the first few draws; matched-vocab for the first few)
                     rs_c2t, rs_lodo, ra_c2t, rs_mv = [], [], [], []
                     V = W.shape[0]
-                    for b in range(args.n_random):
+                    reuse = (prev_random.get(L) or {}).get(f"k{k}")
+                    if reuse is not None:  # the random arms do not depend on the decomposition
+                        rs_c2t = list(reuse["randsub"]["c2t_draws"])
+                        rs_lodo = list(reuse["randsub"].get("lodo_draws", []))
+                        ra_c2t = list(reuse["randatoms"]["c2t_draws"])
+                    for b in range(0 if reuse is not None else args.n_random):
                         Q = sweep.haar_subspace(d, k, rng)
                         do_mv = Xw is not None and b < args.n_random_mv
                         r = score(sweep.project_fixed(Xc, Q), sweep.project_fixed(Xt, Q),
@@ -271,11 +298,18 @@ def main():
                                         "J_pursuit_percentile": stats.empirical_percentile(jp, rs_c2t)}
                     if rs_mv:
                         out_k["randsub"]["matched_vocab"] = mv_summary(rs_mv)
+                    if reuse is not None:
+                        out_k["randsub"]["reused"] = True
+                        if "matched_vocab" in reuse["randsub"]:
+                            out_k["randsub"]["matched_vocab"] = reuse["randsub"]["matched_vocab"]
+                    jr = arms[f"J{k}_recon"]["core_to_transfer"]
+                    out_k["randsub"]["J_recon_percentile"] = stats.empirical_percentile(jr, rs_c2t)
                     out_k["randatoms"] = {"n": len(ra_c2t), "c2t_mean": float(np.mean(ra_c2t)),
                                           "c2t_p95": float(np.percentile(ra_c2t, 95)),
                                           "c2t_draws": [float(x) for x in ra_c2t],
                                           "J_fill_percentile": stats.empirical_percentile(jf, ra_c2t),
-                                          "J_pursuit_percentile": stats.empirical_percentile(jp, ra_c2t)}
+                                          "J_pursuit_percentile": stats.empirical_percentile(jp, ra_c2t),
+                                          "J_recon_percentile": stats.empirical_percentile(jr, ra_c2t)}
                     fullc = full["core_to_transfer"]
                     out_k["recovery_J_fill"] = float((jf - 0.5) / max(fullc - 0.5, 1e-9))
                     out_k["recovery_J_pursuit"] = float((jp - 0.5) / max(fullc - 0.5, 1e-9))
@@ -284,10 +318,16 @@ def main():
                     out_k["J_pursuit_minus_full_ci95"] = list(np.nanpercentile(arms[f"J{k}"]["_boot"] - full["_boot"], [2.5, 97.5]).astype(float))
                     out_k["J_fill_minus_pca_ci95"] = list(np.nanpercentile(arms[f"J{k}_fill"]["_boot"] - arms[f"pca{k}"]["_boot"], [2.5, 97.5]).astype(float))
                     out_k["C_fill_minus_J_fill_ci95"] = list(np.nanpercentile(arms[f"C{k}_fill"]["_boot"] - arms[f"J{k}_fill"]["_boot"], [2.5, 97.5]).astype(float))
+                    rb = arms[f"J{k}_recon"]["_boot"]
+                    out_k["recovery_J_recon"] = float((jr - 0.5) / max(fullc - 0.5, 1e-9))
+                    out_k["J_recon_minus_full_ci95"] = list(np.nanpercentile(rb - full["_boot"], [2.5, 97.5]).astype(float))
+                    out_k["J_recon_minus_pca_ci95"] = list(np.nanpercentile(rb - arms[f"pca{k}"]["_boot"], [2.5, 97.5]).astype(float))
+                    out_k["J_recon_minus_J_fill_ci95"] = list(np.nanpercentile(rb - arms[f"J{k}_fill"]["_boot"], [2.5, 97.5]).astype(float))
+                    out_k["C_recon_minus_J_recon_ci95"] = list(np.nanpercentile(arms[f"C{k}_recon"]["_boot"] - rb, [2.5, 97.5]).astype(float))
                     out_k["seconds"] = round(time.time() - t_k, 1)
                     cell[f"k{k}"] = out_k
                     mvs = arms[f"J{k}_fill"].get("matched_vocab", {})
-                    log(cond, pos, L, f"k={k}", "J_fill", round(jf, 3), "J", round(jp, 3),
+                    log(cond, pos, L, f"k={k}", "[" + args.method + "]", "J_recon", round(jr, 3), "J_fill", round(jf, 3), "J", round(jp, 3),
                         "randsub p95", round(out_k["randsub"]["c2t_p95"], 3), "pca", round(arms[f"pca{k}"]["core_to_transfer"], 3),
                         "full", round(fullc, 3),
                         "| mv col-vs-warned", round(mvs["auroc_colluder_vs_warned"], 3) if mvs.get("auroc_colluder_vs_warned") is not None else "-",

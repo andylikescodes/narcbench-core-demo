@@ -541,3 +541,23 @@ Anthropic's j-lens implementation? ... that should be the standard of our analys
   block l, the same convention); a full sweep with gradient pursuit as primary.
 Paper: now a standard LaTeX article (abstract, numbered sections, references), with Section 3.11 "Implementation: what comes
 from Anthropic's jlens and what is ours" (Table 4 and the two checks).
+
+**Note 2026-11-10 23:45 local — rerun of the sweep in the paper's Methods form (in progress).** User: "why do we need the
+gradient pursuit? Is that the standard that we want to stick to? If so let's rerun this." Read in the paper itself
+(transformer-circuits.pub/2026/workspace, Methods "The J-Space" and the experiments on concept vectors, two-hop probes,
+directed modulation and the J-stripped control): the J-space component of a vector is "a sparse nonnegative combination of
+k J-lens vectors" found "using gradient pursuit" (k = 25 for probes, 16 for concept vectors), the remainder is the
+non-J-space component; the formalisation appendix defines it as the projection onto the span of exactly k vectors and
+mentions orthogonal matching pursuit only as a possible approximation of the distance. So our Nov 5 / Nov 9 primary
+(non-negative OMP, filled to 25, span projection) follows the appendix form and differs from the Methods form in the solver
+and in span-versus-combination.
+- Code: `jspace_interp/sweep.py` gets `decompose_nested(method=...)` and `j_recon` (NNLS combination of the at most k pursuit
+  atoms); `scripts/jspace_interp_analyze.py` gets `--method gp`, the arms `J{k}_recon` / `C{k}_recon` with their paired
+  intervals and percentiles, and `--reuse-random-from` (the 200+200 random draws do not depend on the decomposition and are
+  copied from the Nov 9 files; full and PCA are recomputed for the paired intervals). Tested on the tiny random model.
+- Run: this Mac (8 GB), workers from scratch `gp_rerun/worker.sh` under `caffeinate`, job order original_last (k 8,25,50,100),
+  swap_last, prompt_only, nosys_last, then the other positions of original and of swap (k = 25 only), layers in the order
+  22, 21, 23, 20, 19; output `results/jspace_interp/gemma2_9b_gp/<cond>_<pos>/sweep_results.json`, written after every layer.
+  Expected 7 to 9 hours. Steering is NOT rerun (GPU): its role direction and scale come from the non-negative OMP
+  decomposition; the concept directions do not depend on the solver.
+- Until it finishes the paper keeps the non-negative OMP numbers and says so in Section 3.11.

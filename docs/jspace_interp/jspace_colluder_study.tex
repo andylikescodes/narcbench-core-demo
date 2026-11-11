@@ -448,10 +448,12 @@ memory. It gives the same numbers as the package (below).\\
 J-lens vectors & Not in the package. The paper defines them as the rows of $W_U J_\ell$. &
 \textbf{Ours}, $v_i = J_\ell^{\top}((1+\gamma)\odot W_U[i])$: the direction along which the package's readout of token $i$
 rises (checked below).\\
-J-space decomposition & Not in the package; no code is released. The paper names gradient pursuit as the solver and, in its
-formal definition, projects onto the span of $k$ J-lens vectors. &
-\textbf{Ours}, written from the paper's text: non-negative orthogonal matching pursuit, filled to $k=25$, projection onto
-the span. Check~2 below compares it with gradient pursuit.\\
+J-space decomposition & Not in the package; no code is released. The paper's Methods take the J-space component to be the
+sparse non-negative combination of $k$ J-lens vectors found by gradient pursuit; its appendix defines it as the projection
+onto the span of $k$ vectors. &
+\textbf{Ours}, written from the paper's text. The numbers of this version use non-negative orthogonal matching pursuit,
+filled to $k=25$, with projection onto the span. A rerun in the Methods form (gradient pursuit, non-negative combination)
+is in progress; see Check~2.\\
 Probe, detectors, nulls, controls, steering & None. & \textbf{Ours.}\\
 \bottomrule\end{tabularx}
 \caption{What comes from Anthropic's reference implementation (\jlens{} v0.1.0, commit \texttt{581d398}) and what is our
@@ -468,12 +470,19 @@ softcap equals $\langle v_i,h\rangle$ divided by the root mean square of $J_\ell
 of 50, so our J-lens vectors are exactly the readout directions of the published lens. The check executes
 \texttt{HFLensModel.unembed} on the model's final-norm and unembedding weights; it does not load the model.
 
-\paragraph{Check 2: our decomposition against the solver the paper names.} The paper fixes the dictionary, the
-non-negativity, $k$ of about 25 and gradient pursuit~\cite{blumensath2008}. It does not fix the stopping rule, a candidate
-pre-selection, the normalisation of the vectors, or whether the gain of the final normalisation is part of them. Our
-choices for these are: stop when no candidate correlates positively with the remainder; pre-select the 1{,}024 best
-candidates; compare vectors at unit length; include the gain, so that the vectors are the readout directions of the
-package.
+\paragraph{Check 2: our decomposition against the paper's definition.} A solver is needed because the J-space component of
+an activation is its best approximation by $k$ of the 256{,}000 J-lens vectors, and the best subset cannot be searched
+exhaustively; a greedy pursuit adds one vector at a time. The paper's Methods state the procedure: solve, by gradient
+pursuit~\cite{blumensath2008}, for a sparse non-negative combination of $k$ J-lens vectors that approximates the
+activation; that combination is the J-space component and the rest is the non-J-space component ($k=25$ for probes, 16 for
+concept vectors). Its formalisation appendix defines the component as the projection onto the span of exactly $k$ vectors.
+The numbers of this version follow the appendix form, and they differ from the Methods form in two ways: the solver is
+non-negative orthogonal matching pursuit, a sibling of gradient pursuit that refits all weights after each added vector,
+and the component is the projection onto the span of the 25 chosen vectors, not their non-negative combination. The
+paper does not fix the stopping rule, a candidate pre-selection, the normalisation of the vectors, or whether the gain of
+the final normalisation is part of them. Our choices for these are: stop when no candidate correlates positively with the
+remainder; pre-select the 1{,}024 best candidates; compare vectors at unit length; include the gain, so that the inner
+product with a J-lens vector gives the readout logit up to the normalisation factor, as the paper describes.
 
 On the activations of the first run \src{Nov 5}, gradient pursuit scored 0.756 against 0.755 for our primary (paired
 difference $[-0.025, +0.026]$): the two solvers choose nearly the same atoms. Two other readings scored higher there,
@@ -498,7 +507,9 @@ the gain) was still running when this version was built \notrun; its results go 
 
 \paragraph{Not done.} We did not run \texttt{JacobianLens.apply} on the model itself, which would also exercise the
 package's tokenisation and its hooks \notrun; our extraction reads the output of block $\ell$ with a forward hook, as the
-package does. And the full sweep was not rerun with gradient pursuit as the primary solver \notrun.
+package does. A rerun of the whole sweep in the Methods form, with gradient pursuit and the non-negative combination as
+the J-space arm, was started on November~10 and was still running when this version was built; its results go to
+\texttt{results/jspace\_interp/gemma2\_9b\_gp/} and will replace the J-space numbers of this paper.
 
 \subsection{Compute}
 One A40 GPU ran the main job for 7.7 hours on November~9: the 50 warned episodes, the activations for all four conditions,
@@ -848,8 +859,8 @@ token, 50\% into the reply, and the end of the system prompt.
 It was planned on November~8 and exists for the text only (Appendix~\ref{app:earlier}).
 \item \textbf{A larger lens null for steering,} at more layers and for the role direction. It ran with 20 draws at swap
 layer 23.
-\item \textbf{An end-to-end run of \jlens{} on the model, and a full sweep with gradient pursuit as the primary solver}
-(Section~\ref{sec:impl}).
+\item \textbf{An end-to-end run of \jlens{} on the model} (Section~\ref{sec:impl}). The sweep in the paper's Methods form
+(gradient pursuit, non-negative combination) was still running when this version was built.
 \item \textbf{Other models.} No Jacobian lens is published for the other three models with NARCBench activations.
 \item \textbf{Collusion without an instruction.} The benchmark only has instructed collusion.
 \end{itemize}

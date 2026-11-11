@@ -11,17 +11,19 @@ from .nov5_jspace_decompose import candidates_and_readout, pursuit_one, project_
 
 
 def decompose_nested(acts, J, W, s, an, *, k_max: int, n_cand: int = 1024, select="unit", batch=64,
-                     vocab_chunk=8192, k_read=50):
-    """One NNOMP pursuit to k_max without fill; the first k atoms of the selection order give J_k
-    for every k <= k_max (greedy order does not depend on k). Also returns fill candidates
-    (next-best by correlation with h) so a filled-to-k arm can be built, and the lens readout."""
+                     vocab_chunk=8192, k_read=50, method="nnomp"):
+    """One greedy non-negative pursuit to k_max without fill; the first k atoms of the selection order give J_k
+    for every k <= k_max (the greedy order does not depend on k). ``method`` is "nnomp" (non-negative OMP with an
+    NNLS refit, the solver of the Nov 5 and Nov 9 runs) or "gp" (gradient pursuit, the solver Gurnee et al. name).
+    Also returns fill candidates (next-best by correlation with h) so a filled-to-k arm can be built, and the
+    lens readout."""
     cand, read, read_s = candidates_and_readout(acts, J, W, s, an, n_cand=n_cand, k_read=k_read,
                                                 vocab_chunk=vocab_chunk, batch=batch, select=select)
     n = acts.shape[0]
     order = np.full((n, k_max), -1, dtype=np.int64)
     steps = np.zeros(n, dtype=np.int32)
     for i in range(n):
-        out = pursuit_one(acts[i], cand[i], J, W, s, an, k=k_max, method="nnomp", select=select, fill=False)
+        out = pursuit_one(acts[i], cand[i], J, W, s, an, k=k_max, method=method, select=select, fill=False)
         m = len(out["tokens"])
         order[i, :m] = out["tokens"]
         steps[i] = out["steps"]
@@ -44,6 +46,27 @@ def j_arms(acts, dec, J, W, s, k: int, fill: bool):
         toks[i, :len(t)] = t
         hJ[i] = project_onto_tokens(acts[i], np.array(t, dtype=np.int64), J, W, s)
     return hJ, toks
+
+
+def j_recon(acts, dec, J, W, s, k: int):
+    """The J-space component as Gurnee et al. operationalise it: the best non-negative combination of the (at most k)
+    J-lens vectors the pursuit chose, sum_i c_i v_i with c >= 0 (NNLS on the first k atoms of the selection order).
+    h minus this is their non-J-space component. Returns the reconstructions [n, d] and the number of atoms with a
+    positive coefficient per row."""
+    from scipy.optimize import nnls
+
+    n, d = acts.shape
+    out = np.zeros((n, d), dtype=np.float32)
+    used = np.zeros(n, dtype=np.int32)
+    for i in range(n):
+        t = np.array([x for x in dec["order"][i, :k] if x >= 0], dtype=np.int64)
+        if len(t) == 0:
+            continue
+        A = ((np.asarray(W[t], dtype=np.float32) * s[None, :]) @ J).T.astype(np.float64)  # [d, m] J-lens vectors
+        c = nnls(A, np.asarray(acts[i], dtype=np.float64))[0]
+        out[i] = (A @ c).astype(np.float32)
+        used[i] = int((c > 0).sum())
+    return out, used
 
 
 def haar_subspace(d, k, rng):

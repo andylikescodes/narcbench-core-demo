@@ -480,3 +480,32 @@ system prompt. The paper's abstract, Experiment 1 paragraph and Table 11 caption
   honest agents and only by 0.01; honesty/standards is inside the null for honest agents and weaker than every draw for colluders.
 Slide deck updated the same day: "Collusion Signatures Beyond J-Space" (claude.ai artifact HyGfCP6XjFiyo1copKLhys), 32 slides,
 results section slides 16–28.
+
+**Correction 2026-11-10 (third) — found while restructuring the paper for the 11 November meeting.** Every item was checked
+against `SUMMARY.json`, the `sweep_results.json` files and the steering JSONs; no result changed, three readings did.
+- Experiment 1, token level. The 9 November summary ("the tokens that differ by role are stance and register words") was
+  incomplete. With the instruction in context, colluders' atoms at the last token include scheme words. Layer 22, difference
+  in the share of agents (colluders minus honest, same episodes): Core `subtly` +62 points, `convincing` +50, `justifying` +44,
+  `lobbying` +32, and `recommending` −59, `consensus` −51; Transfer `disinformation` +64, `ironically` +61, `subtly` +57,
+  `misinformation` +42, `unethical` +39. `subtly` holds at layers 21–23 (+54 to +76 on both splits). Under swap and under
+  nosys NO token differs by role on Transfer at any of the five layers (smallest BH p 0.07 at L22); on Core under swap tokens
+  still differ but they are words of disagreement (`disagreed` +38, `argued` +30, `contradicts` +29). At the end of the system
+  prompt (prompt_only, Core, L22): `justifying` +41, `justification` +32, `scrutiny` −36, `transparency` −27. At frac50 nothing
+  differs in any cell. The four frozen concept groups still hold ≤1.1% of the atoms (they list exact word forms, which is why
+  they missed this). Reading: the J-space readout does name the scheme, but only while the instruction is in context, i.e. it
+  echoes the instruction like the probe does. "Scheme words" is a post-hoc reading of the token lists.
+- Read position `prevote`. For the probe's rows it is the last token of the reply text, not "the token before the vote line":
+  the fallback applies to 1,199 of 1,200 Core discussion turns and 284 of 288 Transfer final turns (no vote line). So the
+  Core→Transfer scores 0.517 (`prevote`), 0.780 (`eot`), 0.945 (`last`) are three consecutive tokens at the end of the turn.
+- Swap is not chance for every arm at every position. PCA-25 at `frac25` transfers at 0.64–0.65 at all five layers under swap
+  (95% intervals 0.53–0.75; `frac50` 0.60–0.63), above the random-subspace p95 (0.60–0.62). The full residual there is 0.488,
+  PCA-8 0.475, PCA-100 0.492. A lead, not a result: the only place where something transfers without the instruction.
+- `scripts/jspace_interp_summarize.py` listed the wrong steering run as missing ("swap:L23", which ran): the planned runs were
+  read from the newest pod record (the lens-null pod planned only swap:23) and the check ignored the new suffix key. Fixed;
+  `RESULTS.md` and `SUMMARY.json` now say `original:L23` (those lines are the only change in the regenerated files).
+- The warned-episode extraction has 800 rows per condition (600 discussion + 200 final); the paper had said 850.
+Paper: `docs/jspace_interp/jspace_colluder_study.tex/.pdf` restructured (method in ten steps, then seven findings in order of
+importance, one page each, each with the question it answers; previous draft = commit af7afae). Figures and compact tables
+come from the new `scripts/jspace_interp_paper_assets.py`; 72 numeric claims of the text were asserted against the result
+files. NOT yet updated for the first three items above: the slide deck "Collusion Signatures Beyond J-Space" (its atoms,
+position-sweep and verdict slides still carry the 9 November readings and the "prevote" label).

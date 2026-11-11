@@ -453,6 +453,7 @@ def main() -> int:
     ap.add_argument("--plan-positions", default=None, help="override the planned positions (default: pod.json or the 7 standard ones)")
     ap.add_argument("--plan-layers", default=None)
     ap.add_argument("--plan-ks", default="8,25,50,100")
+    ap.add_argument("--plan-steer-runs", default=None, help="override the planned steering runs (default: swap:22,original:22,swap:23,original:23)")
     a = ap.parse_args()
 
     # the pod writes gemma2_9b/<cond>_<pos>/sweep_results.json; cells finished later on another machine go in subdirectories
@@ -465,7 +466,11 @@ def main() -> int:
         pod_json = Path(cands[-1]) if cands else None
     plan = {"positions": "last,prevote,eot,reply_mean,frac50,frac25,frac75", "layers": "19-23", "steer_runs": "swap:22,original:22,swap:23,original:23"}
     if pod_json and pod_json.exists():
-        plan.update({k: v for k, v in (json.load(open(pod_json)).get("settings") or {}).items() if k in plan})
+        # positions and layers come from the pod; the steering plan stays the pre-registered four runs, because a
+        # follow-up pod (steer-only, or one null rerun) records only the runs it was asked for
+        plan.update({k: v for k, v in (json.load(open(pod_json)).get("settings") or {}).items() if k in ("positions", "layers")})
+    if a.plan_steer_runs:
+        plan["steer_runs"] = a.plan_steer_runs
     if a.plan_positions:
         plan["positions"] = a.plan_positions
     if a.plan_layers:
@@ -489,7 +494,8 @@ def main() -> int:
     have = {(r["condition"], r["position"], r["layer"], r["k"]) for r in rows}
     not_run_cells = [x for x in planned if x not in have]
     planned_steer = [tuple(x.split(":")) for x in plan["steer_runs"].split(",") if x]
-    not_run_steer = [f"{c}:L{L}" for c, L in planned_steer if ("core", c, int(L)) not in steers_raw]
+    # a planned run is the one against the Gaussian null (no suffix); reruns against another null carry a suffix
+    not_run_steer = [f"{c}:L{L}" for c, L in planned_steer if ("core", c, int(L), "") not in steers_raw]
     by_cell_missing = sorted({(c, p) for c, p, L, k in not_run_cells})
 
     a.out.mkdir(parents=True, exist_ok=True)

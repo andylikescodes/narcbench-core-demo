@@ -237,4 +237,4 @@ Inputs: 16 sweep file(s), 4 steering file(s). Planned cells 320, ran 320.
 ## not run
 
 - condition/position pairs with missing cells: none
-- steering runs missing: swap:L23
+- steering runs missing: original:L23

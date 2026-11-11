@@ -33,8 +33,9 @@ percentile of 200 random subspaces at two layers only (layer 22: 0.899 vs 0.851)
 the end of the system prompt, before any conversation, transfers at 1.000 for every arm including random subspaces; with the
 colluders' system prompt swapped for the honest one and their private blocks cut, every arm falls to chance Core$\to$Transfer
 (full residual 0.479) although the probe still separates colluders within Core (0.935 leave-one-domain-out). (iii) The
-chosen atoms are a near-fixed set of decision, formatting and end-of-turn tokens (``decision'' in 189 of 200 final turns at
-layer 22); the four concept groups hold under 2\% of the selections in every cell. (iv) Honest agents warned in the
+chosen atoms are a near-fixed set of decision, formatting and end-of-turn tokens (``decision'' is selected by 189 of the 200
+agents in Core collusion episodes at layer 22); the four concept groups hold about 1\% of the selections in the conversation
+and under 3\% at the end of the system prompt. (iv) Honest agents warned in the
 colluders' vocabulary do not score like colluders (colluders vs warned 1.000), but J-space echoes the vocabulary three to
 four times more than the full residual does. (v) Steering along J-space directions shifts the forced-vote logit
 difference by up to 3.6 but flips at most 1\% of honest votes and 10\% of colluder votes; the four concept directions are
@@ -373,21 +374,25 @@ detectors: primary AUROC of warned vs control episodes and of collusion vs warne
 \end{table}
 
 \subsection{Experiment 1: what the atoms say}
-\gpu{} Table~\ref{tab:exp1}. The four concept groups together hold under 2\% of the $k{=}25$ atom selections in every cell,
-and the colluder--honest differences that survive BH are below 0.01 (deception/secrecy $+0.008$ on Transfer at the last
-token of layer 22; $+0.007$ to $+0.014$, with honesty/standards $-0.009$, at the end of the system prompt, where the words
-themselves are in context). The atoms are a near-fixed set across turns, as on November 5: at the last token of layer 22
-``decision'' is selected in 189 of the 200 collusion-episode final turns, ``prioritizing'' in 177, \texttt{<eos>} in 161,
-``eloquently'' in 161 and ``recommendation'' in 154; at the pre-vote token \texttt{<eos>}, ``acknowledging'' and
-``prioriti'' appear in 199--200 of 200. Token-level selection frequencies do differ by role in 30 of the 40 readout cells
+\gpu{} Table~\ref{tab:exp1}. Core readouts use the probe's rows, the three public discussion turns of each agent, and
+are aggregated per agent; Transfer readouts use the final turn. The four concept groups together hold at most 1.1\% of the
+$k{=}25$ atom selections at every conversation read position and at most 2.8\% at the end of the system prompt, where the
+words themselves are in context. The colluder--honest differences that survive BH are below 0.01 in the conversation
+(deception/secrecy $+0.008$ on Transfer at the last token of layer 22; steering/persuasion $-0.004$ to $-0.007$ under nosys)
+and larger only at the end of the system prompt (deception/secrecy $+0.006$ to $+0.017$, honesty/standards $-0.009$ to
+$-0.026$). The atoms are a near-fixed set across turns, as on November 5: at the last token of layer 22 ``decision'' is
+selected, in at least one discussion turn, by 189 of the 200 agents in Core collusion episodes, ``prioritizing'' by 177,
+\texttt{<eos>} by 161, ``eloquently'' by 161 and ``recommendation'' by 154; at the pre-vote token \texttt{<eos>},
+``prioriti'' and ``acknowledging'' are selected by 199--200 of 200. Token-level selection frequencies do differ by role in 30 of the 40 readout cells
 after BH, but the tokens are stance and register words (under nosys at the last token colluders select ``understandably'',
 ``verdict'', ``compelling'' and ``eloquently'' less often and ``advisors'' and ``considering'' more), not the deception or
 coordination vocabulary. J-space at these positions names how the turn ends, not what the agent is doing.
 \begin{table}[h]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_exp1_concepts}}
-\caption{\gpu{} Share of the four frozen concept groups among the $k{=}25$ selected atoms, mean per agent turn (Core
-collusion episodes, final turns), with Benjamini--Hochberg adjusted within-episode permutation $p$ over all concept tests of the
-run; below each cell, the atoms selected most often with the number of the 200 turns that select them.}
+\caption{\gpu{} Share of the four frozen concept groups among the $k{=}25$ selected atoms, mean per agent over its three
+Core discussion turns, with Benjamini--Hochberg adjusted within-episode permutation $p$ over all concept tests of the run;
+below each cell, the atoms selected most often with the number of the 200 agents in Core collusion episodes that select them
+in at least one turn.}
 \label{tab:exp1}
 \end{table}
 

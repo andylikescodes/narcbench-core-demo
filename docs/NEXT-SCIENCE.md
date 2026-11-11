@@ -455,3 +455,12 @@ They move the vote the same way (honest α=4: +2.2 to +3.0, median +2.5; collude
 and steering/persuasion (+3.1/−1.3) exceed all 20 draws in both groups (p = 1/21), coordination and honesty/standards sit inside
 the null, no direction passes the full bar set. File `results/jspace_interp/steer/steer_core_swap_L23_lensnull.json`. Total
 GPU spend for the study ≈ $7.60; balance ≈ $14.3; no pods running.
+
+**Correction 2026-11-10 — Experiment 1 units and concept share.** Found while preparing the slides, checked against
+`scripts/jspace_interp_analyze.py` (`exp1_readouts`): the Core readouts use each agent's three discussion turns and count
+agents, not final turns. So "decision 189/200" means 189 of the 200 agents in Core collusion episodes select that atom in at
+least one discussion turn (last token, L22). The concept-group share is at most 1.1% at every conversation read position and
+up to 2.8% at the end of the system prompt (prompt_only), not "< 2% everywhere"; BH-significant colluder−honest differences
+are below 0.01 in the conversation and reach +0.017 (deception/secrecy) and −0.026 (honesty/standards) at the end of the
+system prompt. The paper's abstract, Experiment 1 paragraph and Table 11 caption are corrected in the commit after eb381f0
+(eb381f0 itself carried only a rebuilt PDF: its text edit had failed to apply); no other number changes.

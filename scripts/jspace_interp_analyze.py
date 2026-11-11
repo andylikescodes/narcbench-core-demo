@@ -109,7 +109,9 @@ def main():
     ap.add_argument("--boot", type=int, default=2000)
     ap.add_argument("--boot-random", action="store_true", help="also bootstrap every random draw (slow; off by default)")
     ap.add_argument("--candidates", type=int, default=1024)
-    ap.add_argument("--norm-kind", default="gemma")
+    ap.add_argument("--norm-kind", default="gemma",
+                    help="gain of the final norm inside the J-lens vectors: gemma = (1 + weight), the default; none = no gain "
+                         "(the vectors are then literally the rows of W_U J_l)")
     ap.add_argument("--no-lodo", action="store_true", help="skip Core LODO for every arm (fast smoke)")
     ap.add_argument("--no-warned", action="store_true", help="ignore warned extractions even if present")
     ap.add_argument("--seed", type=int, default=42)
@@ -118,6 +120,9 @@ def main():
     ap.add_argument("--reuse-random-from", type=Path, default=None,
                     help="root of an earlier sweep (<root>/<condition>_<position>/sweep_results.json): copy its random-subspace and "
                          "random-atom draws instead of redrawing them (they do not depend on the decomposition)")
+    ap.add_argument("--redraw-random-atoms", action="store_true",
+                    help="with --reuse-random-from: reuse the random subspaces but draw the random lens-atom sets again "
+                         "(needed when the J-lens vectors differ from the earlier sweep's, e.g. --norm-kind none)")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -130,7 +135,8 @@ def main():
     J, lens_info = load_lens(args.lens, layers)
     W, _ = load_unembed(args.basis_dir)
     s = norm_scale(np.load(args.basis_dir / "final_norm_weight_fp32.npy"), args.norm_kind)
-    an = {L: atom_norms(W, s, J[L], args.basis_dir / f"derived_atom_norms_L{L}.npy") for L in layers}
+    an_tag = "" if args.norm_kind == "gemma" else f"_{args.norm_kind}"      # the cache depends on the gain
+    an = {L: atom_norms(W, s, J[L], args.basis_dir / f"derived_atom_norms{an_tag}_L{L}.npy") for L in layers}
     vocab = vocab_from_tokenizer(args.tokenizer)
     inv_vocab = {i: t for t, i in vocab.items()}
     gids = concepts.group_token_ids(vocab)
@@ -271,7 +277,15 @@ def main():
                     if reuse is not None:  # the random arms do not depend on the decomposition
                         rs_c2t = list(reuse["randsub"]["c2t_draws"])
                         rs_lodo = list(reuse["randsub"].get("lodo_draws", []))
-                        ra_c2t = list(reuse["randatoms"]["c2t_draws"])
+                        if args.redraw_random_atoms:
+                            for b in range(args.n_random):
+                                toks = rng.choice(V, size=k, replace=False)
+                                Qa = sweep.atoms_basis(toks, J[L], W, s)
+                                r2 = score(sweep.project_fixed(Xc, Qa), sweep.project_fixed(Xt, Qa), lodo_on=False,
+                                           boot=args.boot_random, mv=False)
+                                ra_c2t.append(r2["core_to_transfer"])
+                        else:
+                            ra_c2t = list(reuse["randatoms"]["c2t_draws"])
                     for b in range(0 if reuse is not None else args.n_random):
                         Q = sweep.haar_subspace(d, k, rng)
                         do_mv = Xw is not None and b < args.n_random_mv

@@ -125,6 +125,137 @@ def run_layer(a, L):
     return res
 
 
+EXTRA = ("gp_recon", "gp_lit", "gpfull_recon", "gpfull_lit", "gpfull_span")
+
+
+def run_layer_extra(a, L):
+    """Two choices the paper's text leaves open, scored on the same cell with the same resamples.
+
+      gp_recon      gradient pursuit among the 1,024 candidates, no fill; J-space component = the best non-negative
+                    combination (NNLS) of the vectors it picks.  This is the sweep's ``J25_recon`` arm.
+      gp_lit        the same pursuit; J-space component = its own output sum c_i v_i (no refit of the coefficients)
+      gpfull_*      gradient pursuit with the selection step over the whole vocabulary (no candidate pre-selection):
+                    _recon = NNLS combination of its 25 vectors, _lit = its own output, _span = projection onto their span
+    """
+    from jspace_interp.nov5_jspace_decompose import project_onto_tokens
+
+    cm, cz = load_extraction(a.root / "core" / a.condition)
+    tm, tz = load_extraction(a.root / "transfer" / a.condition)
+    ci, ti = select_rows(cm, "discussion"), select_rows(tm, "final")
+    key = f"{a.position}__layer_{L}"
+    Xc, Xt = cz[key][ci].astype(np.float32), tz[key][ti].astype(np.float32)
+    X = np.concatenate([Xc, Xt])
+    nc = Xc.shape[0]
+    J = load_lens(a.lens, [L])[0][L]
+    W, _ = load_unembed(a.basis_dir)
+    s = norm_scale(np.load(a.basis_dir / "final_norm_weight_fp32.npy"), "gemma")
+    an = atom_norms(W, s, J, a.basis_dir / f"derived_atom_norms_L{L}.npy")
+    base_c, base_t = to_agents(cm, ci, Xc, "core"), to_agents(tm, ti, Xt, "transfer")
+    boot_idx = shared_boot_idx(base_t, a.boot, a.seed + 1)
+
+    def score(F):
+        ca = [dict(x) for x in base_c]
+        ta = [dict(x) for x in base_t]
+        for x, y in zip(ca, to_agents(cm, ci, F[:nc], "core")):
+            x["x"] = y["x"]
+        for x, y in zip(ta, to_agents(tm, ti, F[nc:], "transfer")):
+            x["x"] = y["x"]
+        return sweep.protocol_scores(ca, ta, lodo=False, lofo=False, boot_idx=boot_idx)
+
+    feats, info = {}, {}
+    t0 = time.time()
+    # (1) the sweep's pursuit: 1,024 candidates, no fill
+    cand, _, _ = candidates_and_readout(X, J, W, s, an, n_cand=a.candidates, k_read=8)
+    order = np.full((X.shape[0], a.k), -1, dtype=np.int64)
+    lit = np.zeros_like(X)
+    steps = np.zeros(X.shape[0], dtype=np.int32)
+    for i in range(X.shape[0]):
+        r = pursuit_one(X[i], cand[i], J, W, s, an, k=a.k, method="gp", select="unit", fill=False)
+        order[i, :len(r["tokens"])] = r["tokens"]
+        lit[i], steps[i] = r["cone"], r["steps"]
+    feats["gp_recon"], used = sweep.j_recon(X, {"order": order}, J, W, s, a.k)
+    feats["gp_lit"] = lit
+    info["gp_recon"] = info["gp_lit"] = {"steps_core_mean": float(steps[:nc].mean()), "candidates": int(a.candidates)}
+    info["gp_recon"] = dict(info["gp_recon"], atoms_used_core_mean=float(used[:nc].mean()))
+    log(f"L{L} 1,024-candidate gradient pursuit done in {time.time() - t0:.0f}s (steps {steps[:nc].mean():.1f})")
+    # (2) the same pursuit with the whole vocabulary as candidates
+    t0 = time.time()
+    full = sweep.gradient_pursuit_full(X, J, W, s, an, k=a.k, batch=a.batch, log=log)
+    feats["gpfull_lit"] = full["recon_gp"]
+    feats["gpfull_recon"], used_f = sweep.j_recon(X, {"order": full["order"]}, J, W, s, a.k)
+    feats["gpfull_span"] = np.stack([project_onto_tokens(X[i], full["order"][i], J, W, s) for i in range(X.shape[0])])
+    for n_ in ("gpfull_recon", "gpfull_lit", "gpfull_span"):
+        info[n_] = {"steps_core_mean": float(full["steps"][:nc].mean()), "candidates": int(W.shape[0])}
+    info["gpfull_recon"] = dict(info["gpfull_recon"], atoms_used_core_mean=float(used_f[:nc].mean()))
+    log(f"L{L} full-vocabulary gradient pursuit done in {time.time() - t0:.0f}s (steps {full['steps'][:nc].mean():.1f})")
+
+    def cos(A, B):
+        na, nb = np.linalg.norm(A, axis=1), np.linalg.norm(B, axis=1)
+        ok = (na > 0) & (nb > 0)
+        return float(np.mean((A[ok] * B[ok]).sum(1) / (na[ok] * nb[ok])))
+
+    jac, first5, outside = [], [], []
+    for i in range(X.shape[0]):
+        a1 = [int(x) for x in order[i] if x >= 0]
+        a2 = [int(x) for x in full["order"][i] if x >= 0]
+        if a1 and a2:
+            jac.append(len(set(a1) & set(a2)) / len(set(a1) | set(a2)))
+            first5.append(float(a1[:5] == a2[:5]))
+            outside.append(float(np.mean([x not in set(cand[i].tolist()) for x in a2])))
+    res = {"layer": L, "condition": a.condition, "position": a.position, "k": a.k, "arms": {},
+           "overlap": {"token_set_jaccard_mean": float(np.mean(jac)), "first5_identical_share": float(np.mean(first5)),
+                       "share_of_full_vocab_picks_outside_the_1024_candidates": float(np.mean(outside)),
+                       "cos_gp_recon_vs_gp_lit": cos(feats["gp_recon"], feats["gp_lit"]),
+                       "cos_gp_recon_vs_gpfull_recon": cos(feats["gp_recon"], feats["gpfull_recon"]),
+                       "cos_gpfull_recon_vs_gpfull_lit": cos(feats["gpfull_recon"], feats["gpfull_lit"])}}
+    boots = {}
+    for name in EXTRA:
+        r = score(feats[name])
+        boots[name] = r["_boot"]
+        fve = float(np.mean((feats[name][:nc] ** 2).sum(1) / (Xc ** 2).sum(1)))
+        res["arms"][name] = dict(info[name], core_to_transfer=r["core_to_transfer"], ci95=r["core_to_transfer_ci95"], fve_core=fve)
+        log(f"L{L} {name}: C->T {r['core_to_transfer']:.3f} {np.round(r['core_to_transfer_ci95'], 3).tolist()} fve {fve:.4f}")
+    main_boot = a.out / f"boot_layer_{L}.npy"
+    if main_boot.exists():                                  # paired differences to the sweep's earlier primary
+        ref = np.load(main_boot)[(("full",) + VARIANTS).index("nnomp_span")]
+        for name in EXTRA:
+            res["arms"][name]["minus_nnomp_span_ci95"] = [float(x) for x in np.nanpercentile(boots[name] - ref, [2.5, 97.5])]
+    for name in EXTRA:
+        if name != "gp_recon":
+            res["arms"][name]["minus_gp_recon_ci95"] = [float(x) for x in np.nanpercentile(boots[name] - boots["gp_recon"], [2.5, 97.5])]
+    log(f"L{L} overlap {json.dumps({k: round(v, 3) for k, v in res['overlap'].items()})}")
+    a.out.mkdir(parents=True, exist_ok=True)
+    (a.out / f"extra_layer_{L}.json").write_text(json.dumps(res, indent=1) + "\n")
+    np.save(a.out / f"extra_boot_layer_{L}.npy", np.stack([boots[n] for n in EXTRA]).astype(np.float32))
+    return res
+
+
+def merge_extra(a, out):
+    files = sorted(a.out.glob("extra_layer_*.json"))
+    if not files:
+        return
+    per = [json.loads(f.read_text()) for f in files]
+    layers = [p["layer"] for p in per]
+    ex = {"layers": layers, "per_layer": {str(p["layer"]): p["arms"] for p in per},
+          "overlap": {str(p["layer"]): p["overlap"] for p in per}, "band_mean": {}, "band_ci95": {},
+          "band_minus_nnomp_span_ci95": {}, "band_minus_gp_recon_ci95": {}}
+    B = np.mean(np.stack([np.load(a.out / f"extra_boot_layer_{L}.npy") for L in layers]), axis=0)   # [arm, draw]
+    main = [a.out / f"boot_layer_{L}.npy" for L in layers]
+    ref = None
+    if all(p.exists() for p in main):
+        ref = np.mean(np.stack([np.load(p)[(("full",) + VARIANTS).index("nnomp_span")] for p in main]), axis=0)
+    for i, n in enumerate(EXTRA):
+        ex["band_mean"][n] = float(np.mean([p["arms"][n]["core_to_transfer"] for p in per]))
+        ex["band_ci95"][n] = [float(x) for x in np.nanpercentile(B[i], [2.5, 97.5])]
+        ex["band_minus_gp_recon_ci95"][n] = [float(x) for x in np.nanpercentile(B[i] - B[EXTRA.index("gp_recon")], [2.5, 97.5])]
+        if ref is not None:
+            ex["band_minus_nnomp_span_ci95"][n] = [float(x) for x in np.nanpercentile(B[i] - ref, [2.5, 97.5])]
+    # the earlier arms over the same layers, so that the two sets of rows are comparable when fewer layers have run
+    ex["band_mean_main_arms_same_layers"] = {n: float(np.mean([out["per_layer"][str(L)][n]["core_to_transfer"] for L in layers]))
+                                             for n in ("full",) + VARIANTS if all(str(L) in out["per_layer"] for L in layers)}
+    out["extra"] = ex
+
+
 def merge(a):
     files = sorted(a.out.glob("layer_*.json"))
     per = [json.loads(f.read_text()) for f in files]
@@ -141,9 +272,13 @@ def merge(a):
     for i, n in enumerate(names):
         out["band_minus_nnomp_span_ci95"][n] = [float(x) for x in np.nanpercentile(band[i] - ref, [2.5, 97.5])]
         out.setdefault("band_ci95", {})[n] = [float(x) for x in np.nanpercentile(band[i], [2.5, 97.5])]
+    merge_extra(a, out)
     (a.out / "solver_check.json").write_text(json.dumps(out, indent=1) + "\n")
     print(json.dumps({"band_mean": {k: round(v, 3) for k, v in out["band_mean"].items()},
                       "band_minus_nnomp_span_ci95": {k: [round(x, 3) for x in v] for k, v in out["band_minus_nnomp_span_ci95"].items()}}, indent=1))
+    if "extra" in out:
+        print(json.dumps({"extra_layers": out["extra"]["layers"],
+                          "extra_band_mean": {k: round(v, 3) for k, v in out["extra"]["band_mean"].items()}}, indent=1))
     return 0
 
 
@@ -160,12 +295,15 @@ def main() -> int:
     ap.add_argument("--boot", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--merge", action="store_true", help="combine the per-layer files into solver_check.json")
+    ap.add_argument("--extra", action="store_true",
+                    help="score the coefficient refit and the candidate pre-selection instead (gradient pursuit only; see run_layer_extra)")
+    ap.add_argument("--batch", type=int, default=496, help="rows per batch of the full-vocabulary pursuit")
     ap.add_argument("--out", type=Path, default=ROOT / "results/jspace_interp/solver_check")
     a = ap.parse_args()
     if a.merge:
         return merge(a)
     for L in [int(x) for x in a.layers.split(",")]:
-        run_layer(a, L)
+        (run_layer_extra if a.extra else run_layer)(a, L)
     return 0
 
 

@@ -30,6 +30,77 @@ def decompose_nested(acts, J, W, s, an, *, k_max: int, n_cand: int = 1024, selec
     return {"order": order, "steps": steps, "cand": cand, "readout": read, "readout_scores": read_s}
 
 
+def gradient_pursuit_full(acts, J, W, s, an, *, k: int, batch: int = 496, vocab_chunk: int = 8192, log=None):
+    """Gradient pursuit whose selection step runs over the whole vocabulary (no candidate pre-selection).
+
+    The same algorithm as ``pursuit_one(method="gp", select="unit", fill=False)`` with every token as a candidate,
+    batched over activations so that one pass over the unembedding serves a whole batch: at each step every row
+    picks the J-lens vector with the largest <v_t, r>/|v_t| among those it has not picked (the row stops if none is
+    positive), takes one optimal gradient step on its support and clips the coefficients at zero.
+
+    Returns {"order": [n, k] token ids in selection order (-1 = unused), "coefs": [n, k] gradient pursuit's own
+    coefficients, "steps": [n], "recon_gp": [n, d] sum_i c_i v_i with those coefficients}.
+    """
+    n, d = acts.shape
+    V = W.shape[0]
+    inv_an = (1.0 / np.maximum(an, 1e-12)).astype(np.float32)
+    order = np.full((n, k), -1, dtype=np.int64)
+    coefs = np.zeros((n, k), dtype=np.float32)
+    steps = np.zeros(n, dtype=np.int32)
+    recon = np.zeros((n, d), dtype=np.float32)
+    for b0 in range(0, n, batch):
+        b1 = min(n, b0 + batch)
+        b = b1 - b0
+        H = np.asarray(acts[b0:b1], dtype=np.float32)
+        R = H.copy()
+        A = np.zeros((b, k, d), dtype=np.float32)          # the chosen J-lens vectors of each row
+        C = np.zeros((b, k), dtype=np.float32)
+        T = np.full((b, k), -1, dtype=np.int64)
+        m = np.zeros(b, dtype=np.int64)
+        alive = np.ones(b, dtype=bool)
+        rows = np.arange(b)
+        for step in range(k):
+            if not alive.any():
+                break
+            Z = (R @ J.T) * s[None, :]                     # row i: s * (J r_i); <v_t, r_i> = W_U[t] . Z_i
+            best_val = np.full(b, -np.inf, dtype=np.float32)
+            best_idx = np.zeros(b, dtype=np.int64)
+            for v0 in range(0, V, vocab_chunk):
+                v1 = min(V, v0 + vocab_chunk)
+                corr = (Z @ np.asarray(W[v0:v1], dtype=np.float32).T) * inv_an[None, v0:v1]
+                ri, ci = np.nonzero((T >= v0) & (T < v1))  # vectors a row already holds are not candidates
+                corr[ri, T[ri, ci] - v0] = -np.inf
+                j = np.argmax(corr, axis=1)
+                val = corr[rows, j]
+                upd = val > best_val
+                best_val[upd] = val[upd]
+                best_idx[upd] = v0 + j[upd]
+            alive &= np.isfinite(best_val) & (best_val > 0)
+            sel = np.nonzero(alive)[0]
+            if len(sel) == 0:
+                break
+            tsel = best_idx[sel]
+            # fancy indexing on the memory map wants sorted indices
+            o = np.argsort(tsel)
+            vnew = np.empty((len(sel), d), dtype=np.float32)
+            vnew[o] = (np.asarray(W[tsel[o]], dtype=np.float32) * s[None, :]) @ J
+            A[sel, m[sel]] = vnew
+            T[sel, m[sel]] = tsel
+            m[sel] += 1
+            Asel = A[sel]
+            G = np.einsum("bkd,bd->bk", Asel, R[sel])      # gradient on the support (zero beyond m)
+            AG = np.einsum("bk,bkd->bd", G, Asel)
+            alpha = (G * G).sum(1) / np.maximum((AG * AG).sum(1), 1e-20)
+            C[sel] = np.maximum(C[sel] + alpha[:, None] * G, 0.0)
+            R[sel] = H[sel] - np.einsum("bk,bkd->bd", C[sel], Asel)
+            steps[b0 + sel] += 1
+            if log and (step % 5 == 4 or step == k - 1):
+                log(f"    full-vocabulary pursuit rows {b0}-{b1} step {step + 1}/{k} ({int(alive.sum())} rows active)")
+        order[b0:b1], coefs[b0:b1] = T, C
+        recon[b0:b1] = np.einsum("bk,bkd->bd", C, A)
+    return {"order": order, "coefs": coefs, "steps": steps, "recon_gp": recon}
+
+
 def j_arms(acts, dec, J, W, s, k: int, fill: bool):
     """h_J for the first k pursuit atoms; with fill, top up to k from the candidate list (correlation with h)."""
     n, d = acts.shape

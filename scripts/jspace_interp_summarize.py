@@ -132,12 +132,33 @@ def arm(cell, k, name):
     return (cell.get(f"k{k}") or {}).get(name)
 
 
+# With --primary recon the row's primary J-space slots (the keys named J_fill*, C_fill*) hold the arm the workspace paper's
+# Methods describe: the non-negative combination of the vectors the pursuit chose (J{k}_recon / C{k}_recon in the sweep
+# files). The span of exactly k vectors (J{k}_fill, the appendix form and the primary of the 9 November run) is then
+# reported under J_span*. The key names are kept so that every table and figure script reads either run the same way.
+PRIMARY = "fill"
+J_LABEL, J2_KEY, J2_LABEL = "J fill", "J_pursuit", "J pursuit"
+
+
+def set_primary(primary: str):
+    global PRIMARY, J_LABEL, J2_KEY, J2_LABEL
+    PRIMARY = primary
+    if primary == "recon":
+        J_LABEL, J2_KEY, J2_LABEL = "J-space", "J_span", "J span"
+
+
 def cell_row(cell, k):
     kb = cell.get(f"k{k}")
     if not kb:
         return None
     full = cell["full"]
     J, Jf, Cf = kb.get(f"J{k}", {}), kb.get(f"J{k}_fill", {}), kb.get(f"C{k}_fill", {})
+    Jspan, Cspan = Jf, Cf
+    tag = "fill"
+    if PRIMARY == "recon":
+        if f"J{k}_recon" not in kb:
+            return None
+        Jf, Cf, tag = kb[f"J{k}_recon"], kb.get(f"C{k}_recon", {}), "recon"
     pca, ff, sh = kb.get(f"pca{k}", {}), kb.get(f"fixedframe{k}", {}), kb.get(f"shuffled{k}", {})
     rs, ra = kb.get("randsub", {}), kb.get("randatoms", {})
     jf, jp = Jf.get("core_to_transfer"), J.get("core_to_transfer")
@@ -154,13 +175,19 @@ def cell_row(cell, k):
         "fixedframe": ff.get("core_to_transfer"), "shuffled": sh.get("core_to_transfer"),
         "randsub_n": rs.get("n"), "randsub_mean": rs.get("c2t_mean"), "randsub_p95": rs95,
         "randatoms_n": ra.get("n"), "randatoms_mean": ra.get("c2t_mean"), "randatoms_p95": ra95,
-        "p_J_fill_vs_randsub": (rs.get("J_fill_percentile") or [None, None])[1],
-        "p_J_fill_vs_randatoms": (ra.get("J_fill_percentile") or [None, None])[1],
+        "p_J_fill_vs_randsub": (rs.get(f"J_{tag}_percentile") or [None, None])[1],
+        "p_J_fill_vs_randatoms": (ra.get(f"J_{tag}_percentile") or [None, None])[1],
         "p_J_pursuit_vs_randsub": (rs.get("J_pursuit_percentile") or [None, None])[1],
         "p_J_pursuit_vs_randatoms": (ra.get("J_pursuit_percentile") or [None, None])[1],
-        "J_fill_minus_full_ci": kb.get("J_fill_minus_full_ci95"), "J_pursuit_minus_full_ci": kb.get("J_pursuit_minus_full_ci95"),
-        "J_fill_minus_pca_ci": kb.get("J_fill_minus_pca_ci95"), "C_fill_minus_J_fill_ci": kb.get("C_fill_minus_J_fill_ci95"),
-        "recovery_J_fill": kb.get("recovery_J_fill"), "recovery_J_pursuit": kb.get("recovery_J_pursuit"),
+        "J_fill_minus_full_ci": kb.get(f"J_{tag}_minus_full_ci95"), "J_pursuit_minus_full_ci": kb.get("J_pursuit_minus_full_ci95"),
+        "J_fill_minus_pca_ci": kb.get(f"J_{tag}_minus_pca_ci95"), "C_fill_minus_J_fill_ci": kb.get(f"C_{tag}_minus_J_{tag}_ci95"),
+        "recovery_J_fill": kb.get(f"recovery_J_{tag}"), "recovery_J_pursuit": kb.get("recovery_J_pursuit"),
+        "primary_j_arm": tag, "J_fve": Jf.get("fve_core"), "J_atoms_used": Jf.get("atoms_used_core_mean"),
+        "J_span": Jspan.get("core_to_transfer"), "J_span_ci": Jspan.get("core_to_transfer_ci95"), "J_span_lodo": Jspan.get("core_lodo"),
+        "J_span_lofo": Jspan.get("transfer_lofo"), "J_span_fve": Jspan.get("fve_core"), "C_span": Cspan.get("core_to_transfer"),
+        "p_J_span_vs_randsub": (rs.get("J_fill_percentile") or [None, None])[1],
+        "p_J_span_vs_randatoms": (ra.get("J_fill_percentile") or [None, None])[1],
+        "J_recon_minus_J_span_ci": kb.get("J_recon_minus_J_fill_ci95"),
         "pursuit_steps_core_mean": cell.get("pursuit_steps_core_mean"),
         "mv": {"full": full.get("matched_vocab"), "J_fill": Jf.get("matched_vocab"), "J_pursuit": J.get("matched_vocab"),
                "pca": pca.get("matched_vocab"), "C_fill": Cf.get("matched_vocab"), "randsub": rs.get("matched_vocab")},
@@ -168,10 +195,10 @@ def cell_row(cell, k):
     both = jf is not None and rs95 is not None and ra95 is not None
     r["J_fill_clears_both_nulls"] = bool(both and jf > rs95 and jf > ra95)
     r["J_pursuit_clears_both_nulls"] = bool(jp is not None and rs95 is not None and ra95 is not None and jp > rs95 and jp > ra95)
-    pc = kb.get("J_fill_minus_pca_ci95")
+    pc = kb.get(f"J_{tag}_minus_pca_ci95")
     r["J_fill_beats_pca"] = bool(pc and pc[0] > 0)
     r["pca_beats_J_fill"] = bool(pc and pc[1] < 0)
-    fc = kb.get("J_fill_minus_full_ci95")
+    fc = kb.get(f"J_{tag}_minus_full_ci95")
     r["full_beats_J_fill"] = bool(fc and fc[1] < 0)
     return r
 
@@ -186,7 +213,7 @@ def tab_headline(rows, conds, positions, layers, k, out):
     """Per condition x position at one k: band mean over layers of full, J (fill, pursuit), complement, PCA, random nulls,
     and how many layers clear both nulls."""
     lines = [r"\begin{tabular}{llcccccccc}\toprule",
-             r"Cond. & Position & Full & J fill & J pursuit & Compl. & PCA-$k$ & Rand.\ sub.\ mean (p95) & Rand.\ atoms p95 & Layers clearing both\\\midrule"]
+             rf"Cond. & Position & Full & {J_LABEL} & {J2_LABEL} & Compl. & PCA-$k$ & Rand.\ sub.\ mean (p95) & Rand.\ atoms p95 & Layers clearing both\\\midrule"]
     for cond in conds:
         first = True
         for pos in positions:
@@ -195,7 +222,7 @@ def tab_headline(rows, conds, positions, layers, k, out):
                 continue
             clears = sum(r["J_fill_clears_both_nulls"] for r in rr)
             lines.append(" & ".join([
-                tex(cond) if first else "", tex(pos), f3(band(rr, "full")), f3(band(rr, "J_fill")), f3(band(rr, "J_pursuit")),
+                tex(cond) if first else "", tex(pos), f3(band(rr, "full")), f3(band(rr, "J_fill")), f3(band(rr, J2_KEY)),
                 f3(band(rr, "C_fill")), f3(band(rr, "pca")),
                 f"{f3(band(rr, 'randsub_mean'))} ({f3(band(rr, 'randsub_p95'))})", f3(band(rr, "randatoms_p95")),
                 f"{clears}/{len(rr)}"]) + r"\\")
@@ -209,14 +236,14 @@ def tab_headline(rows, conds, positions, layers, k, out):
 
 def tab_ksweep(rows, cond, pos, ks, out):
     lines = [r"\begin{tabular}{lcccccccc}\toprule",
-             r"$k$ & Full & J fill & J pursuit & Compl. & PCA-$k$ & Rand.\ sub.\ p95 & Rand.\ atoms p95 & J fill $-$ PCA (95\% CI)\\\midrule"]
+             rf"$k$ & Full & {J_LABEL} & {J2_LABEL} & Compl. & PCA-$k$ & Rand.\ sub.\ p95 & Rand.\ atoms p95 & {J_LABEL} $-$ PCA (95\% CI)\\\midrule"]
     for k in ks:
         rr = [r for r in rows if r["condition"] == cond and r["position"] == pos and r["k"] == k]
         if not rr:
             continue
         # band mean over layers; the paired CI is reported for the layer with the best J fill
         best = max(rr, key=lambda r: (r["J_fill"] if r["J_fill"] is not None else -1))
-        lines.append(" & ".join([str(k), f3(band(rr, "full")), f3(band(rr, "J_fill")), f3(band(rr, "J_pursuit")), f3(band(rr, "C_fill")),
+        lines.append(" & ".join([str(k), f3(band(rr, "full")), f3(band(rr, "J_fill")), f3(band(rr, J2_KEY)), f3(band(rr, "C_fill")),
                                  f3(band(rr, "pca")), f3(band(rr, "randsub_p95")), f3(band(rr, "randatoms_p95")),
                                  f"{ci(best['J_fill_minus_pca_ci'])} (L{best['layer']})"]) + r"\\")
     lines.append(r"\bottomrule\end{tabular}")
@@ -225,9 +252,9 @@ def tab_ksweep(rows, cond, pos, ks, out):
 
 def tab_layers(rows, cond, pos, k, out):
     lines = [r"\begin{tabular}{lcccccccc}\toprule",
-             r"Layer & Full & J fill & J pursuit & PCA-$k$ & Rand.\ sub.\ p95 & Rand.\ atoms p95 & $p$ vs rand.\ sub. & Clears both\\\midrule"]
+             rf"Layer & Full & {J_LABEL} & {J2_LABEL} & PCA-$k$ & Rand.\ sub.\ p95 & Rand.\ atoms p95 & $p$ vs rand.\ sub. & Clears both\\\midrule"]
     for r in sorted([r for r in rows if r["condition"] == cond and r["position"] == pos and r["k"] == k], key=lambda r: r["layer"]):
-        lines.append(" & ".join([str(r["layer"]), f"{f3(r['full'])} {ci(r['full_ci'])}", f"{f3(r['J_fill'])} {ci(r['J_fill_ci'])}", f3(r["J_pursuit"]),
+        lines.append(" & ".join([str(r["layer"]), f"{f3(r['full'])} {ci(r['full_ci'])}", f"{f3(r['J_fill'])} {ci(r['J_fill_ci'])}", f3(r[J2_KEY]),
                                  f3(r["pca"]), f3(r["randsub_p95"]), f3(r["randatoms_p95"]), f3(r["p_J_fill_vs_randsub"]),
                                  mark(r["J_fill_clears_both_nulls"])]) + r"\\")
     lines.append(r"\bottomrule\end{tabular}")
@@ -239,7 +266,7 @@ def tab_controls(rows, layers, k, out):
     arms = [("original", "last"), ("swap", "last"), ("nosys", "last"), ("prompt_only", "prompt_end")]
     lines = [r"\begin{tabular}{l" + "cc" * len(arms) + r"}\toprule", "Layer & " + " & ".join(
         rf"\multicolumn{{2}}{{c}}{{{tex(c)}/{tex(p)}}}" for c, p in arms) + r"\\",
-        " & " + " & ".join(["Full & J fill"] * len(arms)) + r"\\\midrule"]
+        " & " + " & ".join([f"Full & {J_LABEL}"] * len(arms)) + r"\\\midrule"]
     for L in layers:
         cells = []
         for c, p in arms:
@@ -254,7 +281,7 @@ def tab_protocols(rows, k, out):
     """Per condition and read position (last, prevote, prompt_end): band mean over layers of Core LODO, Core->Transfer and Transfer LOFO
     for the full residual, the filled J-only arm and PCA-k. Within-split numbers show whether a probe still finds colluders when the
     instruction is removed (swap, nosys) even if nothing transfers."""
-    arms = [("full", "Full"), ("J_fill", f"J fill $k{{=}}{k}$"), ("pca", f"PCA-{k}")]
+    arms = [("full", "Full"), ("J_fill", f"{J_LABEL} $k{{=}}{k}$"), ("pca", f"PCA-{k}")]
     lines = [r"\begin{tabular}{ll" + "ccc" * len(arms) + r"}\toprule", "Cond. & Pos. & " + " & ".join(
         rf"\multicolumn{{3}}{{c}}{{{lab}}}" for _, lab in arms) + r"\\",
         " & & " + " & ".join(["LODO & C$\\to$T & LOFO"] * len(arms)) + r"\\\midrule"]
@@ -295,7 +322,7 @@ def tab_matched_vocab(rows, cells_sel, k, out):
             continue
         r = rr[0]
         first = True
-        for name, label in [("full", "Full"), ("J_fill", f"J fill $k{{=}}{k}$"), ("pca", f"PCA-{k}")]:
+        for name, label in [("full", "Full"), ("J_fill", f"{J_LABEL} $k{{=}}{k}$"), ("pca", f"PCA-{k}")]:
             m = mv_fields(r["mv"].get(name))
             if not m:
                 continue
@@ -454,11 +481,16 @@ def main() -> int:
     ap.add_argument("--plan-layers", default=None)
     ap.add_argument("--plan-ks", default="8,25,50,100")
     ap.add_argument("--plan-steer-runs", default=None, help="override the planned steering runs (default: swap:22,original:22,swap:23,original:23)")
+    ap.add_argument("--sweep-dir", default="gemma2_9b", help="folder under --root with the sweep results (gemma2_9b_gp: the gradient-pursuit rerun)")
+    ap.add_argument("--primary", default="fill", choices=("fill", "recon"),
+                    help="primary J-space arm: fill = span of exactly k pursuit vectors (9 November run); recon = non-negative combination "
+                         "of the vectors the pursuit chose (the workspace paper's Methods; needs sweeps made with J{k}_recon)")
     a = ap.parse_args()
+    set_primary(a.primary)
 
     # the pod writes gemma2_9b/<cond>_<pos>/sweep_results.json; cells finished later on another machine go in subdirectories
     # (gemma2_9b/<cond>_<pos>/local_L22/sweep_results.json) and override the pod's cell of the same key
-    files = a.files if a.files is not None else sorted(glob.glob(str(a.root / "gemma2_9b" / "**" / "sweep_results.json"), recursive=True))
+    files = a.files if a.files is not None else sorted(glob.glob(str(a.root / a.sweep_dir / "**" / "sweep_results.json"), recursive=True))
     steer_files = a.steer if a.steer is not None else sorted(glob.glob(str(a.root / "steer" / "*.json")))
     pod_json = a.pod_json
     if pod_json is None:
@@ -500,7 +532,11 @@ def main() -> int:
 
     a.out.mkdir(parents=True, exist_ok=True)
     k0 = a.k if a.k in ks else (ks[0] if ks else None)
-    summary = {"inputs": {"sweep_files": files, "steer_files": steer_files, "pod_json": str(pod_json) if pod_json else None},
+    summary = {"primary_j_arm": a.primary,
+               "primary_j_arm_note": ("the keys named J_fill*/C_fill* hold the primary J-space arm: with 'recon' the non-negative combination of the "
+                                      "vectors the pursuit chose (J{k}_recon in the sweep files), with 'fill' the span of exactly k vectors; J_span* "
+                                      "is always the span of exactly k vectors"),
+               "inputs": {"sweep_files": files, "steer_files": steer_files, "pod_json": str(pod_json) if pod_json else None},
                "plan": plan, "ks": ks, "layers": layers, "positions": positions, "conditions": conds, "settings": settings,
                "nov5_reference": NOV5, "rows": rows, "role_dirs": role_dirs,
                "not_run": {"cells": [{"condition": c, "position": p, "layer": L, "k": k} for c, p, L, k in not_run_cells],
@@ -596,13 +632,17 @@ def main() -> int:
     if steers:
         tab_steer(steers, a.out)
 
-    sdir = a.summary_dir or (a.root / "gemma2_9b")
+    sdir = a.summary_dir or (a.root / a.sweep_dir)
     sdir.mkdir(parents=True, exist_ok=True)
     (sdir / "SUMMARY.json").write_text(json.dumps(summary, indent=1, default=float) + "\n")
 
     # RESULTS.md
     md = ["# jspace-interp results summary", "",
           f"Inputs: {len(files)} sweep file(s), {len(steer_files)} steering file(s). Planned cells {len(planned)}, ran {len(planned) - len(not_run_cells)}.", ""]
+    if a.primary == "recon":
+        md += ["Primary J-space arm (the columns headed 'J fill' below): the non-negative combination of the vectors the pursuit chose "
+               "(`J{k}_recon` in the sweep files), the form of the workspace paper's Methods. The column headed 'J pursuit' is the span of "
+               "the same vectors without the fill; the span of exactly k vectors is `J_span` in SUMMARY.json.", ""]
     for cond, v in verdict.items():
         if cond == "prompt_only_probe":
             md += ["## prompt_only probe (prompt_end)", "", "| layer | full | J fill | PCA | rand p95 |", "|---|---|---|---|---|"]

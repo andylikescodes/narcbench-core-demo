@@ -33,6 +33,7 @@ RES = ROOT / "results/jspace_interp"
 DOC = ROOT / "docs/jspace_interp"
 LAYERS = [19, 20, 21, 22, 23]
 K = 25
+SWEEP = "gemma2_9b"     # folder under results/jspace_interp; --sweep-dir gemma2_9b_gp reads the gradient-pursuit rerun
 
 BLUE, ORANGE, GREEN = "#2a78d6", "#eb6834", "#1baf7a"   # full residual, J-space, PCA
 NULL_A, NULL_B = "#c3c2b7", "#898781"                   # random subspaces, random lens-atom sets
@@ -51,9 +52,10 @@ CONCEPTS = [("concept:deception_secrecy", "deception / secrecy"), ("concept:stee
 # ------------------------------------------------------------------------------------------------------------ data
 class Data:
     def __init__(self):
-        self.S = json.loads((RES / "gemma2_9b/SUMMARY.json").read_text())
+        self.S = json.loads((RES / SWEEP / "SUMMARY.json").read_text())
+        self.recon = self.S.get("primary_j_arm") == "recon"   # J_fill* keys then hold the non-negative combination
         self.rows = {(r["condition"], r["position"], r["layer"], r["k"]): r for r in self.S["rows"]}
-        self.sweep_ol = json.loads((RES / "gemma2_9b/original_last/sweep_results.json").read_text())
+        self.sweep_ol = json.loads((RES / SWEEP / "original_last/sweep_results.json").read_text())
         self.steer = {p.stem.replace("steer_core_", ""): json.loads(p.read_text()) for p in sorted((RES / "steer").glob("steer_core_*.json"))}
 
     def cell(self, cond, pos, L, k=K):
@@ -62,7 +64,7 @@ class Data:
     def role_tokens(self, cond, pos, L, split):
         """Tokens whose atoms are selected for a different share of colluders than of honest agents (BH q=0.05).
         The sweep file keeps the 30 tokens with the smallest p per cell; returns (token text, difference in share)."""
-        sw = json.loads((RES / f"gemma2_9b/{cond}_{pos}/sweep_results.json").read_text())
+        sw = json.loads((RES / SWEEP / f"{cond}_{pos}/sweep_results.json").read_text())
         e = next(x for x in sw["exp1"] if x["layer"] == L and x["position"] == pos and x["condition"] == cond)
         return [(t["text"], t["colluder_minus_honest"]) for t in e[split]["top_tokens"] if t["significant"]]
 
@@ -372,10 +374,11 @@ def tables(D):
     L.append(r"\bottomrule\end{tabular}")
     write("tabp_controls", L)
     # --- k sweep (Finding 2)
-    L = [r"\begin{tabular}{@{}lccccc@{}}\toprule",
-         r"$k$ & J-space & PCA-$k$ & Random subspaces (p95) & Random lens atoms (p95) & Full residual\\\midrule"]
+    kcols = ("J_fill", "J_span", "pca", "randsub_p95", "randatoms_p95", "full") if D.recon else ("J_fill", "pca", "randsub_p95", "randatoms_p95", "full")
+    L = [r"\begin{tabular}{@{}l" + "c" * len(kcols) + r"@{}}\toprule",
+         r"$k$ & J-space & " + (r"Span of exactly $k$ & " if D.recon else "") + r"PCA-$k$ & Random subspaces (p95) & Random lens atoms (p95) & Full residual\\\midrule"]
     for k in (8, 25, 50, 100):
-        L.append(" & ".join([str(k)] + [f3(b(a, k=k)) for a in ("J_fill", "pca", "randsub_p95", "randatoms_p95", "full")]) + r"\\")
+        L.append(" & ".join([str(k)] + [f3(b(a, k=k)) for a in kcols]) + r"\\")
     L.append(r"\bottomrule\end{tabular}")
     write("tabp_ksweep", L)
     # --- positions (Finding 4)
@@ -475,31 +478,74 @@ def tables(D):
 
 
 def solver_table():
-    """Table of the decomposition variants (scripts/jspace_interp_solver_check.py), if that check has been run."""
+    """Table of the readings of the paper's definition (scripts/jspace_interp_solver_check.py), if that check has been run.
+
+    Rows come from solver_check.json: the main variants, the ``extra`` block (coefficient refit, whole-vocabulary search)
+    when it covers all five layers, and, if present, the headline cell of the rerun without the final-norm gain
+    (results/jspace_interp/gemma2_9b_gp_nogain). Returns the numbers written, for the text check."""
     p = RES / "solver_check/solver_check.json"
     if not p.exists():
-        return False
+        return None
     S = json.loads(p.read_text())
-    rows = [("nnomp_span", "Non-negative OMP, span (our primary)"),
-            ("gp_span", "Gradient pursuit, span"),
-            ("nnomp_cone", "Non-negative OMP, reconstruction"),
-            ("gp_cone", "Gradient pursuit, reconstruction"),
-            ("nogain_nnomp_span", "Non-negative OMP, span; vectors without the gain"),
-            ("nogain_gp_cone", "Gradient pursuit, reconstruction; vectors without the gain"),
-            ("full", "Full residual, for reference")]
     layers = [str(x) for x in S["layers"]]
+    ex = S.get("extra") if (S.get("extra") or {}).get("layers") == S["layers"] else None
+    out = {"layers": S["layers"], "rows": {}}
+
+    def row(lab, per, band, diff, key):
+        out["rows"][key] = {"per_layer": [round(x, 4) for x in per], "band": round(band, 4), "diff_ci": [round(x, 3) for x in diff] if diff else None}
+        d = "--" if diff is None else f"$[{diff[0]:+.3f}, {diff[1]:+.3f}]$"
+        return " & ".join([lab] + [f3(x) for x in per] + [f3(band), d]) + r"\\"
+
+    def main_row(key, lab, ref=False):
+        return row(lab, [S["per_layer"][x][key]["core_to_transfer"] for x in layers], S["band_mean"][key],
+                   None if ref else S["band_minus_nnomp_span_ci95"][key], key)
+
+    def extra_row(key, lab):
+        return row(lab, [ex["per_layer"][x][key]["core_to_transfer"] for x in layers], ex["band_mean"][key], ex["band_minus_nnomp_span_ci95"].get(key), key)
+
     L = [r"\begin{tabularx}{\linewidth}{@{}X" + "c" * len(layers) + r"cc@{}}\toprule",
-         "Decomposition & " + " & ".join(f"L{x}" for x in layers) + r" & Band & Difference to primary\\\midrule"]
-    for key, lab in rows:
-        if key == "full":
-            L.append(r"\midrule")
-        vals = [f3(S["per_layer"][x][key]["core_to_transfer"]) for x in layers]
-        lo, hi = S["band_minus_nnomp_span_ci95"][key]
-        diff = "--" if key == "nnomp_span" else f"$[{lo:+.3f}, {hi:+.3f}]$"
-        L.append(" & ".join([lab] + vals + [f3(S["band_mean"][key]), diff]) + r"\\")
+         "Reading of the definition & " + " & ".join(f"L{x}" for x in layers) + r" & Band & Difference to row 3\\\midrule"]
+    if ex:
+        L.append(extra_row("gp_recon", r"1. Gradient pursuit, non-negative combination (\textbf{primary})"))
+    L.append(main_row("gp_span", "2. Gradient pursuit, span of exactly 25"))
+    L.append(main_row("nnomp_span", "3. Non-negative OMP, span of exactly 25 (November 9)", ref=True))
+    L.append(main_row("nnomp_cone", "4. Non-negative OMP, combination of the 25 after the fill"))
+    if ex:
+        L.append(extra_row("gp_lit", "5. As 1, with gradient pursuit's own weights (no refit)"))
+        L.append(extra_row("gpfull_recon", "6. As 1, searching the whole vocabulary"))
+        L.append(extra_row("gpfull_span", "7. As 6, span of the chosen vectors"))
+    L.append(r"\midrule")
+    L.append(main_row("nogain_nnomp_span", "8. As 3, J-lens vectors without the gain"))
+    ng = RES / "gemma2_9b_gp_nogain/original_last/sweep_results.json"
+    if ng.exists():
+        cells = {str(c["layer"]): c for c in json.loads(ng.read_text())["cells"]}
+        if all(x in cells for x in layers):
+            for key, arm, lab in (("nogain_gp_recon", f"J{K}_recon", "9. As 1, J-lens vectors without the gain"),
+                                  ("nogain_gp_span", f"J{K}_fill", "10. As 2, J-lens vectors without the gain")):
+                per = [cells[x][f"k{K}"][arm]["core_to_transfer"] for x in layers]
+                L.append(row(lab, per, float(np.mean(per)), None, key))
+            out["nogain_nulls"] = {
+                "randatoms_p95": [round(cells[x][f"k{K}"]["randatoms"]["c2t_p95"], 4) for x in layers],
+                "randatoms_mean": [round(cells[x][f"k{K}"]["randatoms"]["c2t_mean"], 4) for x in layers],
+                "randsub_p95": [round(cells[x][f"k{K}"]["randsub"]["c2t_p95"], 4) for x in layers],
+                "p_J_recon_vs_randatoms": [round(cells[x][f"k{K}"]["randatoms"]["J_recon_percentile"][1], 4) for x in layers],
+                "p_J_recon_vs_randsub": [round(cells[x][f"k{K}"]["randsub"]["J_recon_percentile"][1], 4) for x in layers],
+                "pca": [round(cells[x][f"k{K}"][f"pca{K}"]["core_to_transfer"], 4) for x in layers],
+                "C_recon": [round(cells[x][f"k{K}"][f"C{K}_recon"]["core_to_transfer"], 4) for x in layers],
+                "steps_core": [round(cells[x]["pursuit_steps_core_mean"], 2) for x in layers],
+                "J_recon_minus_pca_ci": [[round(v, 3) for v in cells[x][f"k{K}"]["J_recon_minus_pca_ci95"]] for x in layers]}
+    L.append(r"\midrule")
+    L.append(main_row("full", "Full residual, for reference"))
     L.append(r"\bottomrule\end{tabularx}")
     write("tabp_solver", L)
-    return True
+    out["band_ci"] = {k: [round(x, 3) for x in v] for k, v in S["band_ci95"].items()}
+    if ex:
+        out["band_ci"].update({k: [round(x, 3) for x in v] for k, v in ex["band_ci95"].items()})
+        out["extra_minus_gp_recon_ci"] = {k: [round(x, 3) for x in v] for k, v in ex["band_minus_gp_recon_ci95"].items()}
+        out["overlap"] = ex["overlap"]
+        out["steps"] = {k: [round(ex["per_layer"][x][k]["steps_core_mean"], 2) for x in layers] for k in ("gp_recon", "gpfull_recon")}
+    out["steps_main"] = {k: [round(S["per_layer"][x][k]["steps_core_mean"], 2) for x in layers] for k in ("nnomp_span", "gp_span", "nogain_nnomp_span")}
+    return out
 
 
 # --------------------------------------------------------------------------------------------------------- numbers
@@ -526,7 +572,14 @@ def numbers(D):
     N["per_layer_swap_last_full"] = {L: round(D.cell("swap", "last", L)["full"], 4) for L in LAYERS}
     N["per_layer_prompt_only"] = {L: {a: round(D.cell("prompt_only", "prompt_end", L)[a], 4) for a in ("full", "pca", "J_fill", "randsub_mean", "randsub_p95")} for L in LAYERS}
     N["positions_original"] = {p: {a: b(a, pos=p) for a in ("full", "pca", "J_fill", "randsub_p95", "full_lodo", "full_lofo")} for p, _ in POSITIONS}
-    N["ksweep"] = {k: {a: b(a, k=k) for a in ("J_fill", "J_pursuit", "pca", "randsub_p95", "randatoms_p95", "full")} for k in (8, 25, 50, 100)}
+    N["ksweep"] = {k: {a: b(a, k=k) for a in ("J_fill", "J_pursuit", "J_span", "pca", "randsub_p95", "randatoms_p95", "full")} for k in (8, 25, 50, 100)}
+    N["primary_j_arm"] = D.S.get("primary_j_arm", "fill")
+    N["band_original_last"].update({a: b(a) for a in ("J_span", "C_span", "J_fve", "J_span_fve") if D.cell("original", "last", 22).get(a) is not None})
+    for L in LAYERS:
+        c = D.cell("original", "last", L)
+        N["per_layer_original_last"][L].update({a: (round(c[a], 4) if c.get(a) is not None else None) for a in ("J_span", "C_span", "J_fve", "J_atoms_used")})
+        if c.get("J_recon_minus_J_span_ci"):
+            N["per_layer_original_last"][L]["J_minus_J_span_ci"] = [round(x, 3) for x in c["J_recon_minus_J_span_ci"]]
     for cond in ("original", "swap"):
         cells = [r for r in D.S["rows"] if r["condition"] == cond and r["k"] == K]
         best = max(cells, key=lambda r: r["full"])
@@ -566,10 +619,11 @@ def numbers(D):
     N["positions_swap"] = {p: {a: b(a, cond="swap", pos=p) for a in ("full", "pca", "J_fill", "full_lodo", "full_lofo")} for p, _ in POSITIONS}
     rs = {}
     for cond, pos in (("original", "last"), ("swap", "last"), ("nosys", "last"), ("prompt_only", "prompt_end")):
-        sw = json.loads((RES / f"gemma2_9b/{cond}_{pos}/sweep_results.json").read_text())
+        sw = json.loads((RES / SWEEP / f"{cond}_{pos}/sweep_results.json").read_text())
+        jkey = f"J{K}_recon" if D.recon else f"J{K}_fill"
         rs[cond] = {c["layer"]: {"lodo_mean_20": round(float(np.mean(c[f"k{K}"]["randsub"]["lodo_draws"])), 3),
                                  "c2t_mean": round(c[f"k{K}"]["randsub"]["c2t_mean"], 3),
-                                 "fve_J_fill": round(c[f"k{K}"][f"J{K}_fill"]["fve_core"], 4),
+                                 "fve_J_fill": round(c[f"k{K}"][jkey]["fve_core"], 4),
                                  "steps_core": round(c["pursuit_steps_core_mean"], 2), "steps_transfer": round(c["pursuit_steps_transfer_mean"], 2)}
                     for c in sw["cells"]}
     N["randsub_and_size"] = rs
@@ -600,18 +654,24 @@ def main() -> int:
     ap.add_argument("--png-dir", type=Path, default=None, help="also write PNG previews of the figures here")
     ap.add_argument("--numbers", type=Path, default=None, help="write the numbers the paper's text quotes to this JSON file")
     ap.add_argument("--no-figures", action="store_true")
+    ap.add_argument("--sweep-dir", default=SWEEP, help="folder under results/jspace_interp with SUMMARY.json and the sweep files "
+                                                         "(gemma2_9b: 9 November run; gemma2_9b_gp: gradient-pursuit rerun)")
     a = ap.parse_args()
+    globals()["SWEEP"] = a.sweep_dir
     D = Data()
     if not a.no_figures:
         setup()
         for f in (fig_controls, fig_layers, fig_positions, fig_steering):
             f(D, a.png_dir)
     tables(D)
-    if not solver_table():
+    solver = solver_table()
+    if solver is None:
         print("note: results/jspace_interp/solver_check/solver_check.json not found; tabp_solver.tex not written")
     if a.numbers:
         a.numbers.parent.mkdir(parents=True, exist_ok=True)
-        a.numbers.write_text(json.dumps(numbers(D), indent=1, default=float) + "\n")
+        N = numbers(D)
+        N["solver_check"] = solver
+        a.numbers.write_text(json.dumps(N, indent=1, default=float) + "\n")
     print("figures:", sorted(p.name for p in (DOC / "figs").glob("fig_*.pdf")))
     print("tables:", sorted(p.name for p in (DOC / "tables").glob("tabp_*.tex")))
     return 0

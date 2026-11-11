@@ -106,8 +106,11 @@ def load_unembed(basis_dir: Path) -> tuple[np.ndarray, np.ndarray]:
 
 
 def norm_scale(weight: np.ndarray, kind: str) -> np.ndarray:
-    """Per-dimension scale of the final norm. Gemma's RMSNorm multiplies by (1 + weight); most others by weight."""
+    """Per-dimension scale of the final norm. Gemma's RMSNorm multiplies by (1 + weight); most others by weight.
+    kind="none" leaves the gain out: the J-lens vectors are then literally the rows of W_U J_l."""
     w = np.asarray(weight, dtype=np.float32).reshape(-1)
+    if kind == "none":
+        return np.ones_like(w)
     return (1.0 + w) if kind == "gemma" else w
 
 

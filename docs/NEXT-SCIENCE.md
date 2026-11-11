@@ -464,3 +464,19 @@ up to 2.8% at the end of the system prompt (prompt_only), not "< 2% everywhere";
 are below 0.01 in the conversation and reach +0.017 (deception/secrecy) and −0.026 (honesty/standards) at the end of the
 system prompt. The paper's abstract, Experiment 1 paragraph and Table 11 caption are corrected in the commit after eb381f0
 (eb381f0 itself carried only a rebuilt PDF: its text edit had failed to apply); no other number changes.
+
+**Correction 2026-11-10 (second) — statements in the 9 November entry that were stronger than the data.** Checked against
+`SUMMARY.json` and the steering JSONs while building the slide deck; the paper and the deck are corrected, no result changes.
+- prompt_only: "1.000 for every arm (even random subspaces)" is true of the full residual, PCA-25 and the random subspaces' 95th
+  percentile; the *average* random 25-dim subspace transfers at 0.92–0.93 there.
+- swap: "chance for every arm" holds for the band means (full 0.479); over the 35 full-residual cells the best is 0.64 (frac75,
+  L20) and two intervals exclude 0.5, about what 35 tests give.
+- Matched vocabulary: J-space's echo ratio is 2.3–3.9× the full residual's (not "3–4×"), and that is a ratio effect: in AUROC
+  terms J-space separates warned from unwarned agents no better than the full residual (0.58–0.76 vs 0.62–0.70).
+- Steering: under the original prompt three of four concept directions have the wrong sign on colluders at L22 (deception has
+  the right sign from α=1); concept directions flip at most 6% of colluder prefixes (0–6%), the role direction 10% under swap,
+  and the strongest random Gaussian directions flip 2% (honest) and 5–9% (colluders), so flips are at the random level.
+- Lens null: random lens draws for honest agents run +2.18 to +2.95 (not "+3.0"); coordination (+2.96) exceeds them only for
+  honest agents and only by 0.01; honesty/standards is inside the null for honest agents and weaker than every draw for colluders.
+Slide deck updated the same day: "Collusion Signatures Beyond J-Space" (claude.ai artifact HyGfCP6XjFiyo1copKLhys), 32 slides,
+results section slides 16–28.

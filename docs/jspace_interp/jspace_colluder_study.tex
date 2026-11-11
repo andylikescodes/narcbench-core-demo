@@ -30,18 +30,16 @@ except steering ran on fresh Gemma-2-9B-it activations (one A40 for 7.7 hours; 3
 over layers 19--23) against 0.945 for the full residual and 0.879 for a 25-component PCA subspace; it exceeds the 95th
 percentile of 200 random subspaces at two layers only (layer 22: 0.899 vs 0.851) and never exceeds the 95th percentile of
 200 random sets of 25 lens atoms, which reach 0.969 at layer 22. (ii) The transferable signal is the instruction. A read at
-the end of the system prompt, before any conversation, transfers at 1.000 for every arm including random subspaces; with the
+the end of the system prompt, before any conversation, transfers at 1.000 for the full residual and PCA-25 and at 0.92 for the average random 25-dimensional subspace; with the
 colluders' system prompt swapped for the honest one and their private blocks cut, every arm falls to chance Core$\to$Transfer
 (full residual 0.479) although the probe still separates colluders within Core (0.935 leave-one-domain-out). (iii) The
 chosen atoms are a near-fixed set of decision, formatting and end-of-turn tokens (``decision'' is selected by 189 of the 200
 agents in Core collusion episodes at layer 22); the four concept groups hold about 1\% of the selections in the conversation
 and under 3\% at the end of the system prompt. (iv) Honest agents warned in the
-colluders' vocabulary do not score like colluders (colluders vs warned 1.000), but J-space echoes the vocabulary three to
-four times more than the full residual does. (v) Steering along J-space directions shifts the forced-vote logit
+colluders' vocabulary do not score like colluders (colluders vs warned 1.000), but relative to its smaller colluder--honest gap J-space shifts two to four times more than the full residual (echo ratio 0.13--0.21 against 0.04--0.06). (v) Steering along J-space directions shifts the forced-vote logit
 difference by up to 3.6 but flips at most 1\% of honest votes and 10\% of colluder votes; the four concept directions are
 one direction (pairwise cosines 0.82--0.92, cosine 0.9 with the mean lens atom), and against a null of 20 random lens-atom
-directions, which share that component and move the vote the same way, deception and steering exceed all 20 draws at the
-largest strength while coordination and honesty sit inside the null, so the bars passed against Gaussian noise say little
+directions, which share that component and move the vote the same way, deception and steering exceed all 20 draws in both groups at the largest strength while honesty sits inside the null, so the bars passed against Gaussian noise say little
 about the concepts. Our recommendation: the full-residual probe stays the reference detector, and the swap and
 prompt-only reads become mandatory controls for any detector claim on this benchmark, because the detectors that transfer
 do so by reading the instruction.
@@ -333,12 +331,9 @@ at chance, at every layer.}
 \end{table}
 
 \subsection{The three controls}
-\gpu{} Tables~\ref{tab:protocols} and~\ref{tab:controls}. \textbf{prompt\_only.} At the end of the system prompt the full
-residual, PCA-25 and the 95th percentile of random subspaces all transfer at 1.000 at every layer, and the J arm at
-0.95--1.00. The system prompts differ so systematically between roles that any 25 directions separate them; the tiny-model
+\gpu{} Tables~\ref{tab:protocols} and~\ref{tab:controls}. \textbf{prompt\_only.} At the end of the system prompt the full residual and PCA-25 transfer at 1.000 at every layer, the J arm at 0.95--1.00, and a random 25-dimensional subspace at 0.92--0.93 on average (95th percentile 1.000). The system prompts differ so systematically between roles that most random directions separate them; the tiny-model
 lesson of Section~\ref{sec:results} holds for Gemma. \textbf{swap.} With the honest system prompt and no private blocks,
-Core$\to$Transfer falls to chance for every arm at every layer and position (full residual 0.45--0.54 at the last token;
-Table~\ref{tab:layers_swap}). The best J cell of 35 is 0.622 at the pre-vote token of layer 22, against nulls of 0.594 and
+Core$\to$Transfer falls to chance level for every arm (full residual 0.45--0.54 at the last token, Table~\ref{tab:layers_swap}; over the 35 cells its best score is 0.64, at the 75\% reply position, and two intervals exclude 0.5, about what 35 tests give). The best J cell of 35 is 0.622 at the pre-vote token of layer 22, against nulls of 0.594 and
 0.606, which is the count expected by chance. The probe still separates colluders within Core (LODO 0.935 for the full
 residual, 0.898 PCA, 0.831 J) and partly within Transfer (LOFO 0.667), so the conversation does carry a split-specific
 signal, but nothing that carries across splits. \textbf{nosys} agrees (0.488 Core$\to$Transfer; 0.934 LODO). The 0.945 of
@@ -346,9 +341,7 @@ the original condition is therefore the instruction as the model represents it. 
 (Table~\ref{tab:mv}; original condition, 50 warned control episodes, 600 warned-episode turns). Warned honest agents do not
 score like colluders: colluders vs warned 1.000 for the full residual at every layer, 0.90--0.99 for J. The warning does move
 honest agents a little: warned vs unwarned 0.62--0.70 for the full residual (within-episode $p<0.001$), an echo of 4--6\% of
-the colluder--honest gap, rising to 0.71--0.83 at the end of turn. J-space echoes more: warned vs unwarned 0.58--0.76 and an
-echo ratio of 0.13--0.21, three to four times the full residual's and above PCA (0.01--0.05) and the random subspaces
-(0.55--0.62 AUROC). At the episode level warned episodes are not mistaken for collusion (collusion vs warned 1.000) but look
+the colluder--honest gap, rising to 0.71--0.83 at the end of turn. For J-space the echo ratio is 0.13--0.21, two to four times the full residual's (3.3--3.9 times at layers 19--22, 2.3 at layer 23) and above PCA (0.01--0.05) and the random subspaces (0.02--0.07): its colluder--honest gap is smaller, so the same shift is a larger share of it. In AUROC terms J-space separates warned from unwarned agents no better than the full residual (0.58--0.76 against 0.62--0.70; random subspaces 0.55--0.62). At the episode level warned episodes are not mistaken for collusion (collusion vs warned 1.000) but look
 slightly more collusive than plain control episodes (0.59--0.65).
 \begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \resizebox{\linewidth}{!}{\input{tables/tab_protocols_k25}}
@@ -411,13 +404,11 @@ causal counterpart of the swap result above.
 \textbf{Large in logits, small in votes.} Adding $+u$ to honest agents raises $y$ by 2.4 to 3.6 at $\alpha{=}4$ for every
 concept direction, monotonically in $\alpha$ and above the 95th percentile of the random directions, whose mean effects at
 $\alpha{=}4$ range from $-0.3$ to $+2.0$. Subtracting $u$ from colluders lowers $y$ by 0.3 to 1.6 under swap, with the J-space
-role direction strongest ($-1.5$ at layer 22, $-2.0$ at layer 23). Under the original prefix the concept directions have the
-wrong sign on colluders at layer 22 (they raise $y$ by 0.05 to 0.38) and only the role direction lowers it ($-0.66$). At swap
+role direction strongest ($-1.5$ at layer 22, $-2.0$ at layer 23). Under the original prefix three of the four concept directions have the wrong sign on colluders at layer 22 (they raise $y$ by 0.05 to 0.38 at $\alpha{=}4$), deception/secrecy lowers it only from $\alpha{=}1$ ($-0.47$ at $\alpha{=}4$), and the role direction lowers it at every strength ($-0.66$). At swap
 layer 23 every direction passes every pre-registered bar (sign, random 95th percentile at every $\alpha$, BH at $q{=}0.05$,
 dose); at layer 22 the sign and random bars pass for most cells but BH does not, which with a 20-direction null (minimum
 $p$ = 1/21) rejects only when every test sits at that minimum. Votes barely move: honest agents start 8.6 logits from the
-target and at most 1\% cross zero at $\alpha{=}4$; colluders are pushed off the target in 1--6\% of prefixes by the concept
-directions and in 10\% by the role direction under swap.
+target and at most 1\% cross zero at $\alpha{=}4$; colluders are pushed off the target in at most 6\% of prefixes by the concept directions and in 10\% by the role direction under swap. Random directions do about as much: the strongest of the 20 Gaussian directions flips 2\% of honest prefixes and 5--9\% of colluder prefixes.
 
 \textbf{The result is not about the concepts.} The four concept directions have pairwise cosines of 0.82--0.92 at layers
 22--23 and cosines of 0.88--0.94 with the mean of all lens atoms (the mean of 20{,}000 unit atoms has norm 0.75: the atoms
@@ -431,10 +422,9 @@ one layer for a reason that has nothing to do with what the atoms name.
 \textbf{A fairer null.} \gpu{} We reran swap layer 23 with the same prefixes, scale and strengths against 20 random
 \emph{lens} directions: the unit mean atom of a random set of vocabulary tokens, size-matched to the concept groups (32--47
 tokens). These share the common component (cosine 0.85--0.94 with the concept directions, mean 0.90) and move the vote the
-same way: at $\alpha{=}4$ their mean effects on honest agents run from $+2.2$ to $+3.0$ (median $+2.5$) and on colluders
+same way: at $\alpha{=}4$ their mean effects on honest agents run from $+2.18$ to $+2.95$ (median $+2.5$) and on colluders
 from $-0.8$ to $-1.2$ (median $-1.0$). Against this null deception/secrecy ($+3.6$, $-1.6$) and steering/persuasion ($+3.1$,
-$-1.3$) exceed all 20 draws in both groups at $\alpha{=}4$ ($p = 1/21$), coordination ($+3.0$, $-0.9$) and honesty/standards
-($+2.7$, $-0.6$) sit inside it, and no direction passes the full pre-registered set (Table~\ref{tab:steer}, last block). The
+$-1.3$) exceed all 20 draws in both groups at $\alpha{=}4$ ($p = 1/21$), coordination ($+2.96$, $-0.92$) exceeds the draws only for honest agents and only by 0.01, honesty/standards ($+2.7$, $-0.6$) sits inside the null for honest agents and is weaker than every draw for colluders, and no direction passes the full pre-registered set (Table~\ref{tab:steer}, last block). The
 concept-specific part of the effect is therefore at most about one logit on top of a common-component effect of two and a
 half, with deception and steering at the top of the random-lens distribution and honesty at its bottom; with 20 draws the
 smallest attainable $p$ is 1/21, so a sharper statement needs more draws.
@@ -478,7 +468,7 @@ atoms everywhere. (2) The prompt-only probe transfers at 1.000 against J's 0.77 
 transfers at 0.879 against 0.773, and 0.937 against 0.899 at the best layer; the paired interval never favours J. The
 pre-registered conditions for the interpretation case fail as well: (a) under swap no J cell beats both nulls beyond the
 chance count, because nothing transfers under swap; (b) prompt\_only is far above J-only; (c) warned honest agents are not
-mistaken for colluders, but J-space tracks the warning's words more than the full residual does; (d) steering
+mistaken for colluders, but J-space's echo ratio on the warning's words is two to four times the full residual's; (d) steering
 passes its bars at one layer against Gaussian noise, but the four concept directions are nearly a single direction shared by
 every lens atom; against random lens directions only deception and steering stay above all 20 draws, and votes do not flip.
 \textbf{What the run says about detection in general.} The detectors that transfer across NARCBench splits are instruction

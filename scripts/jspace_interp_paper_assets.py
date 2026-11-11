@@ -474,6 +474,34 @@ def tables(D):
     write("tabp_steer", L)
 
 
+def solver_table():
+    """Table of the decomposition variants (scripts/jspace_interp_solver_check.py), if that check has been run."""
+    p = RES / "solver_check/solver_check.json"
+    if not p.exists():
+        return False
+    S = json.loads(p.read_text())
+    rows = [("nnomp_span", "Non-negative OMP, span (our primary)"),
+            ("gp_span", "Gradient pursuit, span"),
+            ("nnomp_cone", "Non-negative OMP, reconstruction"),
+            ("gp_cone", "Gradient pursuit, reconstruction"),
+            ("nogain_nnomp_span", "Non-negative OMP, span; vectors without the gain"),
+            ("nogain_gp_cone", "Gradient pursuit, reconstruction; vectors without the gain"),
+            ("full", "Full residual, for reference")]
+    layers = [str(x) for x in S["layers"]]
+    L = [r"\begin{tabularx}{\linewidth}{@{}X" + "c" * len(layers) + r"cc@{}}\toprule",
+         "Decomposition & " + " & ".join(f"L{x}" for x in layers) + r" & Band & Difference to primary\\\midrule"]
+    for key, lab in rows:
+        if key == "full":
+            L.append(r"\midrule")
+        vals = [f3(S["per_layer"][x][key]["core_to_transfer"]) for x in layers]
+        lo, hi = S["band_minus_nnomp_span_ci95"][key]
+        diff = "--" if key == "nnomp_span" else f"$[{lo:+.3f}, {hi:+.3f}]$"
+        L.append(" & ".join([lab] + vals + [f3(S["band_mean"][key]), diff]) + r"\\")
+    L.append(r"\bottomrule\end{tabularx}")
+    write("tabp_solver", L)
+    return True
+
+
 # --------------------------------------------------------------------------------------------------------- numbers
 def numbers(D):
     """Every number the paper's text quotes, recomputed from the result files (for checking the text)."""
@@ -579,6 +607,8 @@ def main() -> int:
         for f in (fig_controls, fig_layers, fig_positions, fig_steering):
             f(D, a.png_dir)
     tables(D)
+    if not solver_table():
+        print("note: results/jspace_interp/solver_check/solver_check.json not found; tabp_solver.tex not written")
     if a.numbers:
         a.numbers.parent.mkdir(parents=True, exist_ok=True)
         a.numbers.write_text(json.dumps(numbers(D), indent=1, default=float) + "\n")

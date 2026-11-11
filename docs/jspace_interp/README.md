@@ -22,6 +22,8 @@ Branch for the next J-space direction on NARCBench (Gemma-2-9B-it, instructed co
 | `scripts/jspace_interp_gen_matched_vocab.py` | Matched-vocabulary control episodes (warned honest seats 0-1); `--workers`/`--batch` run episodes concurrently through the batched generator | needs GPU; dry run and a real tiny-model run tested |
 | `scripts/runpod_launch_jspace_interp.py`, `scripts/runpod_jspace_interp_boot.sh`, `scripts/runpod_range_server.py` | One-pod rebuild on RunPod: estimate, preflight (balance, running pods, GPU stock, pushed SHA), launch, status, watch, pull (verified), terminate; the boot script runs every stage and the analysis as parallel CPU jobs sized from the cgroup limits; `--mode steer` reruns only the steering chain | **ran Nov 9** (full run 7.7 h on an A40; steering rerun) |
 | `scripts/jspace_interp_summarize.py` | SUMMARY.json, RESULTS.md and the paper's LaTeX table fragments from the sweep, steering and matched-vocabulary JSON; lists every planned cell that did not run | ran Nov 9 |
+| `scripts/jspace_interp_verify_jlens.py` | Runs Anthropic's `jlens` code (`JacobianLens.load/transport`, `HFLensModel.unembed`) on saved activations and compares it with this repo's numpy lens arithmetic; writes `results/jspace_interp/jlens_check/jlens_check.json` | ran Nov 10: identical to float32 rounding |
+| `scripts/jspace_interp_solver_check.py` | Scores the J-space arm on the headline cell under the readings of the paper's definition: non-negative OMP or gradient pursuit, span projection or non-negative reconstruction, J-lens vectors with or without the final-norm gain; `--merge` writes `results/jspace_interp/solver_check/solver_check.json` | ran Nov 10 |
 | `scripts/jspace_interp_paper_assets.py` | The paper's figures (`docs/jspace_interp/figs/fig_*.pdf`) and compact tables (`tables/tabp_*.tex`), read from SUMMARY.json, the sweep files and the steering files; `--numbers <file>` dumps the numbers the text quotes | ran Nov 10 |
 | `scripts/jspace_interp_finish_cells.py` | Runs analysis cells a time cap cut, on CPU from the pulled activations; the summariser merges them | tested (dry run) |
 | `scripts/jspace_interp_convert_paper_cache.py` | Turns the Nov 5 Gemma caches (activations_gen.npz + metadata_gen.json) into this layout so Exp 1 and 2 (last token, original) run on CPU | tested on synthetic data |
@@ -57,16 +59,36 @@ python scripts/jspace_interp_steer.py --lens <lens.pt> --basis-dir data/j_basis/
 Launch and pull with `scripts/runpod_launch_jspace_interp.py` (estimate by default; `--preflight`; `--launch --watch`; `--pull <pod>`).
 Needs HF_TOKEN for the gated Gemma repo and RUNPOD_API_KEY, both from the environment only.
 
+## Anthropic's `jlens`: what we use and what is ours
+The reference implementation of the Jacobian lens is Anthropic's `jlens` (github.com/anthropics/jacobian-lens, v0.1.0,
+one commit `581d398`, "reference implementation, not maintained"). It provides the lens fit (`jlens.fit`), the transport
+(`JacobianLens.transport`, J_l h) and the readout (`HFLensModel.unembed`: final norm, LM head, softcap), plus a slice
+visualisation. It contains **no J-space decomposition**, and the paper links no code for one.
+
+| Part | Source |
+|---|---|
+| The lens J_l for Gemma-2-9B-it | Anthropic's `jlens`, as fitted and published by Neuronpedia (HF `neuronpedia/jacobian-lens`, 453 WikiText prompts, layers 0-40). Used as published; we fit no lens for Gemma. `jspace_interp/jacobian.py` is only for the tiny random model of the pipeline check. |
+| Transport and readout | Re-implemented in numpy (`jspace_interp/nov5_jspace_decompose.py`) so the analysis runs on saved activations without the model. Checked against `jlens` with `scripts/jspace_interp_verify_jlens.py` on 480 activations: identical matrices and transport, logits within 2.8e-5 on a scale of 30, same top-1 and top-50 tokens for every activation. |
+| J-lens vectors | Ours: v_i = J_l^T ((1 + gamma) * W_U[i]), the readout direction of token i under the official readout (checked in the same script). The paper writes "rows of W_U J_l". |
+| J-space decomposition | Ours, from the paper's text: non-negative OMP with NNLS refit, filled to k = 25, projection onto the span. The paper names gradient pursuit; `scripts/jspace_interp_solver_check.py` compares the readings. On the 5 November activations gradient pursuit gave 0.756 against 0.755. |
+| Probe, detectors, nulls, controls, steering | Ours. |
+
+Not done: `JacobianLens.apply` on the model itself (needs the 9B model in memory), and a full sweep with gradient pursuit
+as the primary solver. To install the package for the check: `pip install "git+https://github.com/anthropics/jacobian-lens@581d398"`.
+
 ## The paper
-`docs/jspace_interp/jspace_colluder_study.tex` / `.pdf` (restructured Nov 10 for the Nov 11 group meeting; the previous
-draft is commit `af7afae`). Layout: one front page with the summary and a table of the findings; background; the method in
-ten steps (what, why, settings); seven findings in order of importance, one page each, each opening with the question it
-answers; what did not run; what to hold loosely; recommendations; appendices with the full tables, the earlier results and
-the list of changes since the previous draft.
+`docs/jspace_interp/jspace_colluder_study.tex` / `.pdf` (restructured Nov 10 for the Nov 11 group meeting; the draft
+before that is commit `af7afae`). A standard LaTeX article: abstract; introduction with a table of the seven findings;
+background; the method in ten steps (what, why, details) and a section on what comes from Anthropic's `jlens`; seven
+findings in order of importance, each opening with the question it answers; what did not run; limitations; conclusion;
+references; appendices with the full tables, the earlier results and the list of changes. Set `\findingbreak` to
+`\clearpage` in the preamble to start every finding on a new page.
 
 Rebuild:
 ```bash
 python scripts/jspace_interp_summarize.py      # SUMMARY.json, RESULTS.md, tables/tab_*.tex
+python scripts/jspace_interp_verify_jlens.py --lens <lens.pt>   # optional: check against Anthropic's jlens
+python scripts/jspace_interp_solver_check.py --lens <lens.pt> && python scripts/jspace_interp_solver_check.py --merge   # optional
 python scripts/jspace_interp_paper_assets.py   # figs/fig_*.pdf, tables/tabp_*.tex (needs matplotlib)
 cd docs/jspace_interp && tectonic jspace_colluder_study.tex
 ```

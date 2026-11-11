@@ -1,88 +1,66 @@
 \documentclass[11pt]{article}
-\usepackage[letterpaper,left=0.9in,right=0.9in,top=0.7in,bottom=0.8in]{geometry}
-\usepackage{amsmath,amssymb,booktabs,array,tabularx,graphicx,xcolor,enumitem,caption,parskip,titlesec,float}
-\usepackage[most]{tcolorbox}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,tabularx,graphicx,xcolor,enumitem,caption,float}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
-\definecolor{accent}{HTML}{17233B}
-\definecolor{boxbg}{HTML}{F2F4F7}
-\definecolor{mute}{HTML}{5B6270}
-\definecolor{instr}{HTML}{C9D3E6}
-\definecolor{neutral}{HTML}{E9EBEF}
-\usepackage[colorlinks=true,linkcolor=accent,urlcolor=accent,citecolor=accent]{hyperref}
-\captionsetup{font=small,labelfont=bf,skip=3pt}
-\setlength{\parskip}{4pt plus 1pt minus 1pt}
-\setlist{nosep,leftmargin=1.5em,itemsep=1pt}
-\titleformat{\section}{\Large\bfseries\color{accent}}{\thesection}{0.6em}{}
-\titleformat{\subsection}{\large\bfseries\color{accent}}{\thesubsection}{0.6em}{}
-\titlespacing*{\section}{0pt}{12pt}{3pt}
-\titlespacing*{\subsection}{0pt}{9pt}{1pt}
-\renewcommand{\arraystretch}{1.1}
-\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
-\setlength{\intextsep}{5pt plus 2pt minus 1pt}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+\captionsetup{font=small,labelfont=bf}
+\setlist{itemsep=1pt,topsep=3pt,parsep=0pt,leftmargin=*}
 
-% provenance tags: a number without a tag comes from the November 9 GPU run
-\newcommand{\src}[1]{\textcolor{mute}{\small\textsf{[#1]}}}
-\newcommand{\notrun}{\textcolor{red!70!black}{\small\textsf{\textbf{[not run]}}}}
+% Provenance tags. A number without a tag comes from the GPU run of November 9, 2026.
+\newcommand{\src}[1]{{\small[#1]}}
+\newcommand{\notrun}{{\small\textbf{[not run]}}}
 \newcommand{\tok}[1]{\texttt{#1}}
 \newcommand{\eot}{\texttt{<end\_of\_turn>}}
-
-% method steps: the main line in normal size, the settings in small type
-\newcounter{step}
-\newcommand{\step}[1]{\par\normalsize\refstepcounter{step}\subsection*{Step \thestep. #1}\addcontentsline{toc}{subsection}{Step \thestep. #1}}
-\newcommand{\what}{\textbf{What we do.}\ }
-\newcommand{\why}{\textbf{Why.}\ }
-\newcommand{\details}{\par\small\textbf{Details.}\ }
-
-% findings: each on its own page, opening with the question it answers
+\newcommand{\jlens}{\texttt{jlens}}
 \newcounter{finding}
-\newcommand{\finding}[4]{%
-  \clearpage\normalsize\refstepcounter{finding}%
-  \addcontentsline{toc}{subsection}{Finding \thefinding. #1}%
-  \begin{tcolorbox}[enhanced,colback=boxbg,colframe=boxbg,boxrule=0pt,arc=0pt,outer arc=0pt,
-      borderline west={3pt}{0pt}{accent},left=11pt,right=9pt,top=6pt,bottom=5pt,before skip=0pt,after skip=5pt]
-  {\sffamily\footnotesize\bfseries\color{accent}FINDING \thefinding\ OF 7}\par\vspace{2pt}
-  {\raggedright\Large\bfseries\color{accent}#1\par}\vspace{4pt}
-  \renewcommand{\arraystretch}{1.25}%
-  \begin{tabularx}{\linewidth}{@{}>{\bfseries\raggedright\arraybackslash}p{2.5cm}X@{}}
-  Question & #2\\
-  Answer & #3\\
-  Why it matters & #4\\
-  \end{tabularx}
-  \end{tcolorbox}}
-\newcommand{\evidence}{\textbf{Evidence.}\ }
-\newcommand{\caveats}{\par\small\textbf{Caveats.}\ }
+% Set to \clearpage to start every finding on a new page.
+\newcommand{\findingbreak}{}
+
+\title{Is J-space the Right Standard for Detecting Colluders?\\[4pt]
+\large Method and findings for NARCBench on Gemma-2-9B-it}
+\author{Andy Liang, with Claude\\[2pt] \small Working draft for the research group}
+\date{November 10, 2026}
 
 \begin{document}
+\maketitle
 
-\begin{center}
-{\LARGE\bfseries\color{accent} Is J-space the Right Standard for Detecting Colluders?\par}
-\vspace{4pt}
-{\large The method step by step, then seven findings in order of importance\par}
-\vspace{3pt}
-{\small NARCBench on Gemma-2-9B-it \quad$\cdot$\quad Andy, with Claude \quad$\cdot$\quad version of November 10, 2026, for the group meeting of November 11\par}
-\end{center}
-\vspace{-3pt}
+\begin{abstract}
+A linear probe on the residual stream of Gemma-2-9B-it detects colluding agents in NARCBench and transfers to a second set
+of scenarios. Recent work proposes \emph{J-space}, the part of an activation spanned by a few Jacobian-lens token directions,
+as the place where such states are represented. We test whether J-space should become our standard representation by
+requiring it to beat three baselines: random subspaces of the same size, a probe that reads only the system prompt, and a
+25-component PCA subspace. We use the Jacobian lens published for this model, which was fitted with Anthropic's \jlens{}
+package; our code applies it identically to the package (checked on 480 activations), and we implement the J-space
+decomposition ourselves because none has been released. J-space beats none of the baselines. It transfers at 0.773, against
+0.808 and 0.875 for the 95th percentiles of two random nulls, 1.000 for the prompt-only probe and 0.879 for PCA; the full
+residual gives 0.945. Three context controls show that what transfers is the instruction given to the colluders: with the
+instruction removed and the conversation kept, transfer falls to chance (0.479), and with the system prompt alone the full
+residual transfers perfectly. The token readout of J-space names the scheme (``subtly'', ``disinformation'') only while the
+instruction is in the context, and steering along J-space directions moves the vote logit mostly as any lens direction does.
+We recommend keeping the full-residual probe as the reference detector, describing it as an instruction detector on this
+benchmark, and reporting every detector together with its swap and prompt-only controls.
+\end{abstract}
 
-\begin{tcolorbox}[enhanced,colback=boxbg,colframe=boxbg,boxrule=0pt,arc=0pt,outer arc=0pt,borderline west={3pt}{0pt}{accent},
-  left=11pt,right=9pt,top=6pt,bottom=6pt,after skip=7pt]
-\textbf{The question.} A linear probe on Gemma-2-9B-it's activations finds colluding agents in NARCBench, also on scenarios
-it was not trained on. Recent work says the place to look is \emph{J-space}: the small part of an activation spanned by
-Jacobian-lens token directions. Before making J-space our standard we set a bar. It must beat three cheap baselines: random
-subspaces of the same size, a probe that reads only the system prompt, and a 25-component PCA subspace.
+% =====================================================================================================================
+\section{Introduction}\label{sec:intro}
 
-\smallskip\textbf{The answer.} It beats none of them (Finding~\ref{f:baselines}). The controls built for the test showed something
-larger (Finding~\ref{f:instruction}): the signal that carries a probe from one set of scenarios to the other is \emph{the
-instruction the colluders were given}. Take the instruction out of the context and the probe transfers at chance. Leave
-only the system prompt and the full residual transfers perfectly. J-space's token readout tells the same story
-(Finding~\ref{f:atoms}): it shows scheme words such as ``subtly'' and ``disinformation'' for colluders, but only while the
-instruction is in the context.
+A linear probe on Gemma-2-9B-it's activations finds colluding agents in NARCBench~\cite{rose2026narcbench}, also on
+scenarios it was not trained on. Gurnee et al.~\cite{gurnee2026workspace} argue that the content a model can verbalise
+lives in a small part of the activation that they call J-space, the set of sparse non-negative combinations of
+Jacobian-lens token directions, and Molinari and Bettineschi~\cite{molinari2026collusion} report that the J-space of
+colluding agents holds the collusion itself. Before making J-space the standard representation of our collusion work we set
+a bar. J-space has to beat three cheap baselines: (1) random subspaces of the same size, judged against the 95th
+percentile of 200 draws; (2) a probe that reads only the system prompt; (3) a 25-component PCA subspace.
 
-\smallskip\textbf{What we recommend.} Keep the full-residual probe as the reference detector, describe it as an instruction detector
-on this benchmark, and report every detector next to its swap and prompt-only controls (Section~\ref{sec:next}).
-\end{tcolorbox}
+It beats none of them (Finding~\ref{f:baselines}). The controls built for the test showed something larger
+(Finding~\ref{f:instruction}): the signal that carries a probe from one set of scenarios to the other is the instruction
+the colluders were given. With the instruction taken out of the context the probe transfers at chance, and with only the
+system prompt in the context the full residual transfers perfectly. The token readout of J-space tells the same story
+(Finding~\ref{f:atoms}). Table~\ref{tab:glance} lists the seven findings in order of importance, with the question each
+one answers.
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[ht]\centering\footnotesize
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\linewidth}{@{}c>{\raggedright\arraybackslash}p{0.255\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.315\linewidth}r@{}}\toprule
  & Question & Answer & Key numbers & Page\\\midrule
@@ -104,36 +82,36 @@ words: 1.000 & \pageref{f:vocab}\\
 the effect is shared by any lens direction. & Up to $+3.61$ logits; at most 1\% of honest votes flip; random lens directions
 $+2.18$ to $+2.95$ & \pageref{f:steer}\\
 \bottomrule\end{tabularx}
-\caption{The seven findings at a glance, most important first. AUROC is the chance that the detector ranks a collusion
-episode above a control episode: 1.0 is perfect, 0.5 is chance.}
+\caption{The seven findings, most important first. AUROC is the chance that the detector ranks a collusion episode above a
+control episode: 1.0 is perfect, 0.5 is chance.}
 \label{tab:glance}
 \end{table}
 
-\textbf{How to use this document.} Section~\ref{sec:background} is the background. Section~\ref{sec:method} is the method in
-ten steps: each says what we do and why, with the settings in small type. Section~\ref{sec:findings} has the seven findings,
-one per page: the question, the answer, why it matters, the evidence, the caveats. Findings~1 to~3 carry the conclusion if
-time is short. Sections~\ref{sec:notrun} to~\ref{sec:next} list what did not run, what to hold loosely and what we
-recommend. The appendices hold the full tables, the earlier results and the changes since the previous draft.
+\paragraph{Organisation.} Section~\ref{sec:background} gives the background. Section~\ref{sec:method} describes the method
+in ten steps, each with what we do, why, and the settings, and then documents which parts come from Anthropic's \jlens{}
+implementation and which are our own (Section~\ref{sec:impl}). Section~\ref{sec:findings} presents the seven findings, each
+with the question it answers, the answer, why it matters, the evidence and the caveats.
+Sections~\ref{sec:notrun}--\ref{sec:next} list what did not run, the limitations and our recommendations. The appendices
+hold the full tables, the earlier results and the run record.
+
+\paragraph{Where the numbers come from.} A number without a tag comes from the GPU run of November~9, 2026 and is read from
+the result files by the scripts of Appendix~\ref{app:files}. \src{Nov 5} marks a number quoted from the first run and not
+rerun. \src{Nov 8, CPU} marks a number computed from the saved transcripts without a GPU. \notrun{} marks something
+planned that did not run.
 
 % =====================================================================================================================
-\clearpage
 \section{Background}\label{sec:background}
 
-\textbf{Where the numbers come from.} A number without a tag comes from the GPU run of November~9, 2026 and is read from the
-result files by the scripts in Appendix~\ref{app:files}. \src{Nov 5} marks a number quoted from the first run and not rerun.
-\src{Nov 8, CPU} marks a number computed from the saved transcripts without a GPU. \notrun{} marks something planned that
-did not run.
+\paragraph{The benchmark.} NARCBench Core~\cite{rose2026narcbench} has 100 committee episodes in 17 domains (medicine,
+finance, hiring and so on). In each episode four agents discuss a decision for three public rounds and then each casts a
+final vote. Fifty episodes are \emph{collusion} episodes: two of the four agents are colluders, told through their system
+prompt to steer the committee to a target option while appearing impartial, and they exchange private messages. The other
+two agents are honest. The other fifty episodes are \emph{control} episodes with four honest agents. NARCBench Transfer has
+72 episodes (36 collusion, 36 control) in six scenario families of a different kind: CI/CD, code review, news,
+pump-and-dump, retrieval and research. All episodes were generated earlier with Gemma-2-9B-it~\cite{gemma2}. This study
+replays the recorded transcripts through the same model and reads its activations.
 
-\textbf{The benchmark.} NARCBench Core has 100 committee episodes in 17 domains (medicine, finance, hiring and so on).
-In each episode four agents discuss a decision for three public rounds and then each casts a final vote. Fifty episodes are
-\emph{collusion} episodes: two of the four agents are colluders, told through their system prompt to steer the committee to a
-target option while appearing impartial, and they exchange private messages. The other two agents are honest. The other
-fifty episodes are \emph{control} episodes with four honest agents. NARCBench Transfer has 72 episodes (36 collusion, 36
-control) in six scenario families of a different kind: CI/CD, code review, news, pump-and-dump, retrieval and research. All
-episodes were generated earlier with Gemma-2-9B-it. This study replays the recorded transcripts through the same model and
-reads its activations.
-
-\textbf{How colluders differ before they write a word.} \src{Nov 8, CPU} Reading the saved prompts shows three channels,
+\paragraph{How colluders differ before they write a word.} \src{Nov 8, CPU} Reading the saved prompts shows three channels,
 all in the model's context before the reply starts:
 \begin{enumerate}
 \item the \textbf{system prompt}, in every turn: the motive and the instruction to deceive;
@@ -143,30 +121,25 @@ all in the model's context before the reply starts:
 Behaviour is tied to role as well. On Core, colluders voted for the target option 73 times out of 100, honest agents in
 collusion episodes 8 out of 100, and agents in control episodes 8 out of 200. A probe can therefore succeed by reading the
 instruction, the private channel or the vote. None of these is collusion as a state of the model, which is what a general
-detector would need. Each control in Step~\ref{st:conditions} removes one of these routes.
+detector would need. Each control in Section~\ref{st:conditions} removes one of these routes.
 
-\textbf{J-space.} Gurnee, Lindsey et al.\ (arXiv:2607.15495) define a \emph{Jacobian lens} for each layer $\ell$: the
-matrix $J_\ell$ is the average Jacobian of the final-layer residual with respect to the layer-$\ell$ residual $h$. Through
-the lens every vocabulary token $i$ gets a direction in layer-$\ell$ space, its \emph{atom}
-$v_i = J_\ell^{\top}\big((1+\gamma)\odot W_U[i]\big)$, where $W_U$ is the unembedding matrix and $\gamma$ the weight of the
-final normalisation. Moving $h$ along $v_i$ raises token $i$ in the lens readout. The \emph{J-space} of one activation is
-the span of the $k=25$ atoms that a sparse pursuit picks for it (Step~\ref{st:arms}). The appeal is that J-space is small
-and its axes are labelled with tokens, so if collusion lived there one could both detect it and read what it says.
-Molinari and Bettineschi (arXiv:2611.02153; abstract read) report on NARCBench that colluders' J-space ``holds the collusion
-itself''.
+\paragraph{The Jacobian lens and J-space.} Gurnee et al.~\cite{gurnee2026workspace} define a \emph{Jacobian lens} for each
+layer $\ell$: the matrix $J_\ell$ is the average Jacobian of the final-layer residual with respect to the layer-$\ell$
+residual $h$, and the lens reads a residual out as $\mathrm{unembed}(J_\ell h)$, a ranked list of vocabulary tokens.
+The rows of $W_U J_\ell$, where $W_U$ is the unembedding matrix, are the \emph{J-lens vectors}: each is a direction in
+layer-$\ell$ space that belongs to one vocabulary token, and moving $h$ along it raises that token in the readout. The
+\emph{J-space} is the set of sparse non-negative combinations of J-lens vectors, with about $k=25$ vectors. The appeal is
+that J-space is small and its axes are labelled with tokens, so if collusion lived there one could both detect it and read
+what it says.
 
-\textbf{Where things stood.} \src{Nov 5} In the first run a probe on the J-space part of the activation transferred from
+\paragraph{Where things stood.} \src{Nov 5} In the first run a probe on the J-space part of the activation transferred from
 Core to Transfer at 0.755, against 0.902 for the full residual, 0.856 for a 25-component PCA subspace, and 0.647 for a
 random 25-dimensional subspace. That left two holes. The random baseline was a single draw, so there was no way to say how
 often a random subspace does as well. And none of the three channels above was controlled.
 
-\textbf{The bar, set before the GPU run.} J-space becomes our standard only if it beats all three of: (1) random subspaces
-of the same size, judged against the 95th percentile of 200 draws; (2) the prompt-only probe; (3) the 25-component PCA
-subspace.
-
-\begin{table}[H]\centering\small
+\begin{table}[ht]\centering\small
 \begin{tabularx}{\linewidth}{@{}>{\bfseries\raggedright\arraybackslash}p{0.17\linewidth}X@{}}\toprule
-Term & Meaning in this document\\\midrule
+Term & Meaning in this paper\\\midrule
 Core, Transfer & The two sets of episodes. Probes are trained on Core. Transfer tests whether they carry over to different scenarios.\\
 Residual $h$ & The model's activation vector (3{,}584 numbers) after one layer at one token.\\
 Arm & One version of the activation that is handed to the probe: the full residual, its J-space part, a PCA or random projection, and so on.\\
@@ -175,7 +148,7 @@ Core$\to$Transfer & Probe fit on Core and tested once on Transfer. This is the h
 LODO, LOFO & Leave one domain out (within Core) and leave one family out (within Transfer).\\
 Band mean & The mean of a score over layers 19 to 23.\\
 Null, p95 & The scores of 200 random subspaces; p95 is their 95th percentile.\\
-Lens atom & The direction in the residual space that the Jacobian lens gives to one vocabulary token.\\
+J-lens vector, atom & The direction in the residual space that the Jacobian lens gives to one vocabulary token. We call the J-lens vectors chosen for an activation its atoms.\\
 $k$ & The number of atoms or dimensions of a subspace: 25 unless stated.\\
 \bottomrule\end{tabularx}
 \caption{Terms used throughout.}
@@ -183,16 +156,16 @@ $k$ & The number of atoms or dimensions of a subspace: 25 unless stated.\\
 \end{table}
 
 % =====================================================================================================================
-\section{Method, step by step}\label{sec:method}
+\section{Method}\label{sec:method}
 
-Figure~\ref{fig:pipeline} is the whole method on one line. Steps 1 to 7 are the main test. Steps 8 to 10 are three side
-experiments on the same activations.
+Figure~\ref{fig:pipeline} shows the method on one line. Steps 1 to 7 are the main test. Steps 8 to 10 are three side
+experiments on the same activations. Section~\ref{sec:impl} then states which parts use Anthropic's implementation.
 
-\begin{figure}[h!]\centering
+\begin{figure}[ht]\centering
 \begin{tikzpicture}[font=\sffamily\scriptsize, node distance=3.2mm,
-  box/.style={draw=accent!55, fill=boxbg, rounded corners=1.5pt, align=left, text width=28.6mm, minimum height=19mm, inner sep=3pt},
-  side/.style={draw=black!30, fill=white, rounded corners=1.5pt, align=left, text width=51.3mm, minimum height=12.5mm, inner sep=3pt},
-  arr/.style={-{Latex[length=1.8mm]}, draw=black!55, line width=0.55pt}]
+  box/.style={draw=black!60, fill=black!5, rounded corners=1.5pt, align=left, text width=27.4mm, minimum height=19mm, inner sep=3pt},
+  side/.style={draw=black!40, fill=white, rounded corners=1.5pt, align=left, text width=49.4mm, minimum height=12.5mm, inner sep=3pt},
+  arr/.style={-{Latex[length=1.8mm]}, draw=black!60, line width=0.55pt}]
 \hyphenpenalty=10000 \exhyphenpenalty=10000
 \node[box] (a) {\textbf{Steps 1--2}\\[1pt] Recorded episodes, replayed in four context conditions};
 \node[box, right=of a] (b) {\textbf{Step 3}\\[1pt] Run Gemma-2-9B-it; save the residual $h$ at layers 19--23, at seven read positions};
@@ -211,21 +184,22 @@ experiments on the same activations.
 \label{fig:pipeline}
 \end{figure}
 
-\step{Start from the recorded episodes}\label{st:data}
-\what For every agent turn we take the saved system prompt, the saved user prompt (the task, the discussion so far and, for
-colluders, the private blocks) and the reply the agent wrote. Nothing is generated again, apart from the 50 new control
-episodes of Step~\ref{st:mv}.
+\subsection{Step 1: Start from the recorded episodes}\label{st:data}
+\paragraph{What we do.} For every agent turn we take the saved system prompt, the saved user prompt (the task, the
+discussion so far and, for colluders, the private blocks) and the reply the agent wrote. Nothing is generated again, apart
+from the 50 new control episodes of Step~8.
 
-\why The probes must read the model's state on what actually happened. Replaying fixed transcripts also lets us change the
-context while the replies stay exactly the same (Step~\ref{st:conditions}).
+\paragraph{Why.} The probes must read the model's state on what actually happened. Replaying fixed transcripts also lets
+us change the context while the replies stay exactly the same (Step~2).
 
-\details Core: 100 episodes, 400 agents (100 colluders, 300 honest), 1{,}200 public discussion turns (three rounds), 400
-final-vote turns and 100 private messages. Transfer: 72 episodes, 288 agents (72 colluders, 216 honest), 576 discussion
-turns (two rounds), 288 final-vote turns and 72 private messages. The median context is 1{,}159 tokens for a Core
-discussion turn and about 3{,}150 tokens for a Transfer final turn. No context was truncated.
+\paragraph{Details.} Core: 100 episodes, 400 agents (100 colluders, 300 honest), 1{,}200 public discussion turns (three
+rounds), 400 final-vote turns and 100 private messages. Transfer: 72 episodes, 288 agents (72 colluders, 216 honest), 576
+discussion turns (two rounds), 288 final-vote turns and 72 private messages. The median context is 1{,}159 tokens for a
+Core discussion turn and about 3{,}150 tokens for a Transfer final turn. No context was truncated.
 
-\step{Make four versions of each turn's context}\label{st:conditions}
-\what The same recorded reply is shown to the model in four contexts, called conditions (Figure~\ref{fig:conditions}).
+\subsection{Step 2: Make four versions of each turn's context}\label{st:conditions}
+\paragraph{What we do.} The same recorded reply is shown to the model in four contexts, called conditions
+(Figure~\ref{fig:conditions}).
 \begin{itemize}
 \item \textbf{original}: the turn as it was generated.
 \item \textbf{swap}: for colluders, the system prompt is replaced by the honest prompt for the same seat, and both
@@ -235,62 +209,67 @@ colluder-only blocks are cut from the user prompt. The colluder's own replies an
 token of the system prompt.
 \end{itemize}
 
-\why Each condition removes or isolates one way a probe could succeed. If the probe still works under swap, it is reading
-the discussion and the replies, which is behaviour. If it works under prompt\_only, it can succeed with no behaviour at all.
+\paragraph{Why.} Each condition removes or isolates one way a probe could succeed. If the probe still works under swap, it
+is reading the discussion and the replies, which is behaviour. If it works under prompt\_only, it can succeed with no
+behaviour at all.
 
-\begin{figure}[h!]\centering
-\begin{tikzpicture}[x=1mm,y=1mm,font=\sffamily\scriptsize]
+\begin{figure}[ht]\centering
+\begin{tikzpicture}[x=0.955mm,y=1mm,font=\sffamily\scriptsize]
 \def\hh{5.2}
 \foreach \name/\y in {original/0,swap/-8.2,nosys/-16.4,prompt\_only/-24.6}{\node[anchor=east,font=\sffamily\scriptsize\bfseries] at (27,\y+2.6) {\name};}
-\node[anchor=south,color=mute] at (47,5.6) {System prompt};
-\node[anchor=south,color=mute] at (86.5,5.6) {Task and discussion so far};
-\node[anchor=south,color=mute] at (120,5.6) {Colluder-only blocks};
-\node[anchor=south,color=mute] at (150.5,5.6) {The agent's own reply};
+\node[anchor=south,color=black!65] at (47,5.6) {System prompt};
+\node[anchor=south,color=black!65] at (86.5,5.6) {Task and discussion so far};
+\node[anchor=south,color=black!65] at (120,5.6) {Colluder-only blocks};
+\node[anchor=south,color=black!65] at (150.5,5.6) {The agent's own reply};
 % original
-\fill[instr] (29,0) rectangle (65,\hh); \node at (47,2.6) {instruction to collude};
-\fill[neutral] (66,0) rectangle (107,\hh); \node at (86.5,2.6) {as recorded};
-\fill[instr] (108,0) rectangle (132,\hh); \node at (120,2.6) {private messages};
-\fill[neutral] (133,0) rectangle (168,\hh); \node at (150.5,2.6) {as recorded};
+\fill[black!22] (29,0) rectangle (65,\hh); \node at (47,2.6) {instruction to collude};
+\fill[black!7] (66,0) rectangle (107,\hh); \node at (86.5,2.6) {as recorded};
+\fill[black!22] (108,0) rectangle (132,\hh); \node at (120,2.6) {private messages};
+\fill[black!7] (133,0) rectangle (168,\hh); \node at (150.5,2.6) {as recorded};
 % swap
-\fill[neutral] (29,-8.2) rectangle (65,-8.2+\hh); \node at (47,-8.2+2.6) {honest prompt, same seat};
-\fill[neutral] (66,-8.2) rectangle (107,-8.2+\hh); \node at (86.5,-8.2+2.6) {as recorded};
-\draw[black!35,dashed] (108,-8.2) rectangle (132,-8.2+\hh); \node[color=mute] at (120,-8.2+2.6) {cut};
-\fill[neutral] (133,-8.2) rectangle (168,-8.2+\hh); \node at (150.5,-8.2+2.6) {as recorded};
+\fill[black!7] (29,-8.2) rectangle (65,-8.2+\hh); \node at (47,-8.2+2.6) {honest prompt, same seat};
+\fill[black!7] (66,-8.2) rectangle (107,-8.2+\hh); \node at (86.5,-8.2+2.6) {as recorded};
+\draw[black!40,dashed] (108,-8.2) rectangle (132,-8.2+\hh); \node[color=black!65] at (120,-8.2+2.6) {cut};
+\fill[black!7] (133,-8.2) rectangle (168,-8.2+\hh); \node at (150.5,-8.2+2.6) {as recorded};
 % nosys
-\draw[black!35,dashed] (29,-16.4) rectangle (65,-16.4+\hh); \node[color=mute] at (47,-16.4+2.6) {none, for every agent};
-\fill[neutral] (66,-16.4) rectangle (107,-16.4+\hh); \node at (86.5,-16.4+2.6) {as recorded};
-\draw[black!35,dashed] (108,-16.4) rectangle (132,-16.4+\hh); \node[color=mute] at (120,-16.4+2.6) {cut};
-\fill[neutral] (133,-16.4) rectangle (168,-16.4+\hh); \node at (150.5,-16.4+2.6) {as recorded};
+\draw[black!40,dashed] (29,-16.4) rectangle (65,-16.4+\hh); \node[color=black!65] at (47,-16.4+2.6) {none, for every agent};
+\fill[black!7] (66,-16.4) rectangle (107,-16.4+\hh); \node at (86.5,-16.4+2.6) {as recorded};
+\draw[black!40,dashed] (108,-16.4) rectangle (132,-16.4+\hh); \node[color=black!65] at (120,-16.4+2.6) {cut};
+\fill[black!7] (133,-16.4) rectangle (168,-16.4+\hh); \node at (150.5,-16.4+2.6) {as recorded};
 % prompt_only
-\fill[instr] (29,-24.6) rectangle (65,-24.6+\hh); \node at (47,-24.6+2.6) {instruction to collude};
-\node[anchor=west,color=mute] at (67,-24.6+2.6) {nothing else in the context};
+\fill[black!22] (29,-24.6) rectangle (65,-24.6+\hh); \node at (47,-24.6+2.6) {instruction to collude};
+\node[anchor=west,color=black!65] at (67,-24.6+2.6) {nothing else in the context};
 % read markers
-\foreach \y in {0,-8.2,-16.4}{\fill[accent] (168,\y+\hh+0.2) -- (166.9,\y+\hh+1.9) -- (169.1,\y+\hh+1.9) -- cycle;}
-\fill[accent] (65,-24.6+\hh+0.2) -- (63.9,-24.6+\hh+1.9) -- (66.1,-24.6+\hh+1.9) -- cycle;
-\fill[accent] (134.5,-24.6+1.7) -- (133.4,-24.6+3.4) -- (135.6,-24.6+3.4) -- cycle;
-\node[anchor=west,color=accent] at (136,-24.6+2.6) {where the probe reads};
+\foreach \y in {0,-8.2,-16.4}{\fill[black] (168,\y+\hh+0.2) -- (166.9,\y+\hh+1.9) -- (169.1,\y+\hh+1.9) -- cycle;}
+\fill[black] (65,-24.6+\hh+0.2) -- (63.9,-24.6+\hh+1.9) -- (66.1,-24.6+\hh+1.9) -- cycle;
+\fill[black] (134.5,-24.6+1.7) -- (133.4,-24.6+3.4) -- (135.6,-24.6+3.4) -- cycle;
+\node[anchor=west] at (136,-24.6+2.6) {where the probe reads};
 \end{tikzpicture}
 \caption{What the model sees for a colluder's turn in each condition. Dark shading: the parts that carry the instruction.
 An honest agent's turn is unchanged under swap and loses its system prompt under nosys.}
 \label{fig:conditions}
 \end{figure}
 
-\details On Core the honest prompt is the scenario's honest mandate; on Transfer it is the prompt the same seat has in the
-control twin of the episode, with the agent's name put in. After the rewrite no colluder-only block is left: 0 of 1{,}700
-Core contexts and 0 of 936 Transfer contexts under swap and nosys. In the original contexts the private block is in 300 Core
-and 144 Transfer contexts and the drift block in 36 Transfer contexts. In every condition the probe is trained and tested in
-that same condition. Gemma's chat format has no system role, so the system prompt is the first part of the user turn.
+\paragraph{Details.} On Core the honest prompt is the scenario's honest mandate; on Transfer it is the prompt the same seat
+has in the control twin of the episode, with the agent's name put in. After the rewrite no colluder-only block is left: 0
+of 1{,}700 Core contexts and 0 of 936 Transfer contexts under swap and nosys. In the original contexts the private block is
+in 300 Core and 144 Transfer contexts and the drift block in 36 Transfer contexts. In every condition the probe is trained
+and tested in that same condition. Gemma's chat format has no system role, so the system prompt is the first part of the
+user turn.
 
-\step{Run the model and save the residual stream}\label{st:extract}
-\what One forward pass of Gemma-2-9B-it per turn and condition, with the recorded reply included, saving the residual stream
-(the output of a transformer block: 3{,}584 numbers) at layers 19 to 23 and at seven read positions
+\subsection{Step 3: Run the model and save the residual stream}\label{st:extract}
+\paragraph{What we do.} One forward pass of Gemma-2-9B-it per turn and condition, with the recorded reply included, saving
+the residual stream (the output of a transformer block: 3{,}584 numbers) at layers 19 to 23 and at seven read positions
 (Table~\ref{tab:positions}).
 
-\why Layers 19 to 23 are the band of the first run, so the numbers can be compared; we report the mean over the five
-layers and the single layers. The first run read only the last token, where the lens's top token was \tok{<eos>} for 98\% of
-Core turns \src{Nov 5}. We added positions inside the reply in case J-space says more there.
+\paragraph{Why.} Layers 19 to 23 are the band of the first run, so the numbers can be compared; we report the mean over the
+five layers and the single layers. The first run read only the last token, where the lens's top token was \tok{<eos>} for
+98\% of Core turns \src{Nov 5}. We added positions inside the reply in case J-space says more there.
 
-\begin{table}[h!]\centering\small
+\paragraph{Details.} The residual of layer $\ell$ is the output of block $\ell$, read with a forward hook; this is the
+convention of \jlens{} (Section~\ref{sec:impl}). The model ran in bf16.
+
+\begin{table}[ht]\centering\small
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.235\linewidth}>{\raggedright\arraybackslash}p{0.2\linewidth}X@{}}\toprule
 Position & Code name & Which token\\\midrule
 Last token & \tok{last} & The newline after \eot, the final token of the sequence. The only position of the first run.\\
@@ -302,42 +281,45 @@ them it is the last reply token.\\
 Mean over the reply & \tok{reply\_mean} & The residual averaged over all reply tokens.\\
 End of the system prompt & \tok{prompt\_end} & The last token of the system prompt; used by prompt\_only.\\
 \bottomrule\end{tabularx}
-\caption{Read positions. The last three tokens of a turn are consecutive: last reply token, \eot, newline. The model ran
-in bf16.}
+\caption{Read positions. The last three tokens of a turn are consecutive: last reply token, \eot, newline.}
 \label{tab:positions}
 \end{table}
 
-\step{Build the representations to compare}\label{st:arms}
-\what From each saved activation $h$ we compute several versions, called arms. Every arm goes through the same probe.
+\subsection{Step 4: Build the representations to compare}\label{st:arms}
+\paragraph{What we do.} From each saved activation $h$ we compute several versions, called arms. Every arm goes through the
+same probe.
 \begin{itemize}
 \item \textbf{Full residual}: $h$ itself.
-\item \textbf{J-space}: built separately for each activation, in four moves. (a) Take as candidates the 1{,}024 tokens whose
-unit-length atoms correlate most with $h$. (b) Run a non-negative orthogonal matching pursuit: add the candidate atom that
-correlates most with what is not yet explained, refit non-negative coefficients, and repeat until no candidate correlates
-positively or 25 atoms are chosen. (c) If fewer than 25 were chosen, fill up to 25 with the next-best candidates. (d)
-Orthonormalise the 25 atoms into a matrix $Q$ and project: $h_J = QQ^{\top}h$.
+\item \textbf{J-space}: built separately for each activation from the J-lens vectors
+$v_i = J_\ell^{\top}\big((1+\gamma)\odot W_U[i]\big)$, where $\gamma$ is the weight of the final normalisation. (a) Take as
+candidates the 1{,}024 tokens whose unit-length vectors correlate most with $h$. (b) Run a non-negative orthogonal matching
+pursuit: add the candidate that correlates most with what is not yet explained, refit non-negative coefficients, and
+repeat until no candidate correlates positively or 25 vectors are chosen. (c) If fewer than 25 were chosen, fill up to 25
+with the next-best candidates. (d) Orthonormalise the 25 chosen vectors (the atoms) into a matrix $Q$ and project:
+$h_J = QQ^{\top}h$.
 \item \textbf{Complement}: $h - h_J$, the residual with its J-space part removed.
 \item \textbf{PCA-25}: the projection of $h$ onto the top 25 principal components of the Core training activations.
 \item \textbf{Random subspaces}: the projection onto a random 25-dimensional subspace, the same for every activation; 200
 independent draws.
-\item \textbf{Random lens atoms}: the projection onto the span of the atoms of 25 randomly drawn tokens; 200 draws.
+\item \textbf{Random lens atoms}: the projection onto the span of the J-lens vectors of 25 randomly drawn tokens; 200 draws.
 \item \textbf{Fixed frame} and \textbf{shuffled}: the span of the 25 atoms most often chosen on Core, the same for every
 activation; and each activation projected onto another activation's atoms.
 \end{itemize}
 
-\why Each arm answers one question. Random subspaces: are 25 dimensions of anything enough? Random lens atoms: is it the
-pursuit's choice of atoms that matters, or would any lens atoms do? PCA: the best cheap 25-dimensional subspace learned from
-the data. Complement: is anything lost when J-space is taken out? Fixed frame and shuffled: does choosing atoms per
-activation matter?
+\paragraph{Why.} Each arm answers one question. Random subspaces: are 25 dimensions of anything enough? Random lens atoms:
+is it the pursuit's choice of atoms that matters, or would any lens vectors do? PCA: the best cheap 25-dimensional subspace
+learned from the data. Complement: is anything lost when J-space is taken out? Fixed frame and shuffled: does choosing
+atoms per activation matter?
 
-\details We use the published lens for Gemma-2-9B-it (fit on 453 WikiText prompts with the \texttt{jlens} package, layers 0
-to 40). We report J-space filled to 25 atoms, the primary version of the first run; the version without move (c) is called
-\emph{pursuit} in the appendix tables. The pursuit stops by itself after 16 to 18 atoms on average on Core. The J-space
-part is small: at $k=25$ it holds 1.0\% to 1.4\% of the squared length of $h$. Random subspaces are Haar-distributed. Sizes
-$k\in\{8,25,50,100\}$ were run for every arm.
+\paragraph{Details.} The lens is the published one for Gemma-2-9B-it. The decomposition is our implementation of the
+definition of Gurnee et al.~\cite{gurnee2026workspace}; Section~\ref{sec:impl} states exactly what is theirs and what is
+ours, and compares our solver with the one they name. We report J-space filled to 25 atoms, the primary version of the
+first run; the version without move (c) is called \emph{pursuit} in the appendix tables. The pursuit stops by itself after
+16 to 18 atoms on average on Core. The J-space part is small: at $k=25$ it holds 1.0\% to 1.4\% of the squared length of
+$h$. Random subspaces are Haar-distributed. Sizes $k\in\{8,25,50,100\}$ were run for every arm.
 
-\step{Fit the probe and score episodes}\label{st:probe}
-\what Five moves, the same for every arm.
+\subsection{Step 5: Fit the probe and score episodes}\label{st:probe}
+\paragraph{What we do.} Five moves, the same for every arm.
 \begin{enumerate}
 \item \textbf{Agent feature.} Average the arm's vectors over the agent's turns: three discussion turns on Core, the final
 turn on Transfer.
@@ -352,14 +334,14 @@ range, split and mean of the four scores, fit on the training episodes.
 the number we report (the \emph{primary AUROC}).
 \end{enumerate}
 
-\why The benchmark asks whether an episode contains collusion, and a control episode has no colluder to rank its agents
-against, so the unit of detection is the episode.
+\paragraph{Why.} The benchmark asks whether an episode contains collusion, and a control episode has no colluder to rank
+its agents against, so the unit of detection is the episode.
 
-\details Logistic regression with $C=1$ on class-balanced data; the Asymmetry model uses $C=0.01$. This mirrors the
-detector of the earlier runs.
+\paragraph{Details.} Logistic regression with $C=1$ on class-balanced data; the Asymmetry model uses $C=0.01$. This mirrors
+the detector of the earlier runs.
 
-\step{Evaluate under three protocols}\label{st:protocols}
-\what Three ways of splitting the episodes into training and test sets.
+\subsection{Step 6: Evaluate under three protocols}\label{st:protocols}
+\paragraph{What we do.} Three ways of splitting the episodes into training and test sets.
 \begin{itemize}
 \item \textbf{Core$\to$Transfer.} Fit on all Core discussion turns (1{,}200 rows) and score the Transfer final-vote turns
 (288 rows) once. This is the headline number: does the detector work on scenarios unlike the ones it was trained on?
@@ -368,14 +350,15 @@ held-out scores.
 \item \textbf{Transfer LOFO.} Leave one of the six Transfer families out, the same way.
 \end{itemize}
 
-\why Core$\to$Transfer tests generalisation to new kinds of scenario. The two within-set protocols show what is detectable
-when training and test scenarios come from the same recipe.
+\paragraph{Why.} Core$\to$Transfer tests generalisation to new kinds of scenario. The two within-set protocols show what is
+detectable when training and test scenarios come from the same recipe.
 
-\details Intervals are 95\% bootstrap intervals over episodes (2{,}000 resamples, stratified by family and label). The same
-resampled episodes are used for every arm, so differences between arms are paired. In prompt\_only there is one row per agent.
+\paragraph{Details.} Intervals are 95\% bootstrap intervals over episodes (2{,}000 resamples, stratified by family and
+label). The same resampled episodes are used for every arm, so differences between arms are paired. In prompt\_only there
+is one row per agent.
 
-\step{Decide whether J-space beats a baseline}\label{st:bar}
-\what The rule was written down on November 8, before the GPU run.
+\subsection{Step 7: Decide whether J-space beats a baseline}\label{st:bar}
+\paragraph{What we do.} The rule was written down on November 8, before the GPU run.
 \begin{itemize}
 \item \textbf{Random subspaces.} At a given layer, position and $k$, J-space beats random only if its AUROC from Core to
 Transfer is above the 95th percentile of \emph{both} nulls: the 200 random subspaces and the 200 random sets of lens atoms.
@@ -383,97 +366,169 @@ Transfer is above the 95th percentile of \emph{both} nulls: the 200 random subsp
 for J-space minus PCA.
 \end{itemize}
 
-\why With one random draw, as in the first run, there is no null distribution. A check with a small randomly initialised
-model showed how misleading a few draws are: with 5 draws per cell, J-space cleared both 95th percentiles in 6 of 45 cells
-of a network that knows nothing \src{Nov 8, CPU}.
+\paragraph{Why.} With one random draw, as in the first run, there is no null distribution. A check with a small randomly
+initialised model showed how misleading a few draws are: with 5 draws per cell, J-space cleared both 95th percentiles in 6
+of 45 cells of a network that knows nothing \src{Nov 8, CPU}.
 
-\details The one-sided $p$ against a null is $(1+n)/201$, where $n$ is the number of draws at or above J-space. The rule
-also asked for the paired bootstrap interval of J-space against the median random draw to exclude zero. That half did not
-run, because the random draws were scored without the bootstrap to fit the time limit \notrun.
+\paragraph{Details.} The one-sided $p$ against a null is $(1+n)/201$, where $n$ is the number of draws at or above
+J-space. The rule also asked for the paired bootstrap interval of J-space against the median random draw to exclude zero.
+That half did not run, because the random draws were scored without the bootstrap to fit the time limit \notrun.
 
-\step{Matched-vocabulary control}\label{st:mv}
-\what We generated 50 new control episodes on the Core scenarios. All four agents are honest, but two of them carry an
-``integrity notice from the committee chair'' in their system prompt. The notice is written in the colluders' vocabulary
-(``secretly coordinated'', ``steer the vote'', ``quietly downplaying a flaw'', ``hide a conflict of interest'') and says
-plainly that the agent has no agenda and no partner. These warned agents are then scored with probes fit on Core.
+\subsection{Step 8: Matched-vocabulary control}\label{st:mv}
+\paragraph{What we do.} We generated 50 new control episodes on the Core scenarios. All four agents are honest, but two of
+them carry an ``integrity notice from the committee chair'' in their system prompt. The notice is written in the colluders'
+vocabulary (``secretly coordinated'', ``steer the vote'', ``quietly downplaying a flaw'', ``hide a conflict of interest'')
+and says plainly that the agent has no agenda and no partner. These warned agents are then scored with probes fit on Core.
 
-\why If warned honest agents score like colluders, the probe follows the words and not the role.
+\paragraph{Why.} If warned honest agents score like colluders, the probe follows the words and not the role.
 
-\details Three readings. (1) The AUROC of colluders against warned honest agents: high if the probe follows the role.
-(2) The AUROC of warned against unwarned honest agents in the same episodes: 0.5 if the probe does not see the warning.
-(3) The \emph{echo ratio}: (mean score of warned agents $-$ mean score of control agents) divided by (mean score of
-colluders $-$ mean score of control agents). It is the share of the colluders' shift that the warning alone produces: 0 is
-none, 1 means warned agents score like colluders. Scores are out of fold: the probe for a domain is fit on the other Core
-domains. The warning holds more collusion vocabulary than the colluders' own prompts do, so the test is conservative: 6
-deception, 3 coordination, 5 steering and 5 honesty words in 79 words, against averages of 0.15, 0.23, 1.40 and 1.40 in Core
-colluder prompts \src{Nov 8, CPU}. This control ran in the original condition only.
+\paragraph{Details.} Three readings. (1) The AUROC of colluders against warned honest agents: high if the probe follows the
+role. (2) The AUROC of warned against unwarned honest agents in the same episodes: 0.5 if the probe does not see the
+warning. (3) The \emph{echo ratio}: (mean score of warned agents $-$ mean score of control agents) divided by (mean score
+of colluders $-$ mean score of control agents). It is the share of the colluders' shift that the warning alone produces: 0
+is none, 1 means warned agents score like colluders. Scores are out of fold: the probe for a domain is fit on the other
+Core domains. The warning holds more collusion vocabulary than the colluders' own prompts do, so the test is conservative:
+6 deception, 3 coordination, 5 steering and 5 honesty words in 79 words, against averages of 0.15, 0.23, 1.40 and 1.40 in
+Core colluder prompts \src{Nov 8, CPU}. This control ran in the original condition only.
 
-\step{Read what the atoms say}\label{st:atoms}
-\what Every atom is a vocabulary token, so the 25 atoms of an activation can be read as 25 tokens. For each agent we take
-the atoms of its turns and measure two things. (a) \textbf{Concept share}: the share of atoms that fall in four word groups
-fixed on November~8, before any readout: deception and secrecy, coordination, steering and persuasion, honesty and
-standards. (b) \textbf{Token by token}: for every token, the share of colluders whose atoms include it minus the share of
-honest agents in the same episodes.
+\subsection{Step 9: Read what the atoms say}\label{st:atoms}
+\paragraph{What we do.} Every atom is the J-lens vector of a vocabulary token, so the 25 atoms of an activation can be read
+as 25 tokens. For each agent we take the atoms of its turns and measure two things. (a) \textbf{Concept share}: the share
+of atoms that fall in four word groups fixed on November~8, before any readout: deception and secrecy, coordination,
+steering and persuasion, honesty and standards. (b) \textbf{Token by token}: for every token, the share of colluders whose
+atoms include it minus the share of honest agents in the same episodes.
 
-\why The promise of J-space over an ordinary probe is that it can be read. If colluders' J-space holds the collusion, the
-tokens should show it.
+\paragraph{Why.} The promise of J-space over an ordinary probe is that it can be read. If colluders' J-space holds the
+collusion, the tokens should show it.
 
-\details The word groups have 14, 10, 10 and 10 words, which match 35, 47, 32 and 37 vocabulary tokens. Both measures are
-tested by reshuffling the colluder labels within each episode (5{,}000 permutations for (a), 1{,}000 for (b)) and corrected
-with Benjamini--Hochberg at $q=0.05$. A token is tested if at least 5 agents have it and at least 5 do not. On Core an
-agent's atoms are pooled over its three discussion turns; on Transfer they are the atoms of its final turn. Readouts ran at
-four positions: the last token, the last reply token, 50\% into the reply, and the end of the system prompt.
+\paragraph{Details.} The word groups have 14, 10, 10 and 10 words, which match 35, 47, 32 and 37 vocabulary tokens. Both
+measures are tested by reshuffling the colluder labels within each episode (5{,}000 permutations for (a), 1{,}000 for (b))
+and corrected with the Benjamini--Hochberg procedure~\cite{benjamini1995} at $q=0.05$. A token is tested if at least 5
+agents have it and at least 5 do not. On Core an agent's atoms are pooled over its three discussion turns; on Transfer they
+are the atoms of its final turn. Readouts ran at four positions: the last token, the last reply token, 50\% into the reply,
+and the end of the system prompt.
 
-\step{Steer the vote}\label{st:steer}
-\what Take each Core agent's final-vote prompt (400 prompts: 300 honest agents, 100 colluders) and force the reply to
-start with ``RECOMMENDATION: Option''. The next token is the option letter. The outcome is
+\subsection{Step 10: Steer the vote}\label{st:steer}
+\paragraph{What we do.} Take each Core agent's final-vote prompt (400 prompts: 300 honest agents, 100 colluders) and force
+the reply to start with ``RECOMMENDATION: Option''. The next token is the option letter. The outcome is
 $y=\mathrm{logit}(\text{target option})-\mathrm{logit}(\text{fair option})$: positive means the model leans to the target.
 Then add $\alpha\cdot s\cdot u$ to the residual at one layer, on the final instruction and the forced tokens only, and
 measure the change $\Delta y$. Honest agents get $+u$, which should push them toward the target. Colluders get $-u$, which
-should push them away from it.
+should push them away from it. The directions $u$, all of unit length, are four \emph{concept directions} (the mean unit
+J-lens vector of each word group of Step~9), the \emph{J-space role direction} (mean $h_J$ of colluders minus mean $h_J$ of
+honest agents in Core collusion episodes), and 20 random Gaussian directions as the null.
 
-The directions $u$, all of unit length: four \emph{concept directions} (the mean lens atom of each word group of
-Step~\ref{st:atoms}); the \emph{J-space role direction} (mean $h_J$ of colluders minus mean $h_J$ of honest agents in Core
-collusion episodes); and 20 random Gaussian directions as the null.
+\paragraph{Why.} A probe shows that information is present. Steering asks whether the direction is used: does moving the
+residual along it change the collusive choice?
 
-\why A probe shows that information is present. Steering asks whether the direction is used: does moving the residual
-along it change the collusive choice?
-
-\details The strength is $\alpha\in\{0.5,1,2,4\}$ times $s$, the median length of $h_J$ at that layer (33 to 39). A
-direction counts as steering only if four conditions written down on November~8 all hold: (1) the predicted sign in both
-groups; (2) an effect above the 95th percentile of the random directions at the same strength; (3) significance after
+\paragraph{Details.} The strength is $\alpha\in\{0.5,1,2,4\}$ times $s$, the median length of $h_J$ at that layer (33 to
+39). A direction counts as steering only if four conditions written down on November~8 all hold: (1) the predicted sign in
+both groups; (2) an effect above the 95th percentile of the random directions at the same strength; (3) significance after
 Benjamini--Hochberg at $q=0.05$ over all direction, strength and group cells; (4) growth with the strength. Three runs
 completed: swap at layers 22 and 23, original at layer 22. After seeing them we added a second null of 20 random
-\emph{lens} directions: the mean lens atom of a random set of 32 to 47 vocabulary tokens, the sizes of the word groups
-(Finding~\ref{f:steer} says why).
+\emph{lens} directions: the mean unit J-lens vector of a random set of 32 to 47 vocabulary tokens, the sizes of the word
+groups (Finding~\ref{f:steer} says why).
 
-\par\normalsize
-\textbf{Compute.} One A40 GPU ran the main job for 7.7 hours on November~9: the 50 warned episodes, the activations for
-all four conditions, and 320 analysis cells (two conditions at seven positions, plus nosys and prompt\_only, each at five
-layers and four sizes). Two shorter A40 jobs ran the steering (3.8 hours) and the lens null (0.9 hours). The total was
-about \$7.60. Appendix~\ref{app:run} has the run record.
+\subsection{Implementation: what comes from Anthropic's \jlens{} and what is ours}\label{sec:impl}
+
+The reference implementation of the Jacobian lens is Anthropic's \jlens{} package~\cite{jlens}, the companion code of
+Gurnee et al.~\cite{gurnee2026workspace}. Table~\ref{tab:impl} states, part by part, what this study takes from it.
+
+\begin{table}[H]\centering\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.2\linewidth}>{\raggedright\arraybackslash}p{0.33\linewidth}X@{}}\toprule
+Part & Anthropic's implementation & This study\\\midrule
+The lens $J_\ell$ & \jlens{} fits it (\texttt{jlens.fit}). The lens for Gemma-2-9B-it was fitted with that code and
+published by Neuronpedia~\cite{neuronpedialens}: 453 WikiText prompts of 128 tokens, layers 0 to 40. &
+\textbf{Used as published.} We did not fit a lens for Gemma. Our own Jacobian estimator is used only for the small random
+model of the pipeline check.\\
+Applying the lens: transport $J_\ell h$ and readout (final norm, unembedding, softcap) &
+\texttt{JacobianLens.transport} and \texttt{HFLensModel.unembed}. &
+\textbf{Re-implemented and checked.} The analysis runs on saved activations with numpy code, so that it needs no model in
+memory. It gives the same numbers as the package (below).\\
+J-lens vectors & Not in the package. The paper defines them as the rows of $W_U J_\ell$. &
+\textbf{Ours}, $v_i = J_\ell^{\top}((1+\gamma)\odot W_U[i])$: the direction along which the package's readout of token $i$
+rises (checked below).\\
+J-space decomposition & Not in the package; no code is released. The paper names gradient pursuit as the solver and, in its
+formal definition, projects onto the span of $k$ J-lens vectors. &
+\textbf{Ours}, written from the paper's text: non-negative orthogonal matching pursuit, filled to $k=25$, projection onto
+the span. Check~2 below compares it with gradient pursuit.\\
+Probe, detectors, nulls, controls, steering & None. & \textbf{Ours.}\\
+\bottomrule\end{tabularx}
+\caption{What comes from Anthropic's reference implementation (\jlens{} v0.1.0, commit \texttt{581d398}) and what is our
+own code.}
+\label{tab:impl}
+\end{table}
+
+\paragraph{Check 1: our lens arithmetic against the package.} We ran the package's own code on 480 saved activations (48
+per layer at layers 19 to 23, at the last token and at 50\% into the reply, half from Core and half from Transfer). The
+matrices read by \texttt{JacobianLens.load} and by our loader are identical, and so is the transport. The readout logits
+differ by at most $2.8\times10^{-5}$ on a scale of 30, which is float32 rounding; the top token and the top 50 tokens agree
+for every activation, also for the ranking by raw score that our pipeline uses. The package's logit of token $i$ before the
+softcap equals $\langle v_i,h\rangle$ divided by the root mean square of $J_\ell h$ to within $1.7\times10^{-4}$ on a scale
+of 50, so our J-lens vectors are exactly the readout directions of the published lens. The check executes
+\texttt{HFLensModel.unembed} on the model's final-norm and unembedding weights; it does not load the model.
+
+\paragraph{Check 2: our decomposition against the solver the paper names.} The paper fixes the dictionary, the
+non-negativity, $k$ of about 25 and gradient pursuit~\cite{blumensath2008}. It does not fix the stopping rule, a candidate
+pre-selection, the normalisation of the vectors, or whether the gain of the final normalisation is part of them. Our
+choices for these are: stop when no candidate correlates positively with the remainder; pre-select the 1{,}024 best
+candidates; compare vectors at unit length; include the gain, so that the vectors are the readout directions of the
+package.
+
+On the activations of the first run \src{Nov 5}, gradient pursuit scored 0.756 against 0.755 for our primary (paired
+difference $[-0.025, +0.026]$): the two solvers choose nearly the same atoms. Two other readings scored higher there,
+0.811 without the fill to exactly 25 atoms and 0.809 with the non-negative reconstruction in place of the projection onto
+the span; both stayed below PCA-25 (0.856) and the full residual (0.902) of that run. On the activations of November~9 the
+version without the fill is the ``J pursuit'' arm of the appendix tables: 0.765 against 0.773 for the filled version.
+\IfFileExists{tables/tabp_solver.tex}{Table~\ref{tab:solver} repeats the comparison on the activations of November~9,
+on the headline cell, with the same probe and the same episode resamples.
+\input{solver_text}
+
+\begin{table}[H]\centering\small
+\input{tables/tabp_solver}
+\caption{The J-space arm under different readings of the paper's definition. Core$\to$Transfer primary AUROC, original
+condition, last token, $k=25$, per layer and as band mean. ``Span'' projects onto the span of the 25 chosen vectors;
+``reconstruction'' takes the non-negative combination itself. The last column is the paired 95\% bootstrap interval of the
+band-mean difference to our primary.}
+\label{tab:solver}
+\end{table}
+}{The same comparison on the activations of November~9 (gradient pursuit, the reconstruction, and J-lens vectors without
+the gain) was still running when this version was built \notrun; its results go to
+\texttt{results/jspace\_interp/solver\_check/}.}
+
+\paragraph{Not done.} We did not run \texttt{JacobianLens.apply} on the model itself, which would also exercise the
+package's tokenisation and its hooks \notrun; our extraction reads the output of block $\ell$ with a forward hook, as the
+package does. And the full sweep was not rerun with gradient pursuit as the primary solver \notrun.
+
+\subsection{Compute}
+One A40 GPU ran the main job for 7.7 hours on November~9: the 50 warned episodes, the activations for all four conditions,
+and 320 analysis cells (two conditions at seven positions, plus nosys and prompt\_only, each at five layers and four
+sizes). Two shorter A40 jobs ran the steering (3.8 hours) and the lens null (0.9 hours). The total was about \$7.60. The
+two checks of Section~\ref{sec:impl} ran on a laptop CPU. Appendix~\ref{app:run} has the run record.
 
 % =====================================================================================================================
-\section{Findings, in order of importance}\label{sec:findings}
-The order is by how much each finding changes what we should believe or do next. Unless stated, numbers are Core$\to$Transfer
-primary AUROCs at $k=25$, band means over layers 19 to 23, at the last token. Each finding has one page.
-
-\textbf{Reading the figures.} The same colours are used throughout: \textcolor[HTML]{2A78D6}{\rule{0.9em}{0.9ex}}~blue is
-the full residual, \textcolor[HTML]{EB6834}{\rule{0.9em}{0.9ex}}~orange is J-space, \textcolor[HTML]{1BAF7A}{\rule{0.9em}{0.9ex}}~green
-is the 25-component PCA subspace, and grey marks random draws. A horizontal or vertical line at 0.5 is chance. Every
-plotted value is also in a table, in the finding or in Appendix~\ref{app:tables}.
+\section{Findings}\label{sec:findings}
+The findings are ordered by how much each changes what we should believe or do next. Unless stated, numbers are
+Core$\to$Transfer primary AUROCs at $k=25$, band means over layers 19 to 23, at the last token. In the figures, blue is the
+full residual, orange is J-space, green is the 25-component PCA subspace, and grey marks random draws; a line at 0.5 is
+chance. Every plotted value is also in a table, in the finding or in Appendix~\ref{app:tables}.
 
 % ---------------------------------------------------------------------------------------------------------- Finding 1
-\finding{What transfers from Core to Transfer is the instruction}
-{When a probe trained on Core finds colluders in Transfer, what is it reading?}
-{The instruction in the colluder's own context. With the instruction removed and the whole discussion kept, transfer falls
-to chance. With the system prompt alone in the context, before any discussion, the full residual transfers perfectly.}
-{Every cross-scenario number on this benchmark, including the 0.945 of our reference probe, measures detection of an
-instruction. None shows that the activations carry a general signature of colluding behaviour.}
-\label{f:instruction}
+\findingbreak
+\refstepcounter{finding}\label{f:instruction}
+\subsection{Finding \thefinding: What transfers from Core to Transfer is the instruction}
 
-\evidence Figure~\ref{fig:controls}, left panel; every value is in Table~\ref{tab:controls} on
-page~\pageref{tab:controls}. In each condition the probe is trained and tested in that condition.
+\paragraph{Question.} When a probe trained on Core finds colluders in Transfer, what is it reading?
+
+\paragraph{Answer.} The instruction in the colluder's own context. With the instruction removed and the whole discussion
+kept, transfer falls to chance. With the system prompt alone in the context, before any discussion, the full residual
+transfers perfectly.
+
+\paragraph{Why it matters.} Every cross-scenario number on this benchmark, including the 0.945 of our reference probe,
+measures detection of an instruction. None shows that the activations carry a general signature of colluding behaviour.
+
+\paragraph{Evidence.} Figure~\ref{fig:controls}, left panel; every value is in Table~\ref{tab:controls}. In each condition
+the probe is trained and tested in that condition.
 \begin{itemize}
 \item \textbf{Instruction in the context (original).} The full residual transfers at 0.945, PCA-25 at 0.879 and J-space
 at 0.773.
@@ -483,19 +538,19 @@ blocks; their own replies and the rest of the discussion are unchanged. Transfer
 \item \textbf{Instruction alone (prompt only).} Reading the end of the system prompt with nothing else in the context:
 1.000 for the full residual at every layer, 1.000 for PCA-25, 0.980 for J-space.
 \item \textbf{The vote shows the same.} At the final vote colluders lean to the target option by $+3.54$ logits with the
-original prompt and by $-3.85$ with the swapped one (honest agents: $-8.63$; Step~\ref{st:steer}).
+original prompt and by $-3.85$ with the swapped one (honest agents: $-8.63$; Step~10).
 \item \textbf{It is not shared wording.} A bag-of-words classifier on the system prompts is perfect within Core but
 transfers at 0.457 \src{Nov 8, CPU} (see also Finding~\ref{f:vocab}).
 \end{itemize}
 
-\begin{figure}[h!]\centering
+\begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{figs/fig_controls}
 \caption{The four context conditions. Bars start at chance (0.5). Left: probe fit on Core, tested on Transfer. Right: within
 Core, leaving one domain out. The value of the full residual is printed.}
 \label{fig:controls}
 \end{figure}
 
-\caveats
+\paragraph{Caveats.}
 \begin{itemize}
 \item ``Chance'' is a statement about band means at the last token. Over the 35 swap cells (seven positions, five layers)
 the best full-residual score is 0.641 and 2 of the 35 intervals exclude 0.5, about what 35 tests give by chance. PCA-25
@@ -506,16 +561,20 @@ signal. A perfect prompt-only score is easy to get: a random 25-dimensional subs
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------- Finding 2
-\finding{J-space beats none of the three baselines}
-{Is J-space a better place to look for colluders than (1) a random subspace of the same size, (2) the system prompt alone,
-(3) a 25-component PCA subspace?}
-{No, on all three. J-space transfers at 0.773. Random subspaces reach 0.808 and random sets of lens atoms 0.875 at their
-95th percentile, the prompt-only probe 1.000, and PCA-25 0.879.}
-{This was the bar for making J-space the standard. The 0.755 of the first run is within what random 25-dimensional
-slices of the residual give.}
-\label{f:baselines}
+\findingbreak
+\refstepcounter{finding}\label{f:baselines}
+\subsection{Finding \thefinding: J-space beats none of the three baselines}
 
-\begin{table}[h!]\centering\small
+\paragraph{Question.} Is J-space a better place to look for colluders than (1) a random subspace of the same size, (2) the
+system prompt alone, (3) a 25-component PCA subspace?
+
+\paragraph{Answer.} No, on all three. J-space transfers at 0.773. Random subspaces reach 0.808 and random sets of lens
+atoms 0.875 at their 95th percentile, the prompt-only probe 1.000, and PCA-25 0.879.
+
+\paragraph{Why it matters.} This was the bar for making J-space the standard. The 0.755 of the first run is within what
+random 25-dimensional slices of the residual give.
+
+\begin{table}[H]\centering\small
 \input{tables/tabp_scoreboard}
 \caption{The scoreboard. Core$\to$Transfer primary AUROC, original condition, last token, $k=25$, band mean. Each null
 has 200 draws; they average 0.650 (subspaces) and 0.716 (lens atoms). The last column lists the layers at which J-space
@@ -523,53 +582,61 @@ scores above the baseline. For reference: full residual 0.945; residual with J-s
 \label{tab:scoreboard}
 \end{table}
 
-\evidence Table~\ref{tab:scoreboard} and Figure~\ref{fig:layers}.
+\paragraph{Evidence.} Table~\ref{tab:scoreboard} and Figure~\ref{fig:layers}.
 \begin{itemize}
 \item \textbf{Random subspaces.} J-space rises from 0.596 at layer 19 to 0.899 at layer 22 and is above the 95th
 percentile of the 200 random subspaces at layers 21 and 22 only ($p=0.040$ and $0.010$).
 \item \textbf{Random lens atoms.} It is never above their 95th percentile (0.969 at layer 22; $p$ from 0.16 to 0.61), so the
-pursuit's atoms are not reliably better than 25 lens atoms drawn at random. The rule of Step~\ref{st:bar} is met at no layer.
+pursuit's atoms are not reliably better than 25 lens atoms drawn at random. The rule of Step~7 is met at no layer.
 \item \textbf{PCA and the complement.} J-space is below PCA-25 at every layer. Removing J-space costs almost nothing: the
 complement transfers at 0.941 and beats J-space at every layer.
 \item \textbf{Size and choice of atoms.} From $k=8$ to $k=100$ J-space goes from 0.740 to 0.807 while PCA goes from 0.831
 to 0.938 (Table~\ref{tab:ksweep}). A fixed frame of the 25 most common atoms scores 0.776.
+\item \textbf{The solver.} Gradient pursuit, the solver the paper names, scores the same as ours: 0.756 against 0.755 on
+the first run's activations \src{Nov 5} (Section~\ref{sec:impl}).
 \end{itemize}
 
-\begin{figure}[h!]\centering
+\begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{figs/fig_layers}
 \caption{J-space against the two random nulls at each layer. A grey dot is one random draw; the black tick is the 95th
 percentile of the 200 draws. Original condition, last token, $k=25$. The horizontal line is chance.}
 \label{fig:layers}
 \end{figure}
 
-\caveats J-space is not empty: at layer 22 it reaches 0.899 and clears the random-subspace null, as many sets of lens atoms
-do. Over all 35 cells of position and layer the rule is met in 2, both inside the reply where every arm is near chance.
+\paragraph{Caveats.} J-space is not empty: at layer 22 it reaches 0.899 and clears the random-subspace null, as many sets
+of lens atoms do. Over all 35 cells of position and layer the rule is met in 2, both inside the reply where every arm is
+near chance.
 
 % ---------------------------------------------------------------------------------------------------------- Finding 3
-\finding{Without the instruction, colluders stand out within one set of scenarios but not across sets}
-{Once the instruction is out of the context, does the discussion itself still give the colluders away?}
-{Within Core, yes: 0.935 under swap when one domain is left out. Within Transfer, weakly: 0.667. From Core to Transfer, no:
-0.479 at the last token, with one weak exception early in the reply.}
-{This is the part of the result that is about behaviour. A detector of colluding behaviour, as opposed to instructions, has
-to be built and tested here, and it has to be shown to transfer. Nothing we tested does so clearly.}
-\label{f:within}
+\findingbreak
+\refstepcounter{finding}\label{f:within}
+\subsection{Finding \thefinding: Without the instruction, colluders stand out within one set of scenarios but not across sets}
 
-\begin{table}[h!]\centering\small
+\paragraph{Question.} Once the instruction is out of the context, does the discussion itself still give the colluders away?
+
+\paragraph{Answer.} Within Core, yes: 0.935 under swap when one domain is left out. Within Transfer, weakly: 0.667. From
+Core to Transfer, no: 0.479 at the last token, with one weak exception early in the reply.
+
+\paragraph{Why it matters.} This is the part of the result that is about behaviour. A detector of colluding behaviour, as
+opposed to instructions, has to be built and tested here, and it has to be shown to transfer. Nothing we tested does so
+clearly.
+
+\begin{table}[H]\centering\small
 \input{tables/tabp_controls}
 \caption{Primary AUROC under the three protocols, $k=25$, band mean over layers 19 to 23, at the last token (prompt only: at
 the end of the system prompt). The left block is Figure~\ref{fig:controls}, left panel; the middle block its right panel.}
 \label{tab:controls}
 \end{table}
 
-\evidence Table~\ref{tab:controls}, rows ``Swap'' and ``No system prompt''.
+\paragraph{Evidence.} Table~\ref{tab:controls}, rows ``Swap'' and ``No system prompt''.
 \begin{itemize}
 \item \textbf{Within Core.} Under swap the full residual separates collusion from control episodes at 0.935, PCA-25 at
 0.898 and J-space at 0.831. With no system prompt: 0.934, 0.889 and 0.822.
 \item \textbf{Within Transfer.} Under swap 0.667, 0.667 and 0.555; with no system prompt 0.631, 0.609 and 0.605.
 \item \textbf{Across.} 0.479 under swap and 0.488 with no system prompt, at the last token (Finding~\ref{f:instruction}).
 \item \textbf{One weak exception across sets.} Under swap, PCA-25 read at 25\% into the reply transfers at 0.64 to 0.65 at
-every layer (intervals between 0.53 and 0.75). The full residual at that position is at 0.488, and PCA with 8 or 100 components
-is at chance (0.475, 0.492). It is a lead, not a result.
+every layer (intervals between 0.53 and 0.75). The full residual at that position is at 0.488, and PCA with 8 or 100
+components is at chance (0.475, 0.492). It is a lead, not a result.
 \item \textbf{The within-Core signal is spread widely.} Under swap an average random 25-dimensional subspace reaches 0.86
 to 0.88 within Core (20 draws per layer), more than J-space. The full residual is strongest when the whole reply is
 averaged: 0.971.
@@ -580,7 +647,7 @@ fewer honesty and standards words in Core discussion: 8.3 per 1{,}000 words agai
 the replies scores 0.853 within Core but 0.493 from Core to Transfer, the same pattern as the probe. The atom readout under
 swap points the same way (Finding~\ref{f:atoms}): colluders' atoms more often include ``disagreed'' and ``argued''.
 
-\caveats
+\paragraph{Caveats.}
 \begin{itemize}
 \item Within one set of scenarios, training and test episodes share a generation recipe, so a high score there does not
 show a general signal. Under swap the context still holds messages that were written under the instruction.
@@ -589,16 +656,22 @@ not run \notrun, so we cannot separate ``argues for the target'' from other diff
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------- Finding 4
-\finding{The J-space token readout echoes the instruction}
-{If we read the vocabulary tokens that colluders' J-space atoms stand for, do they describe the collusion?}
-{Only with the instruction in the context. Most atoms are generic tokens shared by nearly every agent. But colluders'
-atoms also include ``subtly'' and ``lobbying'' on Core and ``disinformation'' and ``unethical'' on Transfer. With the
-instruction swapped out, no token differs by role on Transfer.}
-{This is J-space at its best: a plain-token readout that names the scheme. But it names the instruction, as in
-Finding~\ref{f:instruction}, not colluding behaviour. It also corrects the previous draft, which reported stance words only.}
-\label{f:atoms}
+\findingbreak
+\refstepcounter{finding}\label{f:atoms}
+\subsection{Finding \thefinding: The J-space token readout echoes the instruction}
 
-\evidence Table~\ref{tab:atomroles}: layer 22, last token. Differences are in percentage points of agents.
+\paragraph{Question.} If we read the vocabulary tokens that colluders' J-space atoms stand for, do they describe the
+collusion?
+
+\paragraph{Answer.} Only with the instruction in the context. Most atoms are generic tokens shared by nearly every agent.
+But colluders' atoms also include ``subtly'' and ``lobbying'' on Core and ``disinformation'' and ``unethical'' on Transfer.
+With the instruction swapped out, no token differs by role on Transfer.
+
+\paragraph{Why it matters.} This is J-space at its best: a plain-token readout that names the scheme. But it names the
+instruction, as in Finding~\ref{f:instruction}, not colluding behaviour. It also corrects an earlier draft, which reported
+stance words only.
+
+\paragraph{Evidence.} Table~\ref{tab:atomroles}: layer 22, last token. Differences are in percentage points of agents.
 \begin{itemize}
 \item \textbf{Most atoms are the same for everyone.} ``decision'' is among the atoms of 189 of the 200 agents in Core
 collusion episodes (Table~\ref{tab:atoms}). The four word groups fixed in advance hold at most 1.1\% of the atoms in the
@@ -613,7 +686,7 @@ Finding~\ref{f:within}.
 ``justifying'' at $+41$, ``scrutiny'' at $-36$). At 50\% into the reply no token differs by role in any cell.
 \end{itemize}
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[H]\centering\footnotesize
 \input{tables/tabp_atom_roles}
 \caption{Tokens that colluders and honest agents have among their atoms at different rates (layer 22, last token;
 Benjamini--Hochberg at $q=0.05$). In brackets: the share of colluders with the token minus the share of honest agents in the
@@ -621,7 +694,7 @@ same episodes, in percentage points. Only tokens made of unaccented Latin letter
 \label{tab:atomroles}
 \end{table}
 
-\caveats
+\paragraph{Caveats.}
 \begin{itemize}
 \item Calling these ``scheme words'' is our reading of the token lists, made after seeing them. The word groups fixed in
 advance did not capture them: they list exact word forms (``persuade'', ``argue''), and the atoms that differ are other
@@ -631,16 +704,21 @@ atoms of at least one of its turns. Readouts did not run at the \eot{} token \no
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------- Finding 5
-\finding{The transferable signal sits on the two tokens that close the turn}
-{Where in a turn can the probe read the signal that transfers?}
-{Only at the very end. At the last token of the reply text the full residual transfers at 0.517. One token later, on \eot,
-it transfers at 0.780. One more token, on the newline that ends the turn, 0.945. Inside the reply it is at chance.}
-{It says where the instruction-driven signal sits. It removes the hope that J-space would do better at positions with more
-content: inside the reply no arm scores above 0.57. And it warns that results obtained within one set of scenarios hide
-this, because there the signal is readable everywhere.}
-\label{f:position}
+\findingbreak
+\refstepcounter{finding}\label{f:position}
+\subsection{Finding \thefinding: The transferable signal sits on the two tokens that close the turn}
 
-\evidence Figure~\ref{fig:positions}; every value is in Table~\ref{tab:posresults}.
+\paragraph{Question.} Where in a turn can the probe read the signal that transfers?
+
+\paragraph{Answer.} Only at the very end. At the last token of the reply text the full residual transfers at 0.517. One
+token later, on \eot, it transfers at 0.780. One more token, on the newline that ends the turn, 0.945. Inside the reply it
+is at chance.
+
+\paragraph{Why it matters.} It says where the instruction-driven signal sits. It removes the hope that J-space would do
+better at positions with more content: inside the reply no arm scores above 0.57. And it warns that results obtained within
+one set of scenarios hide this, because there the signal is readable everywhere.
+
+\paragraph{Evidence.} Figure~\ref{fig:positions}; every value is in Table~\ref{tab:posresults}.
 \begin{itemize}
 \item \textbf{Across sets, three consecutive tokens: 0.517, 0.780, 0.945.} Inside the reply the full residual scores 0.522,
 0.527 and 0.571 at 25\%, 50\% and 75\%. The mean over all reply tokens gives 0.706.
@@ -651,34 +729,38 @@ this, because there the signal is readable everywhere.}
 inside the reply.
 \end{itemize}
 
-\begin{figure}[h!]\centering
+\begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{figs/fig_positions}
 \caption{Read positions in the order they occur in a turn, with the mean over the reply below the line. Original condition,
 $k=25$, band mean over layers 19 to 23.}
 \label{fig:positions}
 \end{figure}
 
-\caveats
+\paragraph{Caveats.}
 \begin{itemize}
 \item We did not test why the signal sits on the closing tokens. One reading is that tokens inside the reply mostly encode
 the local text, which differs between a committee discussion and a code review, while the closing tokens hold a summary of
 the whole context. That is a guess.
 \item The probe is fit on Core discussion turns and tested on Transfer final-vote turns, as in every earlier run. The two
 kinds of turn differ, and that may matter most inside the reply.
-\item The position called ``pre-vote'' in the code and in the previous draft is the last reply token (Table~\ref{tab:positions}).
+\item The position called ``pre-vote'' in the code and in an earlier draft is the last reply token (Table~\ref{tab:positions}).
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------- Finding 6
-\finding{The probe is not a vocabulary detector}
-{Does the probe fire on the words of collusion, or on the role?}
-{On the role. Honest agents whose system prompt carries a warning written in the colluders' own words are separated from
-colluders perfectly by the full residual (1.000 at every layer). The warning moves them 4\% to 6\% of the way toward the
-colluders. For J-space that share is 13\% to 21\%.}
-{It rules out the cheapest explanation of Finding~\ref{f:instruction}, that the probe matches words in the prompt. What the
-probe reads is closer to being told to collude than to seeing the words.}
-\label{f:vocab}
+\findingbreak
+\refstepcounter{finding}\label{f:vocab}
+\subsection{Finding \thefinding: The probe is not a vocabulary detector}
 
-\evidence Table~\ref{tab:mv}: the 50 warned control episodes of Step~\ref{st:mv}, original condition, last token; ranges
+\paragraph{Question.} Does the probe fire on the words of collusion, or on the role?
+
+\paragraph{Answer.} On the role. Honest agents whose system prompt carries a warning written in the colluders' own words
+are separated from colluders perfectly by the full residual (1.000 at every layer). The warning moves them 4\% to 6\% of
+the way toward the colluders. For J-space that share is 13\% to 21\%.
+
+\paragraph{Why it matters.} It rules out the cheapest explanation of Finding~\ref{f:instruction}, that the probe matches
+words in the prompt. What the probe reads is closer to being told to collude than to seeing the words.
+
+\paragraph{Evidence.} Table~\ref{tab:mv}: the 50 warned control episodes of Step~8, original condition, last token; ranges
 are over layers 19 to 23.
 \begin{itemize}
 \item \textbf{Warned agents are not mistaken for colluders.} Colluders against warned honest agents: 1.00 for the full
@@ -690,7 +772,7 @@ look slightly more like collusion than plain control episodes do (0.59 to 0.65).
 and 0.13 to 0.21 for J-space.
 \end{itemize}
 
-\begin{table}[h!]\centering\small
+\begin{table}[H]\centering\small
 \input{tables/tabp_matched_vocab}
 \caption{Matched-vocabulary control. The first two columns are AUROCs of agent scores; the echo ratio is the share of the
 colluders' shift that the warning alone produces; the last column is the primary AUROC of the episode detectors. For random
@@ -698,7 +780,7 @@ subspaces: the mean over 20 draws, and the median for the echo ratio.}
 \label{tab:mv}
 \end{table}
 
-\caveats
+\paragraph{Caveats.}
 \begin{itemize}
 \item J-space's echo ratio is 2.3 to 3.9 times the full residual's, but mainly because its gap between colluders and honest
 agents is smaller, and that gap is the denominator. Measured as an AUROC, J-space separates warned from unwarned agents no
@@ -708,24 +790,29 @@ better than the full residual does (0.58 to 0.76 against 0.62 to 0.70).
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------- Finding 7
-\finding{Steering along J-space directions moves the vote logit, but mostly as any lens direction does}
-{If we push the residual along a J-space concept direction, does the vote change in a way that shows these directions drive
-the collusive choice?}
-{The vote logit moves by up to 3.6 for honest agents, but at most 1\% of honest votes flip. Most of the movement is
-generic: 20 random lens directions move honest agents by 2.2 to 2.9. Only ``deception'' and ``steering'' go beyond all of
-them, by 0.7 logits at most.}
-{Against random Gaussian directions the result would have read as ``J-space concept directions control the collusive
-vote''. Against a fair null most of it goes away. A steering claim made with lens directions needs a lens-direction null.}
-\label{f:steer}
+\findingbreak
+\refstepcounter{finding}\label{f:steer}
+\subsection{Finding \thefinding: Steering along J-space directions moves the vote logit, but mostly as any lens direction does}
 
-\evidence Figure~\ref{fig:steering}: swap condition, layer 23, the largest strength ($\alpha=4$). Table~\ref{tab:steer} has
-the values and Table~\ref{tab:steerfull} every run.
+\paragraph{Question.} If we push the residual along a J-space concept direction, does the vote change in a way that shows
+these directions drive the collusive choice?
+
+\paragraph{Answer.} The vote logit moves by up to 3.6 for honest agents, but at most 1\% of honest votes flip. Most of the
+movement is generic: 20 random lens directions move honest agents by 2.2 to 2.9. Only ``deception'' and ``steering'' go
+beyond all of them, by 0.7 logits at most.
+
+\paragraph{Why it matters.} Against random Gaussian directions the result would have read as ``J-space concept directions
+control the collusive vote''. Against a fair null most of it goes away. A steering claim made with lens directions needs a
+lens-direction null.
+
+\paragraph{Evidence.} Figure~\ref{fig:steering}: swap condition, layer 23, the largest strength ($\alpha=4$).
+Table~\ref{tab:steer} has the values and Table~\ref{tab:steerfull} every run.
 \begin{itemize}
-\item \textbf{Against Gaussian directions every direction passes the four conditions of Step~\ref{st:steer}} at swap
-layer 23. At layer 22 Benjamini--Hochberg fails, and under the original prompt three of the four concept directions move
-colluders the wrong way.
+\item \textbf{Against Gaussian directions every direction passes the four conditions of Step~10} at swap layer 23. At
+layer 22 Benjamini--Hochberg fails, and under the original prompt three of the four concept directions move colluders the
+wrong way.
 \item \textbf{The four concept directions are nearly one direction.} Their pairwise cosines are 0.82 to 0.92, and each has
-a cosine of 0.88 to 0.94 with the mean of all lens atoms, which a Gaussian direction does not share. ``Honesty'' moves
+a cosine of 0.88 to 0.94 with the mean of all lens vectors, which a Gaussian direction does not share. ``Honesty'' moves
 the vote the same way as ``deception''.
 \item \textbf{Random lens directions share most of the effect.} They move honest agents by $+2.18$ to $+2.95$ and colluders
 by $-1.23$ to $-0.80$. Deception is beyond all 20 draws by 0.66 (honest) and 0.37 (colluders), steering by 0.18 and 0.04
@@ -735,25 +822,24 @@ pushed off the target in at most 6\% of prompts by a concept direction and 10\% 
 directions reach 2\% and 9\%.
 \end{itemize}
 
-\begin{figure}[h!]\centering
+\begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{figs/fig_steering}
 \caption{Mean change of the vote logit difference, in logits, at the largest strength; swap condition, layer 23. The grey
 band is the range of the 20 random lens directions. A concept direction is specific only where it falls outside the band.}
 \label{fig:steering}
 \end{figure}
 
-\caveats With 20 draws the smallest possible $p$ is $1/21$, so a sharper statement needs more draws. The lens null ran at
-one layer and one condition, and not for the role direction. Steered passes reuse a cached prefix and differ from full
-passes by up to 0.13 logits.
+\paragraph{Caveats.} With 20 draws the smallest possible $p$ is $1/21$, so a sharper statement needs more draws. The lens
+null ran at one layer and one condition, and not for the role direction. Steered passes reuse a cached prefix and differ
+from full passes by up to 0.13 logits. The steering scale, the median length of $h_J$, is our own choice.
 
 % =====================================================================================================================
-\clearpage\normalsize
 \section{What did not run}\label{sec:notrun}
 \begin{itemize}
 \item \textbf{Steering with the original prompt at layer 23.} The steering job hit its 4-hour limit after three of the four
 planned runs.
-\item \textbf{The paired-interval half of the rule for random subspaces} (Step~\ref{st:bar}). The random draws were scored
-without the bootstrap. The one-sided $p$ against the 200 draws is reported instead.
+\item \textbf{The paired-interval half of the rule for random subspaces} (Step~7). The random draws were scored without the
+bootstrap. The one-sided $p$ against the 200 draws is reported instead.
 \item \textbf{The matched-vocabulary control under swap and with no system prompt.} The warned episodes were extracted for
 the original and prompt-only conditions only.
 \item \textbf{Atom readouts at the \eot{} token and at other reply positions.} They ran at the last token, the last reply
@@ -762,15 +848,19 @@ token, 50\% into the reply, and the end of the system prompt.
 It was planned on November~8 and exists for the text only (Appendix~\ref{app:earlier}).
 \item \textbf{A larger lens null for steering,} at more layers and for the role direction. It ran with 20 draws at swap
 layer 23.
+\item \textbf{An end-to-end run of \jlens{} on the model, and a full sweep with gradient pursuit as the primary solver}
+(Section~\ref{sec:impl}).
 \item \textbf{Other models.} No Jacobian lens is published for the other three models with NARCBench activations.
 \item \textbf{Collusion without an instruction.} The benchmark only has instructed collusion.
 \end{itemize}
 All 320 planned analysis cells ran. The steering runs failed on the first GPU job with an out-of-memory error in our own
 loop and were rerun after the fix (Appendix~\ref{app:run}).
 
-\section{What to hold loosely}\label{sec:limits}
+\section{Limitations}\label{sec:limits}
 \begin{itemize}
 \item \textbf{Scope.} One model, one published lens, one run, and collusion that is instructed.
+\item \textbf{The decomposition is our implementation.} No reference code exists for it; Section~\ref{sec:impl} lists the
+choices the paper leaves open and tests the main ones on one cell.
 \item \textbf{Train and test turns differ.} Probes are fit on Core discussion turns and tested on Transfer final-vote turns.
 \item \textbf{Many cells.} There are 35 cells per condition at $k=25$, so single cells clear a bar by chance.
 \item \textbf{The first run was not reproduced exactly.} The activations were regenerated (seven positions, bf16). The full
@@ -781,11 +871,11 @@ advance, but their choice is ours.
 (Appendix~\ref{app:related}).
 \end{itemize}
 
-\section{What we recommend}\label{sec:next}
-\textbf{Should J-space be the standard? No.} As a detector it loses to every baseline it had to beat
-(Finding~\ref{f:baselines}). As a readout it does show the scheme in plain tokens at the end of a turn
-(Finding~\ref{f:atoms}), which is its most favourable result here. But what it shows is the instruction, fixed word groups
-do not capture it, and its concept directions do not steer the vote specifically (Finding~\ref{f:steer}).
+\section{Conclusion and recommendations}\label{sec:next}
+Should J-space be the standard? No. As a detector it loses to every baseline it had to beat (Finding~\ref{f:baselines}).
+As a readout it does show the scheme in plain tokens at the end of a turn (Finding~\ref{f:atoms}), which is its most
+favourable result here. But what it shows is the instruction, fixed word groups do not capture it, and its concept
+directions do not steer the vote specifically (Finding~\ref{f:steer}). We recommend the following.
 \begin{enumerate}
 \item \textbf{Keep the full-residual probe as the reference detector,} and describe it as an instruction detector on this
 benchmark.
@@ -793,10 +883,32 @@ benchmark.
 cannot be told apart from reading the instruction.
 \item \textbf{Treat collusion without an instruction as the real test.} On the instructed benchmark the instruction is the
 signal. The within-set signal of Finding~\ref{f:within} is where a behaviour detector would start, and it has to transfer.
-\item \textbf{Use a lens-direction null} for any steering claim made with lens atoms.
+\item \textbf{Use a lens-direction null} for any steering claim made with lens vectors.
 \item \textbf{If J-space is used for reading, read token by token} at the last token of a turn, with a swap control, and not
 through fixed word lists.
+\item \textbf{Keep the lens and its application tied to Anthropic's reference implementation,} and state which solver was
+used for the decomposition, since none is released.
 \end{enumerate}
+
+\begin{thebibliography}{9}
+\bibitem{gurnee2026workspace} W.~Gurnee et al. Verbalizable Representations Form a Global Workspace in Language Models.
+Transformer Circuits Thread, 2026. \url{https://transformer-circuits.pub/2026/workspace/index.html}. arXiv:2607.15495.
+\bibitem{jlens} Anthropic. \texttt{jlens}: Jacobian lens, reference implementation (companion code of
+\cite{gurnee2026workspace}), version 0.1.0, commit \texttt{581d398}, 2026.
+\url{https://github.com/anthropics/jacobian-lens}.
+\bibitem{neuronpedialens} Neuronpedia. Jacobian lens for \texttt{google/gemma-2-9b-it}, fitted with \texttt{jlens} on
+WikiText-103, June 2026. Hugging Face repository \texttt{neuronpedia/jacobian-lens}, file
+\texttt{gemma-2-9b-it/jlens/Salesforce-wikitext/gemma-2-9b-it\_jacobian\_lens.pt}.
+\bibitem{rose2026narcbench} J.~Rose et al. Detecting Multi-Agent Collusion Through Multi-Agent Interpretability.
+arXiv:2604.01151, 2026.
+\bibitem{molinari2026collusion} M.~Molinari and G.~Bettineschi. Multi-Agent Collusion and the J-Space. arXiv:2611.02153,
+2026.
+\bibitem{gemma2} Gemma Team. Gemma 2: Improving Open Language Models at a Practical Size. arXiv:2408.00118, 2024.
+\bibitem{blumensath2008} T.~Blumensath and M.~E.~Davies. Gradient pursuits. \emph{IEEE Transactions on Signal Processing},
+56(6):2370--2382, 2008.
+\bibitem{benjamini1995} Y.~Benjamini and Y.~Hochberg. Controlling the false discovery rate: a practical and powerful
+approach to multiple testing. \emph{Journal of the Royal Statistical Society: Series B}, 57(1):289--300, 1995.
+\end{thebibliography}
 
 % =====================================================================================================================
 \clearpage
@@ -807,28 +919,28 @@ text. ``J fill'' is J-space filled to $k$ atoms, ``J pursuit'' the version witho
 Over the 35 cells of position and layer in the original condition, PCA-25 is reliably better than J-space in 9 and J-space
 in 1 (paired 95\% bootstrap intervals).
 
-\begin{table}[h!]\centering\small
+\begin{table}[H]\centering\small
 \input{tables/tabp_ksweep}
 \caption{Finding~\ref{f:baselines}: the comparison at four subspace sizes. Core$\to$Transfer, original condition, last token,
 band means; p95 is the 95th percentile of 200 draws.}
 \label{tab:ksweep}
 \end{table}
 
-\begin{table}[h!]\centering\small
+\begin{table}[H]\centering\small
 \input{tables/tabp_atoms}
 \caption{Finding~\ref{f:atoms}: the most common atoms at layer 22 and the number of the 200 agents in Core collusion
 episodes that have each in at least one of their three discussion turns. \tok{\textvisiblespace} marks a leading space.}
 \label{tab:atoms}
 \end{table}
 
-\begin{table}[h!]\centering\small
+\begin{table}[H]\centering\small
 \resizebox{\linewidth}{!}{\input{tables/tabp_positions}}
 \caption{Finding~\ref{f:position}: primary AUROC by read position, original condition, $k=25$, band mean. ``Random p95'' is
 the 95th percentile of 200 random subspaces.}
 \label{tab:posresults}
 \end{table}
 
-\begin{table}[h!]\centering\small
+\begin{table}[H]\centering\small
 \resizebox{\linewidth}{!}{\input{tables/tabp_steer}}
 \caption{Finding~\ref{f:steer}: steering at $\alpha=4$, swap condition, layer 23. $\Delta y$ is the mean change of
 $\mathrm{logit}(\text{target})-\mathrm{logit}(\text{fair})$. A vote flips when $y$ changes sign: toward the target for
@@ -836,64 +948,64 @@ honest agents, away from it for colluders.}
 \label{tab:steer}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{table}[H]\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \resizebox{\linewidth}{!}{\input{tables/tab_headline_k25}}
 \caption{Core$\to$Transfer primary AUROC at $k=25$, band mean over layers 19 to 23, per condition and read position.
 ``Layers clearing both'' counts the layers at which J fill is above the 95th percentile of both random nulls.}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[H]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_layers_original_last_k25}}
 \caption{Per layer, original condition, last token, $k=25$, with 95\% episode-bootstrap intervals and the one-sided $p$ of J
 fill against the 200 random subspaces.}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[H]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_layers_swap_last_k25}}
 \caption{The same under swap: every arm at chance at every layer.}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[H]\centering\footnotesize
 \input{tables/tab_controls_k25}
 \caption{Core$\to$Transfer primary AUROC per layer for the four conditions, full residual and J fill at $k=25$.}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[H]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_ksweep_original_last}}
 \caption{$k$ sweep with all arms, original condition, last token, band mean. The paired interval of J fill minus PCA-$k$ is
 for layer 22.}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{table}[H]\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \resizebox{\linewidth}{!}{\input{tables/tab_protocols_k25}}
 \caption{The three protocols per condition, band mean: Core leave-one-domain-out (LODO), Core$\to$Transfer (C$\to$T) and
 Transfer leave-one-family-out (LOFO).}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{table}[H]\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \resizebox{\linewidth}{!}{\input{tables/tab_matched_vocab_k25}}
 \caption{Matched-vocabulary control at layer 22, at the last token and at the last reply token, scored out of fold.}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[H]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_exp1_concepts}}
 \caption{Share of the four word groups among the $k=25$ atoms at layer 22, mean per agent over its three Core discussion
 turns, with Benjamini--Hochberg adjusted within-episode permutation $p$.}
 \end{table}
 
-\begin{table}[h!]\centering\footnotesize
+\begin{table}[H]\centering\footnotesize
 \resizebox{\linewidth}{!}{\input{tables/tab_steer}}
 \caption{All steering runs. $\Delta y$ under $+u$ for honest agents and $-u$ for colluders. Flips: share of prompts whose
 $y$ changes sign. Sign: predicted sign at every strength. $>$ rand.\ p95: above the 95th percentile of the 20 random
-directions at every strength. BH: rejected at $q=0.05$ at some strength. All bars: the four conditions of
-Step~\ref{st:steer}. Below each run: the baseline $y_0$ per group and the range of the random directions.}
+directions at every strength. BH: rejected at $q=0.05$ at some strength. All bars: the four conditions of Step~10. Below
+each run: the baseline $y_0$ per group and the range of the random directions.}
 \label{tab:steerfull}
 \end{table}
 
 \clearpage
 \section{Earlier results this study builds on}\label{app:earlier}
 \subsection*{The first run, November 5 \src{Nov 5}}
-\begin{table}[h!]\centering\small
+\begin{table}[H]\centering\small
 \begin{tabular}{lccc}\toprule
 Arm (layers 19--23, last token) & Core LODO & Core$\to$Transfer & Transfer LOFO\\\midrule
 Full residual & 1.000 & 0.902 [0.863, 0.935] & 0.977\\
@@ -912,15 +1024,21 @@ and 0.750) and apart only at layers 22 and 23 (0.852 and 0.753, 0.897 and 0.497)
 nearly a fixed set across turns: at Core layer 21, ``decision'' in 90\% of turns, \tok{<eos>} in 86\% and ``prioritizing''
 in 82\%. On Transfer discussion turns J-space was at the level of the random draw (0.613 against 0.602).
 
-\textbf{Other models.} On the three models with public NARCBench activations, an earlier J-space proxy built from
+\paragraph{Solver variants of the first run.} The same run compared readings of the decomposition on its own activations.
+Gradient pursuit, the solver the paper names, gave 0.756 against 0.755 for our primary (paired difference
+$[-0.025, +0.026]$). Without the fill to exactly 25 atoms the score was 0.811, and with the non-negative reconstruction in
+place of the span projection 0.809. Selecting atoms by raw score gave 0.740 and taking the 25 largest correlations without
+a pursuit 0.751. Section~\ref{sec:impl} repeats the main variants on the activations of November~9.
+
+\paragraph{Other models.} On the three models with public NARCBench activations, an earlier J-space proxy built from
 unembedding directions was at chance from Core to Transfer and level with a random 25-dimensional subspace: Qwen3-32B 0.513
 against 0.508, DeepSeek-R1-32B 0.500 against 0.550, GPT-OSS-20B 0.568 against 0.611. No Jacobian lens is published for
 those models, so the Jacobian-lens result has not been tested elsewhere.
 
 \subsection*{Results from the transcripts alone, November 8 \src{Nov 8, CPU}}
-\textbf{Text baselines.} Bag-of-words features (1- and 2-grams, TF-IDF fit on Core only, at most 5{,}000 features) go
+\paragraph{Text baselines.} Bag-of-words features (1- and 2-grams, TF-IDF fit on Core only, at most 5{,}000 features) go
 through the same detectors and protocols as the activation probe.
-\begin{table}[h!]\centering\small
+\begin{table}[H]\centering\small
 \begin{tabular}{lccc}\toprule
 Feature & Core LODO & Core$\to$Transfer & Transfer LOFO\\\midrule
 Reply words only & 0.853 & 0.493 [0.389, 0.603] & 0.642\\
@@ -932,13 +1050,13 @@ Four concept word groups & 0.627 & 0.593 [0.512, 0.675] & 0.565\\\bottomrule
 The system prompts separate colluders perfectly within Core and almost perfectly within Transfer, but the words do not
 carry across: trained on Core prompts and tested on Transfer, they are at chance. The same holds for the replies.
 
-\textbf{Behaviour split on the text.} Colluders who did \emph{not} vote for the target against honest agents who also voted
-for another option: reply-word AUROC 0.776 (permutation $p=0.0002$; 27 against 92 agents). Within colluders, target vote
-against other vote: 0.583 ($p=0.21$). Within honest agents, target vote against other vote: 0.792 ($p=0.007$; 8 against 92),
-so arguing for the target option has a wording of its own.
+\paragraph{Behaviour split on the text.} Colluders who did \emph{not} vote for the target against honest agents who also
+voted for another option: reply-word AUROC 0.776 (permutation $p=0.0002$; 27 against 92 agents). Within colluders, target
+vote against other vote: 0.583 ($p=0.21$). Within honest agents, target vote against other vote: 0.792 ($p=0.007$; 8 against
+92), so arguing for the target option has a wording of its own.
 
-\textbf{Which words differ.}
-\begin{table}[h!]\centering\small
+\paragraph{Which words differ.}
+\begin{table}[H]\centering\small
 \begin{tabular}{llcccc}\toprule
 Phase & Group & Colluder & Honest (same ep.) & Control & BH $p$ (within ep.)\\\midrule
 Core discussion & honesty/standards & 8.29 & 14.22 & 13.61 & 0.0008\\
@@ -951,24 +1069,23 @@ Transfer final & steering/persuasion & 3.87 & 2.45 & 2.23 & 0.016\\\bottomrule
 not use more deception words.}
 \end{table}
 
-\textbf{Matched-vocabulary prompt check.} The warning has 6 deception/secrecy, 3 coordination, 5 steering and 5 honesty
+\paragraph{Matched-vocabulary prompt check.} The warning has 6 deception/secrecy, 3 coordination, 5 steering and 5 honesty
 words in 79 words. Colluder system prompts average 0.15, 0.23, 1.40 and 1.40 on Core and 1.89, 0.17, 0.63 and 0.54 on
 Transfer.
 
-\textbf{Pipeline check with a small random model.} Every stage ran on the real transcripts with a randomly initialised
+\paragraph{Pipeline check with a small random model.} Every stage ran on the real transcripts with a randomly initialised
 6-layer model. Two lessons carried over. With 5 random draws per cell, J-space cleared both 95th percentiles in 6 of 45
 cells of a network that knows nothing. And at the end of the system prompt even that network separated colluders from
 Core to Transfer (0.84 [0.73, 0.95]), because activations there are a function of the prompt tokens.
 
 \section{Related work}\label{app:related}
-\textbf{Molinari \& Bettineschi} (arXiv:2611.02153, November 1, 2026; abstract read) report on NARCBench that colluders'
-J-space ``holds the collusion itself'' (86\% of colluders represent misrepresentation, concealment or remorse before
-replying, on DeepSeek-V4-Flash), an unsupervised detector that keeps 85\% of the above-chance AUROC of supervised probes,
-and causal interventions on a hidden count in a steganography task. The abstract does not mention system-prompt controls.
-Finding~\ref{f:atoms} here is compatible with their observation and adds that, on Gemma-2-9B-it, the scheme words leave the
-readout when the instruction leaves the context. A \textbf{LessWrong post} reportedly finds that NARCBench system prompts
-alone separate colluders (not read here; the text baselines agree within one set of scenarios). An \textbf{Apart sprint
-team} reportedly built a J-lens collusion monitor on NARCBench; its report could not be read.
+Molinari and Bettineschi~\cite{molinari2026collusion} (abstract read) report on NARCBench that colluders' J-space ``holds
+the collusion itself'' (86\% of colluders represent misrepresentation, concealment or remorse before replying, on
+DeepSeek-V4-Flash), and they introduce an unsupervised detector that performs close to supervised probes. The abstract does
+not mention system-prompt controls. Finding~\ref{f:atoms} here is compatible with their observation and adds that, on
+Gemma-2-9B-it, the scheme words leave the readout when the instruction leaves the context. A LessWrong post reportedly finds
+that NARCBench system prompts alone separate colluders (not read here; the text baselines agree within one set of
+scenarios). An Apart sprint team reportedly built a J-lens collusion monitor on NARCBench; its report could not be read.
 
 \section{Run record}\label{app:run}
 \begin{itemize}
@@ -985,41 +1102,47 @@ job completed three of the four runs before its 4-hour limit.
 \item \textbf{Lens-null job.} Pod \texttt{rt34fhh908ja7p}, 0.9 hours, commit \texttt{1c740de}: swap layer 23 against 20
 random lens directions.
 \item \textbf{Cost.} About \$4.60, \$2.25 and \$0.55; about \$7.60 in total by the account balance. No pod is running.
+\item \textbf{Checks against the reference implementation} (November~10, laptop CPU). \jlens{} v0.1.0 was installed from
+the repository \texttt{anthropics/jacobian-lens} at commit \texttt{581d398}. The results are in the folders
+\texttt{jlens\_check} and \texttt{solver\_check} under \texttt{results/jspace\_interp/}.
 \end{itemize}
 
 \section{Code, files and how to rebuild}\label{app:files}
-Branch \texttt{jspace-interp} of the narcbench-core-demo repository. Modules in \texttt{jspace\_interp/}: contexts
-(conditions), positions and extract (read positions), sweep and detectors (arms, probe, protocols), concepts and stats (atom
-readout), matched\_vocab, steer. Results are under \texttt{results/jspace\_interp/}: one \texttt{sweep\_results.json} per
-condition and read position in \texttt{gemma2\_9b/}, the steering runs in \texttt{steer/}, and the pod records in
-\texttt{pod\_runs/} and \texttt{pod\_logs/}.
-{\small
+The code is on branch \texttt{jspace-interp} of the narcbench-core-demo repository. The modules are in
+\texttt{jspace\_interp/}: contexts (conditions), positions and extract (read positions), sweep and detectors (arms, probe,
+protocols), concepts and stats (atom readout), matched\_vocab and steer. The results are under
+\texttt{results/jspace\_interp/}. The folder \texttt{gemma2\_9b/} holds one file \texttt{sweep\_results.json} per condition
+and read position, \texttt{steer/} the steering runs, and \texttt{pod\_runs/} and \texttt{pod\_logs/} the pod records.
+{\footnotesize
 \begin{verbatim}
-python scripts/jspace_interp_summarize.py      # SUMMARY.json, RESULTS.md, tables/tab_*
-python scripts/jspace_interp_paper_assets.py   # figs/fig_*.pdf, tables/tabp_*
+python scripts/jspace_interp_summarize.py      # SUMMARY.json, RESULTS.md, tab_*
+python scripts/jspace_interp_verify_jlens.py   # check against Anthropic's jlens
+python scripts/jspace_interp_solver_check.py   # the paper's solver, headline cell
+python scripts/jspace_interp_paper_assets.py   # figs/fig_*.pdf, tabp_*
 cd docs/jspace_interp && tectonic jspace_colluder_study.tex
 \end{verbatim}
 }
-Every figure, and every table in Section~\ref{sec:findings} and Appendix~\ref{app:tables}, is written by these two scripts
+Every figure, and every table in Section~\ref{sec:findings} and Appendix~\ref{app:tables}, is written by these scripts
 from the result files. The numbers quoted in the text were checked against the same files.
 
-\section{What changed since the draft of November 10}\label{app:changes}
-The previous draft is commit \texttt{af7afae}. No result changed. The changes are:
+\section{Changes since earlier drafts}\label{app:changes}
+The draft before this one is commit \texttt{af7afae}. No result changed. The changes are:
 \begin{enumerate}
 \item \textbf{Structure.} The method comes first, step by step; the findings follow in order of importance, each with the
 question it answers. Four figures were added.
-\item \textbf{Atom readout (Finding~\ref{f:atoms}).} The previous draft said that the tokens which differ by role are
-stance and register words. The result files show more: with the instruction in the context, colluders' atoms include scheme
-words, and these are gone under swap. The numbers were in the result files since November~9; the earlier summary of them
-was incomplete.
+\item \textbf{Reference implementation (Section~\ref{sec:impl}).} The paper now states which parts come from Anthropic's
+\jlens{} and which are our code, and reports two checks: our lens arithmetic against the package, and our decomposition
+against the solver the paper names.
+\item \textbf{Atom readout (Finding~\ref{f:atoms}).} An earlier draft said that the tokens which differ by role are stance
+and register words. The result files show more: with the instruction in the context, colluders' atoms include scheme words,
+and these are gone under swap.
 \item \textbf{The ``pre-vote'' read position} is now described as what it is for the probe's turns: the last token of the
 reply text (Table~\ref{tab:positions}, Finding~\ref{f:position}).
 \item \textbf{A weak exception to chance under swap} is now reported: PCA-25 early in the reply (Finding~\ref{f:within}).
-The previous draft said every arm falls to chance.
-\item \textbf{Warned episodes} have 800 turns per condition; the previous draft said 850.
+An earlier draft said every arm falls to chance.
+\item \textbf{Warned episodes} have 800 turns per condition; an earlier draft said 850.
 \item \textbf{The generated results summary} (\texttt{RESULTS.md}, \texttt{SUMMARY.json}) listed the wrong steering run as
-missing (swap layer 23, which ran). The run that is missing is original layer 23, as this paper and the previous draft
-say. The summary script is fixed.
+missing (swap layer 23, which ran). The run that is missing is original layer 23. The summary script is fixed.
 \end{enumerate}
 
 \end{document}

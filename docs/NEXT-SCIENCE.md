@@ -509,3 +509,35 @@ importance, one page each, each with the question it answers; previous draft = c
 come from the new `scripts/jspace_interp_paper_assets.py`; 72 numeric claims of the text were asserted against the result
 files. NOT yet updated for the first three items above: the slide deck "Collusion Signatures Beyond J-Space" (its atoms,
 position-sweep and verdict slides still carry the 9 November readings and the "prevote" label).
+
+**Note 2026-11-10 (late) — Anthropic's `jlens` and what this lane computes itself.** Asked by the user: "did you not use
+Anthropic's j-lens implementation? ... that should be the standard of our analysis." Checked against the repository
+(github.com/anthropics/jacobian-lens, package `jlens` 0.1.0, a single commit `581d398` of 2 July 2026) and against the paper.
+- The lens is Anthropic's: the published Neuronpedia fit for google/gemma-2-9b-it, made with `jlens.fit` (453 WikiText
+  prompts, layers 0–40). We fitted no lens for Gemma; `jspace_interp/jacobian.py` serves only the tiny random model.
+- The analysis code never imports `jlens`. Transport and readout are numpy re-implementations. New script
+  `scripts/jspace_interp_verify_jlens.py` runs the package's `JacobianLens.load/transport` and `HFLensModel.unembed` (on the
+  real Gemma2RMSNorm with the model's final-norm weight and on the model's unembedding rows, config values from the model's
+  config.json: softcap 30, eps 1e-6) on 480 saved activations (layers 19–23, positions last and frac50): matrices and
+  transport identical, logits within 2.8e-5 on a scale of 30, top-1 and top-50 identical for every activation (also for the
+  raw-score ranking the pipeline uses), and the official pre-softcap logit equals <v_i, h>/rms(J h) within 1.7e-4, so our
+  J-lens vectors v_i = J^T((1+gamma)*W_U[i]) are the readout directions of the official lens. Result:
+  `results/jspace_interp/jlens_check/jlens_check.json`.
+- `jlens` has NO J-space decomposition and the paper links none ("Code and Replication Information" covers lens training
+  and inference). The paper (read through WebFetch summaries of transformer-circuits.pub/2026/workspace, so second-hand):
+  J-lens vectors = rows of W_U J_l; J-space = sparse non-negative combinations, k about 25 (16 for concept vectors, 10 for
+  ablations); "gradient pursuit" named as the solver, its reconstruction being the J-space component (Methods); the
+  formalisation appendix uses the projection onto the span of exactly k vectors. Not stated: stopping rule, candidate
+  pre-selection, normalisation of the vectors, whether the final-norm gain is in them. Our primary is non-negative OMP
+  (NNLS refit), unit-normalised selection among 1,024 candidates, filled to exactly 25, span projection, gain included.
+  The 5 November variants (branch jspace-separability) already showed gradient pursuit = primary (0.756 vs 0.755,
+  [−0.025, +0.026]); no fill 0.811 and the non-negative reconstruction 0.809 were higher there.
+- `scripts/jspace_interp_solver_check.py` repeats the comparison on the 9 November activations (original, last, k=25,
+  layers 19–23, same probe and episode resamples; also J-lens vectors without the gain). Started 22:59 local on the Mac
+  (about an hour); partial at the time of this note (L22: our primary 0.899 as in the sweep, gradient pursuit span 0.917,
+  reconstructions 0.921–0.927; L20: 0.716 / 0.734 / 0.714–0.722; L19: gp span 0.609, reconstructions 0.594–0.604). Results go
+  to `results/jspace_interp/solver_check/`; the paper prints the table once `solver_check.json` exists.
+- Not done: `JacobianLens.apply` end to end on the model (needs the 9B model in memory; our extraction hooks the output of
+  block l, the same convention); a full sweep with gradient pursuit as primary.
+Paper: now a standard LaTeX article (abstract, numbered sections, references), with Section 3.11 "Implementation: what comes
+from Anthropic's jlens and what is ours" (Table 4 and the two checks).

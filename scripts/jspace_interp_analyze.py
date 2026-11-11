@@ -33,6 +33,7 @@ Role directions for Experiment 3: at k=25 the mean filled J component of collude
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -115,8 +116,20 @@ def main():
     ap.add_argument("--no-lodo", action="store_true", help="skip Core LODO for every arm (fast smoke)")
     ap.add_argument("--no-warned", action="store_true", help="ignore warned extractions even if present")
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--method", default="nnomp", choices=("nnomp", "gp"),
-                    help="pursuit solver: nnomp (non-negative OMP, NNLS refit) or gp (gradient pursuit, the solver Gurnee et al. name)")
+    ap.add_argument("--method", default="nnomp", choices=("nnomp", "gp", "gpfull"),
+                    help="pursuit solver: nnomp (non-negative OMP, NNLS refit), gp (gradient pursuit, the solver Gurnee et al. name; "
+                         "both search the --candidates tokens best aligned with the activation) or gpfull (gradient pursuit that "
+                         "searches the whole vocabulary at every step)")
+    ap.add_argument("--k-max", type=int, default=None,
+                    help="run the pursuit to this many vectors (default: the largest of --ks); the first k of its selection order serve every k")
+    ap.add_argument("--device", default=None,
+                    help="torch device for the whole-vocabulary products of --method gpfull and the candidate list (e.g. mps); "
+                         "default: numpy on the CPU. The pursuit's choices are decided in CPU arithmetic either way")
+    ap.add_argument("--decomp-cache", type=Path, default=None,
+                    help="folder of saved decompositions, one .npz per (condition, position, layer, split, method, k-max, candidates, gain); "
+                         "read when present and matching the activations, written otherwise")
+    ap.add_argument("--require-cache", action="store_true", help="stop if a decomposition is not in --decomp-cache")
+    ap.add_argument("--decompose-only", action="store_true", help="fill --decomp-cache and score nothing")
     ap.add_argument("--reuse-random-from", type=Path, default=None,
                     help="root of an earlier sweep (<root>/<condition>_<position>/sweep_results.json): copy its random-subspace and "
                          "random-atom draws instead of redrawing them (they do not depend on the decomposition)")
@@ -130,7 +143,9 @@ def main():
 
     layers = parse_layers(args.layers)
     ks = [int(k) for k in args.ks.split(",")]
-    kmax = max(ks)
+    kmax = args.k_max or max(ks)
+    if kmax < max(ks):
+        raise SystemExit("--k-max is smaller than the largest k")
     positions = args.positions.split(",")
     J, lens_info = load_lens(args.lens, layers)
     W, _ = load_unembed(args.basis_dir)
@@ -142,6 +157,9 @@ def main():
     gids = concepts.group_token_ids(vocab)
     gnames = list(gids)
     rng = np.random.default_rng(args.seed)
+    searcher = sweep.TorchVocabSearch(W, device=args.device) if args.device else None
+    if args.decomp_cache is not None:
+        args.decomp_cache.mkdir(parents=True, exist_ok=True)
     warned_root = args.warned_root or (args.root / "warned")
     results = {"lens": lens_info, "layers": layers, "ks": ks, "positions": positions,
                "concept_token_counts": {g: len(v) for g, v in gids.items()},
@@ -177,6 +195,40 @@ def main():
                 Xt = tz[key][ti].astype(np.float32)
                 Xw = wz[key][wi].astype(np.float32) if have_warned and key in wz.files else None
                 d = Xc.shape[1]
+                if searcher is not None:
+                    searcher.set_norms(an[L])
+
+                def decomp(X, split):
+                    """The pursuit of one split, from the cache when it holds these very activations."""
+                    if X is None:
+                        return None
+                    f = None
+                    if args.decomp_cache is not None:
+                        sig = hashlib.sha1(np.ascontiguousarray(X).tobytes()).hexdigest()
+                        f = args.decomp_cache / (f"{cond}_{pos}_L{L}_{split}_{args.method}_k{kmax}_c{args.candidates}"
+                                                 f"_{args.norm_kind}.npz")
+                        if f.exists():
+                            z = np.load(f)
+                            if str(z["acts_sha1"]) == sig:
+                                return {k: z[k] for k in z.files if k != "acts_sha1"}
+                            log("cache entry does not match the activations, recomputing:", f)
+                        if args.require_cache:
+                            raise SystemExit(f"decomposition not in the cache: {f}")
+                    dec = sweep.decompose_nested(X, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates, method=args.method,
+                                                 searcher=searcher)
+                    if f is not None:
+                        tmp = f.with_name(f.stem + ".tmp.npz")
+                        np.savez(tmp, acts_sha1=sig, **dec)
+                        tmp.replace(f)
+                    return dec
+
+                if args.decompose_only:
+                    t_dec = time.time()
+                    st = [decomp(X, split) for X, split in ((Xc, "core"), (Xt, "transfer"), (Xw, "warned"))]
+                    log(cond, pos, L, "decomposed", [len(X) for X in (Xc, Xt, Xw) if X is not None], "rows; steps mean",
+                        [round(float(x["steps"].mean()), 2) for x in st if x is not None], "max",
+                        [int(x["steps"].max()) for x in st if x is not None], f"({time.time() - t_dec:.0f}s)")
+                    continue
                 base_c = to_agents(cm, ci, Xc, "core")
                 base_t = to_agents(tm, ti, Xt, "transfer")
                 base_w = to_agents(wm, wi, Xw, "warned") if Xw is not None else None
@@ -206,11 +258,9 @@ def main():
                 log(cond, pos, L, "full", {k: v for k, v in cell["full"].items() if k != "matched_vocab"},
                     "| warned:", {k: round(v, 3) for k, v in cell["full"].get("matched_vocab", {}).items()
                                   if isinstance(v, float)} if Xw is not None else "-")
-                dc = sweep.decompose_nested(Xc, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates, method=args.method)
-                dt = sweep.decompose_nested(Xt, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates, method=args.method)
-                dw = (sweep.decompose_nested(Xw, J[L], W, s, an[L], k_max=kmax, n_cand=args.candidates, method=args.method)
-                      if Xw is not None else None)
+                dc, dt, dw = decomp(Xc, "core"), decomp(Xt, "transfer"), decomp(Xw, "warned")
                 cell["pursuit_steps_core_mean"] = float(dc["steps"].mean())
+                cell["pursuit_steps_core_max"] = int(dc["steps"].max())
                 cell["pursuit_steps_transfer_mean"] = float(dt["steps"].mean())
                 cell["decompose_seconds"] = round(time.time() - t_cell, 1)
                 Fc_mean = np.linalg.norm(Xc, axis=1) ** 2
@@ -338,6 +388,10 @@ def main():
                     out_k["J_recon_minus_pca_ci95"] = list(np.nanpercentile(rb - arms[f"pca{k}"]["_boot"], [2.5, 97.5]).astype(float))
                     out_k["J_recon_minus_J_fill_ci95"] = list(np.nanpercentile(rb - arms[f"J{k}_fill"]["_boot"], [2.5, 97.5]).astype(float))
                     out_k["C_recon_minus_J_recon_ci95"] = list(np.nanpercentile(arms[f"C{k}_recon"]["_boot"] - rb, [2.5, 97.5]).astype(float))
+                    # the bootstrap draws of every arm (the same resamples for all), so that intervals of layer means and of
+                    # differences between arms can be formed afterwards; .npz files are not committed
+                    np.savez(args.out / f"boot_{cond}_{pos}_L{L}_k{k}.npz", full=full["_boot"].astype(np.float32),
+                             **{a: r["_boot"].astype(np.float32) for a, r in arms.items() if "_boot" in r})
                     out_k["seconds"] = round(time.time() - t_k, 1)
                     cell[f"k{k}"] = out_k
                     mvs = arms[f"J{k}_fill"].get("matched_vocab", {})

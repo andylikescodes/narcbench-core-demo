@@ -250,6 +250,14 @@ def merge_extra(a, out):
         ex["band_minus_gp_recon_ci95"][n] = [float(x) for x in np.nanpercentile(B[i] - B[EXTRA.index("gp_recon")], [2.5, 97.5])]
         if ref is not None:
             ex["band_minus_nnomp_span_ci95"][n] = [float(x) for x in np.nanpercentile(B[i] - ref, [2.5, 97.5])]
+    # every reading against the whole-vocabulary one (gradient pursuit over all tokens, non-negative combination), which
+    # the later sweep takes as its J-space arm: paired differences of the band mean, for the earlier arms as well
+    full_ref = B[EXTRA.index("gpfull_recon")]
+    ex["band_minus_gpfull_recon_ci95"] = {n: [float(x) for x in np.nanpercentile(B[i] - full_ref, [2.5, 97.5])] for i, n in enumerate(EXTRA)}
+    if all(p.exists() for p in main):
+        M = np.mean(np.stack([np.load(p) for p in main]), axis=0)
+        for i, n in enumerate(("full",) + VARIANTS):
+            ex["band_minus_gpfull_recon_ci95"][n] = [float(x) for x in np.nanpercentile(M[i] - full_ref, [2.5, 97.5])]
     # the earlier arms over the same layers, so that the two sets of rows are comparable when fewer layers have run
     ex["band_mean_main_arms_same_layers"] = {n: float(np.mean([out["per_layer"][str(L)][n]["core_to_transfer"] for L in layers]))
                                              for n in ("full",) + VARIANTS if all(str(L) in out["per_layer"] for L in layers)}

@@ -478,73 +478,99 @@ def tables(D):
 
 
 def solver_table():
-    """Table of the readings of the paper's definition (scripts/jspace_interp_solver_check.py), if that check has been run.
+    """Table of the readings of the paper's definition (scripts/jspace_interp_solver_check.py), if that check has been run
+    with its ``extra`` block on all five layers.
 
-    Rows come from solver_check.json: the main variants, the ``extra`` block (coefficient refit, whole-vocabulary search)
-    when it covers all five layers, and, if present, the headline cell of the rerun without the final-norm gain
-    (results/jspace_interp/gemma2_9b_gp_nogain). Returns the numbers written, for the text check."""
+    Row 1 is the reading the sweep takes as its J-space arm: gradient pursuit over the whole vocabulary, non-negative
+    combination. Every other row is compared with it on the same episode resamples. The rows without the final-norm gain
+    come from the sweeps results/jspace_interp/gemma2_9b_gpfull_nogain (whole vocabulary) and gemma2_9b_gp_nogain
+    (shortlist). Returns the numbers written, for the text check."""
     p = RES / "solver_check/solver_check.json"
     if not p.exists():
         return None
     S = json.loads(p.read_text())
     layers = [str(x) for x in S["layers"]]
     ex = S.get("extra") if (S.get("extra") or {}).get("layers") == S["layers"] else None
+    if ex is None or "band_minus_gpfull_recon_ci95" not in ex:
+        return None
+    DF = ex["band_minus_gpfull_recon_ci95"]
     out = {"layers": S["layers"], "rows": {}}
 
-    def row(lab, per, band, diff, key):
-        out["rows"][key] = {"per_layer": [round(x, 4) for x in per], "band": round(band, 4), "diff_ci": [round(x, 3) for x in diff] if diff else None}
+    def row(lab, per, band, diff, key, ci=None):
+        out["rows"][key] = {"per_layer": [round(x, 4) for x in per], "band": round(band, 4), "diff_ci": [round(x, 3) for x in diff] if diff else None,
+                            "ci": [round(x, 3) for x in ci] if ci else None}
         d = "--" if diff is None else f"$[{diff[0]:+.3f}, {diff[1]:+.3f}]$"
         return " & ".join([lab] + [f3(x) for x in per] + [f3(band), d]) + r"\\"
 
-    def main_row(key, lab, ref=False):
-        return row(lab, [S["per_layer"][x][key]["core_to_transfer"] for x in layers], S["band_mean"][key],
-                   None if ref else S["band_minus_nnomp_span_ci95"][key], key)
+    def main_row(key, lab):
+        return row(lab, [S["per_layer"][x][key]["core_to_transfer"] for x in layers], S["band_mean"][key], DF[key], key, S["band_ci95"][key])
 
-    def extra_row(key, lab):
-        return row(lab, [ex["per_layer"][x][key]["core_to_transfer"] for x in layers], ex["band_mean"][key], ex["band_minus_nnomp_span_ci95"].get(key), key)
+    def extra_row(key, lab, ref=False):
+        return row(lab, [ex["per_layer"][x][key]["core_to_transfer"] for x in layers], ex["band_mean"][key], None if ref else DF[key], key,
+                   ex["band_ci95"][key])
 
+    def sweep_cells(folder):
+        f = RES / folder / "original_last/sweep_results.json"
+        if not f.exists():
+            return None
+        cells = {str(c["layer"]): c for c in json.loads(f.read_text())["cells"]}
+        return cells if all(x in cells and cells[x].get(f"k{K}") for x in layers) else None
+
+    def band_boot(folder, arm):
+        fs = [RES / folder / f"original_last/boot_original_last_L{x}_k{K}.npz" for x in layers]
+        if not all(f.exists() for f in fs):
+            return None
+        return np.mean(np.stack([np.load(f)[arm] for f in fs]), axis=0)
+
+    ncol = len(layers) + 3
     L = [r"\begin{tabularx}{\linewidth}{@{}X" + "c" * len(layers) + r"cc@{}}\toprule",
-         "Reading of the definition & " + " & ".join(f"L{x}" for x in layers) + r" & Band & Difference to row 3\\\midrule"]
-    if ex:
-        L.append(extra_row("gp_recon", r"1. Gradient pursuit, non-negative combination (\textbf{primary})"))
-    L.append(main_row("gp_span", "2. Gradient pursuit, span of exactly 25"))
-    L.append(main_row("nnomp_span", "3. Non-negative OMP, span of exactly 25 (November 9)", ref=True))
-    L.append(main_row("nnomp_cone", "4. Non-negative OMP, combination of the 25 after the fill"))
-    if ex:
-        L.append(extra_row("gp_lit", "5. As 1, with gradient pursuit's own weights (no refit)"))
-        L.append(extra_row("gpfull_recon", "6. As 1, searching the whole vocabulary"))
-        L.append(extra_row("gpfull_span", "7. As 6, span of the chosen vectors"))
-    L.append(r"\midrule")
-    L.append(main_row("nogain_nnomp_span", "8. As 3, J-lens vectors without the gain"))
-    ng = RES / "gemma2_9b_gp_nogain/original_last/sweep_results.json"
-    if ng.exists():
-        cells = {str(c["layer"]): c for c in json.loads(ng.read_text())["cells"]}
-        if all(x in cells for x in layers):
-            for key, arm, lab in (("nogain_gp_recon", f"J{K}_recon", "9. As 1, J-lens vectors without the gain"),
-                                  ("nogain_gp_span", f"J{K}_fill", "10. As 2, J-lens vectors without the gain")):
-                per = [cells[x][f"k{K}"][arm]["core_to_transfer"] for x in layers]
-                L.append(row(lab, per, float(np.mean(per)), None, key))
-            out["nogain_nulls"] = {
-                "randatoms_p95": [round(cells[x][f"k{K}"]["randatoms"]["c2t_p95"], 4) for x in layers],
-                "randatoms_mean": [round(cells[x][f"k{K}"]["randatoms"]["c2t_mean"], 4) for x in layers],
-                "randsub_p95": [round(cells[x][f"k{K}"]["randsub"]["c2t_p95"], 4) for x in layers],
-                "p_J_recon_vs_randatoms": [round(cells[x][f"k{K}"]["randatoms"]["J_recon_percentile"][1], 4) for x in layers],
-                "p_J_recon_vs_randsub": [round(cells[x][f"k{K}"]["randsub"]["J_recon_percentile"][1], 4) for x in layers],
-                "pca": [round(cells[x][f"k{K}"][f"pca{K}"]["core_to_transfer"], 4) for x in layers],
-                "C_recon": [round(cells[x][f"k{K}"][f"C{K}_recon"]["core_to_transfer"], 4) for x in layers],
-                "steps_core": [round(cells[x]["pursuit_steps_core_mean"], 2) for x in layers],
-                "J_recon_minus_pca_ci": [[round(v, 3) for v in cells[x][f"k{K}"]["J_recon_minus_pca_ci95"]] for x in layers]}
+         "Reading of the definition & " + " & ".join(f"L{x}" for x in layers) + r" & Band & Difference to row 1\\\midrule",
+         rf"\multicolumn{{{ncol}}}{{@{{}}l}}{{\emph{{The pursuit searches the whole vocabulary at every step}}}}\\",
+         extra_row("gpfull_recon", r"1. Gradient pursuit, non-negative combination (\textbf{primary})", ref=True),
+         extra_row("gpfull_span", "2. As 1, projected onto the span of the chosen vectors"),
+         extra_row("gpfull_lit", "3. As 1, with gradient pursuit's own weights (no refit)"),
+         r"\midrule",
+         rf"\multicolumn{{{ncol}}}{{@{{}}l}}{{\emph{{The pursuit searches the 1{{,}}024 tokens best aligned with the activation}}}}\\",
+         extra_row("gp_recon", "4. Gradient pursuit, non-negative combination"),
+         main_row("gp_span", "5. Gradient pursuit, span of exactly 25"),
+         main_row("nnomp_span", "6. Non-negative OMP, span of exactly 25 (November 9)"),
+         main_row("nnomp_cone", "7. Non-negative OMP, combination of the 25 after the fill"),
+         r"\midrule",
+         rf"\multicolumn{{{ncol}}}{{@{{}}l}}{{\emph{{J-lens vectors without the gain of the final normalisation}}}}\\"]
+    n = 8
+    ngf = sweep_cells("gemma2_9b_gpfull_nogain")
+    if ngf is not None:
+        per = [ngf[x][f"k{K}"][f"J{K}_recon"]["core_to_transfer"] for x in layers]
+        b_ng, b_pr = band_boot("gemma2_9b_gpfull_nogain", f"J{K}_recon"), band_boot("gemma2_9b_gpfull", f"J{K}_recon")
+        diff = [float(v) for v in np.nanpercentile(b_ng - b_pr, [2.5, 97.5])] if b_ng is not None and b_pr is not None else None
+        ci = [float(v) for v in np.nanpercentile(b_ng, [2.5, 97.5])] if b_ng is not None else None
+        L.append(row(f"{n}. As 1 (whole vocabulary)", per, float(np.mean(per)), diff, "nogain_gpfull_recon", ci))
+        n += 1
+        out["nogain_nulls"] = {
+            "randatoms_p95": [round(ngf[x][f"k{K}"]["randatoms"]["c2t_p95"], 4) for x in layers],
+            "randatoms_mean": [round(ngf[x][f"k{K}"]["randatoms"]["c2t_mean"], 4) for x in layers],
+            "randsub_p95": [round(ngf[x][f"k{K}"]["randsub"]["c2t_p95"], 4) for x in layers],
+            "p_J_recon_vs_randatoms": [round(ngf[x][f"k{K}"]["randatoms"]["J_recon_percentile"][1], 4) for x in layers],
+            "p_J_recon_vs_randsub": [round(ngf[x][f"k{K}"]["randsub"]["J_recon_percentile"][1], 4) for x in layers],
+            "pca": [round(ngf[x][f"k{K}"][f"pca{K}"]["core_to_transfer"], 4) for x in layers],
+            "C_recon": [round(ngf[x][f"k{K}"][f"C{K}_recon"]["core_to_transfer"], 4) for x in layers],
+            "J_span": [round(ngf[x][f"k{K}"][f"J{K}_fill"]["core_to_transfer"], 4) for x in layers],
+            "steps_core": [round(ngf[x]["pursuit_steps_core_mean"], 2) for x in layers],
+            "J_recon_minus_pca_ci": [[round(v, 3) for v in ngf[x][f"k{K}"]["J_recon_minus_pca_ci95"]] for x in layers]}
+    ngs = sweep_cells("gemma2_9b_gp_nogain")
+    if ngs is not None:
+        per = [ngs[x][f"k{K}"][f"J{K}_recon"]["core_to_transfer"] for x in layers]
+        L.append(row(f"{n}. As 4 (shortlist, gradient pursuit)", per, float(np.mean(per)), None, "nogain_gp_recon"))
+        n += 1
+    L.append(main_row("nogain_nnomp_span", f"{n}. As 6 (shortlist, non-negative OMP, span)"))
     L.append(r"\midrule")
     L.append(main_row("full", "Full residual, for reference"))
     L.append(r"\bottomrule\end{tabularx}")
     write("tabp_solver", L)
-    out["band_ci"] = {k: [round(x, 3) for x in v] for k, v in S["band_ci95"].items()}
-    if ex:
-        out["band_ci"].update({k: [round(x, 3) for x in v] for k, v in ex["band_ci95"].items()})
-        out["extra_minus_gp_recon_ci"] = {k: [round(x, 3) for x in v] for k, v in ex["band_minus_gp_recon_ci95"].items()}
-        out["overlap"] = ex["overlap"]
-        out["steps"] = {k: [round(ex["per_layer"][x][k]["steps_core_mean"], 2) for x in layers] for k in ("gp_recon", "gpfull_recon")}
+    out["overlap"] = ex["overlap"]
+    out["steps"] = {k: [round(ex["per_layer"][x][k]["steps_core_mean"], 2) for x in layers] for k in ("gp_recon", "gpfull_recon")}
     out["steps_main"] = {k: [round(S["per_layer"][x][k]["steps_core_mean"], 2) for x in layers] for k in ("nnomp_span", "gp_span", "nogain_nnomp_span")}
+    out["fve"] = {k: [round(ex["per_layer"][x][k]["fve_core"], 4) for x in layers] for k in ("gp_recon", "gpfull_recon")}
     return out
 
 

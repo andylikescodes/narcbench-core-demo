@@ -11,15 +11,24 @@ from .nov5_jspace_decompose import candidates_and_readout, pursuit_one, project_
 
 
 def decompose_nested(acts, J, W, s, an, *, k_max: int, n_cand: int = 1024, select="unit", batch=64,
-                     vocab_chunk=8192, k_read=50, method="nnomp"):
+                     vocab_chunk=8192, k_read=50, method="nnomp", searcher=None, log=None):
     """One greedy non-negative pursuit to k_max without fill; the first k atoms of the selection order give J_k
     for every k <= k_max (the greedy order does not depend on k). ``method`` is "nnomp" (non-negative OMP with an
-    NNLS refit, the solver of the Nov 5 and Nov 9 runs) or "gp" (gradient pursuit, the solver Gurnee et al. name).
-    Also returns fill candidates (next-best by correlation with h) so a filled-to-k arm can be built, and the
-    lens readout."""
-    cand, read, read_s = candidates_and_readout(acts, J, W, s, an, n_cand=n_cand, k_read=k_read,
-                                                vocab_chunk=vocab_chunk, batch=batch, select=select)
+    NNLS refit, the solver of the Nov 5 and Nov 9 runs), "gp" (gradient pursuit, the solver Gurnee et al. name; both
+    search the n_cand tokens best aligned with h) or "gpfull" (gradient pursuit whose selection step searches the
+    whole vocabulary at every step, the literal procedure). Also returns fill candidates (next-best by correlation
+    with h) so a filled-to-k arm can be built, and the lens readout. ``searcher`` (a TorchVocabSearch) moves the
+    whole-vocabulary products to another device; it is used by "gpfull" and for the candidate list."""
+    if searcher is not None:
+        cand, read, read_s = searcher.candidates_and_readout(acts, J, s, n_cand=n_cand, k_read=k_read, select=select)
+    else:
+        cand, read, read_s = candidates_and_readout(acts, J, W, s, an, n_cand=n_cand, k_read=k_read,
+                                                    vocab_chunk=vocab_chunk, batch=batch, select=select)
     n = acts.shape[0]
+    if method == "gpfull":
+        g = gradient_pursuit_full(acts, J, W, s, an, k=k_max, vocab_chunk=vocab_chunk, searcher=searcher, log=log)
+        return {"order": g["order"], "steps": g["steps"], "cand": cand, "readout": read, "readout_scores": read_s,
+                "coefs_gp": g["coefs"]}
     order = np.full((n, k_max), -1, dtype=np.int64)
     steps = np.zeros(n, dtype=np.int32)
     for i in range(n):
@@ -30,13 +39,109 @@ def decompose_nested(acts, J, W, s, an, *, k_max: int, n_cand: int = 1024, selec
     return {"order": order, "steps": steps, "cand": cand, "readout": read, "readout_scores": read_s}
 
 
-def gradient_pursuit_full(acts, J, W, s, an, *, k: int, batch: int = 496, vocab_chunk: int = 8192, log=None):
+class TorchVocabSearch:
+    """Whole-vocabulary products <v_t, x> for a batch of vectors on a torch device (the Mac's GPU, "mps").
+
+    The unembedding sits on the device once, in the half precision it is stored in, and is widened to single
+    precision chunk by chunk. For the pursuit's selection step the device only proposes the ``top`` best tokens
+    per row; their correlations are then recomputed on the CPU in single precision from the stored unembedding and
+    the largest of those decides, so the choice does not depend on the device's arithmetic."""
+
+    def __init__(self, W, device="mps", chunk=16000, top=8):
+        import torch
+
+        self.torch, self.dev, self.W, self.chunk, self.top = torch, torch.device(device), W, chunk, top
+        self.V, self.d = W.shape
+        self.chunks = [torch.from_numpy(np.array(W[v0:v0 + chunk])).to(self.dev) for v0 in range(0, self.V, chunk)]
+        self.inv_an_np = self.inv_an = None
+
+    def set_norms(self, an):
+        self.inv_an_np = (1.0 / np.maximum(an, 1e-12)).astype(np.float32)
+        self.inv_an = self.torch.from_numpy(self.inv_an_np).to(self.dev)
+
+    def _scores(self, Zt, ci):
+        return Zt @ self.chunks[ci].to(self.torch.float32).T
+
+    def best(self, Z, T):
+        """Z [b, d]: s * (J r) per row; T [b, m]: tokens a row already holds (-1 = none). Returns the largest
+        <v_t, r>/|v_t| over the tokens a row does not hold, and the token."""
+        torch = self.torch
+        b = Z.shape[0]
+        Z = np.ascontiguousarray(Z, dtype=np.float32)
+        Zt = torch.from_numpy(Z).to(self.dev)
+        top_v = torch.full((b, self.top), -float("inf"), device=self.dev)
+        top_i = torch.zeros((b, self.top), dtype=torch.long, device=self.dev)
+        for ci in range(len(self.chunks)):
+            v0 = ci * self.chunk
+            v1 = v0 + self.chunks[ci].shape[0]
+            corr = self._scores(Zt, ci) * self.inv_an[None, v0:v1]
+            ri, cj = np.nonzero((T >= v0) & (T < v1))
+            if len(ri):
+                corr[torch.from_numpy(ri).to(self.dev), torch.from_numpy(T[ri, cj] - v0).to(self.dev)] = -float("inf")
+            v, j = torch.topk(corr, self.top, dim=1)
+            allv, alli = torch.cat([top_v, v], 1), torch.cat([top_i, j + v0], 1)
+            top_v, o = torch.topk(allv, self.top, dim=1)
+            top_i = torch.gather(alli, 1, o)
+        cand = top_i.cpu().numpy()
+        dev_val = top_v.cpu().numpy()
+        flat = cand.reshape(-1)
+        o = np.argsort(flat, kind="stable")
+        Wsel = np.empty((flat.size, self.d), dtype=np.float32)
+        Wsel[o] = np.asarray(self.W[flat[o]], dtype=np.float32)
+        val = np.einsum("bjd,bd->bj", Wsel.reshape(b, self.top, self.d), Z) * self.inv_an_np[cand]
+        val[~np.isfinite(dev_val)] = -np.inf
+        j = val.argmax(1)
+        rows = np.arange(b)
+        return val[rows, j].astype(np.float32), cand[rows, j]
+
+    def candidates_and_readout(self, acts, J, s, *, n_cand, k_read, select="unit", batch=496):
+        """The device version of ``candidates_and_readout``: per row the n_cand tokens with the largest
+        <v_t, h>/|v_t| (in that order) and the k_read tokens with the largest raw score <v_t, h>."""
+        torch = self.torch
+        n = acts.shape[0]
+        cand = np.zeros((n, n_cand), dtype=np.int64)
+        read = np.zeros((n, k_read), dtype=np.int64)
+        read_s = np.zeros((n, k_read), dtype=np.float32)
+        for b0 in range(0, n, batch):
+            b1 = min(n, b0 + batch)
+            b = b1 - b0
+            Z = np.ascontiguousarray((np.asarray(acts[b0:b1], dtype=np.float32) @ J.T) * s[None, :], dtype=np.float32)
+            Zt = torch.from_numpy(Z).to(self.dev)
+            cv = torch.full((b, n_cand), -float("inf"), device=self.dev)
+            ci_ = torch.zeros((b, n_cand), dtype=torch.long, device=self.dev)
+            rv = torch.full((b, k_read), -float("inf"), device=self.dev)
+            ri_ = torch.zeros((b, k_read), dtype=torch.long, device=self.dev)
+            for ci in range(len(self.chunks)):
+                v0 = ci * self.chunk
+                v1 = v0 + self.chunks[ci].shape[0]
+                sc = self._scores(Zt, ci)
+                corr = sc * self.inv_an[None, v0:v1] if select == "unit" else sc
+                for cur, kk, which in ((corr, n_cand, "c"), (sc, k_read, "r")):
+                    v, j = torch.topk(cur, kk, dim=1)
+                    pv, pi = (cv, ci_) if which == "c" else (rv, ri_)
+                    allv, alli = torch.cat([pv, v], 1), torch.cat([pi, j + v0], 1)
+                    nv, o = torch.topk(allv, kk, dim=1)
+                    ni = torch.gather(alli, 1, o)
+                    if which == "c":
+                        cv, ci_ = nv, ni
+                    else:
+                        rv, ri_ = nv, ni
+            cand[b0:b1] = ci_.cpu().numpy()
+            read[b0:b1] = ri_.cpu().numpy()
+            read_s[b0:b1] = rv.cpu().numpy()
+        return cand, read, read_s
+
+
+def gradient_pursuit_full(acts, J, W, s, an, *, k: int, batch: int = 496, vocab_chunk: int = 8192, log=None,
+                          searcher=None):
     """Gradient pursuit whose selection step runs over the whole vocabulary (no candidate pre-selection).
 
     The same algorithm as ``pursuit_one(method="gp", select="unit", fill=False)`` with every token as a candidate,
     batched over activations so that one pass over the unembedding serves a whole batch: at each step every row
     picks the J-lens vector with the largest <v_t, r>/|v_t| among those it has not picked (the row stops if none is
-    positive), takes one optimal gradient step on its support and clips the coefficients at zero.
+    positive), takes one optimal gradient step on its support and clips the coefficients at zero. Rows that have
+    stopped take no further part. ``searcher`` (a TorchVocabSearch with its norms set) runs the selection step on
+    another device.
 
     Returns {"order": [n, k] token ids in selection order (-1 = unused), "coefs": [n, k] gradient pursuit's own
     coefficients, "steps": [n], "recon_gp": [n, d] sum_i c_i v_i with those coefficients}.
@@ -48,38 +153,52 @@ def gradient_pursuit_full(acts, J, W, s, an, *, k: int, batch: int = 496, vocab_
     coefs = np.zeros((n, k), dtype=np.float32)
     steps = np.zeros(n, dtype=np.int32)
     recon = np.zeros((n, d), dtype=np.float32)
+    grow = 32
     for b0 in range(0, n, batch):
         b1 = min(n, b0 + batch)
         b = b1 - b0
         H = np.asarray(acts[b0:b1], dtype=np.float32)
         R = H.copy()
-        A = np.zeros((b, k, d), dtype=np.float32)          # the chosen J-lens vectors of each row
-        C = np.zeros((b, k), dtype=np.float32)
-        T = np.full((b, k), -1, dtype=np.int64)
+        kc = min(k, grow)
+        A = np.zeros((b, kc, d), dtype=np.float32)         # the chosen J-lens vectors of each row
+        C = np.zeros((b, kc), dtype=np.float32)
+        T = np.full((b, kc), -1, dtype=np.int64)
         m = np.zeros(b, dtype=np.int64)
         alive = np.ones(b, dtype=bool)
-        rows = np.arange(b)
         for step in range(k):
-            if not alive.any():
+            act = np.nonzero(alive)[0]
+            if len(act) == 0:
                 break
-            Z = (R @ J.T) * s[None, :]                     # row i: s * (J r_i); <v_t, r_i> = W_U[t] . Z_i
-            best_val = np.full(b, -np.inf, dtype=np.float32)
-            best_idx = np.zeros(b, dtype=np.int64)
-            for v0 in range(0, V, vocab_chunk):
-                v1 = min(V, v0 + vocab_chunk)
-                corr = (Z @ np.asarray(W[v0:v1], dtype=np.float32).T) * inv_an[None, v0:v1]
-                ri, ci = np.nonzero((T >= v0) & (T < v1))  # vectors a row already holds are not candidates
-                corr[ri, T[ri, ci] - v0] = -np.inf
-                j = np.argmax(corr, axis=1)
-                val = corr[rows, j]
-                upd = val > best_val
-                best_val[upd] = val[upd]
-                best_idx[upd] = v0 + j[upd]
-            alive &= np.isfinite(best_val) & (best_val > 0)
-            sel = np.nonzero(alive)[0]
+            if step >= A.shape[1]:
+                e = min(k - A.shape[1], grow)
+                A = np.concatenate([A, np.zeros((b, e, d), dtype=np.float32)], 1)
+                C = np.concatenate([C, np.zeros((b, e), dtype=np.float32)], 1)
+                T = np.concatenate([T, np.full((b, e), -1, dtype=np.int64)], 1)
+            Z = (R[act] @ J.T) * s[None, :]                # row i: s * (J r_i); <v_t, r_i> = W_U[t] . Z_i
+            Ta = T[act]
+            if searcher is not None:
+                best_val, best_idx = searcher.best(Z, Ta)
+            else:
+                na = len(act)
+                rows = np.arange(na)
+                best_val = np.full(na, -np.inf, dtype=np.float32)
+                best_idx = np.zeros(na, dtype=np.int64)
+                for v0 in range(0, V, vocab_chunk):
+                    v1 = min(V, v0 + vocab_chunk)
+                    corr = (Z @ np.asarray(W[v0:v1], dtype=np.float32).T) * inv_an[None, v0:v1]
+                    ri, ci = np.nonzero((Ta >= v0) & (Ta < v1))  # vectors a row already holds are not candidates
+                    corr[ri, Ta[ri, ci] - v0] = -np.inf
+                    j = np.argmax(corr, axis=1)
+                    val = corr[rows, j]
+                    upd = val > best_val
+                    best_val[upd] = val[upd]
+                    best_idx[upd] = v0 + j[upd]
+            ok = np.isfinite(best_val) & (best_val > 0)
+            alive[act[~ok]] = False
+            sel = act[ok]
             if len(sel) == 0:
                 break
-            tsel = best_idx[sel]
+            tsel = best_idx[ok]
             # fancy indexing on the memory map wants sorted indices
             o = np.argsort(tsel)
             vnew = np.empty((len(sel), d), dtype=np.float32)
@@ -87,16 +206,19 @@ def gradient_pursuit_full(acts, J, W, s, an, *, k: int, batch: int = 496, vocab_
             A[sel, m[sel]] = vnew
             T[sel, m[sel]] = tsel
             m[sel] += 1
-            Asel = A[sel]
+            mm = int(m[sel].max())
+            Asel = A[sel, :mm]
             G = np.einsum("bkd,bd->bk", Asel, R[sel])      # gradient on the support (zero beyond m)
             AG = np.einsum("bk,bkd->bd", G, Asel)
             alpha = (G * G).sum(1) / np.maximum((AG * AG).sum(1), 1e-20)
-            C[sel] = np.maximum(C[sel] + alpha[:, None] * G, 0.0)
-            R[sel] = H[sel] - np.einsum("bk,bkd->bd", C[sel], Asel)
+            Cs = np.maximum(C[sel, :mm] + alpha[:, None] * G, 0.0)
+            C[sel, :mm] = Cs
+            R[sel] = H[sel] - np.einsum("bk,bkd->bd", Cs, Asel)
             steps[b0 + sel] += 1
             if log and (step % 5 == 4 or step == k - 1):
                 log(f"    full-vocabulary pursuit rows {b0}-{b1} step {step + 1}/{k} ({int(alive.sum())} rows active)")
-        order[b0:b1], coefs[b0:b1] = T, C
+        kc = T.shape[1]
+        order[b0:b1, :kc], coefs[b0:b1, :kc] = T, C
         recon[b0:b1] = np.einsum("bk,bkd->bd", C, A)
     return {"order": order, "coefs": coefs, "steps": steps, "recon_gp": recon}
 

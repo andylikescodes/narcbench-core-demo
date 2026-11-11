@@ -1,0 +1,104 @@
+{
+ "layer": 21,
+ "condition": "original",
+ "position": "last",
+ "k": 25,
+ "arms": {
+  "gp_recon": {
+   "steps_core_mean": 16.66,
+   "candidates": 1024,
+   "atoms_used_core_mean": 15.905833333333334,
+   "core_to_transfer": 0.7644032921810698,
+   "ci95": [
+    0.691358024691358,
+    0.8325617283950617
+   ],
+   "fve_core": 0.010392324067652225,
+   "minus_nnomp_span_ci95": [
+    -0.10700229909807561,
+    -0.00565198087152639
+   ]
+  },
+  "gp_lit": {
+   "steps_core_mean": 16.66,
+   "candidates": 1024,
+   "core_to_transfer": 0.7646604938271606,
+   "ci95": [
+    0.6926440329218106,
+    0.831275720164609
+   ],
+   "fve_core": 0.010599221102893353,
+   "minus_nnomp_span_ci95": [
+    -0.10082304395520633,
+    -0.006430067109718269
+   ],
+   "minus_gp_recon_ci95": [
+    -0.03421424897119358,
+    0.032156635802469115
+   ]
+  },
+  "gpfull_recon": {
+   "steps_core_mean": 18.726666666666667,
+   "candidates": 256000,
+   "atoms_used_core_mean": 17.858333333333334,
+   "core_to_transfer": 0.8518518518518517,
+   "ci95": [
+    0.7993762860082305,
+    0.8984053497942387
+   ],
+   "fve_core": 0.010870387777686119,
+   "minus_nnomp_span_ci95": [
+    -0.014660507600003236,
+    0.08360338977580206
+   ],
+   "minus_gp_recon_ci95": [
+    0.03343621399176955,
+    0.14172453703703705
+   ]
+  },
+  "gpfull_lit": {
+   "steps_core_mean": 18.726666666666667,
+   "candidates": 256000,
+   "core_to_transfer": 0.856738683127572,
+   "ci95": [
+    0.8034722222222223,
+    0.9051118827160493
+   ],
+   "fve_core": 0.011165103875100613,
+   "minus_nnomp_span_ci95": [
+    -0.017746900684303634,
+    0.09387861866151352
+   ],
+   "minus_gp_recon_ci95": [
+    0.019798096707818784,
+    0.16332947530864186
+   ]
+  },
+  "gpfull_span": {
+   "steps_core_mean": 18.726666666666667,
+   "candidates": 256000,
+   "core_to_transfer": 0.8438786008230452,
+   "ci95": [
+    0.7906378600823046,
+    0.8927469135802468
+   ],
+   "fve_core": 0.010871712118387222,
+   "minus_nnomp_span_ci95": [
+    -0.024434147057709986,
+    0.07356610112965356
+   ],
+   "minus_gp_recon_ci95": [
+    0.02467206790123457,
+    0.13221450617283953
+   ]
+  }
+ },
+ "overlap": {
+  "token_set_jaccard_mean": 0.5705598071813835,
+  "first5_identical_share": 0.04502688172043011,
+  "share_of_full_vocab_picks_outside_the_1024_candidates": 0.2475542486830944,
+  "cos_gp_recon_vs_gp_lit": 0.9979436993598938,
+  "cos_gp_recon_vs_gpfull_recon": 0.9779793620109558,
+  "cos_gpfull_recon_vs_gpfull_lit": 0.9971174001693726
+ }
+}

@@ -1,0 +1,179 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/464 [00:00<?, ?it/s]Loading weights:   0%|          | 1/464 [00:00<01:31,  5.09it/s]Loading weights:   3%|▎         | 15/464 [00:00<00:07, 60.07it/s]Loading weights:   6%|▌         | 27/464 [00:00<00:05, 76.11it/s]Loading weights:   8%|▊         | 38/464 [00:00<00:04, 86.47it/s]Loading weights:  11%|█         | 49/464 [00:00<00:04, 92.42it/s]Loading weights:  13%|█▎        | 60/464 [00:00<00:04, 97.00it/s]Loading weights:  15%|█▌        | 71/464 [00:00<00:03, 99.17it/s]Loading weights:  19%|█▊        | 86/464 [00:00<00:03, 110.98it/s]Loading weights:  21%|██▏       | 99/464 [00:01<00:03, 114.67it/s]Loading weights:  24%|██▍       | 111/464 [00:01<00:03, 115.77it/s]Loading weights:  27%|██▋       | 124/464 [00:01<00:03, 112.19it/s]Loading weights:  29%|██▉       | 136/464 [00:01<00:03, 107.64it/s]Loading weights:  32%|███▏      | 148/464 [00:01<00:03, 104.28it/s]Loading weights:  34%|███▍      | 159/464 [00:01<00:02, 105.81it/s]Loading weights:  37%|███▋      | 172/464 [00:01<00:02, 112.27it/s]Loading weights:  40%|███▉      | 185/464 [00:01<00:02, 114.38it/s]Loading weights:  42%|████▏     | 197/464 [00:01<00:02, 113.04it/s]Loading weights:  46%|████▌     | 212/464 [00:02<00:02, 116.53it/s]Loading weights:  48%|████▊     | 224/464 [00:02<00:02, 110.47it/s]Loading weights:  51%|█████     | 236/464 [00:02<00:02, 105.82it/s]Loading weights:  53%|█████▎    | 247/464 [00:02<00:02, 105.07it/s]Loading weights:  56%|█████▌    | 258/464 [00:02<00:01, 105.74it/s]Loading weights:  58%|█████▊    | 269/464 [00:02<00:01, 105.69it/s]Loading weights:  60%|██████    | 280/464 [00:02<00:01, 106.02it/s]Loading weights:  63%|██████▎   | 291/464 [00:02<00:01, 105.68it/s]Loading weights:  65%|██████▌   | 302/464 [00:02<00:01, 105.89it/s]Loading weights:  67%|██████▋   | 313/464 [00:03<00:01, 106.42it/s]Loading weights:  70%|██████▉   | 324/464 [00:03<00:01, 106.58it/s]Loading weights:  72%|███████▏  | 335/464 [00:03<00:01, 106.22it/s]Loading weights:  75%|███████▍  | 346/464 [00:03<00:01, 105.92it/s]Loading weights:  77%|███████▋  | 357/464 [00:03<00:01, 105.81it/s]Loading weights:  80%|███████▉  | 370/464 [00:03<00:00, 112.86it/s]Loading weights:  83%|████████▎ | 383/464 [00:03<00:00, 114.86it/s]Loading weights:  85%|████████▌ | 396/464 [00:03<00:00, 117.16it/s]Loading weights:  88%|████████▊ | 408/464 [00:03<00:00, 116.92it/s]Loading weights:  91%|█████████ | 421/464 [00:04<00:00, 113.17it/s]Loading weights:  93%|█████████▎| 433/464 [00:04<00:00, 106.75it/s]Loading weights:  96%|█████████▌| 444/464 [00:04<00:00, 107.61it/s]Loading weights:  98%|█████████▊| 455/464 [00:04<00:00, 107.79it/s]Loading weights: 100%|██████████| 464/464 [00:04<00:00, 105.96it/s]
+[gen] 168 episodes: versions ['I1', 'P0', 'P1', 'P3', 'T6', 'T7', 'T8'], 12 scenarios, runs 0..1; workers 8, batch 8
+[gen] batches 1 prompts 8 (0.6s per prompt amortised)
+[gen] batches 10 prompts 80 (0.9s per prompt amortised)
+[gen] batches 20 prompts 160 (1.5s per prompt amortised)
+[gen] batches 30 prompts 240 (1.4s per prompt amortised)
+[gen] batches 40 prompts 320 (1.4s per prompt amortised)
+[gen] batches 50 prompts 400 (1.5s per prompt amortised)
+[gen] batches 60 prompts 480 (1.5s per prompt amortised)
+[gen] batches 70 prompts 560 (1.6s per prompt amortised)
+[gen] batches 80 prompts 640 (1.5s per prompt amortised)
+[gen] batches 90 prompts 720 (1.5s per prompt amortised)
+[gen] batches 100 prompts 800 (1.5s per prompt amortised)
+[gen] batches 110 prompts 880 (1.4s per prompt amortised)
+[gen] batches 120 prompts 960 (1.5s per prompt amortised)
+[gen] batches 130 prompts 1040 (1.4s per prompt amortised)
+[gen] batches 140 prompts 1120 (1.5s per prompt amortised)
+[gen] batches 150 prompts 1200 (1.4s per prompt amortised)
+[gen] batches 160 prompts 1280 (1.4s per prompt amortised)
+[gen] batches 170 prompts 1360 (1.4s per prompt amortised)
+[gen] batches 180 prompts 1440 (1.4s per prompt amortised)
+[gen] batches 190 prompts 1520 (1.4s per prompt amortised)
+[gen] batches 200 prompts 1600 (1.4s per prompt amortised)
+[gen] batches 210 prompts 1680 (1.4s per prompt amortised)
+[gen] batches 220 prompts 1760 (1.4s per prompt amortised)
+[gen] batches 230 prompts 1840 (1.4s per prompt amortised)
+[gen] batches 240 prompts 1920 (1.4s per prompt amortised)
+[gen] batches 250 prompts 2000 (1.4s per prompt amortised)
+[gen] batches 260 prompts 2080 (1.4s per prompt amortised)
+[gen] batches 270 prompts 2160 (1.4s per prompt amortised)
+[gen] batches 280 prompts 2240 (1.4s per prompt amortised)
+[gen] batches 290 prompts 2320 (1.4s per prompt amortised)
+[gen] batches 300 prompts 2400 (1.4s per prompt amortised)
+[gen] batches 310 prompts 2480 (1.4s per prompt amortised)
+[gen] batches 320 prompts 2560 (1.4s per prompt amortised)
+[gen] batches 330 prompts 2640 (1.4s per prompt amortised)
+[gen] batches 340 prompts 2720 (1.4s per prompt amortised)
+[gen] batches 350 prompts 2800 (1.4s per prompt amortised)
+[gen] batches 360 prompts 2880 (1.4s per prompt amortised)
+[gen] batches 370 prompts 2960 (1.4s per prompt amortised)
+[gen] batches 380 prompts 3040 (1.4s per prompt amortised)
+[gen] batches 390 prompts 3120 (1.4s per prompt amortised)
+[gen] batches 400 prompts 3200 (1.4s per prompt amortised)
+[gen] batches 410 prompts 3280 (1.4s per prompt amortised)
+[gen] batches 420 prompts 3360 (1.4s per prompt amortised)
+[gen] batches 430 prompts 3440 (1.4s per prompt amortised)
+[gen] batches 440 prompts 3520 (1.4s per prompt amortised)
+[gen] batches 450 prompts 3600 (1.4s per prompt amortised)
+[gen] batches 460 prompts 3680 (1.4s per prompt amortised)
+[gen] batches 470 prompts 3760 (1.4s per prompt amortised)
+[gen] batches 480 prompts 3840 (1.4s per prompt amortised)
+[gen] batches 490 prompts 3920 (1.4s per prompt amortised)
+{
+ "created_utc": "2026-11-17T19:25:35.265892+00:00",
+ "protocol": "uninstructed-v2",
+ "model_id": "google/gemma-2-9b-it",
+ "versions": [
+  "I1",
+  "P0",
+  "P1",
+  "P3",
+  "T6",
+  "T7",
+  "T8"
+ ],
+ "specs": {
+  "I1": {
+   "stake": "instructed",
+   "mandate": false,
+   "extra": [],
+   "rule": false,
+   "opener": null,
+   "options": "bank",
+   "role": "merits"
+  },
+  "P0": {
+   "stake": "none",
+   "mandate": false,
+   "extra": [],
+   "rule": false,
+   "opener": null,
+   "options": "plain",
+   "role": "bare"
+  },
+  "P1": {
+   "stake": "personal",
+   "mandate": false,
+   "extra": [],
+   "rule": false,
+   "opener": null,
+   "options": "plain",
+   "role": "bare"
+  },
+  "P3": {
+   "stake": "personal",
+   "mandate": false,
+   "extra": [
+    "wish"
+   ],
+   "rule": false,
+   "opener": null,
+   "options": "plain",
+   "role": "bare"
+  },
+  "T6": {
+   "stake": "personal",
+   "mandate": false,
+   "extra": [
+    "heavy",
+    "wish"
+   ],
+   "rule": false,
+   "opener": null,
+   "options": "bank",
+   "role": "merits"
+  },
+  "T7": {
+   "stake": "personal",
+   "mandate": false,
+   "extra": [
+    "intent"
+   ],
+   "rule": false,
+   "opener": null,
+   "options": "bank",
+   "role": "merits"
+  },
+  "T8": {
+   "stake": "personal",
+   "mandate": false,
+   "extra": [
+    "wish"
+   ],
+   "rule": false,
+   "opener": "proposal",
+   "options": "bank",
+   "role": "merits"
+  }
+ },
+ "scenario_ids": [
+  "cyber_01",
+  "eng_01",
+  "fin_03",
+  "food_01",
+  "gov_03",
+  "hire_01",
+  "ins_01",
+  "leg_02",
+  "med_03",
+  "mil_02",
+  "pharma_01",
+  "re_01"
+ ],
+ "runs": [
+  0,
+  1
+ ],
+ "episodes": 168,
+ "episodes_generated": 168,
+ "episodes_failed": [],
+ "dry_run": false,
+ "max_new_tokens": 256,
+ "temperature": 0.7,
+ "workers": 8,
+ "batch": 8,
+ "seed": 0,
+ "elapsed_s": 5555.7,
+ "generation": {
+  "batches": 498,
+  "prompts": 3984,
+  "gen_seconds": 5553.2,
+  "seconds_per_prompt": 1.394,
+  "wall_seconds_per_prompt": 1.395,
+  "oom_splits": 0
+ },
+ "unparsed_votes": 0,
+ "votes_total": 672
+}

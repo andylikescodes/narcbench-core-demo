@@ -1,0 +1,32 @@
+17:52:09 config: mode=pilot model=google/gemma-2-9b-it pilot_n=12 pilot_runs=2 batch=8 workers=8 max=135 min grace=15 min skip=,gen_ref,export_basis,timing,
+17:52:09 config: versions=I1,P0,P1,P3,T6,T7,T8 results=/workspace/nb/repo/results/uninstructed/pilot3 threads=9 (cpu quota 8, RUNPOD_CPU_COUNT=9, nproc 9)
+17:52:09 stage setup: bash -c python3 -m pip install -q 'transformers>=4.56' accelerate 'scikit-learn>=1.5' scipy 'huggingface_hub>=0.26' sentencepiece protobuf && python3 -c 'import torch,transformers,sklearn; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0), transformers.__version__, sklearn.__version__)' && nvidia-smi && nproc && free -g && df -h /workspace /tmp
+17:52:33 stage setup: exit 0 after 0 min
+Filesystem      Size  Used Avail Use% Mounted on
+overlay          60G  608M   60G   1% /
+overlay          60G  608M   60G   1% /
+17:52:33 stage download: python3 -
+17:52:47 stage download: exit 0 after 0 min
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files:   9%|▉         | 1/11 [00:00<00:02,  3.50it/s]Fetching 11 files:  45%|████▌     | 5/11 [00:00<00:00,  9.47it/s]Fetching 11 files:  55%|█████▍    | 6/11 [00:01<00:01,  3.56it/s]Fetching 11 files: 
+model /workspace/.cache/huggingface/hub/models--google--gemma-2-9b-it/snapshots/11c9b309abf73637e4b6f9a3fa1e92e615547819 17648 MiB 9s
+lens 1053307540 4s
+17:52:47 stage gen_ref skipped (JOB_SKIP)
+17:52:47 gen_ref skipped: 0 S0 run folders in the checkout
+17:52:47 stage gen_stake: python3 scripts/uninstructed_generate.py --model google/gemma-2-9b-it --versions I1,P0,P1,P3,T6,T7,T8 --pilot --pilot-n 12 --runs 2 --workers 8 --batch 8 --tag I1-P0-P1-P3-T6-T7-T8 --out /workspace/nb/repo/results/uninstructed/pilot3/runs
+19:25:36 stage gen_stake: exit 0 after 92 min
+ "unparsed_votes": 0,
+ "votes_total": 672
+}
+19:25:36 stage code_rooms: python3 scripts/uninstructed_code_rooms.py --model google/gemma-2-9b-it --runs /workspace/nb/repo/results/uninstructed/pilot3/runs --batch 8 --out /workspace/nb/repo/results/uninstructed/pilot3/coding_gemma.json
+19:28:33 stage code_rooms: exit 0 after 2 min
+ "n_unparsed": 0,
+ "elapsed_s": 175.5
+}
+19:28:33 stage summarize: python3 scripts/uninstructed_summarize.py --runs /workspace/nb/repo/results/uninstructed/pilot3/runs --coding /workspace/nb/repo/results/uninstructed/pilot3/coding_gemma.json --out /workspace/nb/repo/results/uninstructed/pilot3/provisional
+19:28:34 stage summarize: exit 0 after 0 min
+Kappa: not checked yet (one coder).
+Version chosen by the rule: T7.
+
+19:28:34 stage export_basis skipped (JOB_SKIP)
+19:28:34 stage timing skipped (JOB_SKIP)
+19:28:34 finished: done (stages 5 ok of 8); serving results for 15 min, then terminating

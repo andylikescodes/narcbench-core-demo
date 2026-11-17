@@ -1,0 +1,72 @@
+{
+ "created_utc": "20261117T174733Z",
+ "pod": {
+  "id": "dkhn903tiqaxop",
+  "desiredStatus": "RUNNING",
+  "costPerHr": 0.59,
+  "machine": {
+   "podHostId": "dkhn903tiqaxop-64412561",
+   "gpuDisplayName": "A40",
+   "dataCenterId": "EU-SE-1",
+   "cpuCount": 2
+  },
+  "gpu": "NVIDIA A40",
+  "cloud": "SECURE",
+  "min_vcpu": 8,
+  "min_memory_gb": 40
+ },
+ "attempts_before": [],
+ "sha": "72f5a1e31ad8d7867e2f277594f359d458d13b57",
+ "branch": "uninstructed-collusion",
+ "image": "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404",
+ "settings": {
+  "mode": "pilot",
+  "gpu": "NVIDIA A40",
+  "max_minutes": 135,
+  "grace_minutes": 15,
+  "pilot_n": 12,
+  "pilot_runs": 2,
+  "versions": "I1,P0,P1,P3,T6,T7,T8",
+  "pilot_dir": "pilot3",
+  "batch": 8,
+  "workers": 8,
+  "timing_episodes": 10,
+  "skip": "gen_ref,export_basis,timing",
+  "min_balance": 20.0,
+  "reserve": 5.0
+ },
+ "estimate": {
+  "mode": "pilot",
+  "gpu": "NVIDIA A40",
+  "versions": [
+   "I1",
+   "P0",
+   "P1",
+   "P3",
+   "T6",
+   "T7",
+   "T8"
+  ],
+  "results_dir": "results/uninstructed/pilot3",
+  "episodes": 168,
+  "prompts": 3984,
+  "stages_minutes": {
+   "boot, setup, downloads": 6,
+   "generation (168 episodes, 3984 prompts at 1.58 s)": 105,
+   "model loads": 3,
+   "room codes by Gemma (336 new rooms)": 7,
+   "timing test (basis export, replay, decomposition, probes)": 0,
+   "package": 2
+  },
+  "expected_hours": 2.05,
+  "expected_usd": {
+   "SECURE": 1.21,
+   "COMMUNITY": 0.72
+  },
+  "time_cap_minutes": 135,
+  "grace_minutes": 15,
+  "worst_case_usd": 1.47
+ },
+ "balance_before": 34.05,
+ "status_url": "https://dkhn903tiqaxop-8765.proxy.runpod.net/status.json"
+}

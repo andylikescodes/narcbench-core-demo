@@ -888,3 +888,25 @@ records a vote for the reduced score, with the phased correction plan as the rea
 **What it does not show.** It is a description of 34 votes, made after the rooms were read. The 68 members from
 other episodes were drawn to keep the coders blind; they are not a sample that gives a rate for the whole pilot.
 Whether the pattern holds is a question for the third round, where it is coded again with the same rubric.
+
+### 17 November 2026: public position, who codes it from the third round on
+
+Written after the third round's pod had finished and before any public position of that round was coded.
+
+The note of this morning set two blind Claude passes over the episodes with a vote for the stake option and as
+many others. In the third round 63 of the 168 episodes have such a vote, so that rule would mean 126 episodes, 504
+members, read twice. The two Claude passes of the second pilot also agreed on all 136 members, which says that
+the reading is stable for one model and little else. The procedure changes as follows; the rubric does not.
+
+- **Coder 1 is Gemma-2-9B-it with greedy decoding**, run on the next pod over every member of the round. The same
+  pod codes the second pilot and the third round, whose runs are in its checkout. The table of a round uses coder 1
+  and covers every member, so it can give a rate per version, which the subset could not.
+- **Coder 2 is one blind Claude pass on 34 whole episodes of the round**, 17 of them with a vote for the stake
+  option, drawn with the seed 20261117. It gives the agreement between the two coders. For the second pilot, the
+  136 members already coded by Claude serve as coder 2.
+- Gemma gets the rubric as it is. The Claude passes also get the one clarification of this morning's note (a
+  phased or conditional version of an option counts as neither). If the two coders differ mostly on such cases,
+  the table says so.
+
+Script: `scripts/uninstructed_public_stance.py` (`--model` for coder 1, `--subset balanced` for coder 2's
+cases; the first answers file given to `--import-answers` is the coder the table uses).

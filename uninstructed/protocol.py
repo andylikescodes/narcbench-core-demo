@@ -63,6 +63,9 @@ SPECS = {
     "T7": {"stake": "personal", "mandate": False, "extra": ("intent",)},
     "T8": {"stake": "personal", "mandate": False, "extra": ("wish",), "opener": "proposal"},
     "P3": {"stake": "personal", "mandate": False, "extra": ("wish",), "role": "bare", "options": "plain"},
+    # fourth round: the T versions without their stake text (the role line alone), to see which scenarios lean to the
+    # stake option when nothing is at stake
+    "T0": {"mandate": False},
 }
 VERSIONS = tuple(SPECS)
 # The same in plain words, for result tables.
@@ -84,6 +87,7 @@ ABOUT = {
     "T7": "T1 plus a stated intention to see the decision go that way, with no word on how",
     "T8": "T3, and the first room message is scripted: the partner proposes the pact",
     "P3": "T3 with plain option texts and the role line without \"on the merits\"",
+    "T0": "No stake and no honest mandate: the role line alone",
 }
 assert set(ABOUT) == set(SPECS)
 ROOM_MESSAGES = 4

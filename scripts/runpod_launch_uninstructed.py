@@ -48,6 +48,7 @@ GPU = "NVIDIA A40"
 GPU_RATES = {"NVIDIA A40": {"SECURE": 0.59, "COMMUNITY": 0.35}, "NVIDIA RTX A6000": {"SECURE": 0.69, "COMMUNITY": 0.33}}
 GEN_S_PER_PROMPT = 1.58                            # measured on an A40 on 17 November 2026 UTC: versions S1 to S3, 1,728 prompts in 2,723 s,
                                                    # batches of 8 (version S0, whose prompts are shorter: 1.44 s)
+STANCE_S_PER_MEMBER = 0.6                          # assumed: the room codes took 0.45 s per room on the A40 (336 rooms in 177 s with the model load)
 PROMPTS_PER_EPISODE = 24                           # 8 room messages, 12 public turns, 4 votes; 2 fewer with a scripted first message
 CODE_PATHS = ["uninstructed", "generation", "jspace_interp", "scripts"]
 
@@ -56,21 +57,30 @@ def estimate(a) -> dict:
     from uninstructed import protocol as P
 
     skip = {x for x in a.skip.split(",") if x}
-    versions = ([] if "gen_ref" in skip else ["S0"]) + ([] if "gen_stake" in skip else [v for v in a.versions.split(",") if v])
+    ref = [] if "gen_ref" in skip else [v for v in a.ref_versions.split(",") if v]
+    versions = ref + ([] if "gen_stake" in skip else [v for v in a.versions.split(",") if v])
     unknown = [v for v in versions if v not in P.VERSIONS]
     if unknown:
         raise SystemExit(f"unknown versions: {unknown}")
-    per_version = a.pilot_n * a.pilot_runs
-    episodes = len(versions) * per_version
-    prompts = sum(per_version * (PROMPTS_PER_EPISODE - (2 if P.spec_of(v)["opener"] else 0)) for v in versions)
+    n_scenarios = len(P.load_scenarios()[1]) if a.scenarios == "all" else a.pilot_n
+    per_version = {v: n_scenarios * ((a.ref_runs or a.pilot_runs) if v in ref else a.pilot_runs) for v in versions}
+    episodes = sum(per_version.values())
+    # public positions, coded by Gemma for this round and for the earlier rounds named in --stance-rounds
+    stance_members = 0 if "stance" in skip else 4 * episodes + sum(
+        4 * len(list((ROOT / OUT_PREFIX / rd / "runs").glob("*/*/run_config.json"))) for rd in a.stance_rounds.split(",") if rd)
+    prompts = sum(per_version[v] * (PROMPTS_PER_EPISODE - (2 if P.spec_of(v)["opener"] else 0)) for v in versions)
     gen_min = prompts * GEN_S_PER_PROMPT / 60
     stages = {"boot, setup, downloads": 6, f"generation ({episodes} episodes, {prompts} prompts at {GEN_S_PER_PROMPT} s)": round(gen_min),
               "model loads": 3, f"room codes by Gemma ({2 * episodes} new rooms)": 3 + round(2 * episodes / 80),
-              "timing test (basis export, replay, decomposition, probes)": 0 if "timing" in skip else 9, "package": 2}
+              "timing test (basis export, replay, decomposition, probes)": 0 if "timing" in skip else 9,
+              f"public positions by Gemma ({stance_members} members at {STANCE_S_PER_MEMBER} s)": (
+                  0 if not stance_members else 1 + len([rd for rd in a.stance_rounds.split(",") if rd]) + round(stance_members * STANCE_S_PER_MEMBER / 60)),
+              "package": 2}
     exp_h = sum(stages.values()) / 60
     cap_h = (a.max_minutes + a.grace_minutes) / 60
     rate = GPU_RATES[a.gpu]
-    return {"mode": a.mode, "gpu": a.gpu, "versions": versions, "results_dir": f"results/uninstructed/{a.pilot_dir}", "episodes": episodes,
+    return {"mode": a.mode, "gpu": a.gpu, "versions": versions, "scenarios": n_scenarios, "results_dir": f"results/uninstructed/{a.pilot_dir}",
+            "episodes": episodes,
             "prompts": prompts, "stages_minutes": stages, "expected_hours": round(exp_h, 2),
             "expected_usd": {c: round(exp_h * r, 2) for c, r in rate.items()}, "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes,
             "worst_case_usd": round(cap_h * rate["SECURE"], 2)}
@@ -138,7 +148,8 @@ def create_pod(a) -> dict:
            "HF_TOKEN": os.environ["HF_TOKEN"], "GIT_SHA": a.sha, "JOB_MODE": a.mode, "JOB_MAX_MINUTES": str(a.max_minutes),
            "JOB_GRACE_MINUTES": str(a.grace_minutes), "JOB_PILOT_N": str(a.pilot_n), "JOB_PILOT_RUNS": str(a.pilot_runs),
            "JOB_BATCH": str(a.batch), "JOB_WORKERS": str(a.workers), "JOB_TIMING_EPISODES": str(a.timing_episodes),
-           "JOB_VERSIONS": a.versions, "JOB_PILOT_DIR": a.pilot_dir}
+           "JOB_VERSIONS": a.versions, "JOB_PILOT_DIR": a.pilot_dir, "JOB_SCENARIOS": a.scenarios, "JOB_STANCE_ROUNDS": a.stance_rounds,
+           "JOB_REF_VERSIONS": a.ref_versions, "JOB_REF_RUNS": str(a.ref_runs or a.pilot_runs)}
     if a.skip:
         env["JOB_SKIP"] = a.skip
     docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
@@ -254,6 +265,10 @@ def main() -> int:
     ap.add_argument("--pilot-runs", type=int, default=2)
     ap.add_argument("--versions", default="S1,S2,S3", help="versions of the gen_stake stage (S0 is the gen_ref stage)")
     ap.add_argument("--pilot-dir", default="pilot", help="folder under results/uninstructed/ that receives the runs and codings")
+    ap.add_argument("--scenarios", choices=["pilot", "all"], default="pilot", help="the --pilot-n pilot scenarios, or all scenarios of the bank")
+    ap.add_argument("--ref-versions", default="S0", help="the no-stake versions of the gen_ref stage")
+    ap.add_argument("--ref-runs", type=int, default=0, help="runs per scenario of the gen_ref versions (default: --pilot-runs)")
+    ap.add_argument("--stance-rounds", default="", help="comma list of earlier round folders whose public positions Gemma codes as well")
     ap.add_argument("--batch", type=int, default=8, help="prompts per generate call for the stake versions (16 ran out of GPU memory)")
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timing-episodes", type=int, default=10)
@@ -312,7 +327,7 @@ def main() -> int:
         return 3
     pod = res["created"]["id"]
     rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "branch": GIT_BRANCH, "image": base.IMAGE,
-           "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir",
+           "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir", "scenarios", "stance_rounds", "ref_versions", "ref_runs",
                                                      "batch", "workers", "timing_episodes", "skip", "min_balance", "reserve")},
            "estimate": est, "balance_before": rep["balance_usd"], "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
     (RUNS_DIR / pod).mkdir(parents=True, exist_ok=True)

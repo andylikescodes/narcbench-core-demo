@@ -15,7 +15,8 @@
 #   package
 # Env: HF_TOKEN, RUNPOD_API_KEY (self-termination), RUNPOD_POD_ID, JOB_MAX_MINUTES, JOB_GRACE_MINUTES, JOB_PILOT_N,
 #      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_CODER_BATCH, JOB_TIMING_EPISODES, JOB_SKIP, JOB_VERSIONS,
-#      JOB_PILOT_DIR, JOB_THREADS.
+#      JOB_PILOT_DIR, JOB_THREADS, JOB_SCENARIOS (pilot | all), JOB_STANCE_ROUNDS (comma list of earlier round folders),
+#      JOB_REF_VERSIONS and JOB_REF_RUNS (the no-stake versions of gen_ref and their runs; default S0 and JOB_PILOT_RUNS).
 set -uo pipefail
 cd "$(dirname "$0")/.."
 REPO=$(pwd)
@@ -34,6 +35,11 @@ CODER_BATCH=${JOB_CODER_BATCH:-8}
 TIMING_EPISODES=${JOB_TIMING_EPISODES:-10}
 VERSIONS=${JOB_VERSIONS:-S1,S2,S3}
 PILOT_DIR=${JOB_PILOT_DIR:-pilot}
+REF_VERSIONS=${JOB_REF_VERSIONS:-S0}               # the versions of the gen_ref stage (no stake), with their own number of runs
+REF_RUNS=${JOB_REF_RUNS:-$PILOT_RUNS}
+SCENARIOS=${JOB_SCENARIOS:-pilot}                  # pilot: the PILOT_N pilot scenarios; all: every scenario of the bank
+STANCE_ROUNDS=${JOB_STANCE_ROUNDS:-}               # earlier round folders whose public positions are coded as well
+if [ "$SCENARIOS" = all ]; then SCEN_ARGS=(--all); else SCEN_ARGS=(--pilot --pilot-n "$PILOT_N"); fi
 P=$OUT/$PILOT_DIR
 TIMING_VERSION=${VERSIONS%%,*}
 # Threads of the numerical libraries. A pod shows every CPU of its host (96 on the second pod) to a container that may
@@ -135,7 +141,7 @@ finish() {  # finish PHASE DETAIL
 pkill -f "http.server 8765" 2>/dev/null || true
 nohup python3 scripts/runpod_range_server.py "$RUN" 8765 > /tmp/http.log 2>&1 &
 ELAPSED_MIN=0 st running boot "repo $(git rev-parse --short HEAD); gpu $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1); mode $MODE"
-log "config: mode=$MODE model=$MODEL pilot_n=$PILOT_N pilot_runs=$PILOT_RUNS batch=$BATCH workers=$WORKERS max=$MAX_MIN min grace=$GRACE_MIN min skip=$SKIP"
+log "config: mode=$MODE model=$MODEL scenarios=$SCENARIOS pilot_n=$PILOT_N pilot_runs=$PILOT_RUNS ref=$REF_VERSIONS x$REF_RUNS versions=$VERSIONS stance_rounds=$STANCE_ROUNDS batch=$BATCH workers=$WORKERS max=$MAX_MIN min grace=$GRACE_MIN min skip=$SKIP"
 log "config: versions=$VERSIONS results=$P threads=$THREADS (cpu quota $QUOTA, RUNPOD_CPU_COUNT=${RUNPOD_CPU_COUNT:-unset}, nproc $(nproc))"
 if [ "$MODE" != pilot ]; then log "unknown JOB_MODE $MODE"; finish failed "unknown mode $MODE"; fi
 
@@ -159,11 +165,11 @@ except Exception as e:  # the lens is only needed by the timing test
 PY
 
 # ---- 3. generation: S0 at the reference batch size, then the other versions ----
-stage gen_ref python3 scripts/uninstructed_generate.py --model "$MODEL" --versions S0 --pilot --pilot-n "$PILOT_N" --runs "$PILOT_RUNS" \
-  --workers 8 --batch 8 --tag S0 --out "$P/runs"
+stage gen_ref python3 scripts/uninstructed_generate.py --model "$MODEL" --versions "$REF_VERSIONS" "${SCEN_ARGS[@]}" --runs "$REF_RUNS" \
+  --workers 8 --batch 8 --tag "${REF_VERSIONS//,/-}" --out "$P/runs"
 rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || finish failed gen_ref
-[ $rc -eq 99 ] && log "gen_ref skipped: $(ls "$P/runs/S0" 2>/dev/null | wc -l) S0 run folders in the checkout"
-stage gen_stake python3 scripts/uninstructed_generate.py --model "$MODEL" --versions "$VERSIONS" --pilot --pilot-n "$PILOT_N" --runs "$PILOT_RUNS" \
+[ $rc -eq 99 ] && log "gen_ref skipped: $(ls "$P/runs/${REF_VERSIONS%%,*}" 2>/dev/null | wc -l) ${REF_VERSIONS%%,*} run folders in the checkout"
+stage gen_stake python3 scripts/uninstructed_generate.py --model "$MODEL" --versions "$VERSIONS" "${SCEN_ARGS[@]}" --runs "$PILOT_RUNS" \
   --workers "$WORKERS" --batch "$BATCH" --tag "${VERSIONS//,/-}" --out "$P/runs"
 rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || finish failed gen_stake
 
@@ -173,6 +179,20 @@ if stage code_rooms python3 scripts/uninstructed_code_rooms.py --model "$MODEL" 
     --out "$P/provisional" || log "summarize failed; the rates are computed after the pull"
 else
   log "code_rooms failed; the rooms are coded after the pull"
+fi
+
+# ---- 4b. public position of every member, coded by Gemma: this round, then the earlier rounds named in JOB_STANCE_ROUNDS ----
+# (exploratory reading, DESIGN.md notes of 17 November 2026; a failure here loses nothing else)
+if [[ "$SKIP" == *",stance,"* ]]; then
+  log "stance skipped (JOB_SKIP)"; record_stage stance 99 0
+else
+  for rd in "$PILOT_DIR" ${STANCE_ROUNDS//,/ }; do
+    [ -d "$OUT/$rd/runs" ] || { log "stance: no runs under $OUT/$rd"; continue; }
+    [ -f "$OUT/$rd/stance_gemma.json" ] && { log "stance: $rd is coded already"; continue; }
+    if [ "$(remaining_min)" -lt 8 ]; then log "stance of $rd skipped: under 8 min left"; record_stage "stance_$rd" 98 0; continue; fi
+    stage "stance_$rd" python3 scripts/uninstructed_public_stance.py --model "$MODEL" --runs "$OUT/$rd/runs" --batch "$CODER_BATCH" \
+      --key "$OUT/$rd/stance_key_all.json" --answers-out "$OUT/$rd/stance_gemma.json" || log "stance coding of $rd failed"
+  done
 fi
 
 # ---- 5. timing test for the main run ----

@@ -43,7 +43,9 @@ BOOT = "scripts/runpod_uninstructed_boot.sh"
 OUT_PREFIX = "results/uninstructed/"
 RUNS_DIR = ROOT / "results/uninstructed/pod_runs"
 GPU = "NVIDIA A40"
-RATE = {"SECURE": 0.59, "COMMUNITY": 0.35}        # A40, USD per hour, read from the RunPod price list on 16 November 2026
+# USD per hour, read from the RunPod price list on 16 and 17 November 2026. The RTX A6000 is the workstation version of
+# the A40 (same chip, 48 GB): it is the stand-in when no A40 can be deployed, as on the morning of 17 November.
+GPU_RATES = {"NVIDIA A40": {"SECURE": 0.59, "COMMUNITY": 0.35}, "NVIDIA RTX A6000": {"SECURE": 0.69, "COMMUNITY": 0.33}}
 GEN_S_PER_PROMPT = 1.58                            # measured on an A40 on 17 November 2026 UTC: versions S1 to S3, 1,728 prompts in 2,723 s,
                                                    # batches of 8 (version S0, whose prompts are shorter: 1.44 s)
 PROMPTS_PER_EPISODE = 24                           # 8 room messages, 12 public turns, 4 votes; 2 fewer with a scripted first message
@@ -64,13 +66,14 @@ def estimate(a) -> dict:
     gen_min = prompts * GEN_S_PER_PROMPT / 60
     stages = {"boot, setup, downloads": 6, f"generation ({episodes} episodes, {prompts} prompts at {GEN_S_PER_PROMPT} s)": round(gen_min),
               "model loads": 3, f"room codes by Gemma ({2 * episodes} new rooms)": 3 + round(2 * episodes / 80),
-              "timing test (basis export, replay, decomposition, probes)": 9, "package": 2}
+              "timing test (basis export, replay, decomposition, probes)": 0 if "timing" in skip else 9, "package": 2}
     exp_h = sum(stages.values()) / 60
     cap_h = (a.max_minutes + a.grace_minutes) / 60
-    return {"mode": a.mode, "gpu": GPU, "versions": versions, "results_dir": f"results/uninstructed/{a.pilot_dir}", "episodes": episodes,
+    rate = GPU_RATES[a.gpu]
+    return {"mode": a.mode, "gpu": a.gpu, "versions": versions, "results_dir": f"results/uninstructed/{a.pilot_dir}", "episodes": episodes,
             "prompts": prompts, "stages_minutes": stages, "expected_hours": round(exp_h, 2),
-            "expected_usd": {c: round(exp_h * r, 2) for c, r in RATE.items()}, "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes,
-            "worst_case_usd": round(cap_h * RATE["SECURE"], 2)}
+            "expected_usd": {c: round(exp_h * r, 2) for c, r in rate.items()}, "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes,
+            "worst_case_usd": round(cap_h * rate["SECURE"], 2)}
 
 
 def sha_on_branch(sha: str) -> bool:
@@ -97,7 +100,7 @@ def gates(a, est: dict) -> tuple[bool, dict]:
     rep = {"balance_usd": round(balance, 2), "min_balance": a.min_balance, "worst_case_usd": worst, "balance_after_worst_case": round(balance - worst, 2),
            "reserve": a.reserve, "spend_per_hr_idle": me.get("currentSpendPerHr"), "billable_pods_running": running, "sha": a.sha,
            "sha_on_origin_branch": pushed, "code_dirty": dirty, "hf_token_present": bool(os.environ.get("HF_TOKEN")),
-           "gpu_market": base.gpu_market([GPU])}
+           "gpu_market": base.gpu_market([a.gpu])}
     checks = ((balance < a.min_balance, f"balance below {a.min_balance}"), (balance - worst < a.reserve, f"worst case would leave less than {a.reserve}"),
               (bool(running), "a billable pod is running"), (not pushed, f"the SHA is not on origin/{GIT_BRANCH} (push first)"),
               (not os.environ.get("HF_TOKEN"), "HF_TOKEN missing"), (bool(dirty), "code folders have uncommitted or untracked files (commit first)"))
@@ -143,7 +146,7 @@ def create_pod(a) -> dict:
     clouds = ["SECURE"] + ([] if a.secure_only else ["COMMUNITY"])
     for vcpu, mem in ((a.min_vcpu, a.min_memory_gb), (4, 24)):
         for cloud in clouds:
-            inp = {"name": f"{POD_NAME}-{a.mode}", "imageName": base.IMAGE, "gpuTypeId": GPU, "cloudType": cloud, "gpuCount": 1,
+            inp = {"name": f"{POD_NAME}-{a.mode}", "imageName": base.IMAGE, "gpuTypeId": a.gpu, "cloudType": cloud, "gpuCount": 1,
                    "volumeInGb": 0, "containerDiskInGb": a.disk_gb, "minVcpuCount": vcpu, "minMemoryInGb": mem, "ports": "8765/http",
                    "env": [{"key": k, "value": v} for k, v in env.items()], "dockerArgs": docker_args, "supportPublicIp": False, "startSsh": False}
             if a.min_download > 0:
@@ -157,11 +160,11 @@ def create_pod(a) -> dict:
                 pod = (r.get("data") or {}).get("podFindAndDeployOnDemand")
                 if not pod or not pod.get("id"):
                     raise RuntimeError("empty pod")
-                pod.update({"gpu": GPU, "cloud": cloud, "min_vcpu": vcpu, "min_memory_gb": mem})
+                pod.update({"gpu": a.gpu, "cloud": cloud, "min_vcpu": vcpu, "min_memory_gb": mem})
                 return {"created": pod, "attempts": attempts}
             except (RuntimeError, urllib.error.HTTPError) as e:
                 attempts.append({"cloud": cloud, "vcpu": vcpu, "error": str(e)[:200]})
-                print(f"[launch] {cloud} {GPU} (vcpu>={vcpu}): {str(e)[:200]}", file=sys.stderr, flush=True)
+                print(f"[launch] {cloud} {a.gpu} (vcpu>={vcpu}): {str(e)[:200]}", file=sys.stderr, flush=True)
     return {"created": None, "attempts": attempts}
 
 
@@ -243,6 +246,7 @@ def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--mode", choices=["pilot"], default="pilot")
+    ap.add_argument("--gpu", choices=sorted(GPU_RATES), default=GPU, help="GPU type (default: the A40 of the approved plan)")
     ap.add_argument("--sha", default=None, help="commit the pod checks out (default: local HEAD; must be on origin)")
     ap.add_argument("--max-minutes", type=int, default=150, help="time cap on the pod; what is unfinished is packaged as is")
     ap.add_argument("--grace-minutes", type=int, default=30, help="how long the pod serves results before terminating itself")
@@ -303,12 +307,12 @@ def main() -> int:
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     if not res["created"]:
-        print("no A40 could be deployed", file=sys.stderr)
+        print(f"no {a.gpu} could be deployed", file=sys.stderr)
         (RUNS_DIR / f"failed_launch_{stamp}.json").write_text(json.dumps(res, indent=1) + "\n")
         return 3
     pod = res["created"]["id"]
     rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "branch": GIT_BRANCH, "image": base.IMAGE,
-           "settings": {k: getattr(a, k) for k in ("mode", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir",
+           "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir",
                                                      "batch", "workers", "timing_episodes", "skip", "min_balance", "reserve")},
            "estimate": est, "balance_before": rep["balance_usd"], "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
     (RUNS_DIR / pod).mkdir(parents=True, exist_ok=True)

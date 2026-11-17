@@ -179,12 +179,16 @@ fi
 if [ "$(remaining_min)" -lt 20 ]; then
   log "timing test skipped: under 20 min left"; record_stage timing 98 0
 else
-  [ -f "$BASIS/unembed_fp16.npy" ] || stage export_basis python3 scripts/jspace_interp_extract.py --model "$MODEL" --splits core --conditions original \
-    --max-rows 4 --layers 19 --export-basis "$BASIS" --out /tmp/basis_probe || log "export_basis failed; the decomposition is not timed"
+  if [ ! -f "$BASIS/unembed_fp16.npy" ]; then
+    stage export_basis python3 scripts/jspace_interp_extract.py --model "$MODEL" --splits core --conditions original \
+      --max-rows 4 --layers 19 --export-basis "$BASIS" --out /tmp/basis_probe
+    rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || log "export_basis failed; the decomposition is not timed"
+  fi
   TARGS=()
   [ -f "$LENS" ] && [ -f "$BASIS/unembed_fp16.npy" ] && TARGS+=(--lens "$LENS" --basis-dir "$BASIS")
   stage timing python3 scripts/uninstructed_timing_test.py --model "$MODEL" --runs "$P/runs/$TIMING_VERSION" --episodes "$TIMING_EPISODES" \
-    "${TARGS[@]}" --out "$P/timing.json" || log "timing test failed"
+    "${TARGS[@]}" --out "$P/timing.json"
+  rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || log "timing test failed"
 fi
 
 finish done "stages $(python3 -c "import json;d=json.load(open('/tmp/run/stages.json'));print(sum(1 for v in d.values() if v['rc']==0),'ok of',len(d))")"

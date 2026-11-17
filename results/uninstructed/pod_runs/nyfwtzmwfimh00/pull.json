@@ -1,0 +1,12 @@
+{
+ "pod": "nyfwtzmwfimh00",
+ "files": {
+  "results.tgz": {
+   "size": 1237150,
+   "sha256": "65d11c56b6d63a825d187c89b65476edeca39f3c04a55dfe3fb16c0b58bc13fc",
+   "status": "downloaded",
+   "seconds": 1.0
+  }
+ },
+ "extracted_members": 953
+}

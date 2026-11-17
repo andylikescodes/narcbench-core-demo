@@ -1,0 +1,34 @@
+{
+ "setup": {
+  "rc": 0,
+  "seconds": 25
+ },
+ "download": {
+  "rc": 0,
+  "seconds": 12
+ },
+ "gen_ref": {
+  "rc": 99,
+  "seconds": 0
+ },
+ "gen_stake": {
+  "rc": 0,
+  "seconds": 3984
+ },
+ "code_rooms": {
+  "rc": 0,
+  "seconds": 128
+ },
+ "summarize": {
+  "rc": 0,
+  "seconds": 0
+ },
+ "export_basis": {
+  "rc": 0,
+  "seconds": 27
+ },
+ "timing": {
+  "rc": 0,
+  "seconds": 128
+ }
+}

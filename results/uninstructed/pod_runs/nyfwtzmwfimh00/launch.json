@@ -1,0 +1,70 @@
+{
+ "created_utc": "20261117T160341Z",
+ "pod": {
+  "id": "nyfwtzmwfimh00",
+  "desiredStatus": "RUNNING",
+  "costPerHr": 0.59,
+  "machine": {
+   "podHostId": "nyfwtzmwfimh00-6441286a",
+   "gpuDisplayName": "A40",
+   "dataCenterId": "CA-MTL-1",
+   "cpuCount": 2
+  },
+  "gpu": "NVIDIA A40",
+  "cloud": "SECURE",
+  "min_vcpu": 8,
+  "min_memory_gb": 40
+ },
+ "attempts_before": [],
+ "sha": "2e90a5634bddfd7389031958eb25840b2cac7c8a",
+ "branch": "uninstructed-collusion",
+ "image": "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404",
+ "settings": {
+  "mode": "pilot",
+  "gpu": "NVIDIA A40",
+  "max_minutes": 120,
+  "grace_minutes": 15,
+  "pilot_n": 12,
+  "pilot_runs": 2,
+  "versions": "T1,T2,T3,T4,T5",
+  "pilot_dir": "pilot2",
+  "batch": 8,
+  "workers": 8,
+  "timing_episodes": 10,
+  "skip": "gen_ref",
+  "min_balance": 20.0,
+  "reserve": 5.0
+ },
+ "estimate": {
+  "mode": "pilot",
+  "gpu": "NVIDIA A40",
+  "versions": [
+   "T1",
+   "T2",
+   "T3",
+   "T4",
+   "T5"
+  ],
+  "results_dir": "results/uninstructed/pilot2",
+  "episodes": 120,
+  "prompts": 2784,
+  "stages_minutes": {
+   "boot, setup, downloads": 6,
+   "generation (120 episodes, 2784 prompts at 1.58 s)": 73,
+   "model loads": 3,
+   "room codes by Gemma (240 new rooms)": 6,
+   "timing test (basis export, replay, decomposition, probes)": 9,
+   "package": 2
+  },
+  "expected_hours": 1.65,
+  "expected_usd": {
+   "SECURE": 0.97,
+   "COMMUNITY": 0.58
+  },
+  "time_cap_minutes": 120,
+  "grace_minutes": 15,
+  "worst_case_usd": 1.33
+ },
+ "balance_before": 34.74,
+ "status_url": "https://nyfwtzmwfimh00-8765.proxy.runpod.net/status.json"
+}

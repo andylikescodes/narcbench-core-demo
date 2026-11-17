@@ -1,0 +1,1442 @@
+{
+ "c5dc7aa0e2d": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c3694ca4ac8": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c4e0cd49c3e": {
+  "code": "SPLIT",
+  "stake": 2,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "cbd990a710a": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cc1c89a99dd": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c7c5d3de53f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cab3aef1900": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c866193260a": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c027132feb0": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "ce86a6adcf1": {
+  "code": "SPLIT",
+  "stake": 2,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "ca569bfbbcb": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "c1bc2127cf2": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c715730296b": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "c41cf560fab": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "ce27e0e8cfd": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 4
+ },
+ "ce943c77912": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c51357ba2a1": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf5f4645e34": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c1c01140e96": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "ce569ca195c": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cb2574d0ce0": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c29713b31b8": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c2e3291337a": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c4922f02d90": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c6be14d8806": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf9913767d9": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cfed5bd1e01": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c7c98f87a3c": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cda069179e1": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c8c0a72b9a1": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c68e979283e": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c18bf3721c8": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 4
+ },
+ "c07124554a3": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cbde3bad34d": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c6669a6dc97": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c10cdbf7602": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c02ab5df4cc": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cecf74e080d": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cab70c39f33": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c16931c8784": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c68995e5ffe": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c41a9e9d397": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c72a22f0d2e": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cbcb5fdb748": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "c52e6a5d8da": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cec3256ac40": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 3
+ },
+ "c9f769e1421": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c16aa969277": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c2ce8b38f3e": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cfec8d82c90": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "ce5ad7bcc28": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c4dea19bc81": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c04db0a6e15": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c04f42f04ad": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c4a5af18a9c": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c81290eabf4": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c32a5c1880f": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c5a3dcb9795": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c33b9c7cd26": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c33fbe5afd5": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cd8c1d522b1": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 0
+ },
+ "c26acb046ef": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c330cc5da11": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c608159e575": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cb102d32271": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c6129e09a15": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c8b7dcc770b": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cab60ecfbad": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cbdeffc2ed9": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cab1c189e37": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cfa06badea4": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c11bdcf8091": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c3d7797d542": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c9da1223d6e": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c2ebf35396f": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c9a6a15539c": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c0ba1ae50af": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c7565a53006": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cb71b8f83a6": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "cb29a0fb1ad": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c5c69e0cc60": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c5e5c6f3416": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c4268d2bff2": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c6009ff0199": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c2657b4c874": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "cbbd488fb62": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf16da28ac4": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf3f92a1907": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c1cdcca1296": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c3099c76954": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cc229eb3c9f": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "ca16eeeeace": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c3f336b3cf3": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c70262b9c18": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "cd7c135f861": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c6f0486661f": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c7f8bd187fc": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cef31cbdd9b": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c4f51b68375": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cac7a5707d1": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "ca4d72cb73a": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c870f8d62a9": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf712d16ef2": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cca6f5e4a12": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c1108634fe8": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c39e15c4a96": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cba6c7a2948": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cbf1929d91e": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "ca093aa2351": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cf713833e76": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c4bb5cdba35": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 3
+ },
+ "c4b7b0aa7ad": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c02887c0760": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cd18b790e8f": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cdfb9a9fd93": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c875272da3e": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c6168722379": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c829738c041": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c10666831b4": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c6956ee3f6e": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c19c31a8af6": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cd57170d795": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cd4c206c468": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "c6519528b63": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "ca1a7f1e3dd": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c10a0e837af": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c02d78e5e4a": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cf7a8ddb968": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c84b59d9dd7": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "ce12f93a4f1": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c0b5fb652df": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c535037730e": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c442e56f7be": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cd11a73c265": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c19037b232f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c210b2b9287": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c76e1a27cbe": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cf5d7ba2c0a": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "c516e739b75": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 4
+ },
+ "c3b850bc31e": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c6877369c67": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cd5b966ea4c": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c57711f38ba": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c8db4094d1e": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c6be86d4e8b": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c22277940dd": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cb7ead58784": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c47f2d6fa44": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cb0e875b6fd": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 0
+ },
+ "c976e56b705": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c8c658d4937": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c1e4404216a": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 4
+ },
+ "c3a9c589302": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cc8ce06e048": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf98d0dfd05": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c1e0ad3e598": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c752f7d2c17": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c29cc70c738": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c682d9df6b0": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c547538b6df": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cc93b4e0101": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c00ac56d13d": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c6b9f7ad872": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cca21976c84": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "ca333cbf503": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "cfb7fa89f52": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c2800f85cda": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c813c187445": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cf511ab327e": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "ccaeddeb381": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf71e5c87c5": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "cd8c9225b2f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cf0a10ff9ee": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c41a8eb9069": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cc1eda59950": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "cb04a05596f": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 2
+ },
+ "ce2537cd3aa": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c9472084cb6": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c66a59b5a57": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c83c14deb97": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c5144a37ab1": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 0
+ },
+ "c41d2fbd426": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c0d60c571d5": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cd77cda1a78": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf3f1eba233": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c586ebb76f3": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c05c74a2a59": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c6713222afd": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cecacceac42": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c07a20bb584": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cf6a3b97450": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 3
+ },
+ "c7821afce36": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cf76de174be": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c29a39ffa89": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c0c7b178c2a": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cf875d38b40": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cdb69c229bc": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c4675c1b1eb": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cde0e7bc0c6": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 0
+ },
+ "c504b696247": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c8ca75fd97f": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c15879d47f0": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cae5d3bfe4f": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c5f48114d46": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c3cbd0a80fe": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c7c7276017f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c4bc53541b8": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c5b6049e6d1": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c698d74cbd3": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "ca926e02355": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "ca72b3f54a1": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cd2c9237a25": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cdc26cd1bbe": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c2676b309d6": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c9e5f0b6ede": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 4
+ },
+ "c9a9610ef13": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c889b319ea5": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c6c6a64662d": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c6e9042adc4": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c2db07c1306": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cacb338c53f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cadc0e4a142": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 4
+ },
+ "cb3daaeae9f": {
+  "code": "NO_PACT",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "cc1badb9beb": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c1bac28de7a": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cc8408bfe88": {
+  "code": "AGREE_MERITS",
+  "stake": 2,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c389a112f55": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c0f904c4f08": {
+  "code": "SPLIT",
+  "stake": 2,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "cd4989a2773": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c907f386e6f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 0
+ },
+ "c0818b31a0f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cd8fec4037c": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ },
+ "c42eaeb035e": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c9ba6134c53": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 0
+ },
+ "c5c33cf162c": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 2,
+  "acceptance": 0
+ },
+ "cbf1cc5b41f": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "cae2f3cf166": {
+  "code": "SPLIT",
+  "stake": 1,
+  "proposal": 4,
+  "acceptance": 0
+ },
+ "c8f8922851b": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 1,
+  "acceptance": 0
+ },
+ "c0a5deda9b1": {
+  "code": "AGREE_TARGET",
+  "stake": 1,
+  "proposal": 3,
+  "acceptance": 4
+ },
+ "c04fa55b471": {
+  "code": "AGREE_MERITS",
+  "stake": 1,
+  "proposal": 0,
+  "acceptance": 0
+ }
+}

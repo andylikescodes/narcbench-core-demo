@@ -1,0 +1,25 @@
+{
+ "created": null,
+ "attempts": [
+  {
+   "cloud": "SECURE",
+   "vcpu": 8,
+   "error": "There are no longer any instances available with the requested specifications. Please refresh and try again."
+  },
+  {
+   "cloud": "COMMUNITY",
+   "vcpu": 8,
+   "error": "There are no longer any instances available with the requested specifications. Please refresh and try again."
+  },
+  {
+   "cloud": "SECURE",
+   "vcpu": 4,
+   "error": "There are no longer any instances available with the requested specifications. Please refresh and try again."
+  },
+  {
+   "cloud": "COMMUNITY",
+   "vcpu": 4,
+   "error": "There are no longer any instances available with the requested specifications. Please refresh and try again."
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+16:06:52 config: mode=pilot model=google/gemma-2-9b-it pilot_n=12 pilot_runs=2 batch=8 workers=8 max=120 min grace=15 min skip=,gen_ref,
+16:06:52 config: versions=T1,T2,T3,T4,T5 results=/workspace/nb/repo/results/uninstructed/pilot2 threads=9 (cpu quota 8, RUNPOD_CPU_COUNT=9, nproc 9)
+16:06:52 stage setup: bash -c python3 -m pip install -q 'transformers>=4.56' accelerate 'scikit-learn>=1.5' scipy 'huggingface_hub>=0.26' sentencepiece protobuf && python3 -c 'import torch,transformers,sklearn; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0), transformers.__version__, sklearn.__version__)' && nvidia-smi && nproc && free -g && df -h /workspace /tmp
+16:07:17 stage setup: exit 0 after 0 min
+Filesystem      Size  Used Avail Use% Mounted on
+overlay          60G  587M   60G   1% /
+overlay          60G  587M   60G   1% /
+16:07:17 stage download: python3 -
+16:07:29 stage download: exit 0 after 0 min
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files:  27%|██▋       | 3/11 [00:00<00:00, 29.44it/s]Fetching 11 files:  55%|█████▍    | 6/11 [00:00<00:00,  8.78it/s]Fetching 11 files:  73%|███████▎  | 8/11 [00:03<00:02,  1.49it/s]Fetching 
+model /workspace/.cache/huggingface/hub/models--google--gemma-2-9b-it/snapshots/11c9b309abf73637e4b6f9a3fa1e92e615547819 17648 MiB 9s
+lens 1053307540 3s
+16:07:29 stage gen_ref skipped (JOB_SKIP)
+16:07:29 gen_ref skipped: 0 S0 run folders in the checkout
+16:07:29 stage gen_stake: python3 scripts/uninstructed_generate.py --model google/gemma-2-9b-it --versions T1,T2,T3,T4,T5 --pilot --pilot-n 12 --runs 2 --workers 8 --batch 8 --tag T1-T2-T3-T4-T5 --out /workspace/nb/repo/results/uninstructed/pilot2/runs
+17:13:53 stage gen_stake: exit 0 after 66 min
+ "unparsed_votes": 0,
+ "votes_total": 480
+}
+17:13:53 stage code_rooms: python3 scripts/uninstructed_code_rooms.py --model google/gemma-2-9b-it --runs /workspace/nb/repo/results/uninstructed/pilot2/runs --batch 8 --out /workspace/nb/repo/results/uninstructed/pilot2/coding_gemma.json
+17:16:01 stage code_rooms: exit 0 after 2 min
+ "n_unparsed": 0,
+ "elapsed_s": 126.9
+}
+17:16:01 stage summarize: python3 scripts/uninstructed_summarize.py --runs /workspace/nb/repo/results/uninstructed/pilot2/runs --coding /workspace/nb/repo/results/uninstructed/pilot2/coding_gemma.json --out /workspace/nb/repo/results/uninstructed/pilot2/provisional
+17:16:01 stage summarize: exit 0 after 0 min
+Kappa: not checked yet (one coder).
+Version chosen by the rule: none.
+
+17:16:02 stage export_basis: python3 scripts/jspace_interp_extract.py --model google/gemma-2-9b-it --splits core --conditions original --max-rows 4 --layers 19 --export-basis /workspace/nb/repo/data/j_basis/gemma2_9b --out /tmp/basis_probe
+17:16:29 stage export_basis: exit 0 after 0 min
+[load] 100 dirs → 1700 samples from /workspace/nb/repo/upstream/scenarios/gemma2_9b/core/20261001T012639Z
+[extract] 1/18 (0s)
+{"core/original": {"n_rows": 18, "leak": {"private_block": 6, "drift_block": 0}, "out": "/tmp/basis_probe/core/original"}}
+17:16:29 stage timing: python3 scripts/uninstructed_timing_test.py --model google/gemma-2-9b-it --runs /workspace/nb/repo/results/uninstructed/pilot2/runs/T1 --episodes 10 --lens /workspace/.cache/huggingface//lens/gemma-2-9b-it_jacobian_lens.pt --basis-dir /workspace/nb/repo/data/j_basis/gemma2_9b --out /workspace/nb/repo/results/uninstructed/pilot2/timing.json
+17:18:37 stage timing: exit 0 after 2 min
+ },
+ "note": "durations and sizes only; the activations were deleted and the probe timing used shuffled labels"
+}

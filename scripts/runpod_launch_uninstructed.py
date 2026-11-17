@@ -41,16 +41,17 @@ OUT_PREFIX = "results/uninstructed/"
 RUNS_DIR = ROOT / "results/uninstructed/pod_runs"
 GPU = "NVIDIA A40"
 RATE = {"SECURE": 0.59, "COMMUNITY": 0.35}        # A40, USD per hour, read from the RunPod price list on 16 November 2026
-GEN_S_PER_PROMPT = 1.70                            # measured on an A40 on 9 November 2026 (800 prompts in 1,357 s, batches of 8)
+GEN_S_PER_PROMPT = 1.44                            # measured on an A40 on 17 November 2026 UTC: version S0, 576 prompts in 832 s, batches of 8
 PROMPTS_PER_EPISODE = 24                           # 8 room messages, 12 public turns, 4 votes
 CODE_PATHS = ["uninstructed", "generation", "jspace_interp", "scripts"]
 
 
 def estimate(a) -> dict:
-    episodes = 4 * a.pilot_n * a.pilot_runs
+    skip = {x for x in a.skip.split(",") if x}
+    episodes = ((0 if "gen_ref" in skip else 1) + (0 if "gen_stake" in skip else 3)) * a.pilot_n * a.pilot_runs
     gen_min = episodes * PROMPTS_PER_EPISODE * GEN_S_PER_PROMPT / 60
-    stages = {"boot, setup, downloads": 8, f"generation ({episodes} episodes, {episodes * PROMPTS_PER_EPISODE} prompts at {GEN_S_PER_PROMPT} s)": round(gen_min),
-              "two model loads": 3, "room codes by Gemma": 5, "timing test (basis export, replay, decomposition, probes)": 12, "package": 2}
+    stages = {"boot, setup, downloads": 6, f"generation ({episodes} episodes, {episodes * PROMPTS_PER_EPISODE} prompts at {GEN_S_PER_PROMPT} s)": round(gen_min),
+              "model loads": 3, "room codes by Gemma": 5, "timing test (basis export, replay, decomposition, probes)": 12, "package": 2}
     exp_h = sum(stages.values()) / 60
     cap_h = (a.max_minutes + a.grace_minutes) / 60
     return {"mode": a.mode, "gpu": GPU, "episodes": episodes, "stages_minutes": stages, "expected_hours": round(exp_h, 2),
@@ -232,8 +233,8 @@ def main() -> int:
     ap.add_argument("--grace-minutes", type=int, default=30, help="how long the pod serves results before terminating itself")
     ap.add_argument("--pilot-n", type=int, default=12)
     ap.add_argument("--pilot-runs", type=int, default=2)
-    ap.add_argument("--batch", type=int, default=16, help="prompts per generate call for the stake versions (S0 runs at 8)")
-    ap.add_argument("--workers", type=int, default=16)
+    ap.add_argument("--batch", type=int, default=8, help="prompts per generate call for the stake versions (16 ran out of GPU memory)")
+    ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timing-episodes", type=int, default=10)
     ap.add_argument("--skip", default="", help="comma list of pod stages to skip (JOB_SKIP)")
     ap.add_argument("--secure-only", action="store_true", help="do not fall back to the community cloud")

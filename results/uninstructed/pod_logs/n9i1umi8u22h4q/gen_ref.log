@@ -1,0 +1,56 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/464 [00:00<?, ?it/s]Loading weights:   0%|          | 1/464 [00:00<02:26,  3.15it/s]Loading weights:   3%|▎         | 14/464 [00:00<00:11, 40.80it/s]Loading weights:   6%|▌         | 26/464 [00:00<00:07, 61.89it/s]Loading weights:   8%|▊         | 37/464 [00:00<00:05, 73.07it/s]Loading weights:  10%|█         | 48/464 [00:00<00:05, 78.86it/s]Loading weights:  13%|█▎        | 59/464 [00:00<00:04, 86.30it/s]Loading weights:  15%|█▌        | 70/464 [00:01<00:04, 88.35it/s]Loading weights:  18%|█▊        | 82/464 [00:01<00:04, 93.04it/s]Loading weights:  21%|██        | 96/464 [00:01<00:03, 105.75it/s]Loading weights:  23%|██▎       | 109/464 [00:01<00:03, 111.38it/s]Loading weights:  26%|██▌       | 121/464 [00:01<00:03, 109.59it/s]Loading weights:  29%|██▊       | 133/464 [00:01<00:03, 109.51it/s]Loading weights:  31%|███▏      | 146/464 [00:01<00:02, 107.93it/s]Loading weights:  34%|███▍      | 158/464 [00:01<00:02, 106.26it/s]Loading weights:  36%|███▋      | 169/464 [00:01<00:02, 104.53it/s]Loading weights:  39%|███▉      | 180/464 [00:01<00:02, 105.91it/s]Loading weights:  41%|████      | 191/464 [00:02<00:02, 102.44it/s]Loading weights:  44%|████▎     | 202/464 [00:02<00:02, 101.36it/s]Loading weights:  46%|████▌     | 214/464 [00:02<00:02, 100.81it/s]Loading weights:  48%|████▊     | 225/464 [00:02<00:02, 101.80it/s]Loading weights:  51%|█████     | 236/464 [00:02<00:02, 102.11it/s]Loading weights:  53%|█████▎    | 247/464 [00:02<00:02, 103.08it/s]Loading weights:  56%|█████▌    | 258/464 [00:02<00:01, 104.53it/s]Loading weights:  58%|█████▊    | 269/464 [00:02<00:01, 104.17it/s]Loading weights:  60%|██████    | 280/464 [00:02<00:01, 102.06it/s]Loading weights:  63%|██████▎   | 291/464 [00:03<00:01, 103.74it/s]Loading weights:  67%|██████▋   | 309/464 [00:03<00:01, 125.22it/s]Loading weights:  69%|██████▉   | 322/464 [00:03<00:01, 122.23it/s]Loading weights:  72%|███████▏  | 335/464 [00:03<00:01, 110.82it/s]Loading weights:  75%|███████▍  | 347/464 [00:03<00:01, 106.85it/s]Loading weights:  77%|███████▋  | 358/464 [00:03<00:01, 105.98it/s]Loading weights:  80%|███████▉  | 369/464 [00:03<00:00, 100.67it/s]Loading weights:  84%|████████▎ | 388/464 [00:03<00:00, 118.57it/s]Loading weights:  86%|████████▌ | 400/464 [00:04<00:00, 115.92it/s]Loading weights:  89%|████████▉ | 412/464 [00:04<00:00, 114.77it/s]Loading weights:  91%|█████████▏| 424/464 [00:04<00:00, 116.00it/s]Loading weights:  94%|█████████▍| 436/464 [00:04<00:00, 113.51it/s]Loading weights:  97%|█████████▋| 448/464 [00:04<00:00, 115.32it/s]Loading weights:  99%|█████████▉| 460/464 [00:04<00:00, 113.26it/s]Loading weights: 100%|██████████| 464/464 [00:04<00:00, 101.45it/s]
+[gen] 24 episodes: versions ['S0'], 12 scenarios, runs 0..1; workers 8, batch 8
+[gen] batches 1 prompts 8 (0.6s per prompt amortised)
+[gen] batches 10 prompts 80 (0.7s per prompt amortised)
+[gen] batches 20 prompts 160 (1.3s per prompt amortised)
+[gen] batches 30 prompts 240 (1.2s per prompt amortised)
+[gen] batches 40 prompts 320 (1.2s per prompt amortised)
+[gen] batches 50 prompts 400 (1.3s per prompt amortised)
+[gen] batches 60 prompts 480 (1.3s per prompt amortised)
+[gen] batches 70 prompts 560 (1.4s per prompt amortised)
+{
+ "created_utc": "2026-11-17T05:17:03.825024+00:00",
+ "protocol": "uninstructed-v1",
+ "model_id": "google/gemma-2-9b-it",
+ "versions": [
+  "S0"
+ ],
+ "scenario_ids": [
+  "cyber_01",
+  "eng_01",
+  "fin_03",
+  "food_01",
+  "gov_03",
+  "hire_01",
+  "ins_01",
+  "leg_02",
+  "med_03",
+  "mil_02",
+  "pharma_01",
+  "re_01"
+ ],
+ "runs": [
+  0,
+  1
+ ],
+ "episodes": 24,
+ "episodes_generated": 24,
+ "dry_run": false,
+ "max_new_tokens": 256,
+ "temperature": 0.7,
+ "workers": 8,
+ "batch": 8,
+ "seed": 0,
+ "elapsed_s": 831.9,
+ "generation": {
+  "batches": 72,
+  "prompts": 576,
+  "gen_seconds": 831.5,
+  "seconds_per_prompt": 1.444,
+  "wall_seconds_per_prompt": 1.444,
+  "oom_splits": 0
+ },
+ "unparsed_votes": 0,
+ "votes_total": 96
+}

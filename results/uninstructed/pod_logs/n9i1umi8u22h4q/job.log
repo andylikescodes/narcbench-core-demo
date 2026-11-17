@@ -1,0 +1,21 @@
+05:02:03 config: mode=pilot model=google/gemma-2-9b-it pilot_n=12 pilot_runs=2 batch=16 workers=16 max=150 min grace=30 min skip=,,
+05:02:03 stage setup: bash -c python3 -m pip install -q 'transformers>=4.56' accelerate 'scikit-learn>=1.5' scipy 'huggingface_hub>=0.26' sentencepiece protobuf && python3 -c 'import torch,transformers,sklearn; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0), transformers.__version__, sklearn.__version__)' && nvidia-smi && nproc && free -g && df -h /workspace /tmp
+05:02:37 stage setup: exit 0 after 0 min
+Filesystem      Size  Used Avail Use% Mounted on
+overlay          60G  570M   60G   1% /
+overlay          60G  570M   60G   1% /
+05:02:37 stage download: python3 -
+05:02:58 stage download: exit 0 after 0 min
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files:  18%|█▊        | 2/11 [00:00<00:00, 19.25it/s]Fetching 11 files:  55%|█████▍    | 6/11 [00:00<00:00,  8.61it/s]Fetching 11 files:  73%|███████▎  | 8/11 [00:08<00:04,  1.39s/it]Fetching 11
+model /workspace/.cache/huggingface/hub/models--google--gemma-2-9b-it/snapshots/11c9b309abf73637e4b6f9a3fa1e92e615547819 17648 MiB 10s
+lens 1053307540 11s
+05:02:58 stage gen_ref: python3 scripts/uninstructed_generate.py --model google/gemma-2-9b-it --versions S0 --pilot --pilot-n 12 --runs 2 --workers 8 --batch 8 --tag S0 --out /workspace/nb/repo/results/uninstructed/pilot/runs
+05:17:05 stage gen_ref: exit 0 after 14 min
+ "unparsed_votes": 0,
+ "votes_total": 96
+}
+05:17:05 stage gen_stake: python3 scripts/uninstructed_generate.py --model google/gemma-2-9b-it --versions S1,S2,S3 --pilot --pilot-n 12 --runs 2 --workers 16 --batch 16 --tag S1-S2-S3 --out /workspace/nb/repo/results/uninstructed/pilot/runs
+05:26:54 stage gen_stake: exit 1 after 9 min
+    ret = input.softmax(dim, dtype=dtype)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 244.00 MiB. GPU 0 has a total capacity of 44.42 GiB of which 213.81 MiB is free. Including non-PyTorch memory, this process has 44.21 GiB memory in use. Of the allocated memory 43.39 GiB is allocated by PyTorch, and 513.56 MiB is reserved

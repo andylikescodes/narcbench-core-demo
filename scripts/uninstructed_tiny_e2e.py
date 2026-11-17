@@ -150,10 +150,48 @@ def main() -> int:
     print(f"B. causal reads: largest relative difference to a context cut after the token, {n_checked} tokens = {max_b:.2e} (float16 storage)")
     assert max_b < 5e-3, max_b
     print("C. alignment: the saved token ids of each room message decode back to the recorded message")
-    # 6. pod scripts parse, and the launcher's estimate mode runs without keys
+    # 6. the out-of-memory fallback: batches above two prompts "do not fit"; the retry must run after the except block
+    #    (the first pilot pod retried inside it and failed), keep the order of the prompts, and give up only at one prompt
+    import traceback
+
+    from generation.hf_batched import BatchedGenerator
+    from uninstructed.batching import SafeBatchedGenerator
+
+    state = {"in_except": []}
+    real = BatchedGenerator._generate
+
+    def fake(self, prompts):
+        state["in_except"].append(sys.exc_info()[0] is not None)      # True would mean: called while an exception is being handled
+        if len(prompts) > 2:
+            raise torch.cuda.OutOfMemoryError("simulated")
+        return [p.upper() for p in prompts]
+
+    BatchedGenerator._generate = fake
+    try:
+        g = object.__new__(SafeBatchedGenerator)                      # no worker thread, no model
+        g.log = None
+        SafeBatchedGenerator.n_oom = 0
+        out = g._generate([f"p{i}" for i in range(11)])
+        assert out == [f"P{i}" for i in range(11)], out
+        assert SafeBatchedGenerator.n_oom >= 3 and not any(state["in_except"]), (SafeBatchedGenerator.n_oom, state)
+
+        def always(self, prompts):
+            raise torch.cuda.OutOfMemoryError("simulated")
+        BatchedGenerator._generate = always
+        try:
+            g._generate(["a", "b"])
+            raise AssertionError("expected a RuntimeError when one prompt does not fit")
+        except RuntimeError:
+            pass
+    finally:
+        BatchedGenerator._generate = real
+    print("D. out-of-memory fallback: 11 prompts through batches of at most 2, order kept, no retry inside an except block")
+    # 7. pod scripts parse, and the launcher's estimate mode runs without keys
     run(["bash", "-n", "scripts/runpod_uninstructed_boot.sh"], log)
     est = json.loads(run([py, "scripts/runpod_launch_uninstructed.py"], log).stdout)
     assert est["episodes"] == 96, est
+    est = json.loads(run([py, "scripts/runpod_launch_uninstructed.py", "--skip", "gen_ref"], log).stdout)
+    assert est["episodes"] == 72, est
     (w / "tiny_e2e_log.json").write_text(json.dumps({"log": log, "replay": info, "summary_versions": summ["versions"], "timing": tim}, indent=1) + "\n")
     print("ALL PASS")
     return 0

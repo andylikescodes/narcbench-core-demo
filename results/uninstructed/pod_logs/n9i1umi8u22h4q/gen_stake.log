@@ -1,0 +1,656 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/464 [00:00<?, ?it/s]Loading weights:   0%|          | 1/464 [00:00<01:46,  4.33it/s]Loading weights:   3%|▎         | 15/464 [00:00<00:08, 55.27it/s]Loading weights:   7%|▋         | 32/464 [00:00<00:04, 90.25it/s]Loading weights:  10%|█         | 48/464 [00:00<00:03, 108.89it/s]Loading weights:  13%|█▎        | 61/464 [00:00<00:03, 113.45it/s]Loading weights:  17%|█▋        | 77/464 [00:00<00:03, 124.91it/s]Loading weights:  20%|█▉        | 91/464 [00:00<00:03, 114.63it/s]Loading weights:  22%|██▏       | 104/464 [00:01<00:03, 103.71it/s]Loading weights:  26%|██▌       | 119/464 [00:01<00:03, 111.29it/s]Loading weights:  28%|██▊       | 131/464 [00:01<00:02, 111.51it/s]Loading weights:  31%|███       | 143/464 [00:01<00:02, 112.22it/s]Loading weights:  34%|███▍      | 157/464 [00:01<00:02, 114.60it/s]Loading weights:  36%|███▋      | 169/464 [00:01<00:02, 108.89it/s]Loading weights:  39%|███▉      | 181/464 [00:01<00:02, 108.21it/s]Loading weights:  42%|████▏     | 197/464 [00:01<00:02, 122.13it/s]Loading weights:  46%|████▌     | 213/464 [00:01<00:01, 128.86it/s]Loading weights:  49%|████▉     | 229/464 [00:02<00:01, 137.52it/s]Loading weights:  53%|█████▎    | 245/464 [00:02<00:01, 143.35it/s]Loading weights:  56%|█████▌    | 260/464 [00:02<00:01, 132.04it/s]Loading weights:  59%|█████▉    | 276/464 [00:02<00:01, 139.36it/s]Loading weights:  63%|██████▎   | 291/464 [00:02<00:01, 124.57it/s]Loading weights:  66%|██████▌   | 306/464 [00:02<00:01, 130.19it/s]Loading weights:  69%|██████▉   | 320/464 [00:02<00:01, 128.66it/s]Loading weights:  72%|███████▏  | 334/464 [00:02<00:01, 116.32it/s]Loading weights:  75%|███████▍  | 347/464 [00:03<00:01, 108.22it/s]Loading weights:  78%|███████▊  | 361/464 [00:03<00:00, 114.25it/s]Loading weights:  81%|████████  | 375/464 [00:03<00:00, 120.60it/s]Loading weights:  84%|████████▎ | 388/464 [00:03<00:00, 117.45it/s]Loading weights:  86%|████████▋ | 401/464 [00:03<00:00, 115.29it/s]Loading weights:  90%|████████▉ | 417/464 [00:03<00:00, 123.33it/s]Loading weights:  93%|█████████▎| 430/464 [00:03<00:00, 119.56it/s]Loading weights:  95%|█████████▌| 443/464 [00:03<00:00, 112.35it/s]Loading weights:  98%|█████████▊| 455/464 [00:03<00:00, 107.17it/s]Loading weights: 100%|██████████| 464/464 [00:04<00:00, 114.94it/s]
+[gen] 72 episodes: versions ['S1', 'S2', 'S3'], 12 scenarios, runs 0..1; workers 16, batch 16
+[gen] batches 1 prompts 16 (0.4s per prompt amortised)
+[gen] batches 10 prompts 160 (0.5s per prompt amortised)
+[gen] batches 20 prompts 320 (1.2s per prompt amortised)
+[gen] out of memory at batch 16; splitting
+[gen] out of memory at batch 8; splitting
+[gen] out of memory at batch 16; splitting
+[gen] out of memory at batch 8; splitting
+[gen] out of memory at batch 8; splitting
+[gen] out of memory at batch 16; splitting
+[gen] out of memory at batch 8; splitting
+[gen] out of memory at batch 8; splitting
+[gen] out of memory at batch 4; splitting
+[gen] out of memory at batch 4; splitting
+[gen] out of memory at batch 2; splitting
+[gen] out of memory at batch 15; splitting
+[gen] out of memory at batch 7; splitting
+[gen] out of memory at batch 3; splitting
+Traceback (most recent call last):
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 111, in _generate
+    return super()._generate(prompts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 103, in _generate
+    out = self.bundle.model.generate(**inputs, **gen_kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3007, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3207, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 4319, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 943, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 505, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 1081, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/output_capturing.py", line 361, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 440, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/modeling_layers.py", line 121, in forward_with_checkpointing
+    return forward(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 310, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 265, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 203, in eager_attention_forward
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2139, in softmax
+    ret = input.softmax(dim, dtype=dtype)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 4.40 GiB. GPU 0 has a total capacity of 44.42 GiB of which 605.81 MiB is free. Including non-PyTorch memory, this process has 43.82 GiB memory in use. Of the allocated memory 35.57 GiB is allocated by PyTorch, and 7.94 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 111, in _generate
+    return super()._generate(prompts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 103, in _generate
+    out = self.bundle.model.generate(**inputs, **gen_kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3007, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3207, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 4319, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 943, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 505, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 1081, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/output_capturing.py", line 361, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 440, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/modeling_layers.py", line 121, in forward_with_checkpointing
+    return forward(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 310, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 265, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 203, in eager_attention_forward
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2139, in softmax
+    ret = input.softmax(dim, dtype=dtype)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.89 GiB. GPU 0 has a total capacity of 44.42 GiB of which 625.81 MiB is free. Including non-PyTorch memory, this process has 43.80 GiB memory in use. Of the allocated memory 39.33 GiB is allocated by PyTorch, and 4.16 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 111, in _generate
+    return super()._generate(prompts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 103, in _generate
+    out = self.bundle.model.generate(**inputs, **gen_kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3007, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3207, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 4319, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 943, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 505, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 1081, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/output_capturing.py", line 361, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 440, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/modeling_layers.py", line 121, in forward_with_checkpointing
+    return forward(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 310, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 265, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 203, in eager_attention_forward
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2139, in softmax
+    ret = input.softmax(dim, dtype=dtype)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 970.00 MiB. GPU 0 has a total capacity of 44.42 GiB of which 217.81 MiB is free. Including non-PyTorch memory, this process has 44.20 GiB memory in use. Of the allocated memory 41.82 GiB is allocated by PyTorch, and 2.07 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 111, in _generate
+    return super()._generate(prompts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 103, in _generate
+    out = self.bundle.model.generate(**inputs, **gen_kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3007, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3207, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 4319, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 943, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 505, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 1081, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/output_capturing.py", line 361, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 440, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/modeling_layers.py", line 121, in forward_with_checkpointing
+    return forward(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 310, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 265, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 203, in eager_attention_forward
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2139, in softmax
+    ret = input.softmax(dim, dtype=dtype)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 486.00 MiB. GPU 0 has a total capacity of 44.42 GiB of which 217.81 MiB is free. Including non-PyTorch memory, this process has 44.20 GiB memory in use. Of the allocated memory 42.82 GiB is allocated by PyTorch, and 1.06 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 167, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 145, in main
+    summaries = list(pool.map(one, jobs))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 138, in one
+    out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 236, in run_episode
+    final_texts[agent] = call(agent, "final", "public", NUM_DISCUSSION_ROUNDS + 1, up)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/uninstructed/protocol.py", line 200, in call
+    text = generate(sysp[agent], user_prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 48, in __call__
+    raise req["error"]
+  File "/workspace/nb/repo/generation/hf_batched.py", line 71, in _loop
+    texts = self._generate([b["prompt"] for b in batch])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 119, in _generate
+    return self._generate(prompts[:h]) + self._generate(prompts[h:])
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 119, in _generate
+    return self._generate(prompts[:h]) + self._generate(prompts[h:])
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 119, in _generate
+    return self._generate(prompts[:h]) + self._generate(prompts[h:])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  [Previous line repeated 1 more time]
+  File "/workspace/nb/repo/scripts/uninstructed_generate.py", line 111, in _generate
+    return super()._generate(prompts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/nb/repo/generation/hf_batched.py", line 103, in _generate
+    out = self.bundle.model.generate(**inputs, **gen_kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3007, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 3207, in _sample
+    outputs = self._prefill(
+              ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/generation/utils.py", line 4319, in _prefill
+    return self(**model_inputs, return_dict=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 943, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 505, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/generic.py", line 1081, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/utils/output_capturing.py", line 361, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 440, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/modeling_layers.py", line 121, in forward_with_checkpointing
+    return forward(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 310, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 265, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/transformers/models/gemma2/modeling_gemma2.py", line 203, in eager_attention_forward
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/nn/functional.py", line 2139, in softmax
+    ret = input.softmax(dim, dtype=dtype)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 244.00 MiB. GPU 0 has a total capacity of 44.42 GiB of which 213.81 MiB is free. Including non-PyTorch memory, this process has 44.21 GiB memory in use. Of the allocated memory 43.39 GiB is allocated by PyTorch, and 513.56 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

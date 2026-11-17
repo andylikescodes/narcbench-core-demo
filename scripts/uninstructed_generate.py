@@ -100,29 +100,13 @@ def main() -> int:
         if not torch.cuda.is_available() and not a.allow_cpu:
             sys.exit("No CUDA GPU here; use --dry-run for a shape test or --allow-cpu with a tiny model.")
         from generation.hf_backend import load_model, make_generate
-        from generation.hf_batched import BatchedGenerator
-
-        class SafeBatched(BatchedGenerator):
-            """Halves a batch that does not fit in GPU memory instead of failing the episode."""
-            n_oom = 0
-
-            def _generate(self, prompts):
-                try:
-                    return super()._generate(prompts)
-                except torch.cuda.OutOfMemoryError:
-                    torch.cuda.empty_cache()
-                    if len(prompts) == 1:
-                        raise
-                    SafeBatched.n_oom += 1
-                    print(f"[gen] out of memory at batch {len(prompts)}; splitting", flush=True)
-                    h = len(prompts) // 2
-                    return self._generate(prompts[:h]) + self._generate(prompts[h:])
+        from uninstructed.batching import SafeBatchedGenerator
 
         torch.manual_seed(a.seed)
         bundle = load_model(a.model, dtype=a.dtype, device_map="auto" if torch.cuda.is_available() else None)
         if a.batch > 1 and a.workers > 1:
-            batched = SafeBatched(bundle, max_new_tokens=a.max_new_tokens, temperature=a.temperature, max_batch=a.batch,
-                                  log=lambda m: print(m, flush=True))
+            batched = SafeBatchedGenerator(bundle, max_new_tokens=a.max_new_tokens, temperature=a.temperature, max_batch=a.batch,
+                                           log=lambda m: print(m, flush=True))
             generate = batched
         else:
             generate = make_generate(bundle, max_new_tokens=a.max_new_tokens, temperature=a.temperature)
@@ -134,9 +118,13 @@ def main() -> int:
           f"workers {a.workers}, batch {a.batch}", flush=True)
 
     def one(job):
+        # an episode that fails must not take the others down with it: it is recorded and can be generated again later
         v, sid, r = job
-        out = P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
-        return out
+        try:
+            return P.run_episode(scenarios[idx[sid]], idx[sid], v, r, generate, a.out / v, name_pool=name_pool, stakes=stakes, model_id=model_id)
+        except Exception as e:  # noqa: BLE001
+            print(f"[gen] episode {P.run_id(sid, v, r)} failed: {type(e).__name__}: {str(e)[:200]}", flush=True)
+            return {"run_id": P.run_id(sid, v, r), "version": v, "votes": {}, "skipped": False, "error": f"{type(e).__name__}: {str(e)[:300]}"}
 
     if a.dry_run or a.workers <= 1:
         summaries = [one(j) for j in jobs]
@@ -146,9 +134,11 @@ def main() -> int:
     if batched is not None:
         batched.close()
     el = time.time() - t0
-    n_new = sum(not s["skipped"] for s in summaries)
+    failed = [s for s in summaries if s.get("error")]
+    n_new = sum(not s["skipped"] and not s.get("error") for s in summaries)
     rec = {"created_utc": datetime.now(timezone.utc).isoformat(), "protocol": P.PROTOCOL, "model_id": model_id, "versions": versions,
            "scenario_ids": ids, "runs": [a.run_start, a.run_start + a.runs - 1], "episodes": len(summaries), "episodes_generated": n_new,
+           "episodes_failed": [{"run_id": s["run_id"], "error": s["error"]} for s in failed],
            "dry_run": a.dry_run, "max_new_tokens": a.max_new_tokens, "temperature": a.temperature, "workers": a.workers, "batch": a.batch,
            "seed": a.seed, "elapsed_s": round(el, 1),
            "generation": ({"batches": batched.n_batches, "prompts": batched.n_prompts, "gen_seconds": round(batched.gen_seconds, 1),
@@ -160,6 +150,9 @@ def main() -> int:
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / f"generation_{a.tag or '-'.join(versions)}.json").write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps(rec, indent=1))
+    if len(failed) > 0.1 * len(summaries):
+        print(f"[gen] {len(failed)} of {len(summaries)} episodes failed", file=sys.stderr)
+        return 1
     return 0
 
 

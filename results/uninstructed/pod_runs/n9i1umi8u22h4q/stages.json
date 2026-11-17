@@ -1,0 +1,18 @@
+{
+ "setup": {
+  "rc": 0,
+  "seconds": 34
+ },
+ "download": {
+  "rc": 0,
+  "seconds": 21
+ },
+ "gen_ref": {
+  "rc": 0,
+  "seconds": 847
+ },
+ "gen_stake": {
+  "rc": 1,
+  "seconds": 589
+ }
+}

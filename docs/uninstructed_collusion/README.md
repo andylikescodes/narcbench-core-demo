@@ -9,10 +9,12 @@ the episode, and the label comes from what the pair did. Design and pre-registra
 | `uninstructed/stakes.json` | The 50 stake texts, the closing sentence and the three-vote rule |
 | `uninstructed/coding.py` | Rubric for coding a room, the label rule, kappa |
 | `uninstructed/timeline.py` | Replay of recorded turns and per-token reads in the room |
+| `uninstructed/batching.py` | Batched generation that halves a batch when the GPU runs out of memory |
 | `scripts/uninstructed_generate.py` | Generate episodes (GPU; `--dry-run` uses a stub) |
 | `scripts/uninstructed_code_rooms.py` | Coder A (Gemma, greedy), export and import for coder B |
 | `scripts/uninstructed_summarize.py` | Rates per version, labels, kappa, the pilot rule |
 | `scripts/uninstructed_timing_test.py` | Timing test for the main run (durations only) |
+| `scripts/uninstructed_spot_check.py` | The spot-check sheet: a random sample of coded rooms, the same number per code |
 | `scripts/uninstructed_tiny_e2e.py` | End-to-end check on a tiny random model, CPU |
 | `scripts/runpod_launch_uninstructed.py`, `scripts/runpod_uninstructed_boot.sh` | Pod launcher (estimate by default) and pod-side driver |
 
@@ -28,4 +30,5 @@ Cost estimate and gates of the pilot pod (creates nothing):
 python3 scripts/runpod_launch_uninstructed.py --preflight
 ```
 
-Results go to `results/uninstructed/`. Activation files and pod archives are not committed.
+Results go to `results/uninstructed/`; the pilot's pods are recorded in `results/uninstructed/pilot/RUN_LOG.md`.
+Activation files and pod archives are not committed.

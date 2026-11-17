@@ -5,14 +5,15 @@
 #
 # JOB_MODE=pilot (docs/uninstructed_collusion/DESIGN.md, sections 10 and 11), stages in order:
 #   setup, download (published lens + gated Gemma-2-9B-it),
-#   gen_ref    version S0 with the batch size of the 9 November run (8), the reference for the generation rate
-#   gen_stake  versions S1, S2, S3 with JOB_BATCH prompts per call
+#   gen_ref    version S0, 8 prompts per call
+#   gen_stake  versions S1, S2, S3 with JOB_BATCH prompts per call (default 8: 16 ran out of memory on the first pod)
+#   A stage named in JOB_SKIP is skipped. For gen_ref this is used when the S0 runs are already in the checkout.
 #   code_rooms room codes by Gemma-2-9B-it, greedy decoding (coder A)
 #   summarize  provisional rates from the votes and coder A
 #   export_basis, timing   the timing test for the main run (durations only; its activations are deleted)
 #   package
 # Env: HF_TOKEN, RUNPOD_API_KEY (self-termination), RUNPOD_POD_ID, JOB_MAX_MINUTES, JOB_GRACE_MINUTES, JOB_PILOT_N,
-#      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_TIMING_EPISODES, JOB_SKIP.
+#      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_CODER_BATCH, JOB_TIMING_EPISODES, JOB_SKIP.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 REPO=$(pwd)
@@ -25,11 +26,13 @@ GRACE_MIN=${JOB_GRACE_MINUTES:-30}
 SKIP=",${JOB_SKIP:-},"
 PILOT_N=${JOB_PILOT_N:-12}
 PILOT_RUNS=${JOB_PILOT_RUNS:-2}
-BATCH=${JOB_BATCH:-16}
-WORKERS=${JOB_WORKERS:-16}
+BATCH=${JOB_BATCH:-8}
+WORKERS=${JOB_WORKERS:-8}
+CODER_BATCH=${JOB_CODER_BATCH:-8}
 TIMING_EPISODES=${JOB_TIMING_EPISODES:-10}
 export HF_HOME=${HF_HOME:-/workspace/nb/hf}; mkdir -p "$HF_HOME"
 export HF_TOKEN="${HF_TOKEN:-}"; export HF_HUB_ENABLE_HF_TRANSFER=0; export TOKENIZERS_PARALLELISM=false
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 LENS=$HF_HOME/lens/gemma-2-9b-it_jacobian_lens.pt
 BASIS=$REPO/data/j_basis/gemma2_9b
 T0=$(date +%s)
@@ -134,12 +137,15 @@ PY
 
 # ---- 3. generation: S0 at the reference batch size, then the stake versions ----
 stage gen_ref python3 scripts/uninstructed_generate.py --model "$MODEL" --versions S0 --pilot --pilot-n "$PILOT_N" --runs "$PILOT_RUNS" \
-  --workers 8 --batch 8 --tag S0 --out "$OUT/pilot/runs" || finish failed gen_ref
+  --workers 8 --batch 8 --tag S0 --out "$OUT/pilot/runs"
+rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || finish failed gen_ref
+[ $rc -eq 99 ] && log "gen_ref skipped: $(ls "$OUT/pilot/runs/S0" 2>/dev/null | wc -l) S0 run folders in the checkout"
 stage gen_stake python3 scripts/uninstructed_generate.py --model "$MODEL" --versions S1,S2,S3 --pilot --pilot-n "$PILOT_N" --runs "$PILOT_RUNS" \
-  --workers "$WORKERS" --batch "$BATCH" --tag S1-S2-S3 --out "$OUT/pilot/runs" || finish failed gen_stake
+  --workers "$WORKERS" --batch "$BATCH" --tag S1-S2-S3 --out "$OUT/pilot/runs"
+rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || finish failed gen_stake
 
 # ---- 4. coder A and the provisional rates ----
-if stage code_rooms python3 scripts/uninstructed_code_rooms.py --model "$MODEL" --runs "$OUT/pilot/runs" --out "$OUT/pilot/coding_gemma.json"; then
+if stage code_rooms python3 scripts/uninstructed_code_rooms.py --model "$MODEL" --runs "$OUT/pilot/runs" --batch "$CODER_BATCH" --out "$OUT/pilot/coding_gemma.json"; then
   stage summarize python3 scripts/uninstructed_summarize.py --runs "$OUT/pilot/runs" --coding "$OUT/pilot/coding_gemma.json" \
     --out "$OUT/pilot/provisional" || log "summarize failed; the rates are computed after the pull"
 else

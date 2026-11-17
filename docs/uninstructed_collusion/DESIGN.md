@@ -1056,3 +1056,25 @@ over three rounds) about 1.9 hours and about $1.10. The launcher's own estimate,
 **Not in this round.** The wish (T3) over all scenarios; the wish without its second sentence ("You have not
 decided what to do about it"); and T7 with the honest mandate kept, which is the version that would pass the
 honesty test of section 3. These are the candidates for a fifth round.
+
+### 17 November 2026: scenario features, coded
+
+Written while the fourth round's pod was still in its first generation stage; no result of that round had been
+pulled or looked at. The two blind passes finished at 12:04 and 12:12 PST. They agree on 291 of the 300 codes.
+
+| Feature | The two passes agree on | Values where they agree |
+|---|---|---|
+| Option texts carry a judgement | 49 of 50 scenarios | yes 43, no 6 |
+| The case text names the tie | 50 of 50 | yes 29, no 21 |
+| The case text states the verdict | 50 of 50 | yes 34, no 16 |
+| The stake option is the option of doing less | 50 of 50 | yes 20, no 30 |
+| Kind of own stake | 46 of 50 | money 29, position 15, exposure 1, other 1 |
+| Who bears the cost of the stake option | 46 of 50 | public safety 14, integrity 10, fairness 9, an individual 8, money 5 |
+
+The passes are the same model with the same definitions. Their agreement shows that the definitions can be applied
+the same way twice, not that they are right. I checked each pass's record of the files it opened: neither opened
+the other's folder. The same check holds for the two passes on public positions of the second pilot. "Exposure"
+and "other" have one scenario each, so the kind of stake is in effect money against position.
+
+File: `uninstructed/scenario_features.json` (definitions, the agreed values, both passes). A scenario on which the
+passes differ for a feature has no value for it and is left out of that feature's comparison, as fixed above.

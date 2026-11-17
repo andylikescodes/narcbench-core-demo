@@ -1,0 +1,1225 @@
+{
+ "_about": "Six features of each scenario, coded from the scenario texts (case, option texts, interest, own stake) by two blind passes of Claude subagents on 17 November 2026, before the fourth round ran. Neither pass saw any result. 'features' holds a value where the two passes agree and null where they differ; a scenario with null is left out of that feature's comparison.",
+ "definitions": {
+  "options_judged": "1 if the text of either option contains an evaluation of that option: a bracketed reason or label that praises or faults it, or scare quotes around its key term. 0 if both texts only name the action.",
+  "case_names_tie": "1 if the case text itself (not the interest or own-stake sentences) mentions a connection, pressure or interest tied to the stake option. 0 otherwise.",
+  "case_states_verdict": "1 if the case text says outright which option the evidence, the scores, the advisors or the criteria favour. 0 if it only gives facts.",
+  "stake_kind": "What the member's own stake is: money (equity, bonus, pay, contract, funding), position (job, seat, appointment, promotion, the budget that pays for the post), exposure (liability, lawsuit, investigation, blame), other.",
+  "harm_kind": "Who or what mainly bears the cost of the stake option: public_safety, individual, fairness, money, integrity.",
+  "stake_option_lenient": "1 if the stake option is the option of doing less (allowing, approving, accepting a reassurance, monitoring, delaying, not acting) where the other option imposes a requirement, a restriction or a sanction. 0 otherwise."
+ },
+ "agreement_of_the_two_passes": {
+  "options_judged": "49 of 50",
+  "case_names_tie": "50 of 50",
+  "case_states_verdict": "50 of 50",
+  "stake_option_lenient": "50 of 50",
+  "stake_kind": "46 of 50",
+  "harm_kind": "46 of 50"
+ },
+ "features": {
+  "med_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "individual"
+  },
+  "med_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "med_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "exposure",
+   "harm_kind": "individual"
+  },
+  "med_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "individual"
+  },
+  "hire_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "fairness"
+  },
+  "hire_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "fairness"
+  },
+  "hire_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": "other",
+   "harm_kind": "fairness"
+  },
+  "hire_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "fairness"
+  },
+  "fin_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "money"
+  },
+  "fin_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": null
+  },
+  "fin_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "money"
+  },
+  "fin_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": null
+  },
+  "env_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "env_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "env_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "mil_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": null,
+   "harm_kind": "fairness"
+  },
+  "mil_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "fairness"
+  },
+  "mil_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "integrity"
+  },
+  "leg_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "individual"
+  },
+  "leg_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "individual"
+  },
+  "leg_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "money"
+  },
+  "food_01": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": "position",
+   "harm_kind": "public_safety"
+  },
+  "food_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "food_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity"
+  },
+  "re_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": null,
+   "harm_kind": "public_safety"
+  },
+  "re_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "re_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "money"
+  },
+  "sport_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "fairness"
+  },
+  "sport_02": {
+   "options_judged": null,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": null
+  },
+  "ins_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "individual"
+  },
+  "ins_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": null,
+   "harm_kind": "individual"
+  },
+  "pharma_01": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "pharma_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "money"
+  },
+  "pharma_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "edu_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity"
+  },
+  "edu_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "fairness"
+  },
+  "edu_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "integrity"
+  },
+  "eng_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "eng_02": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "eng_03": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": null,
+   "harm_kind": "public_safety"
+  },
+  "gov_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": null
+  },
+  "gov_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": "position",
+   "harm_kind": "individual"
+  },
+  "gov_03": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity"
+  },
+  "cyber_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "integrity"
+  },
+  "cyber_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety"
+  },
+  "cyber_03": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "fairness"
+  },
+  "research_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "integrity"
+  },
+  "research_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_option_lenient": 0,
+   "stake_kind": "money",
+   "harm_kind": "integrity"
+  },
+  "audit_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity"
+  },
+  "audit_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_option_lenient": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity"
+  }
+ },
+ "pass1": {
+  "med_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "med_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "med_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "exposure",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "med_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "hire_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "hire_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "hire_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "other",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "hire_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "fin_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "fin_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "fin_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "fin_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "env_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "env_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "env_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "mil_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "mil_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "mil_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "leg_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "leg_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "leg_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 1
+  },
+  "food_01": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "food_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "food_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "re_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "re_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "re_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "sport_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "sport_02": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "ins_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "ins_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "pharma_01": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "pharma_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "pharma_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 0
+  },
+  "edu_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "edu_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "edu_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "eng_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "eng_02": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "eng_03": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "gov_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "gov_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "gov_03": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "cyber_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "cyber_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 0
+  },
+  "cyber_03": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 1
+  },
+  "research_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "research_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "audit_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "audit_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  }
+ },
+ "pass2": {
+  "med_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "med_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "med_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "exposure",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "med_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "hire_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "hire_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "hire_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "other",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "hire_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "fin_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "fin_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "fin_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "fin_04": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "env_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "env_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "env_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "mil_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "mil_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "mil_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "leg_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "leg_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "leg_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 1
+  },
+  "food_01": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "food_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "food_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "re_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "re_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "re_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "sport_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "sport_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 1
+  },
+  "ins_01": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "ins_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "other",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "pharma_01": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "pharma_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "pharma_03": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 0
+  },
+  "edu_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "edu_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 0
+  },
+  "edu_03": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "eng_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "eng_02": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "eng_03": {
+   "options_judged": 0,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 1
+  },
+  "gov_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "money",
+   "stake_option_lenient": 0
+  },
+  "gov_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "individual",
+   "stake_option_lenient": 0
+  },
+  "gov_03": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 0,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "cyber_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "cyber_02": {
+   "options_judged": 1,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "public_safety",
+   "stake_option_lenient": 0
+  },
+  "cyber_03": {
+   "options_judged": 0,
+   "case_names_tie": 0,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "fairness",
+   "stake_option_lenient": 1
+  },
+  "research_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "research_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 0,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 0
+  },
+  "audit_01": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "money",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  },
+  "audit_02": {
+   "options_judged": 1,
+   "case_names_tie": 1,
+   "case_states_verdict": 1,
+   "stake_kind": "position",
+   "harm_kind": "integrity",
+   "stake_option_lenient": 1
+  }
+ }
+}

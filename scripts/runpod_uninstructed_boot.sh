@@ -6,14 +6,16 @@
 # JOB_MODE=pilot (docs/uninstructed_collusion/DESIGN.md, sections 10 and 11), stages in order:
 #   setup, download (published lens + gated Gemma-2-9B-it),
 #   gen_ref    version S0, 8 prompts per call
-#   gen_stake  versions S1, S2, S3 with JOB_BATCH prompts per call (default 8: 16 ran out of memory on the first pod)
+#   gen_stake  versions JOB_VERSIONS (default S1,S2,S3) with JOB_BATCH prompts per call (default 8: 16 ran out of
+#              memory on the first pod). The second pilot runs T1,T2,T3,T4,T5 into JOB_PILOT_DIR=pilot2.
 #   A stage named in JOB_SKIP is skipped. For gen_ref this is used when the S0 runs are already in the checkout.
 #   code_rooms room codes by Gemma-2-9B-it, greedy decoding (coder A)
 #   summarize  provisional rates from the votes and coder A
 #   export_basis, timing   the timing test for the main run (durations only; its activations are deleted)
 #   package
 # Env: HF_TOKEN, RUNPOD_API_KEY (self-termination), RUNPOD_POD_ID, JOB_MAX_MINUTES, JOB_GRACE_MINUTES, JOB_PILOT_N,
-#      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_CODER_BATCH, JOB_TIMING_EPISODES, JOB_SKIP.
+#      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_CODER_BATCH, JOB_TIMING_EPISODES, JOB_SKIP, JOB_VERSIONS,
+#      JOB_PILOT_DIR, JOB_THREADS.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 REPO=$(pwd)
@@ -30,6 +32,26 @@ BATCH=${JOB_BATCH:-8}
 WORKERS=${JOB_WORKERS:-8}
 CODER_BATCH=${JOB_CODER_BATCH:-8}
 TIMING_EPISODES=${JOB_TIMING_EPISODES:-10}
+VERSIONS=${JOB_VERSIONS:-S1,S2,S3}
+PILOT_DIR=${JOB_PILOT_DIR:-pilot}
+P=$OUT/$PILOT_DIR
+TIMING_VERSION=${VERSIONS%%,*}
+# Threads of the numerical libraries. A pod shows every CPU of its host (96 on the second pod) to a container that may
+# use a few of them; with one thread per visible CPU the non-negative refit of the timing test took 207 ms per
+# activation. Use the container's quota when it can be read, else 8.
+cpu_quota() {
+  local q p
+  if [ -r /sys/fs/cgroup/cpu.max ]; then read -r q p < /sys/fs/cgroup/cpu.max; [ "$q" != max ] && { echo $(( (q + p - 1) / p )); return; }; fi
+  if [ -r /sys/fs/cgroup/cpu/cpu.cfs_quota_us ]; then
+    q=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us); p=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us)
+    [ "$q" -gt 0 ] && { echo $(( (q + p - 1) / p )); return; }
+  fi
+  echo 0
+}
+QUOTA=$(cpu_quota)
+THREADS=${JOB_THREADS:-${RUNPOD_CPU_COUNT:-$QUOTA}}
+{ [ "$THREADS" -ge 1 ] 2>/dev/null && [ "$THREADS" -le 32 ]; } || THREADS=8
+export OMP_NUM_THREADS=$THREADS OPENBLAS_NUM_THREADS=$THREADS MKL_NUM_THREADS=$THREADS NUMEXPR_NUM_THREADS=$THREADS VECLIB_MAXIMUM_THREADS=$THREADS
 export HF_HOME=${HF_HOME:-/workspace/nb/hf}; mkdir -p "$HF_HOME"
 export HF_TOKEN="${HF_TOKEN:-}"; export HF_HUB_ENABLE_HF_TRANSFER=0; export TOKENIZERS_PARALLELISM=false
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
@@ -114,6 +136,7 @@ pkill -f "http.server 8765" 2>/dev/null || true
 nohup python3 scripts/runpod_range_server.py "$RUN" 8765 > /tmp/http.log 2>&1 &
 ELAPSED_MIN=0 st running boot "repo $(git rev-parse --short HEAD); gpu $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1); mode $MODE"
 log "config: mode=$MODE model=$MODEL pilot_n=$PILOT_N pilot_runs=$PILOT_RUNS batch=$BATCH workers=$WORKERS max=$MAX_MIN min grace=$GRACE_MIN min skip=$SKIP"
+log "config: versions=$VERSIONS results=$P threads=$THREADS (cpu quota $QUOTA, RUNPOD_CPU_COUNT=${RUNPOD_CPU_COUNT:-unset}, nproc $(nproc))"
 if [ "$MODE" != pilot ]; then log "unknown JOB_MODE $MODE"; finish failed "unknown mode $MODE"; fi
 
 # ---- 1. setup ----
@@ -135,19 +158,19 @@ except Exception as e:  # the lens is only needed by the timing test
     print("lens download failed:", type(e).__name__, str(e)[:200], flush=True)
 PY
 
-# ---- 3. generation: S0 at the reference batch size, then the stake versions ----
+# ---- 3. generation: S0 at the reference batch size, then the other versions ----
 stage gen_ref python3 scripts/uninstructed_generate.py --model "$MODEL" --versions S0 --pilot --pilot-n "$PILOT_N" --runs "$PILOT_RUNS" \
-  --workers 8 --batch 8 --tag S0 --out "$OUT/pilot/runs"
+  --workers 8 --batch 8 --tag S0 --out "$P/runs"
 rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || finish failed gen_ref
-[ $rc -eq 99 ] && log "gen_ref skipped: $(ls "$OUT/pilot/runs/S0" 2>/dev/null | wc -l) S0 run folders in the checkout"
-stage gen_stake python3 scripts/uninstructed_generate.py --model "$MODEL" --versions S1,S2,S3 --pilot --pilot-n "$PILOT_N" --runs "$PILOT_RUNS" \
-  --workers "$WORKERS" --batch "$BATCH" --tag S1-S2-S3 --out "$OUT/pilot/runs"
+[ $rc -eq 99 ] && log "gen_ref skipped: $(ls "$P/runs/S0" 2>/dev/null | wc -l) S0 run folders in the checkout"
+stage gen_stake python3 scripts/uninstructed_generate.py --model "$MODEL" --versions "$VERSIONS" --pilot --pilot-n "$PILOT_N" --runs "$PILOT_RUNS" \
+  --workers "$WORKERS" --batch "$BATCH" --tag "${VERSIONS//,/-}" --out "$P/runs"
 rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || finish failed gen_stake
 
 # ---- 4. coder A and the provisional rates ----
-if stage code_rooms python3 scripts/uninstructed_code_rooms.py --model "$MODEL" --runs "$OUT/pilot/runs" --batch "$CODER_BATCH" --out "$OUT/pilot/coding_gemma.json"; then
-  stage summarize python3 scripts/uninstructed_summarize.py --runs "$OUT/pilot/runs" --coding "$OUT/pilot/coding_gemma.json" \
-    --out "$OUT/pilot/provisional" || log "summarize failed; the rates are computed after the pull"
+if stage code_rooms python3 scripts/uninstructed_code_rooms.py --model "$MODEL" --runs "$P/runs" --batch "$CODER_BATCH" --out "$P/coding_gemma.json"; then
+  stage summarize python3 scripts/uninstructed_summarize.py --runs "$P/runs" --coding "$P/coding_gemma.json" \
+    --out "$P/provisional" || log "summarize failed; the rates are computed after the pull"
 else
   log "code_rooms failed; the rooms are coded after the pull"
 fi
@@ -160,8 +183,8 @@ else
     --max-rows 4 --layers 19 --export-basis "$BASIS" --out /tmp/basis_probe || log "export_basis failed; the decomposition is not timed"
   TARGS=()
   [ -f "$LENS" ] && [ -f "$BASIS/unembed_fp16.npy" ] && TARGS+=(--lens "$LENS" --basis-dir "$BASIS")
-  stage timing python3 scripts/uninstructed_timing_test.py --model "$MODEL" --runs "$OUT/pilot/runs/S2" --episodes "$TIMING_EPISODES" \
-    "${TARGS[@]}" --out "$OUT/pilot/timing.json" || log "timing test failed"
+  stage timing python3 scripts/uninstructed_timing_test.py --model "$MODEL" --runs "$P/runs/$TIMING_VERSION" --episodes "$TIMING_EPISODES" \
+    "${TARGS[@]}" --out "$P/timing.json" || log "timing test failed"
 fi
 
 finish done "stages $(python3 -c "import json;d=json.load(open('/tmp/run/stages.json'));print(sum(1 for v in d.values() if v['rc']==0),'ok of',len(d))")"

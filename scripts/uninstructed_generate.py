@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Generate episodes of the uninstructed-collusion experiment (GPU for Gemma-2-9B-it).
 
-Every agent of an episode gets the same system prompt; the versions S0 to S3 differ in the stake stated in it
-(uninstructed/protocol.py, uninstructed/stakes.json). Episodes run in --workers threads and their prompts are batched
-through one model, with the decoding of the recorded benchmark (sampling at --temperature, --max-new-tokens).
+Every agent of an episode gets the same system prompt; the versions differ in what that prompt carries (S0 to S3: the
+stake; T1 to T5: what stands against it; see SPECS in uninstructed/protocol.py and uninstructed/stakes.json). Episodes
+run in --workers threads and their prompts are batched through one model, with the decoding of the recorded benchmark
+(sampling at --temperature, --max-new-tokens).
 
   python scripts/uninstructed_generate.py --model google/gemma-2-9b-it --versions S0,S1,S2,S3 --pilot --runs 2 \
       --workers 16 --batch 16 --out results/uninstructed/pilot/runs
@@ -137,6 +138,7 @@ def main() -> int:
     failed = [s for s in summaries if s.get("error")]
     n_new = sum(not s["skipped"] and not s.get("error") for s in summaries)
     rec = {"created_utc": datetime.now(timezone.utc).isoformat(), "protocol": P.PROTOCOL, "model_id": model_id, "versions": versions,
+           "specs": {v: {**P.spec_of(v), "extra": list(P.spec_of(v)["extra"])} for v in versions},
            "scenario_ids": ids, "runs": [a.run_start, a.run_start + a.runs - 1], "episodes": len(summaries), "episodes_generated": n_new,
            "episodes_failed": [{"run_id": s["run_id"], "error": s["error"]} for s in failed],
            "dry_run": a.dry_run, "max_new_tokens": a.max_new_tokens, "temperature": a.temperature, "workers": a.workers, "batch": a.batch,

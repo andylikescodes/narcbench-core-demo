@@ -2,9 +2,11 @@
 """Launch, watch, pull and terminate a pod of the uninstructed-collusion experiment (one GPU at a time).
 
 The pod clones this repository at a pushed commit of branch `uninstructed-collusion` and runs
-scripts/runpod_uninstructed_boot.sh. Mode `pilot` (docs/uninstructed_collusion/DESIGN.md, sections 10 and 11): 96
-episodes in four incentive versions, room codes by Gemma, a timing test for the main run. Results are served on port
-8765 until they are pulled; the watcher pulls them, verifies the checksum and terminates the pod.
+scripts/runpod_uninstructed_boot.sh. Mode `pilot` (docs/uninstructed_collusion/DESIGN.md, sections 10 and 11): the
+versions given by --versions on the pilot's twelve scenarios, room codes by Gemma, a timing test for the main run. The
+first pilot was S0 plus S1,S2,S3 into results/uninstructed/pilot; the second is
+`--skip gen_ref --versions T1,T2,T3,T4,T5 --pilot-dir pilot2`. Results are served on port 8765 until they are pulled;
+the watcher pulls them, verifies the checksum and terminates the pod.
 
 Keys come from the environment only: RUNPOD_API_KEY (to spend, watch, pull, terminate) and HF_TOKEN (gated Gemma).
 Default is estimate-only; nothing is created without --launch.
@@ -31,6 +33,7 @@ import urllib.error
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 import runpod_launch_jspace_interp as base  # noqa: E402  (account, market, download, status and terminate helpers)
 
@@ -41,20 +44,31 @@ OUT_PREFIX = "results/uninstructed/"
 RUNS_DIR = ROOT / "results/uninstructed/pod_runs"
 GPU = "NVIDIA A40"
 RATE = {"SECURE": 0.59, "COMMUNITY": 0.35}        # A40, USD per hour, read from the RunPod price list on 16 November 2026
-GEN_S_PER_PROMPT = 1.44                            # measured on an A40 on 17 November 2026 UTC: version S0, 576 prompts in 832 s, batches of 8
-PROMPTS_PER_EPISODE = 24                           # 8 room messages, 12 public turns, 4 votes
+GEN_S_PER_PROMPT = 1.58                            # measured on an A40 on 17 November 2026 UTC: versions S1 to S3, 1,728 prompts in 2,723 s,
+                                                   # batches of 8 (version S0, whose prompts are shorter: 1.44 s)
+PROMPTS_PER_EPISODE = 24                           # 8 room messages, 12 public turns, 4 votes; 2 fewer with a scripted first message
 CODE_PATHS = ["uninstructed", "generation", "jspace_interp", "scripts"]
 
 
 def estimate(a) -> dict:
+    from uninstructed import protocol as P
+
     skip = {x for x in a.skip.split(",") if x}
-    episodes = ((0 if "gen_ref" in skip else 1) + (0 if "gen_stake" in skip else 3)) * a.pilot_n * a.pilot_runs
-    gen_min = episodes * PROMPTS_PER_EPISODE * GEN_S_PER_PROMPT / 60
-    stages = {"boot, setup, downloads": 6, f"generation ({episodes} episodes, {episodes * PROMPTS_PER_EPISODE} prompts at {GEN_S_PER_PROMPT} s)": round(gen_min),
-              "model loads": 3, "room codes by Gemma": 5, "timing test (basis export, replay, decomposition, probes)": 12, "package": 2}
+    versions = ([] if "gen_ref" in skip else ["S0"]) + ([] if "gen_stake" in skip else [v for v in a.versions.split(",") if v])
+    unknown = [v for v in versions if v not in P.VERSIONS]
+    if unknown:
+        raise SystemExit(f"unknown versions: {unknown}")
+    per_version = a.pilot_n * a.pilot_runs
+    episodes = len(versions) * per_version
+    prompts = sum(per_version * (PROMPTS_PER_EPISODE - (2 if P.spec_of(v)["opener"] else 0)) for v in versions)
+    gen_min = prompts * GEN_S_PER_PROMPT / 60
+    stages = {"boot, setup, downloads": 6, f"generation ({episodes} episodes, {prompts} prompts at {GEN_S_PER_PROMPT} s)": round(gen_min),
+              "model loads": 3, f"room codes by Gemma ({2 * episodes} new rooms)": 3 + round(2 * episodes / 80),
+              "timing test (basis export, replay, decomposition, probes)": 9, "package": 2}
     exp_h = sum(stages.values()) / 60
     cap_h = (a.max_minutes + a.grace_minutes) / 60
-    return {"mode": a.mode, "gpu": GPU, "episodes": episodes, "stages_minutes": stages, "expected_hours": round(exp_h, 2),
+    return {"mode": a.mode, "gpu": GPU, "versions": versions, "results_dir": f"results/uninstructed/{a.pilot_dir}", "episodes": episodes,
+            "prompts": prompts, "stages_minutes": stages, "expected_hours": round(exp_h, 2),
             "expected_usd": {c: round(exp_h * r, 2) for c, r in RATE.items()}, "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes,
             "worst_case_usd": round(cap_h * RATE["SECURE"], 2)}
 
@@ -120,7 +134,8 @@ def create_pod(a) -> dict:
     env = {"JOB_BOOT_B64": base64.b64encode(bootstrap_script(a).encode()).decode(), "RUNPOD_API_KEY": os.environ["RUNPOD_API_KEY"],
            "HF_TOKEN": os.environ["HF_TOKEN"], "GIT_SHA": a.sha, "JOB_MODE": a.mode, "JOB_MAX_MINUTES": str(a.max_minutes),
            "JOB_GRACE_MINUTES": str(a.grace_minutes), "JOB_PILOT_N": str(a.pilot_n), "JOB_PILOT_RUNS": str(a.pilot_runs),
-           "JOB_BATCH": str(a.batch), "JOB_WORKERS": str(a.workers), "JOB_TIMING_EPISODES": str(a.timing_episodes)}
+           "JOB_BATCH": str(a.batch), "JOB_WORKERS": str(a.workers), "JOB_TIMING_EPISODES": str(a.timing_episodes),
+           "JOB_VERSIONS": a.versions, "JOB_PILOT_DIR": a.pilot_dir}
     if a.skip:
         env["JOB_SKIP"] = a.skip
     docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
@@ -233,6 +248,8 @@ def main() -> int:
     ap.add_argument("--grace-minutes", type=int, default=30, help="how long the pod serves results before terminating itself")
     ap.add_argument("--pilot-n", type=int, default=12)
     ap.add_argument("--pilot-runs", type=int, default=2)
+    ap.add_argument("--versions", default="S1,S2,S3", help="versions of the gen_stake stage (S0 is the gen_ref stage)")
+    ap.add_argument("--pilot-dir", default="pilot", help="folder under results/uninstructed/ that receives the runs and codings")
     ap.add_argument("--batch", type=int, default=8, help="prompts per generate call for the stake versions (16 ran out of GPU memory)")
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timing-episodes", type=int, default=10)
@@ -291,8 +308,8 @@ def main() -> int:
         return 3
     pod = res["created"]["id"]
     rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "branch": GIT_BRANCH, "image": base.IMAGE,
-           "settings": {k: getattr(a, k) for k in ("mode", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "batch", "workers",
-                                                     "timing_episodes", "skip", "min_balance", "reserve")},
+           "settings": {k: getattr(a, k) for k in ("mode", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir",
+                                                     "batch", "workers", "timing_episodes", "skip", "min_balance", "reserve")},
            "estimate": est, "balance_before": rep["balance_usd"], "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
     (RUNS_DIR / pod).mkdir(parents=True, exist_ok=True)
     (RUNS_DIR / pod / "launch.json").write_text(json.dumps(rec, indent=1) + "\n")

@@ -7,7 +7,10 @@ the design relies on hold:
 
   A. identical prompts: two runs of a scenario have the same activation at the token before the first room message;
   B. causal reads: the activation saved for a reply token equals the one from a context cut right after that token;
-  C. alignment: the saved token ids of every room message decode back to the recorded message.
+  C. alignment: the saved token ids of every room message decode back to the recorded message;
+  D. the out-of-memory fallback retries outside the except block and keeps the order of the prompts;
+  E. the second pilot's versions: system prompts as specified, the scripted first message in place and not generated;
+  F. the first pilot's recorded episodes are rebuilt prompt for prompt by the current code.
 
   python scripts/uninstructed_tiny_e2e.py --work /path/to/scratch/u_tiny
 """
@@ -68,6 +71,7 @@ def main() -> int:
         texts += [s["context"], s["honest_mandate"], s["public_frame"], s["final_frame"], s["options"]["A"], s["options"]["B"]]
     texts += [x for v in stakes["scenarios"].values() for x in (v["interest"], v["personal"])] + [stakes["closing"], stakes["rule"],
                                                                                                 P.ROOM_FRAME, C.RUBRIC, C.CASE] + name_pool
+    texts += [v for k, v in stakes["extras"].items() if k != "_about"] + [v for k, v in stakes["openers"].items() if k != "_about"]
     tok = train_tokenizer(texts, w / "model", vocab_size=3000)
     cfg = Gemma2Config(vocab_size=len(tok), hidden_size=64, intermediate_size=128, num_hidden_layers=6, num_attention_heads=2,
                        num_key_value_heads=1, head_dim=32, max_position_embeddings=8192, sliding_window=4096,
@@ -101,6 +105,85 @@ def main() -> int:
          "--out", w / "summary"], log)
     summ = json.loads((w / "summary/summary.json").read_text())
     assert summ["n_rooms"] == 24 and set(summ["versions"]) == {"S0", "S2"}, summ
+    # 3b. the second pilot's versions through the same path, into their own folder
+    runs2 = w / "runs2"
+    ids2 = ["fin_03", "re_01", "eng_01"]          # option layouts 2, 0 and 1
+    tv = ["T1", "T2", "T3", "T4", "T5"]
+    run([py, "scripts/uninstructed_generate.py", "--model", w / "model", "--allow-cpu", "--dtype", "float32", "--versions", ",".join(tv),
+         "--ids", *ids2, "--runs", "2", "--max-new-tokens", "12", "--workers", "3", "--batch", "2", "--out", runs2], log)
+    gen2 = json.loads((runs2 / "generation_T1-T2-T3-T4-T5.json").read_text())
+    assert gen2["episodes_generated"] == 30 and gen2["generation"]["prompts"] == 18 * 24 + 12 * 22, gen2
+    run([py, "scripts/uninstructed_code_rooms.py", "--model", w / "model", "--allow-cpu", "--dtype", "float32", "--max-new-tokens", "8",
+         "--batch", "4", "--runs", runs2, "--out", w / "coding2_a.json"], log)
+    run([py, "scripts/uninstructed_summarize.py", "--runs", runs2, "--coding", w / "coding2_a.json", "--out", w / "summary2"], log)
+    summ2 = json.loads((w / "summary2/summary.json").read_text())
+    assert summ2["n_rooms"] == 60 and list(summ2["versions"]) == tv and set(summ2["by_scenario"]) == set(ids2), summ2
+    assert [summ2["versions"][v]["spec"]["opener"] for v in tv] == [None, None, None, "proposal", "proposal"]
+    res2 = (w / "summary2/RESULTS.md").read_text()
+    assert "## Who votes for the stake option" in res2 and "## By scenario" in res2
+    # E. what each version's prompts must look like
+    n_scripted = 0
+    for v in tv:
+        spec = P.spec_of(v)
+        for sid in ids2:
+            sc = scenarios[idx[sid]]
+            for r in (0, 1):
+                rd = runs2 / v / P.run_id(sid, v, r)
+                cfg = json.loads((rd / "run_config.json").read_text())
+                log_ = json.loads((rd / "agent_prompts.json").read_text())
+                res = json.loads((rd / "results.json").read_text())
+                for e in log_:
+                    sp, name = e["system_prompt"], e["agent_name"]
+                    assert sp.startswith(P.ROLE_LINE.format(agent_name=name)), (v, sid)
+                    assert (sc["honest_mandate"] in sp) == spec["mandate"], (v, sid, "mandate")
+                    st = stakes["scenarios"][sid]
+                    assert st["interest"] in sp and st["personal"] in sp and sp.endswith(stakes["closing"]), (v, sid, "stake")
+                    assert (stakes["extras"]["heavy"] in sp) == (v == "T2") and (stakes["extras"]["wish"] in sp) == (v == "T3"), (v, sid)
+                    if v == "T4":                 # T4 is S2 with a scripted first message: the same system prompt
+                        assert sp == P.system_prompt(name, sc, "S2", stakes)
+                    if v == "T5":
+                        assert sp == P.system_prompt(name, sc, "T1", stakes)
+                scripted = [e for e in log_ if e.get("scripted")]
+                assert len(scripted) == (2 if spec["opener"] else 0) == cfg["scripted_messages"], (v, sid, len(scripted))
+                n_scripted += len(scripted)
+                for e in scripted:                # first message of its room, said by the lower seat, with the right name and label
+                    k = e["room"]
+                    other = [x for x in cfg["rooms"][k] if x != e["agent_name"]][0]
+                    want = stakes["openers"]["proposal"].format(partner=other, target=cfg["target_option"])
+                    assert e["turn"] == 0 and e["agent_name"] == cfg["rooms"][k][0] and e["response"] == want, (v, sid, k)
+                    assert res["room_messages"][k][0] == f"[{e['agent_name']}]: {want}" and f"Option {cfg['target_option']}" in want
+                    assert P.ROOM_EMPTY in e["user_prompt"]
+                # the listener's first prompt shows the scripted proposal
+                if spec["opener"]:
+                    second = [e for e in log_ if e["phase"] == "room" and e["turn"] == 1]
+                    assert len(second) == 2 and all("I propose that we both back Option" in e["user_prompt"] for e in second)
+                assert len(log_) == 24 and len(res["room_messages"][0]) == len(res["room_messages"][1]) == 4
+    assert n_scripted == 2 * 2 * len(ids2) * 2, n_scripted
+    # two runs of a scenario have the same prompts up to the first generated message
+    for v in tv:
+        for sid in ids2:
+            a0, a1 = (json.loads((runs2 / v / P.run_id(sid, v, r) / "agent_prompts.json").read_text()) for r in (0, 1))
+            first = [(e["system_prompt"], e["user_prompt"]) for e in a0 if e["phase"] == "room" and e["turn"] == (1 if P.spec_of(v)["opener"] else 0)]
+            assert first == [(e["system_prompt"], e["user_prompt"]) for e in a1 if e["phase"] == "room" and e["turn"] == (1 if P.spec_of(v)["opener"] else 0)]
+    print(f"E. second pilot's versions: system prompts as specified in 30 episodes; {n_scripted} scripted first messages in place, none generated")
+    # F. the first pilot's recorded episodes, replayed through the current code: every prompt must be found verbatim
+    import tempfile
+    n_ep = n_pr = 0
+    for cfgp in sorted((ROOT / "results/uninstructed/pilot/runs").rglob("run_config.json")):
+        cfg = json.loads(cfgp.read_text())
+        rec = json.loads((cfgp.parent / "agent_prompts.json").read_text())
+        table = {}
+        for e in rec:
+            table.setdefault((e["system_prompt"], e["user_prompt"]), []).append(e["response"])
+        with tempfile.TemporaryDirectory() as td:
+            out = P.run_episode(scenarios[cfg["scenario_idx"]], cfg["scenario_idx"], cfg["version"], cfg["run_idx"],
+                                lambda system, user: table[(system, user)].pop(0), Path(td), name_pool=name_pool, stakes=stakes, resume=False)
+            new = json.loads((Path(td) / cfg["run_id"] / "agent_prompts.json").read_text())
+        assert new == rec and out["votes"] == cfg["votes"], cfg["run_id"]
+        n_ep += 1
+        n_pr += len(rec)
+    assert n_ep == 96, n_ep
+    print(f"F. first pilot unchanged: {n_ep} recorded episodes, {n_pr} prompts rebuilt identically by the current code")
     # 4. the timing test as the pod runs it (CPU search here)
     run([py, "scripts/uninstructed_timing_test.py", "--model", w / "model", "--allow-cpu", "--dtype", "float32", "--runs", runs / "S2",
          "--episodes", "3", "--layers", ",".join(map(str, LAYERS)), "--decomp-layer", "3", "--lens", w / "lens/tiny_jacobian_lens.pt",
@@ -192,6 +275,8 @@ def main() -> int:
     assert est["episodes"] == 96, est
     est = json.loads(run([py, "scripts/runpod_launch_uninstructed.py", "--skip", "gen_ref"], log).stdout)
     assert est["episodes"] == 72, est
+    est = json.loads(run([py, "scripts/runpod_launch_uninstructed.py", "--skip", "gen_ref", "--versions", ",".join(tv), "--pilot-dir", "pilot2"], log).stdout)
+    assert est["episodes"] == 120 and est["prompts"] == 72 * 24 + 48 * 22 and est["results_dir"].endswith("pilot2"), est
     (w / "tiny_e2e_log.json").write_text(json.dumps({"log": log, "replay": info, "summary_versions": summ["versions"], "timing": tim}, indent=1) + "\n")
     print("ALL PASS")
     return 0

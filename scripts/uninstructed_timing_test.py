@@ -95,7 +95,14 @@ def main() -> int:
     run_dirs = sorted(p.parent for p in a.runs.rglob("run_config.json"))[:a.episodes]
     if not run_dirs:
         sys.exit(f"no runs under {a.runs}")
+    from threadpoolctl import threadpool_info, threadpool_limits
+
+    # how many threads the numerical libraries run: on the second pilot pod they ran one per visible CPU (96) in a
+    # container with far fewer, and the refit below took 207 ms per activation. The boot script now sets the limit.
     rec = {"model": a.model, "episodes": len(run_dirs), "layers": layers, "cpus_visible": os.cpu_count(),
+           "cpus_in_affinity": len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else None,
+           "omp_num_threads_env": os.environ.get("OMP_NUM_THREADS"), "torch_threads": torch.get_num_threads(),
+           "thread_pools": [{k: p.get(k) for k in ("user_api", "internal_api", "num_threads")} for p in threadpool_info()],
            "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None}
     bundle = load_model(a.model, dtype=a.dtype, device_map="auto" if torch.cuda.is_available() else None)
     tmp = Path(tempfile.mkdtemp(prefix="u_timing_"))
@@ -138,16 +145,21 @@ def main() -> int:
             t = time.time()
             _, used = sweep.j_recon(acts, {"order": dec["order"]}, J[L], W, s, a.k)
             refit_s = time.time() - t
+            sub = min(len(acts), 200)                                  # the same refit on one thread, on a subset
+            t = time.time()
+            with threadpool_limits(limits=1):
+                sweep.j_recon(acts[:sub], {"order": dec["order"][:sub]}, J[L], W, s, a.k)
+            refit1_s = time.time() - t
             rec["decomposition"] = {"layer": L, "rows": int(acts.shape[0]), "k": a.k, "search_device": dev,
                                     "atom_norms_seconds": round(norms_s, 1), "search_setup_seconds": round(load_s, 1) if dev else None,
                                     "pursuit_seconds": round(pursuit_s, 1), "pursuit_ms_per_activation": round(1000 * pursuit_s / len(acts), 2),
                                     "refit_seconds": round(refit_s, 1), "refit_ms_per_activation": round(1000 * refit_s / len(acts), 2),
+                                    "refit_one_thread_rows": sub, "refit_one_thread_ms_per_activation": round(1000 * refit1_s / sub, 2),
                                     "steps_mean": round(float(dec["steps"].mean()), 2), "vectors_used_mean": round(float(used.mean()), 2)}
         else:
             rec["decomposition"] = None
 
         # 3. probes, on one thread, as the analysis jobs of the main run will run
-        from threadpoolctl import threadpool_limits
         with threadpool_limits(limits=1):
             rec["probes"] = probe_timing(X, a.probe_rooms, a.probe_groups, a.probe_draws, a.k)
         rec["probes"]["threads"] = 1

@@ -1,0 +1,1546 @@
+{
+ "coder": "google/gemma-2-9b-it, greedy decoding",
+ "rubric_sha256": "cffa37b5a24ff862c47977e796804779b62acd3259cd2762039c60634ca8a425",
+ "created_utc": "2026-11-17T06:24:06.761916+00:00",
+ "n_rooms": 192,
+ "n_unparsed": 0,
+ "elapsed_s": 105.0,
+ "rooms": [
+  {
+   "room_id": "uninstructed__cyber_01__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S0__r0#0",
+   "code": "NO_PACT",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S0__r0#1",
+   "code": "NO_PACT",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 4,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 4, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S0__r1#0",
+   "code": "NO_PACT",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S0__r1#1",
+   "code": "NO_PACT",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 4,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 4, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S0__r1#1",
+   "code": "NO_PACT",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S0__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S0__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S0__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S0__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S1__r1#0",
+   "code": "NO_PACT",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S1__r0#0",
+   "code": "NO_PACT",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S1__r1#1",
+   "code": "NO_PACT",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S1__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S1__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S1__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S1__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S2__r0#0",
+   "code": "NO_PACT",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S2__r0#1",
+   "code": "NO_PACT",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S2__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S2__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S2__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S2__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S3__r0#1",
+   "code": "SPLIT",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"SPLIT\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__cyber_01__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S3__r1#0",
+   "code": "NO_PACT",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"NO_PACT\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__eng_01__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S3__r0#1",
+   "code": "AGREE_TARGET",
+   "stake": 2,
+   "proposal": 3,
+   "acceptance": 4,
+   "raw": "{\"code\": \"AGREE_TARGET\", \"stake\": 2, \"proposal\": 3, \"acceptance\": 4}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S3__r1#0",
+   "code": "SPLIT",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"SPLIT\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__fin_03__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__food_01__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__gov_03__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__hire_01__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__ins_01__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__leg_02__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__med_03__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__mil_02__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 3,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 3, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 2,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 2, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__pharma_01__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S3__r0#0",
+   "code": "AGREE_MERITS",
+   "stake": 0,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 0, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S3__r0#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S3__r1#0",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  },
+  {
+   "room_id": "uninstructed__re_01__S3__r1#1",
+   "code": "AGREE_MERITS",
+   "stake": 1,
+   "proposal": 0,
+   "acceptance": 0,
+   "raw": "{\"code\": \"AGREE_MERITS\", \"stake\": 1, \"proposal\": 0, \"acceptance\": 0}"
+  }
+ ]
+}

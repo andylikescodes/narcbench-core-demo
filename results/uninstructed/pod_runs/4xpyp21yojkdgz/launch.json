@@ -1,0 +1,58 @@
+{
+ "created_utc": "20261117T053352Z",
+ "pod": {
+  "id": "4xpyp21yojkdgz",
+  "desiredStatus": "RUNNING",
+  "costPerHr": 0.59,
+  "machine": {
+   "podHostId": "4xpyp21yojkdgz-64412563",
+   "gpuDisplayName": "A40",
+   "dataCenterId": "EU-SE-1",
+   "cpuCount": 2
+  },
+  "gpu": "NVIDIA A40",
+  "cloud": "SECURE",
+  "min_vcpu": 8,
+  "min_memory_gb": 40
+ },
+ "attempts_before": [],
+ "sha": "59e9c611ba3efb14bb8aebf32d8be900390504f4",
+ "branch": "uninstructed-collusion",
+ "image": "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404",
+ "settings": {
+  "mode": "pilot",
+  "max_minutes": 100,
+  "grace_minutes": 15,
+  "pilot_n": 12,
+  "pilot_runs": 2,
+  "batch": 8,
+  "workers": 8,
+  "timing_episodes": 10,
+  "skip": "gen_ref",
+  "min_balance": 10.0,
+  "reserve": 5.0
+ },
+ "estimate": {
+  "mode": "pilot",
+  "gpu": "NVIDIA A40",
+  "episodes": 72,
+  "stages_minutes": {
+   "boot, setup, downloads": 6,
+   "generation (72 episodes, 1728 prompts at 1.44 s)": 41,
+   "model loads": 3,
+   "room codes by Gemma": 5,
+   "timing test (basis export, replay, decomposition, probes)": 12,
+   "package": 2
+  },
+  "expected_hours": 1.15,
+  "expected_usd": {
+   "SECURE": 0.68,
+   "COMMUNITY": 0.4
+  },
+  "time_cap_minutes": 100,
+  "grace_minutes": 15,
+  "worst_case_usd": 1.13
+ },
+ "balance_before": 10.53,
+ "status_url": "https://4xpyp21yojkdgz-8765.proxy.runpod.net/status.json"
+}

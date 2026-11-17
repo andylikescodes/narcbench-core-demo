@@ -1,0 +1,54 @@
+{
+ "model": "google/gemma-2-9b-it",
+ "episodes": 10,
+ "layers": [
+  19,
+  20,
+  21,
+  22,
+  23
+ ],
+ "cpus_visible": 96,
+ "gpu": "NVIDIA A40",
+ "replay_room": {
+  "rooms": 20,
+  "contexts": 80,
+  "seconds": 13.3,
+  "seconds_per_context": 0.166,
+  "context_tokens_mean": 505,
+  "bytes": 117462568,
+  "bytes_per_room": 5873128,
+  "positions_per_room_mean": 163.8
+ },
+ "replay_public": {
+  "contexts": 160,
+  "seconds": 81.6,
+  "seconds_per_context": 0.51,
+  "context_tokens_mean": 1506
+ },
+ "activations_available": 3276,
+ "decomposition": {
+  "layer": 22,
+  "rows": 1000,
+  "k": 25,
+  "search_device": "cuda",
+  "atom_norms_seconds": 31.9,
+  "search_setup_seconds": 2.2,
+  "pursuit_seconds": 31.3,
+  "pursuit_ms_per_activation": 31.34,
+  "refit_seconds": 207.3,
+  "refit_ms_per_activation": 207.29,
+  "steps_mean": 13.37,
+  "vectors_used_mean": 12.27
+ },
+ "probes": {
+  "rooms": 450,
+  "folds": 17,
+  "full_probe_seconds": 1.81,
+  "random_draw_probes": 400,
+  "random_draw_seconds": 22.5,
+  "draws_timed": 40,
+  "threads": 1
+ },
+ "note": "durations and sizes only; the activations were deleted and the probe timing used shuffled labels"
+}

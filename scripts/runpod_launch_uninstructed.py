@@ -1,0 +1,305 @@
+#!/usr/bin/env python3
+"""Launch, watch, pull and terminate a pod of the uninstructed-collusion experiment (one GPU at a time).
+
+The pod clones this repository at a pushed commit of branch `uninstructed-collusion` and runs
+scripts/runpod_uninstructed_boot.sh. Mode `pilot` (docs/uninstructed_collusion/DESIGN.md, sections 10 and 11): 96
+episodes in four incentive versions, room codes by Gemma, a timing test for the main run. Results are served on port
+8765 until they are pulled; the watcher pulls them, verifies the checksum and terminates the pod.
+
+Keys come from the environment only: RUNPOD_API_KEY (to spend, watch, pull, terminate) and HF_TOKEN (gated Gemma).
+Default is estimate-only; nothing is created without --launch.
+
+    python3 scripts/runpod_launch_uninstructed.py                      # plan and cost estimate
+    python3 scripts/runpod_launch_uninstructed.py --preflight          # gates: balance, running pods, price, pushed SHA, clean code
+    python3 scripts/runpod_launch_uninstructed.py --launch --watch     # create the pod, then poll, pull, terminate
+    python3 scripts/runpod_launch_uninstructed.py --status <pod>
+    python3 scripts/runpod_launch_uninstructed.py --watch-pod <pod>
+    python3 scripts/runpod_launch_uninstructed.py --pull <pod>         # pulls and terminates (--no-terminate keeps it)
+    python3 scripts/runpod_launch_uninstructed.py --terminate <pod>
+"""
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import subprocess
+import sys
+import tarfile
+import time
+import urllib.error
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import runpod_launch_jspace_interp as base  # noqa: E402  (account, market, download, status and terminate helpers)
+
+GIT_BRANCH = "uninstructed-collusion"
+POD_NAME = "job-narcbench-uninstructed"
+BOOT = "scripts/runpod_uninstructed_boot.sh"
+OUT_PREFIX = "results/uninstructed/"
+RUNS_DIR = ROOT / "results/uninstructed/pod_runs"
+GPU = "NVIDIA A40"
+RATE = {"SECURE": 0.59, "COMMUNITY": 0.35}        # A40, USD per hour, read from the RunPod price list on 16 November 2026
+GEN_S_PER_PROMPT = 1.70                            # measured on an A40 on 9 November 2026 (800 prompts in 1,357 s, batches of 8)
+PROMPTS_PER_EPISODE = 24                           # 8 room messages, 12 public turns, 4 votes
+CODE_PATHS = ["uninstructed", "generation", "jspace_interp", "scripts"]
+
+
+def estimate(a) -> dict:
+    episodes = 4 * a.pilot_n * a.pilot_runs
+    gen_min = episodes * PROMPTS_PER_EPISODE * GEN_S_PER_PROMPT / 60
+    stages = {"boot, setup, downloads": 8, f"generation ({episodes} episodes, {episodes * PROMPTS_PER_EPISODE} prompts at {GEN_S_PER_PROMPT} s)": round(gen_min),
+              "two model loads": 3, "room codes by Gemma": 5, "timing test (basis export, replay, decomposition, probes)": 12, "package": 2}
+    exp_h = sum(stages.values()) / 60
+    cap_h = (a.max_minutes + a.grace_minutes) / 60
+    return {"mode": a.mode, "gpu": GPU, "episodes": episodes, "stages_minutes": stages, "expected_hours": round(exp_h, 2),
+            "expected_usd": {c: round(exp_h * r, 2) for c, r in RATE.items()}, "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes,
+            "worst_case_usd": round(cap_h * RATE["SECURE"], 2)}
+
+
+def sha_on_branch(sha: str) -> bool:
+    rs = base.remote_sha(GIT_BRANCH)
+    if rs == sha:
+        return True
+    subprocess.run(["git", "fetch", "-q", "origin", GIT_BRANCH], cwd=ROOT, capture_output=True)
+    return subprocess.run(["git", "merge-base", "--is-ancestor", sha, f"origin/{GIT_BRANCH}"], cwd=ROOT, capture_output=True).returncode == 0
+
+
+def code_dirty() -> list[str]:
+    """Modified or untracked files in the folders the pod runs code from: they would not be on the pod."""
+    r = subprocess.run(["git", "status", "--porcelain", "--"] + CODE_PATHS, cwd=ROOT, capture_output=True, text=True)
+    return [ln for ln in r.stdout.splitlines() if ln.strip() and "__pycache__" not in ln]
+
+
+def gates(a, est: dict) -> tuple[bool, dict]:
+    me = base.account()
+    balance = float(me.get("clientBalance") or 0.0)
+    running = [p for p in (me.get("pods") or []) if p.get("desiredStatus") == "RUNNING" and (p.get("costPerHr") or 0) > 0.05]
+    pushed = sha_on_branch(a.sha)
+    dirty = code_dirty()
+    worst = est["worst_case_usd"]
+    rep = {"balance_usd": round(balance, 2), "min_balance": a.min_balance, "worst_case_usd": worst, "balance_after_worst_case": round(balance - worst, 2),
+           "reserve": a.reserve, "spend_per_hr_idle": me.get("currentSpendPerHr"), "billable_pods_running": running, "sha": a.sha,
+           "sha_on_origin_branch": pushed, "code_dirty": dirty, "hf_token_present": bool(os.environ.get("HF_TOKEN")),
+           "gpu_market": base.gpu_market([GPU])}
+    checks = ((balance < a.min_balance, f"balance below {a.min_balance}"), (balance - worst < a.reserve, f"worst case would leave less than {a.reserve}"),
+              (bool(running), "a billable pod is running"), (not pushed, f"the SHA is not on origin/{GIT_BRANCH} (push first)"),
+              (not os.environ.get("HF_TOKEN"), "HF_TOKEN missing"), (bool(dirty), "code folders have uncommitted or untracked files (commit first)"))
+    rep["why_not"] = [m for cond, m in checks if cond]
+    rep["gates_ok"] = not rep["why_not"]
+    return rep["gates_ok"], rep
+
+
+def bootstrap_script(a) -> str:
+    """Small boot kept in the pod env: status server, shallow fetch of the pushed SHA, hand-off to the repo's boot script."""
+    return f"""#!/bin/bash
+set -u
+RUN=/tmp/run; mkdir -p $RUN/logs
+echo '{{"phase":"boot","stage":"clone"}}' > $RUN/status.json
+(cd $RUN && nohup python3 -m http.server 8765 >/tmp/http0.log 2>&1 &)
+term() {{ python3 - <<'PY' || true
+import os, json, urllib.request as u
+p=os.environ.get('RUNPOD_POD_ID',''); k=os.environ.get('RUNPOD_API_KEY','')
+b=json.dumps({{'query':'mutation {{ podTerminate(input: {{podId: "%s"}}) }}'%p}}).encode()
+r=u.Request('https://api.runpod.io/graphql',data=b,headers={{'content-type':'application/json','Authorization':'Bearer '+k,'User-Agent':'nb-interp/1'}},method='POST')
+u.urlopen(r,timeout=30).read()
+PY
+}}
+fail() {{ echo "{{\\"phase\\":\\"failed\\",\\"stage\\":\\"$1\\"}}" > $RUN/status.json; tail -20 $RUN/logs/clone.log > $RUN/job.log 2>/dev/null; sleep {a.grace_minutes}m; term; exit 1; }}
+mkdir -p /workspace/nb && cd /workspace/nb && rm -rf repo && mkdir repo && cd repo
+git init -q && git remote add origin "{base.GIT_REPO}" && git fetch -q --depth 1 origin {a.sha} >> $RUN/logs/clone.log 2>&1 || fail fetch
+git checkout -q FETCH_HEAD >> $RUN/logs/clone.log 2>&1 || fail checkout
+echo "checked out $(git rev-parse HEAD)" >> $RUN/logs/clone.log
+exec bash {BOOT}
+"""
+
+
+def create_pod(a) -> dict:
+    env = {"JOB_BOOT_B64": base64.b64encode(bootstrap_script(a).encode()).decode(), "RUNPOD_API_KEY": os.environ["RUNPOD_API_KEY"],
+           "HF_TOKEN": os.environ["HF_TOKEN"], "GIT_SHA": a.sha, "JOB_MODE": a.mode, "JOB_MAX_MINUTES": str(a.max_minutes),
+           "JOB_GRACE_MINUTES": str(a.grace_minutes), "JOB_PILOT_N": str(a.pilot_n), "JOB_PILOT_RUNS": str(a.pilot_runs),
+           "JOB_BATCH": str(a.batch), "JOB_WORKERS": str(a.workers), "JOB_TIMING_EPISODES": str(a.timing_episodes)}
+    if a.skip:
+        env["JOB_SKIP"] = a.skip
+    docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
+    attempts = []
+    clouds = ["SECURE"] + ([] if a.secure_only else ["COMMUNITY"])
+    for vcpu, mem in ((a.min_vcpu, a.min_memory_gb), (4, 24)):
+        for cloud in clouds:
+            inp = {"name": f"{POD_NAME}-{a.mode}", "imageName": base.IMAGE, "gpuTypeId": GPU, "cloudType": cloud, "gpuCount": 1,
+                   "volumeInGb": 0, "containerDiskInGb": a.disk_gb, "minVcpuCount": vcpu, "minMemoryInGb": mem, "ports": "8765/http",
+                   "env": [{"key": k, "value": v} for k, v in env.items()], "dockerArgs": docker_args, "supportPublicIp": False, "startSsh": False}
+            if a.min_download > 0:
+                inp["minDownload"] = a.min_download
+            q = """mutation ($input: PodFindAndDeployOnDemandInput!) {
+                  podFindAndDeployOnDemand(input: $input) { id desiredStatus costPerHr machine { podHostId gpuDisplayName dataCenterId cpuCount } } }"""
+            try:
+                r = base.graphql(q, {"input": inp})
+                if r.get("errors"):
+                    raise RuntimeError(r["errors"][0].get("message", "")[:200])
+                pod = (r.get("data") or {}).get("podFindAndDeployOnDemand")
+                if not pod or not pod.get("id"):
+                    raise RuntimeError("empty pod")
+                pod.update({"gpu": GPU, "cloud": cloud, "min_vcpu": vcpu, "min_memory_gb": mem})
+                return {"created": pod, "attempts": attempts}
+            except (RuntimeError, urllib.error.HTTPError) as e:
+                attempts.append({"cloud": cloud, "vcpu": vcpu, "error": str(e)[:200]})
+                print(f"[launch] {cloud} {GPU} (vcpu>={vcpu}): {str(e)[:200]}", file=sys.stderr, flush=True)
+    return {"created": None, "attempts": attempts}
+
+
+def safe_extract(tgz: Path) -> int:
+    with tarfile.open(tgz) as t:
+        members = [m for m in t.getmembers() if m.name.startswith(OUT_PREFIX) and ".." not in m.name.split("/") and not m.name.startswith("/")]
+        t.extractall(ROOT, members=members)
+    return len(members)
+
+
+def pull(pod: str) -> dict:
+    url = f"https://{pod}-8765.proxy.runpod.net"
+    dest = RUNS_DIR / pod
+    man = base.fetch_json(f"{url}/manifest.json", 60)
+    if man is None:
+        raise SystemExit("no manifest.json on the pod yet (status.json says what phase it is in)")
+    dest.mkdir(parents=True, exist_ok=True)
+    rec = {"pod": pod, "files": {}}
+    for name, info in man.items():
+        r = base.download(f"{url}/{name}", dest / name, int(info["size"]), info["sha256"])
+        rec["files"][name] = {**info, **r}
+    if (dest / "results.tgz").exists():
+        rec["extracted_members"] = safe_extract(dest / "results.tgz")
+    for name in ("status.json", "stages.json", "job.log"):
+        b = base.fetch(f"{url}/{name}", 60)
+        if b:
+            (dest / name).write_bytes(b)
+    (dest / "pull.json").write_text(json.dumps(rec, indent=1) + "\n")
+    print(json.dumps(rec, indent=1))
+    return rec
+
+
+def terminate_checked(pod: str) -> None:
+    print("terminating", json.dumps(base.terminate(pod)), flush=True)
+    time.sleep(6)
+    try:
+        print("pod state after terminate:", json.dumps(base.pod_state(pod)), flush=True)
+    except Exception as e:  # noqa: BLE001
+        print("pod state unavailable:", type(e).__name__, flush=True)
+
+
+def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60) -> int:
+    t0, last, missing = time.time(), None, 0
+    while time.time() - t0 < hours * 3600:
+        st = base.fetch_json(f"https://{pod}-8765.proxy.runpod.net/status.json", 20)
+        key = (st or {}).get("phase"), (st or {}).get("stage"), (st or {}).get("detail")
+        if key != last:
+            print(f"[{(time.time() - t0) / 60:5.0f} min] {json.dumps(st) if st else 'no status yet'}", flush=True)
+            last = key
+        if st and st.get("phase") in ("done", "failed"):
+            print(f"pod reports {st.get('phase')}; pulling", flush=True)
+            rc = 0 if st.get("phase") == "done" else 4
+            try:
+                pull(pod)
+            except SystemExit as e:
+                print(f"pull failed: {e}", file=sys.stderr)
+                rc = 5
+            if do_terminate:
+                terminate_checked(pod)
+            return rc
+        if int(time.time() - t0) % 600 < poll:      # every ten minutes: does the pod still exist?
+            try:
+                if base.pod_state(pod) is None:
+                    missing += 1
+                    if missing >= 2:
+                        print("pod no longer exists", flush=True)
+                        return 6
+                else:
+                    missing = 0
+            except Exception:  # noqa: BLE001
+                pass
+        time.sleep(poll)
+    print("watch window over", file=sys.stderr, flush=True)
+    if do_terminate:                                 # never leave a billed pod behind
+        terminate_checked(pod)
+    return 7
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--mode", choices=["pilot"], default="pilot")
+    ap.add_argument("--sha", default=None, help="commit the pod checks out (default: local HEAD; must be on origin)")
+    ap.add_argument("--max-minutes", type=int, default=150, help="time cap on the pod; what is unfinished is packaged as is")
+    ap.add_argument("--grace-minutes", type=int, default=30, help="how long the pod serves results before terminating itself")
+    ap.add_argument("--pilot-n", type=int, default=12)
+    ap.add_argument("--pilot-runs", type=int, default=2)
+    ap.add_argument("--batch", type=int, default=16, help="prompts per generate call for the stake versions (S0 runs at 8)")
+    ap.add_argument("--workers", type=int, default=16)
+    ap.add_argument("--timing-episodes", type=int, default=10)
+    ap.add_argument("--skip", default="", help="comma list of pod stages to skip (JOB_SKIP)")
+    ap.add_argument("--secure-only", action="store_true", help="do not fall back to the community cloud")
+    ap.add_argument("--min-vcpu", type=int, default=8)
+    ap.add_argument("--min-memory-gb", type=int, default=40)
+    ap.add_argument("--disk-gb", type=int, default=60)
+    ap.add_argument("--min-download", type=int, default=800)
+    ap.add_argument("--min-balance", type=float, default=20.0, help="launch floor; the user approves any lower value explicitly")
+    ap.add_argument("--reserve", type=float, default=5.0, help="what the worst case must leave on the account")
+    ap.add_argument("--preflight", action="store_true")
+    ap.add_argument("--launch", action="store_true", help="create the pod (spends money)")
+    ap.add_argument("--watch", action="store_true", help="after --launch: poll, pull when done, terminate")
+    ap.add_argument("--watch-hours", type=float, default=3.4)
+    ap.add_argument("--no-terminate", action="store_true")
+    ap.add_argument("--status", metavar="POD_ID")
+    ap.add_argument("--watch-pod", metavar="POD_ID")
+    ap.add_argument("--pull", metavar="POD_ID")
+    ap.add_argument("--terminate", metavar="POD_ID")
+    a = ap.parse_args()
+    a.sha = a.sha or base.local_sha()
+
+    if a.status:
+        base.status(a.status)
+        return 0
+    if a.terminate:
+        terminate_checked(a.terminate)
+        return 0
+    if a.pull:
+        pull(a.pull)
+        if not a.no_terminate:
+            terminate_checked(a.pull)
+        return 0
+    if a.watch_pod:
+        return watch(a.watch_pod, a.watch_hours, not a.no_terminate)
+
+    est = estimate(a)
+    print(json.dumps(est, indent=1))
+    if not (a.launch or a.preflight):
+        print("\n[estimate-only] --preflight checks the gates read-only; --launch creates the pod", file=sys.stderr)
+        return 0
+    ok, rep = gates(a, est)
+    print(json.dumps(rep, indent=1))
+    if not ok:
+        print("gates failed: " + "; ".join(rep["why_not"]), file=sys.stderr)
+        return 2
+    if a.preflight:
+        return 0
+    res = create_pod(a)
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    if not res["created"]:
+        print("no A40 could be deployed", file=sys.stderr)
+        (RUNS_DIR / f"failed_launch_{stamp}.json").write_text(json.dumps(res, indent=1) + "\n")
+        return 3
+    pod = res["created"]["id"]
+    rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "branch": GIT_BRANCH, "image": base.IMAGE,
+           "settings": {k: getattr(a, k) for k in ("mode", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "batch", "workers",
+                                                     "timing_episodes", "skip", "min_balance", "reserve")},
+           "estimate": est, "balance_before": rep["balance_usd"], "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
+    (RUNS_DIR / pod).mkdir(parents=True, exist_ok=True)
+    (RUNS_DIR / pod / "launch.json").write_text(json.dumps(rec, indent=1) + "\n")
+    print(json.dumps(rec, indent=1), flush=True)
+    if a.watch:
+        return watch(pod, a.watch_hours, not a.no_terminate)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

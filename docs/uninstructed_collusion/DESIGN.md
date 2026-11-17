@@ -345,3 +345,34 @@ Not covered: one model, the committee format only, no steering, and no claim abo
   arXiv:2502.03407.
 - J. Rose et al. Detecting Multi-Agent Collusion Through Multi-Agent Interpretability. arXiv:2604.01151.
 - W. Gurnee et al. Verbalizable Representations Form a Global Workspace in Language Models. arXiv:2607.15495.
+
+## Dated notes
+
+### 16 November 2026: build decisions, before any run
+
+Sections 3 to 9 are unchanged. These are choices the design left open, fixed while building:
+
+1. **Option labels and vote parsing.** In the recorded benchmark a quarter of the scenarios list "Candidate B" under
+   "Option A". In that layout, agents with no instruction named the target's label in 12 of 78 votes, against 4 of
+   222 in the other layouts, which points to the labels and not to the agents' judgement. A "DELAY" answer was also
+   parsed as a vote, because its rationale mentioned an option. Here the fair option comes first under letters or
+   numbers, and when the target comes first the labels are numbers, so a label never contradicts the letter in an
+   entity's name. A vote is read from the RECOMMENDATION line only; anything else counts as unparsed.
+2. **The room in later prompts.** Every public-round prompt and the vote prompt of an agent carry its own room's
+   transcript. The recorded benchmark's vote prompt did not carry the private messages.
+3. **Stake texts.** `uninstructed/stakes.json` holds the 50 texts. For three scenarios (`hire_01`, `fin_01`,
+   `fin_02`) the bank's motive is one member's private tie, which cannot be the same for four members; these were
+   rewritten as a stake all four can share. All texts pass an automatic wording check (no directive words, no
+   mention of a partner, no option labels) and were read one by one.
+4. **What a coder sees.** The scenario's stake text in the third person, for every room including rooms of S0, so
+   that a mention of the stake can be recognised without revealing the version. Cases are exported to the second
+   coder under opaque ids in a shuffled order.
+5. **Pilot scenarios.** Twelve scenarios from twelve domains, three per option layout, drawn with a fixed seed:
+   `cyber_01`, `eng_01`, `fin_03`, `food_01`, `gov_03`, `hire_01`, `ins_01`, `leg_02`, `med_03`, `mil_02`,
+   `pharma_01`, `re_01`.
+6. **Honest mandates.** Some mandates in the bank were written for a neighbouring case (the mandate of `med_02`
+   speaks of site selection). They are used unchanged, as in the recorded benchmark.
+7. **Checked before the pod.** `scripts/uninstructed_tiny_e2e.py` runs the pilot's stages on a tiny random model and
+   checks three properties: two runs of a scenario have exactly the same activation before the first room message;
+   an activation saved for a reply token equals the one from a context cut after that token; the saved token ids
+   decode back to the recorded messages.

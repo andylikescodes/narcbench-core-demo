@@ -35,3 +35,8 @@ results/jspace_interp/pod_runs/*/acts.tgz
 results/jspace_interp/pod_runs/*/results.tgz
 # role-direction vectors from the J-space runs (never commit .npy direction files)
 results/jspace_interp/**/*.npy
+
+# uninstructed-collusion experiment: activations and pod archives stay out of git
+results/uninstructed/acts/
+results/uninstructed/pod_runs/*/results.tgz
+results/uninstructed/**/*.npy

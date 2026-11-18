@@ -36,7 +36,7 @@ def rooms_of(rnd: str) -> list[dict]:
 
 
 def stance_of(rnd: str) -> dict:
-    p = RU / rnd / "public_stance.json"
+    p = RU / rnd / A.STANCE_DIR / "public_stance.json"
     return json.loads(p.read_text())["summary"]["versions"] if p.exists() else {}
 
 
@@ -46,7 +46,15 @@ def main() -> int:
     ap.add_argument("--round5", type=Path, default=RU / "pilot5", help="folder of the fifth round (summary.json, stake_kinds.json)")
     ap.add_argument("--cost5", type=float, default=None, help="USD of the fifth round's pod, by the account balance")
     ap.add_argument("--doc", type=Path, default=DOC, help="folder that holds tables/ (default: docs/uninstructed_collusion)")
+    ap.add_argument("--basis", choices=["both", "claude"], default="both",
+                    help="both: the label fixed before the runs, on which both coders agree. claude: the second coder alone, "
+                         "Claude Fable 5.2, for the room labels, the marks and the public positions; reads and writes <doc>/claude_basis")
     a = ap.parse_args()
+    claude = a.basis == "claude"
+    if claude:
+        A.CODER, A.STANCE_DIR = 1, "claude_first"
+        if a.doc == A.DOC:
+            a.doc = A.DOC / "claude_basis"
     DOC = a.doc
 
     R = {rnd: rooms_of(rnd) for rnd in ("pilot", "pilot2", "pilot3", "pilot4")}
@@ -67,6 +75,8 @@ def main() -> int:
     N: dict[str, str] = {}
     pct = lambda x: f"{100 * x:.0f}"  # noqa: E731
     pts = lambda x: "0" if round(100 * x) == 0 else f"{100 * x:+.0f}".replace("-", "$-$").replace("+", "$+$")  # noqa: E731
+    # a count that each coder marks: the range of the two, or the second coder's alone
+    one = (lambda xs: str(xs[A.CODER])) if claude else (lambda xs: f"{min(xs)} to {max(xs)}")  # noqa: E731
     # five-round totals
     eps4 = sum(len({r["run_id"] for r in rs}) for rs in R.values())
     N["episodes"] = f"{eps4 + n5['episodes']:,}"
@@ -92,9 +102,10 @@ def main() -> int:
     for g in ("zero", "mixed", "all"):
         G = g.capitalize()
         N[f"fun{G}Scen"], N[f"fun{G}Rooms"] = str(f[g]["scenarios"]), str(f[g]["rooms"])
-        N[f"fun{G}Prop"] = f"{min(f[g]['proposal'])} to {max(f[g]['proposal'])}"
-        N[f"fun{G}Acc"] = f"{min(f[g]['acceptance'])} to {max(f[g]['acceptance'])}"
-        N[f"fun{G}Both"], N[f"fun{G}Pact"] = str(f[g]["both_vote"]), str(f[g]["pact_both"])
+        N[f"fun{G}Prop"], N[f"fun{G}Acc"] = one(f[g]["proposal"]), one(f[g]["acceptance"])
+        N[f"fun{G}Both"] = str(f[g]["both_vote"])
+        if not claude:
+            N[f"fun{G}Pact"] = str(f[g]["pact_both"])
     N["rankRepeat"] = f"{sp['rank_correlation']['pilot3:T7']['rho']:.2f}"
     pr = sp["properties"]
     for name, field, val in (("Public", "setting", "PUBLIC"), ("Prof", "setting", "PROFESSIONAL"), ("Company", "setting", "COMPANY"),
@@ -114,7 +125,8 @@ def main() -> int:
         sv, sc = k["stake"]["votes"], k["stake"]["collusion_rooms"]
         N["kDiff"], N["kLo"], N["kHi"] = pts(sv["mean"]), pts(sv["interval"][0]), pts(sv["interval"][1])
         N["kHigher"], N["kEqual"], N["kLower"] = str(sv["higher"]), str(sv["equal"]), str(sv["lower"])
-        N["kColDiff"], N["kColLo"], N["kColHi"] = pts(sc["mean"]), pts(sc["interval"][0]), pts(sc["interval"][1])
+        if not claude:      # this difference and its interval were computed on the label of both coders
+            N["kColDiff"], N["kColLo"], N["kColHi"] = pts(sc["mean"]), pts(sc["interval"][0]), pts(sc["interval"][1])
         N["kStakeRule"] = "is met" if k["stake_matters"] else "is not met"
         N["kCaseRule"] = "is met" if k["case_matters"] else "is not met"
         for v, tag in ((k1, "One"), (k2, "Two")):
@@ -127,16 +139,40 @@ def main() -> int:
             N[f"k{tag}Col"], N[f"k{tag}Rooms"], N[f"k{tag}Clean"] = str(sum(x["collusion"] for x in tot)), str(sum(x["rooms"] for x in tot)), str(sum(x["clean"] for x in tot))
             fb = k["funnel"].get(f"{v}, both ends")
             if fb:
-                N[f"k{tag}Prop"] = f"{min(fb['proposal'])} to {max(fb['proposal'])}"
-                N[f"k{tag}Acc"] = f"{min(fb['acceptance'])} to {max(fb['acceptance'])}"
+                N[f"k{tag}Prop"], N[f"k{tag}Acc"] = one(fb["proposal"]), one(fb["acceptance"])
             st = (k.get("public_positions") or {}).get(v)
             if st:
                 N[f"k{tag}Hidden"], N[f"k{tag}StakeVotes"] = str(st["after_other_option"]), str(st["votes_for_stake_option"])
+            if claude:          # the cells and public positions of stake_kinds.json follow both coders and the first coder
+                rv = [r for r in r5 if r["version"] == v]
+                N[f"k{tag}Col"], N[f"k{tag}Clean"] = str(sum(A.label_of(r) == "collusion" for r in rv)), str(sum(A.label_of(r) == "clean" for r in rv))
+                N[f"k{tag}ColBoth"] = str(sum(r["label"] == "collusion" for r in rv))
+                s5v = stance_of(a.round5.name)[v]
+                N[f"k{tag}Hidden"], N[f"k{tag}StakeVotes"] = str(s5v["stake_votes_after_public_other_option"]), str(s5v["votes_for_stake_option"])
         for e, tag in (("zero", "Zero"), ("all", "All")):
             d = k["per_end"].get(e)
             if d:
                 N[f"kEnd{tag}One"], N[f"kEnd{tag}Two"], N[f"kEnd{tag}Diff"] = pct(d[k1]), pct(d[k2]), pts(d["mean_difference"])
                 N[f"kEnd{tag}N"] = str(len(d["scenarios"]))
+
+    if claude:
+        # how far the first coder, Gemma-2-9B-it, agrees with the reading this basis follows, and what the label fixed
+        # before the runs (both coders) gives for the rooms this report counts
+        allr = [r for rs in R.values() for r in rs] + (r5 if k else [])
+        same = sum(r["codes"][0] == r["codes"][1] for r in allr)
+        N["roomsCoded"], N["sameCode"], N["sameCodePct"] = f"{len(allr):,}", f"{same:,}", pct(same / len(allr))
+        N["bothSeven"], N["bothSevenB"] = str(A.stats(by("pilot3", "T7"))["colboth"]), str(A.stats(by("pilot4", "T7"))["colboth"])
+        ags = [json.loads((RU / rnd / A.STANCE_DIR / "public_stance.json").read_text())["summary"]["agreement"][0]
+               for rnd in ("pilot2", "pilot3", "pilot4") + ((a.round5.name,) if k else ())]
+        N["pubAgreeMin"], N["pubAgreeMax"] = pct(min(x["raw_agreement"] for x in ags)), pct(max(x["raw_agreement"] for x in ags))
+        N["pubKappaMin"], N["pubKappaMax"] = f"{min(x['kappa'] for x in ags):.2f}", f"{max(x['kappa'] for x in ags):.2f}"
+        N["pubMembers"] = f"{sum(x['n'] for x in ags):,}"
+        # the same reader twice: its earlier pass over a sample of the members of each round, where one was imported as a third coder
+        again = [x[1] for x in (json.loads((RU / rnd / A.STANCE_DIR / "public_stance.json").read_text())["summary"]["agreement"]
+                                for rnd in ("pilot2", "pilot3", "pilot4") + ((a.round5.name,) if k else ())) if len(x) > 1]
+        if again:
+            N["pubAgainMin"], N["pubAgainMax"] = pct(min(x["raw_agreement"] for x in again)), pct(max(x["raw_agreement"] for x in again))
+            N["pubAgainN"] = str(again[0]["n"])
 
     L = ["% written by scripts/uninstructed_short_paper_assets.py; do not edit", "\\makeatletter",
          "\\newcommand{\\SN}[1]{\\csname ucs@#1\\endcsname}"]
@@ -167,8 +203,7 @@ def main() -> int:
     T = ["\\begin{tabular}{@{}lrrrr@{}}", "\\toprule",
          "Scenarios (intention, round 4) & Rooms & Proposed & Accepted & Both vote for it \\\\", "\\midrule"]
     for g, w in (("zero", "with no vote for the stake option"), ("mixed", "in between"), ("all", "with every vote for it")):
-        T.append(f"{f[g]['scenarios']} {w} & {f[g]['rooms']} & {min(f[g]['proposal'])} to {max(f[g]['proposal'])} & "
-                 f"{min(f[g]['acceptance'])} to {max(f[g]['acceptance'])} & {f[g]['both_vote']} \\\\")
+        T.append(f"{f[g]['scenarios']} {w} & {f[g]['rooms']} & {one(f[g]['proposal'])} & {one(f[g]['acceptance'])} & {f[g]['both_vote']} \\\\")
     T += ["\\bottomrule", "\\end{tabular}"]
     (DOC / "tables/short_funnel.tex").write_text("\n".join(T) + "\n")
 

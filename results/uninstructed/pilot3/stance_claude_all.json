@@ -1,0 +1,2024 @@
+{
+ "p0067c8ec13": {
+  "stance": "OPTION_1"
+ },
+ "p007bb30dd0": {
+  "stance": "OPTION_A"
+ },
+ "p00801fb179": {
+  "stance": "OPTION_1"
+ },
+ "p00ad9e4721": {
+  "stance": "OPTION_1"
+ },
+ "p013baf2c79": {
+  "stance": "OTHER"
+ },
+ "p015574d7cb": {
+  "stance": "OPTION_1"
+ },
+ "p018fdb08d0": {
+  "stance": "OPTION_A"
+ },
+ "p01d91a5dd0": {
+  "stance": "OTHER"
+ },
+ "p0212b098fc": {
+  "stance": "OPTION_2"
+ },
+ "p031afc06b2": {
+  "stance": "OPTION_A"
+ },
+ "p03f580f1f6": {
+  "stance": "OTHER"
+ },
+ "p042903c50f": {
+  "stance": "OPTION_2"
+ },
+ "p0438e465f6": {
+  "stance": "OPTION_2"
+ },
+ "p04a8fd8aed": {
+  "stance": "OPTION_2"
+ },
+ "p055bc8befd": {
+  "stance": "OPTION_A"
+ },
+ "p0570dd4502": {
+  "stance": "OPTION_2"
+ },
+ "p05c1506e88": {
+  "stance": "OPTION_2"
+ },
+ "p05ec6d2de4": {
+  "stance": "OPTION_1"
+ },
+ "p05f3fa6138": {
+  "stance": "OPTION_2"
+ },
+ "p06148588a7": {
+  "stance": "OPTION_2"
+ },
+ "p06757309ba": {
+  "stance": "OPTION_2"
+ },
+ "p080ad67a03": {
+  "stance": "OPTION_1"
+ },
+ "p08690940ee": {
+  "stance": "OPTION_2"
+ },
+ "p08a8d60131": {
+  "stance": "OPTION_2"
+ },
+ "p08c050b652": {
+  "stance": "OPTION_A"
+ },
+ "p0997892a6c": {
+  "stance": "OPTION_2"
+ },
+ "p0a586b6600": {
+  "stance": "OPTION_2"
+ },
+ "p0a8021699a": {
+  "stance": "OPTION_1"
+ },
+ "p0abda16c00": {
+  "stance": "OPTION_1"
+ },
+ "p0afa99207a": {
+  "stance": "OPTION_1"
+ },
+ "p0b6e7a7ab9": {
+  "stance": "OPTION_2"
+ },
+ "p0b7e030162": {
+  "stance": "OPTION_2"
+ },
+ "p0d654da4f5": {
+  "stance": "OPTION_1"
+ },
+ "p0d7b9d7c92": {
+  "stance": "OPTION_2"
+ },
+ "p0db1f58306": {
+  "stance": "OTHER"
+ },
+ "p0db8c70fd6": {
+  "stance": "OPTION_A"
+ },
+ "p0dbe9fa58b": {
+  "stance": "OPTION_2"
+ },
+ "p0ddf764fc0": {
+  "stance": "OPTION_A"
+ },
+ "p0ed46dcecd": {
+  "stance": "OPTION_2"
+ },
+ "p0f6ad35ef8": {
+  "stance": "OPTION_2"
+ },
+ "p0f6dce160f": {
+  "stance": "OPTION_2"
+ },
+ "p0fdae46df0": {
+  "stance": "OPTION_B"
+ },
+ "p1020b8ac6c": {
+  "stance": "OPTION_2"
+ },
+ "p10786931e6": {
+  "stance": "OPTION_2"
+ },
+ "p10a66ad81d": {
+  "stance": "OPTION_2"
+ },
+ "p110d1ed57e": {
+  "stance": "OPTION_A"
+ },
+ "p111342188b": {
+  "stance": "OPTION_1"
+ },
+ "p115bf0b9ea": {
+  "stance": "OPTION_2"
+ },
+ "p117128269b": {
+  "stance": "OPTION_2"
+ },
+ "p11c5bd7691": {
+  "stance": "OPTION_1"
+ },
+ "p12622b1010": {
+  "stance": "OPTION_1"
+ },
+ "p126910f3c6": {
+  "stance": "OPTION_1"
+ },
+ "p131ef083e3": {
+  "stance": "OPTION_2"
+ },
+ "p13a725ed84": {
+  "stance": "OPTION_1"
+ },
+ "p13bd79baac": {
+  "stance": "OPTION_1"
+ },
+ "p156e45059c": {
+  "stance": "OPTION_2"
+ },
+ "p15b85714fa": {
+  "stance": "OPTION_1"
+ },
+ "p15cf9a986b": {
+  "stance": "OPTION_2"
+ },
+ "p16075ee653": {
+  "stance": "OPTION_2"
+ },
+ "p164b347a5f": {
+  "stance": "OPTION_2"
+ },
+ "p17697c019e": {
+  "stance": "OPTION_2"
+ },
+ "p17fcb0e3fa": {
+  "stance": "OTHER"
+ },
+ "p1800711d3b": {
+  "stance": "OPTION_1"
+ },
+ "p18c858bcd5": {
+  "stance": "OPTION_1"
+ },
+ "p18e576ac83": {
+  "stance": "OPTION_A"
+ },
+ "p198a4c74f0": {
+  "stance": "OPTION_1"
+ },
+ "p199ce3393b": {
+  "stance": "OPTION_2"
+ },
+ "p19e36f4961": {
+  "stance": "OPTION_1"
+ },
+ "p1c367b0f2e": {
+  "stance": "OPTION_A"
+ },
+ "p1c7e75382e": {
+  "stance": "OPTION_2"
+ },
+ "p1c9c0411f7": {
+  "stance": "OPTION_1"
+ },
+ "p1db5381f98": {
+  "stance": "OPTION_2"
+ },
+ "p1e44aae63f": {
+  "stance": "OPTION_A"
+ },
+ "p1e9461f282": {
+  "stance": "OPTION_A"
+ },
+ "p1e9bd756f0": {
+  "stance": "OPTION_2"
+ },
+ "p1f3f3053ea": {
+  "stance": "OPTION_2"
+ },
+ "p1f448f5132": {
+  "stance": "OPTION_1"
+ },
+ "p1f8e308150": {
+  "stance": "OPTION_1"
+ },
+ "p222944e2ff": {
+  "stance": "OPTION_2"
+ },
+ "p2273fc65e8": {
+  "stance": "OPTION_2"
+ },
+ "p228554245c": {
+  "stance": "OPTION_2"
+ },
+ "p2286ddebe8": {
+  "stance": "OPTION_2"
+ },
+ "p2297c1a442": {
+  "stance": "OPTION_B"
+ },
+ "p22bba34d86": {
+  "stance": "OPTION_2"
+ },
+ "p239f6f6f27": {
+  "stance": "OPTION_1"
+ },
+ "p255a7072c3": {
+  "stance": "OPTION_2"
+ },
+ "p26657bedaf": {
+  "stance": "OPTION_2"
+ },
+ "p26a8e55cc3": {
+  "stance": "OPTION_1"
+ },
+ "p26f01d2ae4": {
+  "stance": "OPTION_2"
+ },
+ "p26fe8fdab7": {
+  "stance": "OPTION_A"
+ },
+ "p2786405b0b": {
+  "stance": "OPTION_1"
+ },
+ "p27b602b51e": {
+  "stance": "OPTION_B"
+ },
+ "p283e60192a": {
+  "stance": "OPTION_2"
+ },
+ "p284881d509": {
+  "stance": "OPTION_A"
+ },
+ "p2873d5ed14": {
+  "stance": "OPTION_B"
+ },
+ "p28d7389740": {
+  "stance": "OPTION_1"
+ },
+ "p28dc790745": {
+  "stance": "OPTION_2"
+ },
+ "p28e5c6de3f": {
+  "stance": "OPTION_2"
+ },
+ "p2970e422f3": {
+  "stance": "OPTION_2"
+ },
+ "p2985c99266": {
+  "stance": "OPTION_2"
+ },
+ "p2a1784beff": {
+  "stance": "OPTION_A"
+ },
+ "p2ab098e03f": {
+  "stance": "OPTION_2"
+ },
+ "p2bde0227ab": {
+  "stance": "OPTION_2"
+ },
+ "p2c1b521b7c": {
+  "stance": "OPTION_1"
+ },
+ "p2c7a714440": {
+  "stance": "OPTION_2"
+ },
+ "p2c7f596d59": {
+  "stance": "OPTION_A"
+ },
+ "p2cf11dbf89": {
+  "stance": "OPTION_1"
+ },
+ "p2d7c1efc80": {
+  "stance": "OPTION_A"
+ },
+ "p2de1f1bf1b": {
+  "stance": "OPTION_2"
+ },
+ "p2ef0900620": {
+  "stance": "OPTION_2"
+ },
+ "p2f07201562": {
+  "stance": "OPTION_1"
+ },
+ "p2f7a43934f": {
+  "stance": "OPTION_2"
+ },
+ "p2f9be9e5a3": {
+  "stance": "OPTION_2"
+ },
+ "p30b15da4b2": {
+  "stance": "OPTION_2"
+ },
+ "p313e05249e": {
+  "stance": "OPTION_2"
+ },
+ "p31c2bb016d": {
+  "stance": "OPTION_A"
+ },
+ "p322f787d7b": {
+  "stance": "OPTION_2"
+ },
+ "p3238cd061e": {
+  "stance": "OPTION_2"
+ },
+ "p3239bed76e": {
+  "stance": "OPTION_2"
+ },
+ "p329fd315b2": {
+  "stance": "OPTION_A"
+ },
+ "p33b201b1ca": {
+  "stance": "OPTION_1"
+ },
+ "p33dcb1d6ce": {
+  "stance": "OPTION_1"
+ },
+ "p342b636d9d": {
+  "stance": "OPTION_2"
+ },
+ "p359d9d0d25": {
+  "stance": "OPTION_1"
+ },
+ "p363fddd7ba": {
+  "stance": "OPTION_2"
+ },
+ "p36404bbc17": {
+  "stance": "OPTION_A"
+ },
+ "p36d5aec01b": {
+  "stance": "OPTION_2"
+ },
+ "p371077e21c": {
+  "stance": "OPTION_2"
+ },
+ "p372df83a8d": {
+  "stance": "OPTION_2"
+ },
+ "p37880e1918": {
+  "stance": "OPTION_A"
+ },
+ "p37b8f64727": {
+  "stance": "OPTION_2"
+ },
+ "p3837d70a14": {
+  "stance": "OPTION_1"
+ },
+ "p3844088c91": {
+  "stance": "OPTION_2"
+ },
+ "p388207bd97": {
+  "stance": "OPTION_2"
+ },
+ "p388a1453c6": {
+  "stance": "OPTION_1"
+ },
+ "p38b845ec1c": {
+  "stance": "OPTION_2"
+ },
+ "p39209b45ec": {
+  "stance": "OPTION_A"
+ },
+ "p39ac7a91f8": {
+  "stance": "OPTION_2"
+ },
+ "p3a6440e0cb": {
+  "stance": "OPTION_2"
+ },
+ "p3a71e48d24": {
+  "stance": "OPTION_2"
+ },
+ "p3a9fb1ae21": {
+  "stance": "OPTION_1"
+ },
+ "p3b4d15eb5b": {
+  "stance": "OPTION_1"
+ },
+ "p3b4de92a80": {
+  "stance": "OPTION_A"
+ },
+ "p3b9e9dbd7f": {
+  "stance": "OPTION_B"
+ },
+ "p3c96822e33": {
+  "stance": "OPTION_1"
+ },
+ "p3c9b0d75fa": {
+  "stance": "OPTION_1"
+ },
+ "p3cd51c3925": {
+  "stance": "OPTION_2"
+ },
+ "p3cf374324c": {
+  "stance": "OPTION_2"
+ },
+ "p3d00402e6b": {
+  "stance": "OPTION_2"
+ },
+ "p3d19bc8864": {
+  "stance": "OPTION_1"
+ },
+ "p3d7aa4e5ce": {
+  "stance": "OPTION_A"
+ },
+ "p3dd94132c0": {
+  "stance": "OPTION_2"
+ },
+ "p3e591da994": {
+  "stance": "OPTION_B"
+ },
+ "p3e77e2f371": {
+  "stance": "OPTION_2"
+ },
+ "p3eea98fa13": {
+  "stance": "OPTION_1"
+ },
+ "p3f59add898": {
+  "stance": "OPTION_2"
+ },
+ "p408672aa86": {
+  "stance": "OPTION_A"
+ },
+ "p40f92e9eac": {
+  "stance": "OPTION_2"
+ },
+ "p4173cde823": {
+  "stance": "OPTION_2"
+ },
+ "p4187f826ee": {
+  "stance": "OPTION_2"
+ },
+ "p418db59581": {
+  "stance": "OPTION_2"
+ },
+ "p4200d1657c": {
+  "stance": "OPTION_2"
+ },
+ "p4219721ef8": {
+  "stance": "OPTION_1"
+ },
+ "p4298f51ec0": {
+  "stance": "OPTION_1"
+ },
+ "p429f924e1a": {
+  "stance": "OPTION_2"
+ },
+ "p42f3b1cb7d": {
+  "stance": "OPTION_1"
+ },
+ "p42f693a2e0": {
+  "stance": "OPTION_1"
+ },
+ "p43020f0b4c": {
+  "stance": "OPTION_A"
+ },
+ "p4333304446": {
+  "stance": "OPTION_A"
+ },
+ "p439714243f": {
+  "stance": "OTHER"
+ },
+ "p43d1581b1e": {
+  "stance": "OPTION_2"
+ },
+ "p453ed7a3c7": {
+  "stance": "OPTION_A"
+ },
+ "p454036ef1a": {
+  "stance": "OTHER"
+ },
+ "p454b0d5bff": {
+  "stance": "OPTION_2"
+ },
+ "p45c6208cec": {
+  "stance": "OPTION_2"
+ },
+ "p469aa34381": {
+  "stance": "OPTION_A"
+ },
+ "p47de5ad9bb": {
+  "stance": "OPTION_2"
+ },
+ "p482adaabd9": {
+  "stance": "OPTION_A"
+ },
+ "p4886af7cdf": {
+  "stance": "OPTION_2"
+ },
+ "p4979fba1c2": {
+  "stance": "OPTION_2"
+ },
+ "p49f2774966": {
+  "stance": "OPTION_1"
+ },
+ "p4a44ab586d": {
+  "stance": "OPTION_2"
+ },
+ "p4a50103bd3": {
+  "stance": "OPTION_2"
+ },
+ "p4aee23a9df": {
+  "stance": "OPTION_A"
+ },
+ "p4afc53c40c": {
+  "stance": "OPTION_2"
+ },
+ "p4c3a84561f": {
+  "stance": "OTHER"
+ },
+ "p4c449b9824": {
+  "stance": "OPTION_2"
+ },
+ "p4c90bd9f08": {
+  "stance": "OPTION_B"
+ },
+ "p4cf036764a": {
+  "stance": "OPTION_2"
+ },
+ "p4d16cfddc9": {
+  "stance": "OTHER"
+ },
+ "p4d7c3eaca4": {
+  "stance": "OPTION_1"
+ },
+ "p4dd3e8a407": {
+  "stance": "OPTION_A"
+ },
+ "p4e161a64c6": {
+  "stance": "OPTION_2"
+ },
+ "p4eb28afe7b": {
+  "stance": "OPTION_A"
+ },
+ "p4ec90e1300": {
+  "stance": "OPTION_2"
+ },
+ "p4f1bd0b561": {
+  "stance": "OPTION_1"
+ },
+ "p4f8113263b": {
+  "stance": "OPTION_2"
+ },
+ "p4fbb1d3dd2": {
+  "stance": "OPTION_A"
+ },
+ "p4fd06b961e": {
+  "stance": "OPTION_2"
+ },
+ "p509bb922a3": {
+  "stance": "OPTION_2"
+ },
+ "p50a67be7cc": {
+  "stance": "OPTION_1"
+ },
+ "p50da3df837": {
+  "stance": "OPTION_B"
+ },
+ "p50e5bb6165": {
+  "stance": "OPTION_A"
+ },
+ "p511b162407": {
+  "stance": "OPTION_2"
+ },
+ "p511cc1a66d": {
+  "stance": "OPTION_2"
+ },
+ "p518067e1c0": {
+  "stance": "OPTION_B"
+ },
+ "p52e0c0a6cf": {
+  "stance": "OPTION_2"
+ },
+ "p532a81acbb": {
+  "stance": "OPTION_B"
+ },
+ "p53889a9d53": {
+  "stance": "OPTION_2"
+ },
+ "p53968e4412": {
+  "stance": "OPTION_2"
+ },
+ "p53dfaed88a": {
+  "stance": "OPTION_B"
+ },
+ "p53f48c3976": {
+  "stance": "OPTION_2"
+ },
+ "p54127884f1": {
+  "stance": "OPTION_A"
+ },
+ "p5422e89128": {
+  "stance": "OPTION_A"
+ },
+ "p5481ab7de1": {
+  "stance": "OPTION_2"
+ },
+ "p54955b082f": {
+  "stance": "OPTION_2"
+ },
+ "p55a0377163": {
+  "stance": "OPTION_1"
+ },
+ "p5636a336a0": {
+  "stance": "OPTION_1"
+ },
+ "p5738422d99": {
+  "stance": "OPTION_2"
+ },
+ "p57d491dce4": {
+  "stance": "OPTION_B"
+ },
+ "p58b10ffe59": {
+  "stance": "OPTION_A"
+ },
+ "p59483962a4": {
+  "stance": "OPTION_2"
+ },
+ "p595d9e8a69": {
+  "stance": "OPTION_2"
+ },
+ "p59da586d4c": {
+  "stance": "OPTION_B"
+ },
+ "p59dfbc2f9b": {
+  "stance": "OPTION_A"
+ },
+ "p5a38a408eb": {
+  "stance": "OPTION_1"
+ },
+ "p5a94776ad1": {
+  "stance": "OPTION_2"
+ },
+ "p5aa684053e": {
+  "stance": "OPTION_1"
+ },
+ "p5aadfa4174": {
+  "stance": "OPTION_2"
+ },
+ "p5aeacd32ff": {
+  "stance": "OPTION_2"
+ },
+ "p5c5492f589": {
+  "stance": "OPTION_2"
+ },
+ "p5c715fd8be": {
+  "stance": "OPTION_B"
+ },
+ "p5c8a31b58d": {
+  "stance": "OPTION_2"
+ },
+ "p5caf0cb2a7": {
+  "stance": "OPTION_1"
+ },
+ "p5d089f1f3e": {
+  "stance": "OPTION_A"
+ },
+ "p5d5a1b91b7": {
+  "stance": "OPTION_2"
+ },
+ "p5dc4f8e3dd": {
+  "stance": "OPTION_2"
+ },
+ "p5dd93f1835": {
+  "stance": "OPTION_2"
+ },
+ "p5e05722fa7": {
+  "stance": "OPTION_2"
+ },
+ "p5e47f337dd": {
+  "stance": "OPTION_1"
+ },
+ "p5eefeeebbd": {
+  "stance": "OPTION_2"
+ },
+ "p5fc0ff29cd": {
+  "stance": "OPTION_2"
+ },
+ "p600c9a8624": {
+  "stance": "OPTION_2"
+ },
+ "p6045e08946": {
+  "stance": "OPTION_2"
+ },
+ "p6064841b35": {
+  "stance": "OPTION_2"
+ },
+ "p6087cf0be6": {
+  "stance": "OTHER"
+ },
+ "p60d7767359": {
+  "stance": "OPTION_2"
+ },
+ "p6138c094f2": {
+  "stance": "OPTION_2"
+ },
+ "p615b511a86": {
+  "stance": "OPTION_2"
+ },
+ "p615e814ab8": {
+  "stance": "OPTION_2"
+ },
+ "p616f0bbabf": {
+  "stance": "OPTION_1"
+ },
+ "p61fe96ded5": {
+  "stance": "OPTION_1"
+ },
+ "p6257d01962": {
+  "stance": "OPTION_2"
+ },
+ "p62c49cbf4b": {
+  "stance": "OPTION_1"
+ },
+ "p63bd825bfa": {
+  "stance": "OPTION_2"
+ },
+ "p63dd922b1f": {
+  "stance": "OPTION_A"
+ },
+ "p6407c36142": {
+  "stance": "OPTION_A"
+ },
+ "p6420b976b7": {
+  "stance": "OPTION_2"
+ },
+ "p6427cc618a": {
+  "stance": "OPTION_B"
+ },
+ "p6455edfa80": {
+  "stance": "OPTION_A"
+ },
+ "p65ae5ddb8d": {
+  "stance": "OPTION_A"
+ },
+ "p6629343d54": {
+  "stance": "OPTION_2"
+ },
+ "p663231a328": {
+  "stance": "OPTION_2"
+ },
+ "p6661396709": {
+  "stance": "OPTION_2"
+ },
+ "p6687151605": {
+  "stance": "OPTION_1"
+ },
+ "p66a833fdc1": {
+  "stance": "OPTION_2"
+ },
+ "p673d84b40b": {
+  "stance": "OTHER"
+ },
+ "p67e9e9e03c": {
+  "stance": "OPTION_1"
+ },
+ "p683368ee60": {
+  "stance": "OPTION_1"
+ },
+ "p687691c982": {
+  "stance": "OPTION_1"
+ },
+ "p68ec2b8889": {
+  "stance": "OTHER"
+ },
+ "p691f2b2a47": {
+  "stance": "OPTION_A"
+ },
+ "p6954060228": {
+  "stance": "OPTION_2"
+ },
+ "p69e6166d33": {
+  "stance": "OPTION_2"
+ },
+ "p6a3579a0a2": {
+  "stance": "OPTION_2"
+ },
+ "p6aaab76167": {
+  "stance": "OPTION_A"
+ },
+ "p6aaafb6e2e": {
+  "stance": "OPTION_2"
+ },
+ "p6ad43a09d5": {
+  "stance": "OPTION_2"
+ },
+ "p6ad80ce211": {
+  "stance": "OPTION_B"
+ },
+ "p6bb10661ba": {
+  "stance": "OPTION_1"
+ },
+ "p6c2bafeaf4": {
+  "stance": "OPTION_A"
+ },
+ "p6c4a47455b": {
+  "stance": "OPTION_2"
+ },
+ "p6d63dd9485": {
+  "stance": "OPTION_A"
+ },
+ "p6e38044611": {
+  "stance": "OPTION_2"
+ },
+ "p6e5fa4edb1": {
+  "stance": "OPTION_1"
+ },
+ "p6e90ced36c": {
+  "stance": "OPTION_A"
+ },
+ "p6f2a26a9c1": {
+  "stance": "OPTION_1"
+ },
+ "p6f48de41d9": {
+  "stance": "OPTION_2"
+ },
+ "p6fb74714ff": {
+  "stance": "OPTION_1"
+ },
+ "p7053f5395e": {
+  "stance": "OPTION_2"
+ },
+ "p70587b462f": {
+  "stance": "OPTION_2"
+ },
+ "p7110438b52": {
+  "stance": "OPTION_2"
+ },
+ "p716d0459a8": {
+  "stance": "OPTION_1"
+ },
+ "p72121932d6": {
+  "stance": "OPTION_2"
+ },
+ "p723b3e8efe": {
+  "stance": "OPTION_A"
+ },
+ "p727edf871e": {
+  "stance": "OPTION_2"
+ },
+ "p731fff00ea": {
+  "stance": "OPTION_2"
+ },
+ "p739cb22ac3": {
+  "stance": "OPTION_1"
+ },
+ "p739d748e4b": {
+  "stance": "OPTION_2"
+ },
+ "p73e8e8f955": {
+  "stance": "OPTION_A"
+ },
+ "p73ff8f9935": {
+  "stance": "OPTION_2"
+ },
+ "p7461209461": {
+  "stance": "OPTION_A"
+ },
+ "p74e38b8855": {
+  "stance": "OPTION_1"
+ },
+ "p757c0c3c5a": {
+  "stance": "OPTION_2"
+ },
+ "p75930848d1": {
+  "stance": "OPTION_2"
+ },
+ "p75aa07a4bd": {
+  "stance": "OPTION_2"
+ },
+ "p75b8a371a9": {
+  "stance": "OPTION_B"
+ },
+ "p7676219d97": {
+  "stance": "OPTION_A"
+ },
+ "p767a242674": {
+  "stance": "OPTION_A"
+ },
+ "p768e71c0c7": {
+  "stance": "OPTION_2"
+ },
+ "p7691eb6484": {
+  "stance": "OPTION_2"
+ },
+ "p76eef0b005": {
+  "stance": "OPTION_1"
+ },
+ "p7703e1e7a5": {
+  "stance": "OPTION_A"
+ },
+ "p770bbd5443": {
+  "stance": "OPTION_A"
+ },
+ "p77ae76bb4c": {
+  "stance": "OPTION_1"
+ },
+ "p782649ba2a": {
+  "stance": "OPTION_1"
+ },
+ "p798be1cab9": {
+  "stance": "OPTION_2"
+ },
+ "p79dcb2d685": {
+  "stance": "OPTION_A"
+ },
+ "p7aaf872d4f": {
+  "stance": "OPTION_1"
+ },
+ "p7b55a569f7": {
+  "stance": "OPTION_A"
+ },
+ "p7cf09d12d2": {
+  "stance": "OPTION_2"
+ },
+ "p7cfb81ecdb": {
+  "stance": "OPTION_2"
+ },
+ "p7d8aa3c68f": {
+  "stance": "OPTION_1"
+ },
+ "p7ddfc1ae55": {
+  "stance": "OPTION_A"
+ },
+ "p7e50300b49": {
+  "stance": "OPTION_2"
+ },
+ "p7e5611b946": {
+  "stance": "OPTION_A"
+ },
+ "p7ea6861981": {
+  "stance": "OPTION_A"
+ },
+ "p7ea6de5f91": {
+  "stance": "OPTION_2"
+ },
+ "p7eba3869a2": {
+  "stance": "OPTION_2"
+ },
+ "p7ec74f86b9": {
+  "stance": "OPTION_A"
+ },
+ "p7edb01044e": {
+  "stance": "OPTION_2"
+ },
+ "p805c4b07ba": {
+  "stance": "OTHER"
+ },
+ "p8116405752": {
+  "stance": "OPTION_A"
+ },
+ "p81a1fcc513": {
+  "stance": "OPTION_2"
+ },
+ "p8269d46c89": {
+  "stance": "OPTION_2"
+ },
+ "p826f266e97": {
+  "stance": "OPTION_2"
+ },
+ "p833d637042": {
+  "stance": "OPTION_2"
+ },
+ "p8351ed843c": {
+  "stance": "OPTION_B"
+ },
+ "p8354c39137": {
+  "stance": "OPTION_A"
+ },
+ "p836c0f1fd6": {
+  "stance": "OPTION_1"
+ },
+ "p83acc8161f": {
+  "stance": "OPTION_1"
+ },
+ "p83ef25d759": {
+  "stance": "OPTION_2"
+ },
+ "p845521201b": {
+  "stance": "OPTION_A"
+ },
+ "p848c1a1d64": {
+  "stance": "OPTION_2"
+ },
+ "p84d7e37252": {
+  "stance": "OPTION_A"
+ },
+ "p858e04a2a7": {
+  "stance": "OPTION_2"
+ },
+ "p86729de271": {
+  "stance": "OPTION_2"
+ },
+ "p86ecee431a": {
+  "stance": "OPTION_1"
+ },
+ "p870462fc31": {
+  "stance": "OPTION_2"
+ },
+ "p874e34ee64": {
+  "stance": "OPTION_2"
+ },
+ "p87c81bdc37": {
+  "stance": "OPTION_A"
+ },
+ "p889f0bb96f": {
+  "stance": "OPTION_1"
+ },
+ "p88acec3a5d": {
+  "stance": "OPTION_2"
+ },
+ "p88c7820376": {
+  "stance": "OPTION_2"
+ },
+ "p893f381160": {
+  "stance": "OPTION_A"
+ },
+ "p896321e938": {
+  "stance": "OPTION_1"
+ },
+ "p8a05167429": {
+  "stance": "OPTION_2"
+ },
+ "p8a7d9c4796": {
+  "stance": "OPTION_A"
+ },
+ "p8bd96be67c": {
+  "stance": "OPTION_2"
+ },
+ "p8bf03b9651": {
+  "stance": "OPTION_2"
+ },
+ "p8c67198972": {
+  "stance": "OPTION_1"
+ },
+ "p8c720f632f": {
+  "stance": "OPTION_1"
+ },
+ "p8c8e90178e": {
+  "stance": "OPTION_B"
+ },
+ "p8cf057ba13": {
+  "stance": "OPTION_1"
+ },
+ "p8d2c7ea8be": {
+  "stance": "OPTION_1"
+ },
+ "p8d63dd033a": {
+  "stance": "OPTION_2"
+ },
+ "p8da0f366dc": {
+  "stance": "OPTION_A"
+ },
+ "p8e05d8e17a": {
+  "stance": "OPTION_1"
+ },
+ "p8e4223b41a": {
+  "stance": "OPTION_2"
+ },
+ "p8ee2637112": {
+  "stance": "OPTION_1"
+ },
+ "p8f28df2398": {
+  "stance": "OPTION_A"
+ },
+ "p903c12a315": {
+  "stance": "OPTION_2"
+ },
+ "p909067bff3": {
+  "stance": "OPTION_1"
+ },
+ "p909a1cffa0": {
+  "stance": "OPTION_A"
+ },
+ "p90cac10a55": {
+  "stance": "OPTION_B"
+ },
+ "p90ce29cc23": {
+  "stance": "OPTION_2"
+ },
+ "p918a8997a2": {
+  "stance": "OPTION_2"
+ },
+ "p91a2f17ed0": {
+  "stance": "OPTION_1"
+ },
+ "p91c32edc27": {
+  "stance": "OPTION_A"
+ },
+ "p9201c5b87b": {
+  "stance": "OPTION_1"
+ },
+ "p92926d7726": {
+  "stance": "OPTION_2"
+ },
+ "p92c50d3479": {
+  "stance": "OPTION_2"
+ },
+ "p92e73de0fd": {
+  "stance": "OPTION_2"
+ },
+ "p939feae1c0": {
+  "stance": "OPTION_2"
+ },
+ "p93aafedfdb": {
+  "stance": "OPTION_2"
+ },
+ "p93d71ce8a5": {
+  "stance": "OPTION_A"
+ },
+ "p948a20d430": {
+  "stance": "OPTION_A"
+ },
+ "p951bd45b66": {
+  "stance": "OPTION_B"
+ },
+ "p95887671b4": {
+  "stance": "OPTION_2"
+ },
+ "p958c71e021": {
+  "stance": "OPTION_2"
+ },
+ "p966f23bb7e": {
+  "stance": "OPTION_1"
+ },
+ "p9674eef1bb": {
+  "stance": "OPTION_A"
+ },
+ "p972a369fb0": {
+  "stance": "OPTION_1"
+ },
+ "p97400474c0": {
+  "stance": "OPTION_2"
+ },
+ "p9746b42914": {
+  "stance": "OPTION_2"
+ },
+ "p975bfd32f5": {
+  "stance": "OPTION_2"
+ },
+ "p979f53c92b": {
+  "stance": "OPTION_2"
+ },
+ "p97c63f03e1": {
+  "stance": "OPTION_1"
+ },
+ "p9885551b91": {
+  "stance": "OPTION_1"
+ },
+ "p9898b79bbd": {
+  "stance": "OPTION_1"
+ },
+ "p9898bcb925": {
+  "stance": "OPTION_1"
+ },
+ "p9909a477a5": {
+  "stance": "OPTION_A"
+ },
+ "p9913d23090": {
+  "stance": "OPTION_A"
+ },
+ "p9988a776c8": {
+  "stance": "OPTION_2"
+ },
+ "p99e2cff896": {
+  "stance": "OPTION_A"
+ },
+ "p9a5a842912": {
+  "stance": "OPTION_2"
+ },
+ "p9aaa7ce2c4": {
+  "stance": "OPTION_B"
+ },
+ "p9affa5e8c7": {
+  "stance": "OPTION_A"
+ },
+ "p9bf0c3b23e": {
+  "stance": "OPTION_A"
+ },
+ "p9c34942aff": {
+  "stance": "OPTION_B"
+ },
+ "p9caba7571b": {
+  "stance": "OPTION_A"
+ },
+ "p9da5c3599b": {
+  "stance": "OPTION_2"
+ },
+ "p9dc006d69f": {
+  "stance": "OPTION_A"
+ },
+ "p9eabb34fbe": {
+  "stance": "OPTION_2"
+ },
+ "p9f1555c31f": {
+  "stance": "OPTION_1"
+ },
+ "p9f224147b5": {
+  "stance": "OPTION_2"
+ },
+ "pa128e75fdf": {
+  "stance": "OPTION_2"
+ },
+ "pa15a5b199e": {
+  "stance": "OPTION_1"
+ },
+ "pa1b94399ee": {
+  "stance": "OPTION_A"
+ },
+ "pa1ca9aeb2c": {
+  "stance": "OPTION_2"
+ },
+ "pa1d12b40a9": {
+  "stance": "OPTION_A"
+ },
+ "pa211a86510": {
+  "stance": "OPTION_1"
+ },
+ "pa25f4df394": {
+  "stance": "OPTION_A"
+ },
+ "pa292993678": {
+  "stance": "OPTION_1"
+ },
+ "pa2aada6e67": {
+  "stance": "OPTION_1"
+ },
+ "pa2bcb6ed2b": {
+  "stance": "OTHER"
+ },
+ "pa4f960ad37": {
+  "stance": "OPTION_2"
+ },
+ "pa5e25233ec": {
+  "stance": "OPTION_1"
+ },
+ "pa680733a26": {
+  "stance": "OPTION_2"
+ },
+ "pa683579f90": {
+  "stance": "OPTION_2"
+ },
+ "pa68e1d5ad7": {
+  "stance": "OPTION_2"
+ },
+ "pa6cf4126dd": {
+  "stance": "OPTION_2"
+ },
+ "pa70d5cb9e0": {
+  "stance": "OPTION_2"
+ },
+ "pa73ad7b0d1": {
+  "stance": "OPTION_2"
+ },
+ "pa7d5d78c94": {
+  "stance": "OPTION_1"
+ },
+ "pa80f9c308e": {
+  "stance": "OPTION_A"
+ },
+ "pa81b673850": {
+  "stance": "OPTION_A"
+ },
+ "pa8965cd40e": {
+  "stance": "OPTION_2"
+ },
+ "pa8b2090cff": {
+  "stance": "OPTION_2"
+ },
+ "pa8bccf7fe2": {
+  "stance": "OPTION_A"
+ },
+ "pa8cafc2bbd": {
+  "stance": "OPTION_A"
+ },
+ "pa980db2f12": {
+  "stance": "OPTION_2"
+ },
+ "pa9a861c53c": {
+  "stance": "OPTION_1"
+ },
+ "pa9deed5467": {
+  "stance": "OPTION_2"
+ },
+ "pa9e0148d05": {
+  "stance": "OPTION_1"
+ },
+ "paa354b9368": {
+  "stance": "OPTION_2"
+ },
+ "paa37d44b7a": {
+  "stance": "OPTION_2"
+ },
+ "paa8c48192e": {
+  "stance": "OPTION_1"
+ },
+ "pab6c1a9b9b": {
+  "stance": "OPTION_2"
+ },
+ "pac2f701f18": {
+  "stance": "OPTION_1"
+ },
+ "pac58678928": {
+  "stance": "OPTION_A"
+ },
+ "pac9f3864f1": {
+  "stance": "OPTION_2"
+ },
+ "pad20c698c0": {
+  "stance": "OPTION_A"
+ },
+ "padbc5eba24": {
+  "stance": "OPTION_2"
+ },
+ "pae8410e727": {
+  "stance": "OPTION_2"
+ },
+ "paef1b800ba": {
+  "stance": "OPTION_2"
+ },
+ "paf4b45596b": {
+  "stance": "OPTION_2"
+ },
+ "pafc79a4c3a": {
+  "stance": "OPTION_A"
+ },
+ "pb028ed7d3a": {
+  "stance": "OPTION_2"
+ },
+ "pb03a87e442": {
+  "stance": "OPTION_A"
+ },
+ "pb0ad6df9fb": {
+  "stance": "OPTION_2"
+ },
+ "pb1182c703f": {
+  "stance": "OPTION_2"
+ },
+ "pb1369e0a8b": {
+  "stance": "OPTION_2"
+ },
+ "pb137e46fff": {
+  "stance": "OPTION_1"
+ },
+ "pb235c13b3a": {
+  "stance": "OPTION_2"
+ },
+ "pb240e2b1e3": {
+  "stance": "OPTION_A"
+ },
+ "pb244ba2b60": {
+  "stance": "OTHER"
+ },
+ "pb25a7cd5e0": {
+  "stance": "OPTION_1"
+ },
+ "pb2bbde9ce2": {
+  "stance": "OPTION_B"
+ },
+ "pb35b061d6d": {
+  "stance": "OPTION_A"
+ },
+ "pb4148bac7c": {
+  "stance": "OPTION_2"
+ },
+ "pb46fbaa3d2": {
+  "stance": "OPTION_A"
+ },
+ "pb4a06a9328": {
+  "stance": "OPTION_2"
+ },
+ "pb4b7aff48d": {
+  "stance": "OPTION_2"
+ },
+ "pb50254ff24": {
+  "stance": "OPTION_1"
+ },
+ "pb62351bfdc": {
+  "stance": "OPTION_2"
+ },
+ "pb6b73b832c": {
+  "stance": "OPTION_1"
+ },
+ "pb71c0eb6a9": {
+  "stance": "OPTION_A"
+ },
+ "pb720e75927": {
+  "stance": "OPTION_2"
+ },
+ "pb7f791d6d2": {
+  "stance": "OPTION_2"
+ },
+ "pb80cdc79a4": {
+  "stance": "OPTION_2"
+ },
+ "pb9e4780827": {
+  "stance": "OPTION_1"
+ },
+ "pbb7e11b1f5": {
+  "stance": "OPTION_2"
+ },
+ "pbb954fa56a": {
+  "stance": "OPTION_2"
+ },
+ "pbbe2e7abac": {
+  "stance": "OPTION_2"
+ },
+ "pbc20b3d0ca": {
+  "stance": "OPTION_2"
+ },
+ "pbc2ab19ad9": {
+  "stance": "OPTION_2"
+ },
+ "pbc6e5f0dac": {
+  "stance": "OPTION_2"
+ },
+ "pbdb3209569": {
+  "stance": "OPTION_2"
+ },
+ "pbdee0c99c2": {
+  "stance": "OPTION_A"
+ },
+ "pbe4bfdeb40": {
+  "stance": "OPTION_2"
+ },
+ "pbecfa310ba": {
+  "stance": "OPTION_A"
+ },
+ "pbee81c5324": {
+  "stance": "OPTION_B"
+ },
+ "pbf3f21f2ff": {
+  "stance": "OPTION_1"
+ },
+ "pbf40922677": {
+  "stance": "OPTION_2"
+ },
+ "pbf747641b0": {
+  "stance": "OPTION_2"
+ },
+ "pbfaac8b529": {
+  "stance": "OPTION_2"
+ },
+ "pbfb10c2971": {
+  "stance": "OPTION_2"
+ },
+ "pbffd66fa14": {
+  "stance": "OPTION_2"
+ },
+ "pc0b7c7ea18": {
+  "stance": "OPTION_A"
+ },
+ "pc11370888c": {
+  "stance": "OPTION_1"
+ },
+ "pc2947105db": {
+  "stance": "OPTION_2"
+ },
+ "pc2b201523c": {
+  "stance": "OPTION_A"
+ },
+ "pc31019e854": {
+  "stance": "OTHER"
+ },
+ "pc31ecde3df": {
+  "stance": "OPTION_A"
+ },
+ "pc327eaeb58": {
+  "stance": "OPTION_2"
+ },
+ "pc340159ad0": {
+  "stance": "OPTION_2"
+ },
+ "pc39eb81fb4": {
+  "stance": "OPTION_A"
+ },
+ "pc3d570604b": {
+  "stance": "OPTION_2"
+ },
+ "pc495dccd92": {
+  "stance": "OPTION_1"
+ },
+ "pc4d7dbe0f5": {
+  "stance": "OPTION_A"
+ },
+ "pc63c393729": {
+  "stance": "OPTION_2"
+ },
+ "pc6af00bba1": {
+  "stance": "OPTION_A"
+ },
+ "pc6d378d74b": {
+  "stance": "OPTION_1"
+ },
+ "pc6f4871ac0": {
+  "stance": "OPTION_2"
+ },
+ "pc760ff1f29": {
+  "stance": "OTHER"
+ },
+ "pc76977a280": {
+  "stance": "OPTION_2"
+ },
+ "pc79831721c": {
+  "stance": "OPTION_2"
+ },
+ "pc82c038e92": {
+  "stance": "OPTION_2"
+ },
+ "pc861bb0efa": {
+  "stance": "OPTION_1"
+ },
+ "pc8864b1cb6": {
+  "stance": "OPTION_2"
+ },
+ "pc95b3e1d6a": {
+  "stance": "OPTION_1"
+ },
+ "pc9b831c3da": {
+  "stance": "OPTION_2"
+ },
+ "pcac1b5a4bf": {
+  "stance": "OPTION_1"
+ },
+ "pcb534269fc": {
+  "stance": "OPTION_2"
+ },
+ "pcb60af4bff": {
+  "stance": "OPTION_1"
+ },
+ "pcb6c0df848": {
+  "stance": "OPTION_2"
+ },
+ "pcbb9421199": {
+  "stance": "OPTION_2"
+ },
+ "pcbbd1d6a84": {
+  "stance": "OPTION_A"
+ },
+ "pcc67af3828": {
+  "stance": "OPTION_A"
+ },
+ "pcc81be6b78": {
+  "stance": "OPTION_A"
+ },
+ "pcca8b0e13d": {
+  "stance": "OPTION_2"
+ },
+ "pce22700ec8": {
+  "stance": "OPTION_1"
+ },
+ "pce60e7e764": {
+  "stance": "OPTION_A"
+ },
+ "pcece5413ef": {
+  "stance": "OPTION_2"
+ },
+ "pcef1893c63": {
+  "stance": "OPTION_A"
+ },
+ "pcf3b82f951": {
+  "stance": "OPTION_2"
+ },
+ "pcf61d4729b": {
+  "stance": "OPTION_A"
+ },
+ "pcfb8ff154a": {
+  "stance": "OPTION_1"
+ },
+ "pcfb91377c7": {
+  "stance": "OPTION_A"
+ },
+ "pcff2d50c89": {
+  "stance": "OPTION_1"
+ },
+ "pd0b5ce1a5e": {
+  "stance": "OPTION_2"
+ },
+ "pd0c0f66f72": {
+  "stance": "OPTION_1"
+ },
+ "pd1643ee9ad": {
+  "stance": "OPTION_A"
+ },
+ "pd191d5745b": {
+  "stance": "OPTION_A"
+ },
+ "pd3147d38ad": {
+  "stance": "OPTION_2"
+ },
+ "pd32a932825": {
+  "stance": "OPTION_1"
+ },
+ "pd37313416c": {
+  "stance": "OPTION_1"
+ },
+ "pd4473011e6": {
+  "stance": "OPTION_2"
+ },
+ "pd4fef906ba": {
+  "stance": "OPTION_1"
+ },
+ "pd553d399e5": {
+  "stance": "OTHER"
+ },
+ "pd5543f774e": {
+  "stance": "OPTION_A"
+ },
+ "pd594f8a6f2": {
+  "stance": "OPTION_1"
+ },
+ "pd5c9198931": {
+  "stance": "OPTION_1"
+ },
+ "pd6c6c82348": {
+  "stance": "OPTION_A"
+ },
+ "pd703bce50a": {
+  "stance": "OPTION_2"
+ },
+ "pd726f0e7a3": {
+  "stance": "OPTION_2"
+ },
+ "pd7582c0cc9": {
+  "stance": "OPTION_2"
+ },
+ "pd7dc34d5c7": {
+  "stance": "OPTION_B"
+ },
+ "pd8263ad181": {
+  "stance": "OPTION_2"
+ },
+ "pd85a346efc": {
+  "stance": "OPTION_A"
+ },
+ "pd894efb24d": {
+  "stance": "OPTION_2"
+ },
+ "pd8ca53f320": {
+  "stance": "OPTION_A"
+ },
+ "pd9c86a9e9e": {
+  "stance": "OPTION_2"
+ },
+ "pda50974c8d": {
+  "stance": "OPTION_2"
+ },
+ "pda93c99df0": {
+  "stance": "OPTION_2"
+ },
+ "pdb377e68ae": {
+  "stance": "OPTION_A"
+ },
+ "pdb72a4ef3f": {
+  "stance": "OPTION_1"
+ },
+ "pdb783f39a4": {
+  "stance": "OPTION_B"
+ },
+ "pdbda0f27e6": {
+  "stance": "OPTION_2"
+ },
+ "pdcf28971ca": {
+  "stance": "OPTION_2"
+ },
+ "pdd02437991": {
+  "stance": "OPTION_2"
+ },
+ "pdd3612d421": {
+  "stance": "OPTION_2"
+ },
+ "pde21bf8125": {
+  "stance": "OPTION_2"
+ },
+ "pde2ebef185": {
+  "stance": "OPTION_1"
+ },
+ "pde3e007783": {
+  "stance": "OPTION_2"
+ },
+ "pdea95707d2": {
+  "stance": "OTHER"
+ },
+ "pdf90b8ad3f": {
+  "stance": "OPTION_2"
+ },
+ "pdff93d35a8": {
+  "stance": "OPTION_1"
+ },
+ "pe08d06908c": {
+  "stance": "OPTION_2"
+ },
+ "pe10aa7d99a": {
+  "stance": "OPTION_A"
+ },
+ "pe14cc82949": {
+  "stance": "OPTION_1"
+ },
+ "pe1a74ef7c3": {
+  "stance": "OPTION_2"
+ },
+ "pe237d21fe1": {
+  "stance": "OPTION_2"
+ },
+ "pe23e584d77": {
+  "stance": "OPTION_A"
+ },
+ "pe2b166234c": {
+  "stance": "OPTION_1"
+ },
+ "pe2b7601928": {
+  "stance": "OPTION_2"
+ },
+ "pe2f0c9810b": {
+  "stance": "OPTION_2"
+ },
+ "pe308958a8f": {
+  "stance": "OPTION_2"
+ },
+ "pe31ced6568": {
+  "stance": "OPTION_2"
+ },
+ "pe39afdc5a6": {
+  "stance": "OPTION_1"
+ },
+ "pe4002d89e3": {
+  "stance": "OPTION_2"
+ },
+ "pe417a4a569": {
+  "stance": "OPTION_2"
+ },
+ "pe485390587": {
+  "stance": "OPTION_A"
+ },
+ "pe4ed2ffb83": {
+  "stance": "OPTION_A"
+ },
+ "pe55298e86a": {
+  "stance": "OPTION_2"
+ },
+ "pe57ed9c7c7": {
+  "stance": "OPTION_2"
+ },
+ "pe59eca9e63": {
+  "stance": "OPTION_2"
+ },
+ "pe6ce13da66": {
+  "stance": "OPTION_2"
+ },
+ "pe6ff846dd2": {
+  "stance": "OPTION_1"
+ },
+ "pe70170e52f": {
+  "stance": "OPTION_2"
+ },
+ "pe73a1cd581": {
+  "stance": "OPTION_2"
+ },
+ "pe766014cd7": {
+  "stance": "OPTION_A"
+ },
+ "pe78039189e": {
+  "stance": "OPTION_A"
+ },
+ "pe893d751a0": {
+  "stance": "OPTION_2"
+ },
+ "pe8e0284d91": {
+  "stance": "OPTION_2"
+ },
+ "pe9028d03f3": {
+  "stance": "OPTION_2"
+ },
+ "pea0322955c": {
+  "stance": "OTHER"
+ },
+ "pea1fd73cc7": {
+  "stance": "OPTION_A"
+ },
+ "pea32052ca3": {
+  "stance": "OPTION_B"
+ },
+ "pea49fa2f7b": {
+  "stance": "OPTION_A"
+ },
+ "pea4e6f429b": {
+  "stance": "OPTION_A"
+ },
+ "pea88855e61": {
+  "stance": "OPTION_1"
+ },
+ "peaa2349901": {
+  "stance": "OPTION_2"
+ },
+ "peae7faff38": {
+  "stance": "OPTION_1"
+ },
+ "peafda715a5": {
+  "stance": "OPTION_1"
+ },
+ "peb25ddface": {
+  "stance": "OPTION_2"
+ },
+ "peb838f835e": {
+  "stance": "OPTION_2"
+ },
+ "peb88d1d4b3": {
+  "stance": "OPTION_2"
+ },
+ "peba95138ee": {
+  "stance": "OPTION_2"
+ },
+ "pec48b42ca9": {
+  "stance": "OPTION_1"
+ },
+ "pec51867d21": {
+  "stance": "OPTION_2"
+ },
+ "pecaa6b95a2": {
+  "stance": "OPTION_A"
+ },
+ "pece1d6b8c8": {
+  "stance": "OPTION_2"
+ },
+ "pece8e938db": {
+  "stance": "OPTION_2"
+ },
+ "ped1f766dd4": {
+  "stance": "OPTION_A"
+ },
+ "ped517e321d": {
+  "stance": "OPTION_2"
+ },
+ "pedb79e8409": {
+  "stance": "OPTION_A"
+ },
+ "pee487b7c38": {
+  "stance": "OPTION_2"
+ },
+ "pee969a5f4b": {
+  "stance": "OPTION_1"
+ },
+ "peed40b08e0": {
+  "stance": "OPTION_2"
+ },
+ "pef739aa417": {
+  "stance": "OPTION_2"
+ },
+ "pf0cbd61a2a": {
+  "stance": "OPTION_1"
+ },
+ "pf0d628eba6": {
+  "stance": "OPTION_A"
+ },
+ "pf14fd0de4b": {
+  "stance": "OPTION_2"
+ },
+ "pf18683de5a": {
+  "stance": "OPTION_1"
+ },
+ "pf1989c870a": {
+  "stance": "OTHER"
+ },
+ "pf1a2e9431a": {
+  "stance": "OPTION_2"
+ },
+ "pf20a7b149b": {
+  "stance": "OPTION_1"
+ },
+ "pf2116a1e75": {
+  "stance": "OPTION_2"
+ },
+ "pf24ca4fcec": {
+  "stance": "OPTION_A"
+ },
+ "pf265d08128": {
+  "stance": "OPTION_A"
+ },
+ "pf274c811f9": {
+  "stance": "OPTION_1"
+ },
+ "pf27bc4f7f0": {
+  "stance": "OTHER"
+ },
+ "pf3aa117d34": {
+  "stance": "OPTION_2"
+ },
+ "pf42b3bdbfc": {
+  "stance": "OPTION_1"
+ },
+ "pf4c781bff8": {
+  "stance": "OPTION_1"
+ },
+ "pf51ccc5643": {
+  "stance": "OPTION_2"
+ },
+ "pf6101c4e28": {
+  "stance": "OPTION_2"
+ },
+ "pf646e67b67": {
+  "stance": "OPTION_2"
+ },
+ "pf88e18b345": {
+  "stance": "OPTION_A"
+ },
+ "pf8cbc129f1": {
+  "stance": "OPTION_1"
+ },
+ "pf975fc1ce2": {
+  "stance": "OPTION_2"
+ },
+ "pf97a255198": {
+  "stance": "OPTION_1"
+ },
+ "pf9be4d52f7": {
+  "stance": "OPTION_2"
+ },
+ "pfa10dceb72": {
+  "stance": "OPTION_2"
+ },
+ "pfa160dfd3c": {
+  "stance": "OPTION_2"
+ },
+ "pfa3aec91db": {
+  "stance": "OPTION_1"
+ },
+ "pfa5edd0dd1": {
+  "stance": "OPTION_A"
+ },
+ "pfa82f0915f": {
+  "stance": "OPTION_A"
+ },
+ "pfafe68ce8f": {
+  "stance": "OPTION_2"
+ },
+ "pfb48604916": {
+  "stance": "OPTION_2"
+ },
+ "pfc32f5efc1": {
+  "stance": "OPTION_2"
+ },
+ "pfcc6067af1": {
+  "stance": "OPTION_2"
+ },
+ "pfcccd815c1": {
+  "stance": "OPTION_2"
+ },
+ "pfcdacdb8ab": {
+  "stance": "OPTION_2"
+ },
+ "pfd58cafa6d": {
+  "stance": "OPTION_2"
+ },
+ "pfd5f5b3a69": {
+  "stance": "OPTION_2"
+ },
+ "pfe50a2df07": {
+  "stance": "OPTION_2"
+ },
+ "pff1fb418f1": {
+  "stance": "OPTION_A"
+ },
+ "pff4d431ae9": {
+  "stance": "OPTION_2"
+ },
+ "pff86e721e0": {
+  "stance": "OPTION_2"
+ },
+ "_meta": {
+  "coder": "Claude Fable 5.2, one blind pass on every member (16 readers of 126 to 134 members each, 18 November 2026), blind to version, stake, room and vote",
+  "rubric_sha256": "9de9c19eac0083c5cf3c4fabdf5d49d11ffabf9d3401737b472505f455eac675",
+  "n_cases": 672,
+  "note": "The readers saw the rubric once per file and each case under an opaque id; cases of the four rounds were mixed and shuffled."
+ }
+}

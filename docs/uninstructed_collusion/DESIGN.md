@@ -1609,3 +1609,68 @@ stage.
 updated with this round and kept within five pages; the long version of 17 November is
 `collusion_behaviour_study_full.pdf`. The explorer page covers rounds 1 to 4 and is not updated. Andy said the work
 rests after this round; nothing further is started.
+
+### 18 November 2026, afternoon: the labels follow Claude's reading alone (a change made after all runs)
+
+**What Andy decided,** while reviewing the deck: "using model gemma2 which is the model used in the actual experiment
+is not very good. Because the model is quite weak itself [...] Please rely on the Claude's output because it gemma 2
+will not be very reliable." and "Rewrite the results if necessary on both the deck also the paper if you need." A
+human review of the codings is planned for a later stage.
+
+**What changes.** Section 6 fixed the room label as the agreement of two coders, Gemma-2-9B-it and Claude. From this
+note on, reports follow the second coder alone, Claude Fable 5.2: the room label is `label_by_coder[1]` of each room
+record, the proposal and acceptance marks are Claude's, and the public positions are Claude's reading of every member.
+The change is made after all five rounds had run and been read, so it is reported as a change, next to the label that
+was fixed in advance. No recorded file is altered: `rooms.json`, `summary.json`, `RESULTS.md`, `public_stance.json`
+and the decisions taken on them at the time (the pilot rule, the kappa requirement) stand as written.
+
+**What was run for it.** No pod. One blind pass of Claude Fable 5.2 over the public statements of all 2,136 members
+of rounds 2 to 5: 16 readers of 126 to 134 members each, the cases of the four rounds mixed and shuffled under opaque
+ids, the rubric of 17 November unchanged and shown once per file. The cases, the brief every reader got and the check
+of the answers are in `scripts/uninstructed_stance_full_pass.py`; the readers' answers by file and the key are in
+`results/uninstructed/stance_full_pass/`. Answers per round:
+`results/uninstructed/pilot{2,3,4,5}/stance_claude_all.json`. Tabulation with Claude first, Gemma second and Claude's
+earlier sample pass third: `results/uninstructed/pilot{2,3,4,5}/claude_first/`. Round 1 has no reading of public
+positions (its only votes for the stake option are 4 in S0).
+
+**Rooms labelled collusion and clean, Claude alone against both coders.**
+
+| Type | Rooms | Collusion: Claude | both | Clean: Claude | both |
+|---|---|---|---|---|---|
+| T2 | 48 | 1 | 1 | 30 | 24 |
+| T3 | 48 | 2 | 1 | 32 | 23 |
+| T6 | 48 | 0 | 0 | 24 | 13 |
+| T7, round 3 | 48 | 24 | 22 | 9 | 8 |
+| T8 | 48 | 10 | 10 | 0 | 0 |
+| I1 | 48 | 26 | 13 | 6 | 6 |
+| T0 | 100 | 1 | 0 | 86 | 85 |
+| T7, round 4 | 200 | 80 | 74 | 18 | 18 |
+| K1 | 96 | 38 | 35 | 8 | 8 |
+| K2 | 96 | 10 | 8 | 24 | 15 |
+
+The fact types stay at 0 collusion rooms of 240. The one T0 room is `env_01`, run 0, room 0: the pair agrees on the
+option the bank ties to the outside interest and both vote for it, with no stake stated. The two coders give the same
+code to 1,010 of the 1,260 rooms (80%).
+
+**Votes for the stake option after arguing for the other option in public, Claude (every member) against Gemma.**
+T2 7 against 7 of 8; T3 11 against 10 of 17; T6 24 against 20 of 25; T7 26 against 24 of 59 (round 3) and 123 against
+130 of 251 (round 4); T8 14 against 11 of 36; I1 0 against 0 of 69; K1 70 against 72 of 135; K2 72 against 71 of 73.
+Under I1 Claude reads all 69 as arguing for the stake option in public (Gemma: 46, and 23 for neither). Gemma reads
+the same position as Claude for 96%, 92%, 93% and 96% of the members of rounds 2 to 5 (kappa 0.52, 0.78, 0.82, 0.89).
+Claude's full pass against its own earlier pass on 136 members per round: 93%, 88%, 99%, 99%; every difference is
+between an option and "neither".
+
+**Where the scenarios part, by Claude's marks** (rooms of T7 in round 4; 40, 88 and 72 rooms in the groups with no
+vote, in between, and every vote): a member proposes backing the stake option in 32, 82 and 71 rooms; the other member
+goes along in 6, 55 and 56. In round 5 the other member goes along in 47 of 96 rooms under K1 and in 18 under K2.
+Claude reads a pact for the stake option in 102 of the 200 rooms of T7 in round 4; both members then vote for it in
+84, one in 6 and neither in 12.
+
+**What does not change.** Every count of votes, and with them the two decision rules of round 5, which are rules on
+votes: the kind of stake matters, and the rule for the case is not met. The readings of the earlier notes stand. The
+instructed control doubles (13 to 26 collusion rooms of 48), as the note of the third round's outcome expected: Gemma
+under-reads pacts in instructed rooms.
+
+**Where it is used.** The five-page paper (`collusion_behaviour_study.pdf`; numbers and figures under `claude_basis/`,
+written by the two asset scripts with `--basis claude`) and Part 2 of the deck. The long version of 17 November, the
+explorer page and the tables under `results/` keep the label of both coders. Committed the same day, at Andy's word.

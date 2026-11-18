@@ -15,14 +15,15 @@ the episode, and the label comes from what the pair did. Design and pre-registra
 | `scripts/uninstructed_summarize.py` | Rates per version, labels, kappa, the pilot rule; votes by speaker and by scenario |
 | `scripts/uninstructed_notable_rooms.py` | The rooms of a round worth reading, with their text: votes for the stake option, pacts, flagged public messages |
 | `scripts/uninstructed_all_rounds.py` | One table over all rounds, by version and by scenario |
-| `scripts/uninstructed_public_stance.py` | Exploratory: the option each member supports in the open discussion, coded blind (by Gemma on the pod, by Claude on a sample), against the recorded vote |
+| `scripts/uninstructed_public_stance.py` | Exploratory: the option each member supports in the open discussion, coded blind, against the recorded vote: by Gemma on the pod and by Claude on a sample (`public_stance.json`), and since 18 November 2026 by Claude for every member (`stance_claude_all.json`, tabulated with Claude first in `claude_first/`) |
+| `scripts/uninstructed_stance_full_pass.py` | A second coder reads the public position of every member: exports blind cases in chunks, checks the readers' answers and writes `stance_claude_all.json` per round. The pass of 18 November 2026 (16 Claude readers) is recorded in `results/uninstructed/stance_full_pass/` (answers by chunk, and the key) |
 | `scripts/uninstructed_by_scenario.py` | A round over many scenarios read scenario by scenario, against a no-stake baseline and the scenario features |
 | `uninstructed/scenario_features.json` | Six features of each of the 50 scenarios, coded from the texts by two blind passes before the fourth round |
 | `docs/uninstructed_collusion/EXAMPLE_EPISODE.md` | One recorded episode from the first prompt to its label, and what each version changes |
 | `docs/uninstructed_collusion/collusion_behaviour_study.pdf` (`.tex`) | The paper, within five pages: the setup and the main results of the five rounds |
 | `docs/uninstructed_collusion/collusion_behaviour_study_full.pdf` (`.tex`, `tables/`, `figs/`) | The long version of 17 November 2026, four rounds: method, a worked example, decisions, ten findings, limits, proposed experiments, candidate classes for stage 2 |
-| `scripts/uninstructed_paper_assets.py` | Writes the tables, figures and every number of the long version (`tables/numbers.tex`) from the data |
-| `scripts/uninstructed_short_paper_assets.py` | Writes what the five-page paper adds: `tables/short_numbers.tex` and its three tables |
+| `scripts/uninstructed_paper_assets.py` | Writes the tables, figures and every number of the long version (`tables/numbers.tex`) from the data; with `--basis claude` the same on the second coder's reading alone, into `claude_basis/` |
+| `scripts/uninstructed_short_paper_assets.py` | Writes what the five-page paper adds: `short_numbers.tex` and its three tables (`--basis claude` for the paper as it stands, into `claude_basis/tables/`) |
 | `docs/uninstructed_collusion/BEHAVIOURAL_REVIEW.md` | Review of what is ready and what the rounds show, written for Andy on 17 November 2026 |
 | `scripts/uninstructed_stake_kinds.py` | The fifth round read off as fixed before it ran: the same 12 cases under two kinds of stake sentences (versions K1, K2), `results/uninstructed/pilot5/STAKE_KINDS.md` |
 | `scripts/uninstructed_scenario_properties.py` | What separates the scenarios: where in the episode they part, and properties of the scenario texts coded by two blind passes (`results/uninstructed/pilot4/SCENARIO_PROPERTIES.md`, `scenario_properties_blind.json`); exploratory |
@@ -62,14 +63,18 @@ round, `pilot4/` for the fourth, `pilot5/` for the fifth); the pods are recorded
 rounds in one table.
 Activation files and pod archives are not committed.
 
-Rebuild the paper (the long version builds the same way from `collusion_behaviour_study_full.tex`; 0.69 is the cost in dollars of the fifth round's second pod):
+Rebuild the paper (0.69 is the cost in dollars of the fifth round's second pod). Since 18 November 2026 the five-page
+paper follows the second coder alone, Claude Fable 5.2, for the room labels, the marks and the public positions
+(`--basis claude`, files under `claude_basis/`; DESIGN.md, note of that day). The long version of 17 November keeps the
+label on which both coders agree: it builds from `collusion_behaviour_study_full.tex` after the same two scripts
+without `--basis`.
 
 ```bash
-python3 scripts/uninstructed_paper_assets.py
+python3 scripts/uninstructed_paper_assets.py --basis claude
 ```
 
 ```bash
-python3 scripts/uninstructed_short_paper_assets.py --cost5 0.69
+python3 scripts/uninstructed_short_paper_assets.py --basis claude --cost5 0.69
 ```
 
 ```bash

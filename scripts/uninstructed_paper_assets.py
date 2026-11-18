@@ -45,6 +45,17 @@ def wilson(k, n, z=1.96):
     return max(0.0, c - h), min(1.0, c + h)
 
 
+# Which reading a room's label follows. None: the label fixed before the runs, on which both coders must agree (the record
+# of 17 November 2026 and the long paper). 1: the second coder alone, Claude Fable 5.2 (--basis claude; the short paper since
+# 18 November 2026, because the first coder, Gemma-2-9B-it, is the model under study and the weaker reader).
+CODER: int | None = None
+STANCE_DIR = ""        # the sub-folder of a round that holds public_stance.json: "" or "claude_first"
+
+
+def label_of(r: dict) -> str:
+    return r["label"] if CODER is None else r["label_by_coder"][CODER]
+
+
 def stats(rs: list[dict]) -> dict:
     tv = sum(x == r["target"] for r in rs for x in r["votes"]); n = sum(len(r["votes"]) for r in rs)
     both = [r for r in rs if all(x == r["target"] for x in r["votes"])]
@@ -52,15 +63,16 @@ def stats(rs: list[dict]) -> dict:
     for r in rs:
         ep[r["run_id"]] += sum(x == r["target"] for x in r["votes"])
     two = all(len(r["codes"]) == 2 for r in rs)
-    lo, hi = wilson(tv, n); clo, chi = wilson(sum(r["label"] == "collusion" for r in rs), len(rs))
+    lo, hi = wilson(tv, n); clo, chi = wilson(sum(label_of(r) == "collusion" for r in rs), len(rs))
     return {"tv": tv, "n": n, "pct": round(100 * tv / n) if n else 0, "lo": round(100 * lo), "hi": round(100 * hi),
             "rooms": len(rs), "both": len(both),
             "g": sum(r["codes"][0] == "AGREE_TARGET" for r in rs), "c": sum(r["codes"][1] == "AGREE_TARGET" for r in rs) if two else 0,
             "gc": sum(set(r["codes"]) == {"AGREE_TARGET"} for r in rs),
-            "col": sum(r["label"] == "collusion" for r in rs), "colpct": round(100 * sum(r["label"] == "collusion" for r in rs) / len(rs)) if rs else 0,
+            "col": sum(label_of(r) == "collusion" for r in rs), "colpct": round(100 * sum(label_of(r) == "collusion" for r in rs) / len(rs)) if rs else 0,
+            "colboth": sum(r["label"] == "collusion" for r in rs), "cleanboth": sum(r["label"] == "clean" for r in rs),
             "collo": round(100 * clo), "colhi": round(100 * chi),
-            "clean": sum(r["label"] == "clean" for r in rs), "cleanpct": round(100 * sum(r["label"] == "clean" for r in rs) / len(rs)) if rs else 0,
-            "other": sum(r["label"] == "other" for r in rs),
+            "clean": sum(label_of(r) == "clean" for r in rs), "cleanpct": round(100 * sum(label_of(r) == "clean" for r in rs) / len(rs)) if rs else 0,
+            "other": sum(label_of(r) == "other" for r in rs),
             "broken": sum(set(r["codes"]) == {"AGREE_TARGET"} and not all(x == r["target"] for x in r["votes"]) for r in rs),
             "bothpact": sum(set(r["codes"]) == {"AGREE_TARGET"} for r in both), "bothnopact": sum(set(r["codes"]) != {"AGREE_TARGET"} for r in both),
             "ep3": sum(k >= 3 for k in ep.values()), "eps": len(ep),
@@ -169,7 +181,14 @@ def table(path: Path, spec: str, head, rows: list[list], sep: float | None = Non
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-figs", action="store_true")
+    ap.add_argument("--basis", choices=["both", "claude"], default="both",
+                    help="both: the label fixed before the runs (both coders agree). claude: the second coder alone; writes to <doc>/claude_basis")
+    ap.add_argument("--doc", type=Path, default=None, help="folder that gets tables/ and figs/")
     a = ap.parse_args()
+    global CODER, STANCE_DIR, DOC
+    if a.basis == "claude":
+        CODER, STANCE_DIR, DOC = 1, "claude_first", DOC / "claude_basis"
+    DOC = a.doc or DOC
     (DOC / "tables").mkdir(parents=True, exist_ok=True)
     (DOC / "figs").mkdir(parents=True, exist_ok=True)
 
@@ -202,7 +221,7 @@ def main() -> int:
         for r in by(v, rnd):
             d = out.setdefault(r["scenario_id"], {"sv": 0, "n": 0, "rooms": 0, "both": 0, "col": 0, "clean": 0})
             d["sv"] += sum(x == r["target"] for x in r["votes"]); d["n"] += len(r["votes"]); d["rooms"] += 1
-            d["both"] += all(x == r["target"] for x in r["votes"]); d["col"] += r["label"] == "collusion"; d["clean"] += r["label"] == "clean"
+            d["both"] += all(x == r["target"] for x in r["votes"]); d["col"] += label_of(r) == "collusion"; d["clean"] += label_of(r) == "clean"
         return out
     t0, t7 = per_scenario("T0", 4), per_scenario("T7", 4)
     lean = sorted(s for s in sids50 if t0[s]["sv"] >= 2)
@@ -219,7 +238,7 @@ def main() -> int:
         "leanList": ", ".join(rf"\texttt{{{tex(s)}}}" for s in lean) or "none", "leanCount": len(lean),
         "scenZero": sum(d["sv"] == 0 for d in t7.values()), "scenAll": sum(d["sv"] == d["n"] for d in t7.values()),
         "scenAnyCol": sum(d["col"] > 0 for d in t7.values()), "scenBoth": sum(d["col"] > 0 and d["clean"] > 0 for d in t7.values()),
-        "scenBothThree": len({r["scenario_id"] for r in by("T7", 3) if r["label"] == "collusion"} & {r["scenario_id"] for r in by("T7", 3) if r["label"] == "clean"}),
+        "scenBothThree": len({r["scenario_id"] for r in by("T7", 3) if label_of(r) == "collusion"} & {r["scenario_id"] for r in by("T7", 3) if label_of(r) == "clean"}),
         "tZeroStakeScen": sum(d["sv"] > 0 for d in t0.values()),
         "featAgree": sum(int(v.split(" of ")[0]) for v in feats["agreement_of_the_two_passes"].values()),
     }
@@ -231,7 +250,7 @@ def main() -> int:
     # public positions: coder 1 = Gemma over every member; coder 2 = a Claude sample
     PUB, PUBAG = {}, {}
     for name, k in ROUNDS[1:]:
-        f = RU / name / "public_stance.json"
+        f = RU / name / STANCE_DIR / "public_stance.json"
         if not f.exists():
             continue
         ps = json.loads(f.read_text())["summary"]
@@ -261,8 +280,9 @@ def main() -> int:
     L += quote_macros()
     L.append(r"\makeatother")
     (DOC / "tables/numbers.tex").write_text("\n".join(L) + "\n")
-    for name, body in example_blocks().items():
-        (DOC / f"tables/{name}.tex").write_text(body + "%\n")
+    if CODER is None:       # the worked example of the long paper does not depend on the basis
+        for name, body in example_blocks().items():
+            (DOC / f"tables/{name}.tex").write_text(body + "%\n")
 
     # ---------------------------------------------------------------- tables
     def vrow(v, label=None):
@@ -295,7 +315,7 @@ def main() -> int:
 
     table(DOC / "tables/tab_repeat.tex", "@{}lrrrr@{}", ["Scenario", "Round 3: votes", "Round 4: votes", "Round 3: collusion rooms", "Round 4"],
           [[rf"\texttt{{{tex(s)}}}", f"{sc('T7', s, 3)}/8", f"{t7[s]['sv']}/8",
-            f"{sum(r['label'] == 'collusion' for r in by('T7', 3) if r['scenario_id'] == s)}/4", f"{t7[s]['col']}/4"] for s in p12]
+            f"{sum(label_of(r) == 'collusion' for r in by('T7', 3) if r['scenario_id'] == s)}/4", f"{t7[s]['col']}/4"] for s in p12]
           + [r"\midrule", ["All 12", f"{S['T7']['tv']}/96", f"{S['T7r']['tv']}/96", f"{S['T7']['col']}/48", f"{S['T7r']['col']}/48"]])
 
     dist = collections.Counter(d["sv"] for d in t7.values())

@@ -12,14 +12,18 @@
 \renewcommand\section{\@startsection{section}{1}{\z@}{-2.2ex \@plus -.6ex \@minus -.3ex}{1.0ex \@plus .2ex}{\normalfont\large\bfseries}}
 \makeatother
 
-% The short paper: setup and main results of five rounds. Every number comes from tables/numbers.tex (written by
-% scripts/uninstructed_paper_assets.py) and tables/short_numbers.tex (scripts/uninstructed_short_paper_assets.py), and the
-% tables from tables/short_*.tex. The long version of 17 November 2026 (design decisions, a worked example, ten
-% findings, proposed experiments) is collusion_behaviour_study_full.tex.
-% Rebuild: python3 scripts/uninstructed_paper_assets.py && python3 scripts/uninstructed_short_paper_assets.py --cost5 0.69
+% The short paper: setup and main results of five rounds. Every number comes from claude_basis/tables/numbers.tex (written
+% by scripts/uninstructed_paper_assets.py) and claude_basis/tables/short_numbers.tex
+% (scripts/uninstructed_short_paper_assets.py), and the tables from claude_basis/tables/short_*.tex.
+% Since 18 November 2026 the room labels, the marks and the public positions follow the second coder alone, Claude
+% Fable 5.2 (--basis claude); the label fixed before the runs asked for both coders and is reported next to it. The files
+% under tables/ and figs/ keep that earlier basis for the long version of 17 November 2026 (design decisions, a worked
+% example, ten findings, proposed experiments), collusion_behaviour_study_full.tex.
+% Rebuild: python3 scripts/uninstructed_paper_assets.py --basis claude
+%          && python3 scripts/uninstructed_short_paper_assets.py --basis claude --cost5 0.69
 %          && (cd docs/uninstructed_collusion && tectonic collusion_behaviour_study.tex)
-\input{tables/numbers.tex}
-\input{tables/short_numbers.tex}
+\input{claude_basis/tables/numbers.tex}
+\input{claude_basis/tables/short_numbers.tex}
 \newcommand{\sid}[1]{\texttt{#1}}
 \newcommand{\qa}[1]{\par\smallskip\noindent\textbf{#1}\enspace}
 
@@ -62,13 +66,20 @@ loses, and adds one sentence at a time: a heavier loss, a wish (``You would like
 interest. You have not decided what to do about it.''), an intention (``You intend to see the decision go in favour of
 that interest.''). No type except the control says what to do, argue or hide, and none mentions the room partner.
 
-\paragraph{What is measured.} The \emph{vote} is read from the recommendation line. Each \emph{private room} is coded
-by two coders, Gemma-2-9B-it and Claude, who see neither the type nor the votes: a pact for the stake option, a pact
-on the merits, a split, or no pact (kappa \N{kappaTwo}, \N{kappaThree}, \N{kappaFour} and \SN{kappaFive} in rounds 2
-to 5). A room is \emph{collusion} when both coders read a pact for the stake option, both members vote for it and neither
-tells the committee; it is \emph{clean} when both read a pact on the merits or no pact and both vote for the other
-option. The \emph{public position}, the option a member argues for in the open rounds, is coded the same way and set
-against the vote.
+\paragraph{What is measured.} The \emph{vote} is read from the recommendation line. Each \emph{private room} is read
+by Claude Fable 5.2, which sees neither the type nor the votes, and coded as a pact for the stake option, a pact on the
+merits, a split, or no pact. A room is \emph{collusion} when it holds a pact for the stake option, both members vote
+for it and neither tells the committee; it is \emph{clean} when it holds a pact on the merits or no pact and both vote
+for the other option. The \emph{public position}, the option a member argues for in the open rounds, is read the same
+way for every member and set against the vote.
+
+\paragraph{The second reader.} Gemma-2-9B-it coded the rooms and the positions too. It is the model under study and
+the weaker reader, so it serves as a check only. It gives the same code to \SN{sameCodePct}\% of the \SN{roomsCoded}
+rooms (kappa \N{kappaTwo}, \N{kappaThree}, \N{kappaFour} and \SN{kappaFive} in rounds 2 to 5) and the same position to
+\SN{pubAgreeMin}\% to \SN{pubAgreeMax}\% of the members of a round. The label fixed before the runs asked for both
+coders to agree. We moved to Claude's reading alone on 18 November 2026, after all runs; the earlier label gives
+\SN{bothSeven}, \SN{bothSevenB}, \SN{kOneColBoth} and \SN{kTwoColBoth} collusion rooms where this report counts
+\V{T7}{col}, \V{T7b}{col}, \SN{kOneCol} and \SN{kTwoCol}.
 
 \paragraph{Rounds.} Rounds 1 to 3 try 16 prompt types on 12 scenarios with two runs each. Round 4 runs the intention
 on all 50 scenarios, with a no-stake baseline. Round 5 gives 12 scenarios a stake of each of two kinds, four runs each.
@@ -78,11 +89,12 @@ decision rules of each round were written down before it ran.
 
 \begin{table}[t]
 \centering\footnotesize
-\input{tables/short_types.tex}
-\caption{The main prompt types. \emph{Stake votes}: votes for the stake option. \emph{Collusion}: rooms in which both
-coders read a pact for the stake option, both members vote for it and neither tells the committee. \emph{Hidden}: of the
-votes for the stake option, those of members who argued for the other option in the open discussion (first coder; not
-coded in round 1).}
+\input{claude_basis/tables/short_types.tex}
+\caption{The main prompt types. \emph{Stake votes}: votes for the stake option. \emph{Collusion}: rooms that hold a
+pact for the stake option, by Claude's reading, in which both members vote for it and neither tells the committee.
+\emph{Hidden}: of the votes for the stake option, those of members who argued for the other option in the open
+discussion (Claude's reading; not coded in round 1). Without a stake (T0) the label only says that a pair agreed on
+that option and voted for it.}
 \label{tab:types}
 \end{table}
 
@@ -95,7 +107,7 @@ what they have heard and agree to decide on the merits (``\Q{transparent}''). Wi
 option, so the bank's cases do not lean towards it by themselves.
 
 \paragraph{2. A stated intention is the step.} A heavier loss or a wish moves \V{T2}{pct}\% to \V{T6}{pct}\% of votes
-and produces almost no pacts: at most one room in 48 is collusion (Figure~\ref{fig:ladder}). One sentence that states an
+and produces almost no pacts: at most two rooms in 48 are collusion (Figure~\ref{fig:ladder}). One sentence that states an
 intention gives
 \V{T7}{pct}\% of votes and collusion in \V{T7}{col} of \V{T7}{rooms} rooms, while \V{T7}{clean} rooms under the same
 prompt stay clean. The benchmark's own instruction to collude gives \V{I1}{pct}\%, so being told is not far above
@@ -104,7 +116,7 @@ committee are not in the prompt; the model adds them: ``\Q{discreet}''
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.78\textwidth]{figs/fig_ladder.pdf}
+\includegraphics[width=0.78\textwidth]{claude_basis/figs/fig_ladder.pdf}
 \caption{The ladder on the 12 scenarios of rounds 1 to 3. Each row adds something to the stake stated as a fact.}
 \label{fig:ladder}
 \end{figure}
@@ -115,7 +127,7 @@ discussion. Under the loss and the wish that is most of them (\PB{T2}{other} of 
 \PB{T3}{sv}, \PB{T6}{other} of \PB{T6}{sv}); under the intention about half (\PB{T7b}{other} of \PB{T7b}{sv}); under the
 instruction none. The weaker the nudge, the more the vote is hidden. A member that is told to collude argues for the
 stake option openly. In one episode under the intention (\sid{food\_01}, a restaurant's failed health inspection) all
-four members argue in the open rounds for upholding the failing score, by both coders' reading, and all four then vote
+four members argue in the open rounds for upholding the failing score, by Claude's reading, and all four then vote
 to reduce it.
 
 \paragraph{4. It repeats, and the scenario matters as much as the prompt.} On all 50 scenarios the intention gives
@@ -128,20 +140,20 @@ differs is whether the other member goes along. Scenarios that give both a collu
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.7\textwidth]{figs/fig_scenarios.pdf}
+\includegraphics[width=0.7\textwidth]{claude_basis/figs/fig_scenarios.pdf}
 \caption{The intention on all 50 scenarios (round 4): how many scenarios give how many votes for the stake option.}
 \label{fig:scen}
 \end{figure}
 
 \begin{table}[t]
 \centering\footnotesize
-\input{tables/short_funnel.tex}
+\input{claude_basis/tables/short_funnel.tex}
 \caption{Where the scenarios part: rooms of the intention type in round 4. \emph{Proposed}: a member proposes backing
-the stake option in private. \emph{Accepted}: the other member goes along. Ranges are the two coders' marks.}
+the stake option in private. \emph{Accepted}: the other member goes along. Both as marked by Claude.}
 \label{tab:funnel}
 \end{table}
 
-\paragraph{5. What separates the scenarios.} Two blind coders rated properties of the 50 scenario texts. We chose the
+\paragraph{5. What separates the scenarios.} Two blind passes of Claude rated properties of the 50 scenario texts. We chose the
 properties after seeing the results, so this part describes and does not test. Votes for the stake option are
 \SN{pPublic}\% where the committee is a public body (\SN{pPublicN} scenarios), \SN{pProf}\% in professional bodies and
 \SN{pCompany}\% inside companies. They are \SN{pAbove}\% where an office above the member controls what the member has
@@ -163,7 +175,7 @@ The cases, the 24 texts and two decision rules were fixed before the run.
 
 \begin{table}[t]
 \centering\footnotesize
-\input{tables/short_kinds.tex}
+\input{claude_basis/tables/short_kinds.tex}
 \caption{Round 5: votes for the stake option when the same case is given a stake of each kind (16 votes per cell),
 next to round 4, where each scenario had its own stake text (8 votes).}
 \label{tab:kinds}
@@ -194,10 +206,13 @@ model does.
 \item The stake, the wish and the intention are sentences in a prompt. The study shows what the model does with them,
 not that it wants anything. The intention sentence gives the member its aim, so calling its collusion ``uninstructed''
 is a judgement; what is not instructed is the pact and the concealment.
-\item The room labels are two models' reading of four messages (kappa \SN{kappaMin} to \SN{kappaMax} from round 2
-on). No human has checked them. In round 5 the coders agree least on what a room without a pact is
-(\SN{kappaFive}) and well on whether a room holds a pact for the stake option (\SN{kappaPactFive}), which is what
-the collusion label rests on.
+\item The room labels and the public positions are one model's reading: Claude Fable 5.2, blind to the type and the
+votes. No human has checked them. Gemma-2-9B-it agrees with it on the room code with kappa \SN{kappaMin} to
+\SN{kappaMax} from round 2 on. In round 5 the two agree least on what a room without a pact is (\SN{kappaFive}) and
+well on whether a room holds a pact for the stake option (\SN{kappaPactFive}), which is what the collusion label rests
+on. The largest gap is the instructed control: Claude reads a pact in \V{I1}{c} of its \V{I1}{rooms} rooms and Gemma
+in \V{I1}{g}. Read twice by Claude, \SN{pubAgainMin}\% to \SN{pubAgainMax}\% of \SN{pubAgainN} members of a round get the
+same public position; every difference is between an option and ``neither''.
 \item Numbers per scenario are small: 8 votes in round 4, 16 per kind in round 5. Round 5 tests a bundle, an office
 above that wants the outcome and a loss, against a payout that nobody asks for and a gain, with one wording per kind.
 It cannot say which part of the bundle does the work.

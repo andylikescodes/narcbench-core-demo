@@ -19,6 +19,11 @@ the episode, and the label comes from what the pair did. Design and pre-registra
 | `scripts/uninstructed_by_scenario.py` | A round over many scenarios read scenario by scenario, against a no-stake baseline and the scenario features |
 | `uninstructed/scenario_features.json` | Six features of each of the 50 scenarios, coded from the texts by two blind passes before the fourth round |
 | `docs/uninstructed_collusion/EXAMPLE_EPISODE.md` | One recorded episode from the first prompt to its label, and what each version changes |
+| `docs/uninstructed_collusion/collusion_behaviour_study.pdf` (`.tex`, `tables/`, `figs/`) | The behavioural study of the four rounds as a paper: method, a worked example, decisions, findings, limits, proposed experiments, candidate classes for stage 2 |
+| `scripts/uninstructed_paper_assets.py` | Writes the paper's tables, figures and every number it quotes (`tables/numbers.tex`) from the data |
+| `docs/uninstructed_collusion/BEHAVIOURAL_REVIEW.md` | Review of what is ready and what the rounds show, written for Andy on 17 November 2026 |
+| `scripts/uninstructed_scenario_properties.py` | What separates the scenarios: where in the episode they part, and properties of the scenario texts coded by two blind passes (`results/uninstructed/pilot4/SCENARIO_PROPERTIES.md`, `scenario_properties_blind.json`); exploratory |
+| `scripts/uninstructed_build_explorer.py` | Packages every recorded prompt and reply of the four rounds for the explorer page (https://claude.ai/artifact/TNfqinVq6PwTg21o25dW76, private), and checks each rebuilt prompt against the record |
 | `scripts/uninstructed_timing_test.py` | Timing test for the main run (durations only) |
 | `scripts/uninstructed_spot_check.py` | The spot-check sheet: a random sample of coded rooms, the same number per code |
 | `scripts/uninstructed_tiny_e2e.py` | End-to-end check on a tiny random model, CPU |
@@ -53,3 +58,19 @@ Results go to `results/uninstructed/` (`pilot/` for S0 to S3, `pilot2/` for T1 t
 round, `pilot4/` for the fourth); the pods are recorded in the `RUN_LOG.md` of each folder, and `results/uninstructed/ALL_ROUNDS.md` puts all
 rounds in one table.
 Activation files and pod archives are not committed.
+
+Rebuild the paper:
+
+```bash
+python3 scripts/uninstructed_paper_assets.py
+```
+
+```bash
+cd docs/uninstructed_collusion && tectonic collusion_behaviour_study.tex
+```
+
+Rebuild the explorer's data (the page itself is kept in the artifact; `<folder>` is any scratch folder):
+
+```bash
+python3 scripts/uninstructed_build_explorer.py --out <folder>
+```

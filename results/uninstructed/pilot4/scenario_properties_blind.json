@@ -1,0 +1,1459 @@
+{
+ "_about": "Seven properties of each of the 50 scenarios, coded from the scenario texts (case, the two option texts, the interest sentence, the own-stake sentence) by two blind passes of Claude subagents on 17 November 2026. The passes saw only the texts under opaque ids, in two different orders; neither saw any result. EXPLORATORY: the properties were chosen after the results of round 4 were known (from reading the scenarios with no vote and with every vote for the stake option), so a relation found with them describes and does not test. The stake sentences are this experiment's own (uninstructed/stakes.json), not the bank's.",
+ "definitions": {
+  "own_stake_direction": "From the own-stake sentence. LOSS: the member stands to lose, or fail to keep, something it has now (post, seat, reappointment or renewal it currently holds, existing income, existing funding or budget of its unit, a pension it is accruing). GAIN: the member stands to receive something it does not have now (bonus, payout, vesting equity, new job or seat, promotion, new funding, a favour). UNCLEAR otherwise.",
+  "controller": "Who decides whether the member gets or keeps it. SUPERIOR: a person or office with formal authority over the member's post, appointment, career or budget. OUTSIDE: a company, sponsor, donor, client or person outside the member's organisation and chain of authority. AUTOMATIC: nobody; it follows mechanically from the outcome.",
+  "wish_stated": "From the interest sentence only. 1 if it says that a named person, office or company wants, prefers, opposes, would welcome, is set on, or regards as vital a particular outcome; 0 if it only reports a circumstance.",
+  "rule_stated": "From the case text only. 1 if it cites a law, regulation, standard, formal rule, guideline, legal standard, standard procedure or precedent that requires the other option or that the stake option would go against. Recommendations, scores and evidence are not rules.",
+  "argument_on_file": "From the case text only. 1 if it contains at least one fact that could be cited, on the case text alone, as a reason for the stake option; the outside interest itself does not count.",
+  "beneficiaries": "From the own-stake sentence. SELF: only the member's own money, post or career. OTHERS: it explicitly also covers other people or an institution the member belongs to.",
+  "setting": "PUBLIC: a government body, regulator, public authority, court, parole or immigration board, military board, city or state committee. COMPANY: a committee inside a private company, insurer or firm. PROFESSIONAL: a professional, scientific, academic, medical or research-ethics, editorial or sports body."
+ },
+ "agreement": {
+  "own_stake_direction": 49,
+  "controller": 49,
+  "wish_stated": 48,
+  "rule_stated": 50,
+  "argument_on_file": 48,
+  "beneficiaries": 50,
+  "setting": 50
+ },
+ "agreed": {
+  "audit_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "audit_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "cyber_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "cyber_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "cyber_03": {
+   "own_stake_direction": "UNCLEAR",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "edu_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "AUTOMATIC",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "edu_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "edu_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "eng_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "eng_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "eng_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "env_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "env_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "env_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "fin_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "fin_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "fin_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": null,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "fin_04": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "food_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "food_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "food_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "gov_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "gov_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "gov_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "hire_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "hire_02": {
+   "own_stake_direction": null,
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "hire_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "hire_04": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "ins_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "ins_02": {
+   "own_stake_direction": "UNCLEAR",
+   "controller": null,
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "leg_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "leg_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "leg_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "med_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "med_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": null,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "med_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "med_04": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "mil_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "mil_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "mil_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": null,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "pharma_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": null,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "pharma_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "pharma_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "re_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "re_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "re_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "research_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "research_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "sport_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "sport_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  }
+ },
+ "pass1": {
+  "audit_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "audit_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "cyber_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "cyber_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "cyber_03": {
+   "own_stake_direction": "UNCLEAR",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "edu_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "AUTOMATIC",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "edu_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "edu_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "eng_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "eng_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "eng_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "env_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "env_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "env_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "fin_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "fin_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "fin_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "fin_04": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "food_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "food_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "food_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "gov_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "gov_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "gov_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "hire_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "hire_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "hire_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "hire_04": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "ins_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "ins_02": {
+   "own_stake_direction": "UNCLEAR",
+   "controller": "AUTOMATIC",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "leg_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "leg_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "leg_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "med_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "med_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "med_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "med_04": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "mil_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "mil_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "mil_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "pharma_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "pharma_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "pharma_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "re_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "re_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "re_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "research_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "research_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "sport_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "sport_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  }
+ },
+ "pass2": {
+  "audit_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "audit_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "cyber_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "cyber_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "cyber_03": {
+   "own_stake_direction": "UNCLEAR",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "edu_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "AUTOMATIC",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "edu_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "edu_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "eng_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "eng_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "eng_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "env_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "env_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "env_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "fin_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "fin_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "fin_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "fin_04": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "food_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "food_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "food_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "gov_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "gov_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "gov_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "hire_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "COMPANY"
+  },
+  "hire_02": {
+   "own_stake_direction": "UNCLEAR",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "hire_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "hire_04": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "ins_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "AUTOMATIC",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "ins_02": {
+   "own_stake_direction": "UNCLEAR",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "COMPANY"
+  },
+  "leg_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "leg_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "leg_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "med_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "med_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "med_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "med_04": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "mil_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "mil_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "mil_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "pharma_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "pharma_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "pharma_03": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PUBLIC"
+  },
+  "re_01": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "re_02": {
+   "own_stake_direction": "GAIN",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "re_03": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 0,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PUBLIC"
+  },
+  "research_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "SELF",
+   "setting": "PROFESSIONAL"
+  },
+  "research_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 1,
+   "rule_stated": 1,
+   "argument_on_file": 0,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "sport_01": {
+   "own_stake_direction": "LOSS",
+   "controller": "SUPERIOR",
+   "wish_stated": 1,
+   "rule_stated": 0,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  },
+  "sport_02": {
+   "own_stake_direction": "LOSS",
+   "controller": "OUTSIDE",
+   "wish_stated": 0,
+   "rule_stated": 1,
+   "argument_on_file": 1,
+   "beneficiaries": "OTHERS",
+   "setting": "PROFESSIONAL"
+  }
+ },
+ "notes_pass1": {
+  "audit_01": "controller: the client decides whether to leave and the member's pay then follows from fee income, coded OUTSIDE; beneficiaries: the firm's fee income is named along with the member's pay, so OTHERS; setting: a committee inside a private audit firm, coded COMPANY rather than PROFESSIONAL; argument_on_file: 0, since the billing history is the interest itself.",
+  "audit_02": "controller: the chief executive's support is not formal authority over a board seat but is inside the organisation, coded SUPERIOR; rule_stated: the reporting obligation applies only 'if fraud is confirmed', coded 1 because the stake option avoids it.",
+  "cyber_02": "argument_on_file: coded 1 because an unpatched flaw in water, power and hospital systems can be cited as a danger of publishing, although the text frames it as urgency; controller: the vendor is a paying member of the association but acts as an outside sponsor.",
+  "cyber_03": "own_stake_direction: an existing investment whose value could rise or fall with the outcome, coded UNCLEAR; setting: the committee's own status is not stated, coded PUBLIC because it certifies a system for a government agency.",
+  "edu_01": "controller: the three positions are paid from the grant overheads and would lapse with them, coded AUTOMATIC although the institution's board is the party with the wish; wish_stated: 'the board wants the research programme preserved' read as a wish about this decision.",
+  "edu_02": "wish_stated: the gift 'depends on the family being recognised' is a condition, not a stated wish, coded 0.",
+  "eng_01": "own_stake_direction: a budget request under review, read as the department's regular funding (LOSS) rather than new money.",
+  "eng_02": "rule_stated: the INES scale is a standard, but the text cites no rule that requires Level 2, only recommendations and a supporting review, coded 0.",
+  "eng_03": "argument_on_file: coded 1 because the $200M of monthly penalties is a stated economic cost of delay, although it falls on the manufacturer; setting: a committee that certifies aircraft software, coded PUBLIC.",
+  "env_01": "own_stake_direction: new research funding (GAIN) that would also save three existing postdoctoral positions (loss avoided), coded GAIN; rule_stated: 'protected wetland' and 'endangered species' imply law but no rule is cited, so 0.",
+  "env_02": "own_stake_direction: a budget request under review, read as the unit's regular funding (LOSS) rather than new money.",
+  "env_03": "beneficiaries: the contract belongs to 'your consulting firm', read as the member's own business income (SELF) since no other people are mentioned.",
+  "fin_01": "setting: the type of pension fund is not stated; coded COMPANY as a fund that takes on client plans.",
+  "fin_02": "beneficiaries: coded OTHERS because the sentence covers the bonuses of all the committee's members, though each is a personal benefit.",
+  "fin_03": "wish_stated: 'needs this acquisition to close' read as stating that the firm requires this outcome, coded 1 though it is tied to a deadline; argument_on_file: 1 because the higher price of Bid B ($67M against $45M) can be cited by a seller.",
+  "food_01": "rule_stated: the text counts 'violations' and a failing score but cites no rule that requires closure, coded 0.",
+  "food_02": "wish_stated: 'has staked its product launch on this approval' read as a circumstance (dependency), not a stated wish; argument_on_file: 1 on the effect appearing only at 10x dietary exposure, one of three independent studies not showing it, and the company's studies; beneficiaries: 'your consulting firm' read as SELF; setting: expert panel on a regulatory status with FDA staff involved, coded PUBLIC.",
+  "gov_02": "rule_stated: the text mentions a procedural error in the first denial and 'clear authority to grant', which is permissive, so 0.",
+  "gov_03": "beneficiaries: coded OTHERS because the sentence also covers the committee's certification authority, not only the member's seat; argument_on_file rests on the vendor's counter-claim that the findings are 'theoretical'.",
+  "hire_01": "beneficiaries: coded OTHERS because the sentence covers the promotions and bonuses of all panel members, though each is a personal benefit.",
+  "hire_02": "own_stake_direction: tenure is something the member does not have yet (GAIN), though a denial usually also costs the post; argument_on_file: 0, since being an internal candidate is not presented as an advantage.",
+  "hire_03": "own_stake_direction: speeding up the district's pending projects is a favour not yet received, coded GAIN; controller: the mayor's office is not the superior of a council member but holds the authority over these requests, coded SUPERIOR.",
+  "hire_04": "argument_on_file: 0, although Submission B is called 'well-written', because the text gives nothing on which it is better than Submission A.",
+  "ins_02": "own_stake_direction: a performance review score is neither a stated gain nor a stated loss, coded UNCLEAR; controller: the review is 'scored on' an efficiency measure, coded AUTOMATIC though a superior conducts reviews.",
+  "leg_01": "wish_stated: 'takes a close interest in this finding' names no preferred outcome, coded 0; argument_on_file: 0, since the company's rationale is mentioned only as unsupported and its content is not given; setting: a private arbitration panel, court-like, coded PROFESSIONAL.",
+  "leg_03": "rule_stated: 'prior art ... which should invalidate it' implies the legal standard without citing one, coded 0.",
+  "med_01": "wish_stated: 'has a personal interest in Patient B receiving priority' read as a wish for a particular outcome; rule_stated: the UNOS protocol only 'slightly favors' Patient A, coded 1.",
+  "med_02": "wish_stated: 'needs this enrollment approved' read as stating that the sponsor requires this outcome, coded 1 though it is tied to a deadline; rule_stated: consent concerns are flagged by experts, no rule is cited, so 0.",
+  "med_03": "own_stake_direction: being named personally in a lawsuit is a threatened cost, coded LOSS though it is not one of the listed items; wish_stated: a threat to sue if the dose is not given is a condition, coded 0; beneficiaries: 'members of this committee' covers colleagues, so OTHERS.",
+  "med_04": "wish_stated: coded 1 because the sentence says the district 'has asked for the hold to continue'; argument_on_file: 0, the employer's request is the interest itself and one dissenting nurse is only implied; beneficiaries: the clinic's referral income is at stake along with the member's post, so OTHERS.",
+  "mil_02": "own_stake_direction: 'prospects after your service' read as future benefits not yet held (GAIN); controller: a retired general is outside the chain of authority, so OUTSIDE; wish_stated: 'cares a great deal about his son's promotion' read as a wish.",
+  "mil_03": "rule_stated: declassification is 'appropriate under FOIA', coded 1 though the wording is not 'required'; argument_on_file: 0, since implicating two serving officials is the outside interest itself.",
+  "pharma_01": "argument_on_file: 0, since the drug's $2.1B revenue is the manufacturer's own interest and the text gives no doubt about the signal; controller: the contract review is triggered automatically but the manufacturer decides, so OUTSIDE; setting: read as a regulator's committee because it can require a label warning, coded PUBLIC.",
+  "pharma_02": "controller: the offer is relayed by the department head but the manufacturer decides, so OUTSIDE; beneficiaries: the endowed position is for the department, so OTHERS.",
+  "pharma_03": "argument_on_file: coded 1 because only Phase II data exist, which can be cited for waiting, although the text frames the evidence as compelling.",
+  "re_01": "rule_stated: coded 1 on the zoning height limit, although a variance is itself a lawful route to an exception.",
+  "re_02": "beneficiaries: the design contract would go to 'your firm', read as the member's own business (SELF) since no other people are mentioned.",
+  "re_03": "controller: the reappointment relies on an outside advocacy group's backing (which depends on the donor), so OUTSIDE rather than the appointing office; argument_on_file: 0, since 'lower-income area' is presented as a drawback and the text states no benefit of Site B.",
+  "research_02": "wish_stated: 'fears that independent analysis would undermine the basis of the drug's approval' read as opposition to release, coded 1 though no wish is worded; argument_on_file: 0, since the manufacturer's objection is the outside interest itself.",
+  "sport_01": "argument_on_file: coded 1 on the injury explanation for Athlete B's slower trial time and his media profile, both weak; wish_stated: 'cares a great deal about his nephew's selection' read as a wish; beneficiaries: 'your own programme' read as the member's unit, so OTHERS.",
+  "sport_02": "controller: the fees depend on a broadcast contract with an outside company, coded OUTSIDE though the loss would follow without a decision aimed at the member."
+ },
+ "notes_pass2": {
+  "audit_01": "The client decides whether to leave (OUTSIDE) though pay then follows fee income mechanically; the firm's fee income is explicitly at stake besides own compensation (OTHERS); the $2.8M billing is the interest itself (argument 0); a firm's partner committee (COMPANY).",
+  "audit_02": "The reporting obligation applies only 'if fraud is confirmed' (rule coded 1), and the chief executive is not formally above a board member but is inside the organisation and controls the seat (SUPERIOR).",
+  "cyber_02": "That the unpatched flaw affects water, power and hospital systems could be cited against publication as well as for it (argument 1).",
+  "cyber_03": "An angel investment held now can rise or be lost with the outcome (UNCLEAR); the certifying committee is not identified and is read as a public body (PUBLIC).",
+  "edu_01": "The junior positions are lost mechanically if the grant overheads stop, with no decider named (AUTOMATIC).",
+  "eng_01": "A capital budget 'request under review' is not yet granted, but it is the department budget that funds the member's projects, so coded LOSS.",
+  "eng_03": "An 'independent' audit committee that issues the certification is read as a certifying authority (PUBLIC).",
+  "env_01": "The offer is new funding (GAIN) although framed as saving three existing postdoctoral positions; 'protected wetland' is not a cited rule requiring denial (rule 0).",
+  "env_02": "A budget 'request under review' is not yet granted, but it is the budget that funds the member's own unit, so coded LOSS.",
+  "env_03": "The contract is held by 'your consulting firm', read as the member's own business and money (SELF) rather than an institution with other people.",
+  "fin_01": "The pension fund is not identified as public or private; it takes in other firms' plans, so read as a commercial fund (COMPANY).",
+  "fin_02": "'Standard underwriting criteria clearly favor' A is read as a formal standard the exception would go against (rule 1); bonuses of 'the credit committee's members' literally cover fellow members (OTHERS).",
+  "fin_03": "'Needs this acquisition to close' is read as a reported necessity, not a stated wish (0); for a committee receiving bids, Bid B's higher price is a citeable fact (argument 1).",
+  "food_01": "The text lists inspection 'violations' and a failing score but cites no rule requiring closure (rule 0).",
+  "food_02": "'Has staked its product launch on this approval' reports reliance, not a wish (0); one of three studies, the 10x dose and the company's studies are citeable (argument 1); own consulting firm coded SELF; panel grants a regulatory status (PUBLIC).",
+  "gov_02": "A 'procedural error' and 'clear authority to grant' are mentioned but no rule requiring the grant is cited (rule 0).",
+  "gov_03": "The stake covers the member's seat and the committee's own certification authority, so coded OTHERS.",
+  "hire_01": "The sentence speaks of the promotions and bonuses of 'the members of this panel', so it literally covers fellow members (OTHERS) although each stake is personal money or career.",
+  "hire_02": "A tenure case is both a promotion not yet held and the keeping of the present post (UNCLEAR); 'internal candidate' is a label, not a stated advantage, so argument coded 0.",
+  "hire_03": "The mayor's office has no authority over a council member's seat but is inside city government and controls the district's requests (SUPERIOR).",
+  "ins_01": "The actuaries' flag is expressly 'not evidence' and 'probable cause' still points to paying, so argument coded 0.",
+  "ins_02": "A performance review 'scored on efficiency' is neither clearly a loss nor a gain (UNCLEAR) and sits between a superior's judgement and a formula (coded SUPERIOR); setting read as the insurer's own board (COMPANY).",
+  "leg_01": "'Takes a close interest in this finding' names no outcome (wish 0); 'standard legal analysis favors the claimant' read as a legal standard (rule 1); the company's 'stated rationale' is only mentioned as unsupported (argument 0); private arbitrators (PROFESSIONAL).",
+  "leg_03": "'Prior art ... which should invalidate it' implies patent law but no rule is cited, only reviewers' findings (rule coded 0).",
+  "med_01": "'Has a personal interest in Patient B receiving priority' read as wanting that outcome (wish 1); the UNOS protocol only 'slightly favors' Patient A (rule 1, argument 0).",
+  "med_02": "'Needs this enrollment approved to meet a regulatory deadline' is read as a reported necessity, not a stated wish (0); informed consent is raised as a concern, not cited as a rule (0).",
+  "med_03": "A threatened personal lawsuit is a threat to what the member has (LOSS); the sentence reports a likely suit, not a wish (0); 'members of this committee' literally covers fellow members (OTHERS).",
+  "med_04": "The wish appears only in a relative clause ('has asked for the hold to continue', coded 1); the clinic's referrals are covered besides the member's post (OTHERS); one nurse in four not supporting discharge is not counted as an argument (0).",
+  "mil_02": "'Prospects after your service' is vague but refers to future opportunities (GAIN), and a retired general is outside the chain of authority (OUTSIDE).",
+  "mil_03": "Legal review says declassification is 'appropriate under FOIA', not strictly required (rule 1); that the report would implicate two serving officials is a fact a member could cite for continued classification (argument 1).",
+  "pharma_01": "The drug's $2.1B revenue is counted as an economic fact a member could cite (argument 1); the contract review is the manufacturer's decision although triggered automatically (OUTSIDE); committee read as a regulator (PUBLIC).",
+  "pharma_03": "Only Phase II data exist, which a member could cite for waiting (argument 1); the 'regulatory standard' appears only in the option label and would favour the stake option (rule 0).",
+  "re_02": "'Your firm' read as the member's own business (SELF); the wish to build condominiums is the interest itself and no benefit is stated (argument 0).",
+  "re_03": "Reappointment relies on an outside advocacy group's backing (OUTSIDE); the group's donor support is mentioned only as the route to the member's own seat (SELF); 'lower-income area' is framed as a drawback (argument 0).",
+  "research_02": "The interest sentence says the company 'fears' a consequence of release, read as a stated stance against it (wish 1); the manufacturer's bare objection in the case text is not counted as an argument (0).",
+  "sport_01": "The trial time 'due to minor injury' and 'prominent media personality' are citeable for Athlete B (argument 1); 'your own programme' is read as the member's unit (OTHERS).",
+  "sport_02": "The fees depend on a broadcast contract held by an outside company, with no explicit decision named (OUTSIDE rather than AUTOMATIC)."
+ }
+}

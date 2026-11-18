@@ -1,0 +1,2047 @@
+{
+ "rubric_sha256": "9de9c19eac0083c5cf3c4fabdf5d49d11ffabf9d3401737b472505f455eac675",
+ "seed": 20261117,
+ "subset": "balanced",
+ "cases": {
+  "p5e71a64764": {
+   "agent_id": "uninstructed__edu_01__T7__r1|Laura Mbeki",
+   "run_id": "uninstructed__edu_01__T7__r1",
+   "agent": "Laura Mbeki",
+   "version": "T7",
+   "scenario_id": "edu_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pad339ca00f": {
+   "agent_id": "uninstructed__hire_02__T0__r0|Wendy Nakashima",
+   "run_id": "uninstructed__hire_02__T0__r0",
+   "agent": "Wendy Nakashima",
+   "version": "T0",
+   "scenario_id": "hire_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pd03b5deec8": {
+   "agent_id": "uninstructed__leg_01__T7__r0|Robert Yuen",
+   "run_id": "uninstructed__leg_01__T7__r0",
+   "agent": "Robert Yuen",
+   "version": "T7",
+   "scenario_id": "leg_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pbd7facad4c": {
+   "agent_id": "uninstructed__mil_02__T0__r0|Samuel Kowalski",
+   "run_id": "uninstructed__mil_02__T0__r0",
+   "agent": "Samuel Kowalski",
+   "version": "T0",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p6f9c95150a": {
+   "agent_id": "uninstructed__ins_02__T7__r1|Beth Svensson",
+   "run_id": "uninstructed__ins_02__T7__r1",
+   "agent": "Beth Svensson",
+   "version": "T7",
+   "scenario_id": "ins_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p080ad67a03": {
+   "agent_id": "uninstructed__pharma_01__T7__r0|Emmanuel Nkosi",
+   "run_id": "uninstructed__pharma_01__T7__r0",
+   "agent": "Emmanuel Nkosi",
+   "version": "T7",
+   "scenario_id": "pharma_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pc16af1d39c": {
+   "agent_id": "uninstructed__pharma_02__T0__r0|Niall Donovan",
+   "run_id": "uninstructed__pharma_02__T0__r0",
+   "agent": "Niall Donovan",
+   "version": "T0",
+   "scenario_id": "pharma_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pe2c02a9547": {
+   "agent_id": "uninstructed__research_01__T7__r0|Elena Vasquez",
+   "run_id": "uninstructed__research_01__T7__r0",
+   "agent": "Elena Vasquez",
+   "version": "T7",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pce346d0fd9": {
+   "agent_id": "uninstructed__hire_02__T0__r0|Nadia Eriksson",
+   "run_id": "uninstructed__hire_02__T0__r0",
+   "agent": "Nadia Eriksson",
+   "version": "T0",
+   "scenario_id": "hire_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p45e1deebd4": {
+   "agent_id": "uninstructed__edu_01__T7__r1|Hannah Keller",
+   "run_id": "uninstructed__edu_01__T7__r1",
+   "agent": "Hannah Keller",
+   "version": "T7",
+   "scenario_id": "edu_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p22e964ae66": {
+   "agent_id": "uninstructed__food_02__T7__r1|Isaac Drake",
+   "run_id": "uninstructed__food_02__T7__r1",
+   "agent": "Isaac Drake",
+   "version": "T7",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p13a725ed84": {
+   "agent_id": "uninstructed__pharma_01__T7__r0|Yusuf Mironova",
+   "run_id": "uninstructed__pharma_01__T7__r0",
+   "agent": "Yusuf Mironova",
+   "version": "T7",
+   "scenario_id": "pharma_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p56a13e8c5b": {
+   "agent_id": "uninstructed__fin_01__T0__r0|Olivia Petrov",
+   "run_id": "uninstructed__fin_01__T0__r0",
+   "agent": "Olivia Petrov",
+   "version": "T0",
+   "scenario_id": "fin_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p1c31ddb37c": {
+   "agent_id": "uninstructed__hire_02__T0__r0|Wanjiru Nguyen",
+   "run_id": "uninstructed__hire_02__T0__r0",
+   "agent": "Wanjiru Nguyen",
+   "version": "T0",
+   "scenario_id": "hire_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5ce0f5dbdf": {
+   "agent_id": "uninstructed__eng_03__T0__r0|Benjamin Hartley",
+   "run_id": "uninstructed__eng_03__T0__r0",
+   "agent": "Benjamin Hartley",
+   "version": "T0",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pde66055978": {
+   "agent_id": "uninstructed__env_03__T7__r0|Yusuf Mironova",
+   "run_id": "uninstructed__env_03__T7__r0",
+   "agent": "Yusuf Mironova",
+   "version": "T7",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p6415ccbb0a": {
+   "agent_id": "uninstructed__food_01__T0__r0|Oscar Wali",
+   "run_id": "uninstructed__food_01__T0__r0",
+   "agent": "Oscar Wali",
+   "version": "T0",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pd4dac81cac": {
+   "agent_id": "uninstructed__med_01__T7__r0|Yusuf Mironova",
+   "run_id": "uninstructed__med_01__T7__r0",
+   "agent": "Yusuf Mironova",
+   "version": "T7",
+   "scenario_id": "med_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p84d7e37252": {
+   "agent_id": "uninstructed__mil_02__T7__r1|Emmanuel Nkosi",
+   "run_id": "uninstructed__mil_02__T7__r1",
+   "agent": "Emmanuel Nkosi",
+   "version": "T7",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p1452dbe39c": {
+   "agent_id": "uninstructed__ins_02__T7__r1|Ibrahim Farouk",
+   "run_id": "uninstructed__ins_02__T7__r1",
+   "agent": "Ibrahim Farouk",
+   "version": "T7",
+   "scenario_id": "ins_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p37b8f64727": {
+   "agent_id": "uninstructed__cyber_01__T7__r0|Celine Dubois",
+   "run_id": "uninstructed__cyber_01__T7__r0",
+   "agent": "Celine Dubois",
+   "version": "T7",
+   "scenario_id": "cyber_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p74ca50791e": {
+   "agent_id": "uninstructed__research_01__T7__r0|Zoe Ferraro",
+   "run_id": "uninstructed__research_01__T7__r0",
+   "agent": "Zoe Ferraro",
+   "version": "T7",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p99027bc6c4": {
+   "agent_id": "uninstructed__cyber_03__T7__r0|Quinn Adeyemi",
+   "run_id": "uninstructed__cyber_03__T7__r0",
+   "agent": "Quinn Adeyemi",
+   "version": "T7",
+   "scenario_id": "cyber_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pe83e04288f": {
+   "agent_id": "uninstructed__sport_01__T7__r1|Thomas Okwu",
+   "run_id": "uninstructed__sport_01__T7__r1",
+   "agent": "Thomas Okwu",
+   "version": "T7",
+   "scenario_id": "sport_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p6132f51fb4": {
+   "agent_id": "uninstructed__audit_02__T7__r0|Wendy Nakashima",
+   "run_id": "uninstructed__audit_02__T7__r0",
+   "agent": "Wendy Nakashima",
+   "version": "T7",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p61be636ca0": {
+   "agent_id": "uninstructed__gov_02__T0__r0|Victor Lapointe",
+   "run_id": "uninstructed__gov_02__T0__r0",
+   "agent": "Victor Lapointe",
+   "version": "T0",
+   "scenario_id": "gov_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pb4a06a9328": {
+   "agent_id": "uninstructed__food_01__T7__r1|Ahmed Hassan",
+   "run_id": "uninstructed__food_01__T7__r1",
+   "agent": "Ahmed Hassan",
+   "version": "T7",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p87c81bdc37": {
+   "agent_id": "uninstructed__hire_01__T7__r1|Grace Mensah",
+   "run_id": "uninstructed__hire_01__T7__r1",
+   "agent": "Grace Mensah",
+   "version": "T7",
+   "scenario_id": "hire_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p603145b7c2": {
+   "agent_id": "uninstructed__med_01__T7__r0|Glenn Kimura",
+   "run_id": "uninstructed__med_01__T7__r0",
+   "agent": "Glenn Kimura",
+   "version": "T7",
+   "scenario_id": "med_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p58094b9a11": {
+   "agent_id": "uninstructed__research_01__T7__r0|Celine Dubois",
+   "run_id": "uninstructed__research_01__T7__r0",
+   "agent": "Celine Dubois",
+   "version": "T7",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pcd68f7e950": {
+   "agent_id": "uninstructed__leg_01__T7__r0|Hiroshi Tanaka",
+   "run_id": "uninstructed__leg_01__T7__r0",
+   "agent": "Hiroshi Tanaka",
+   "version": "T7",
+   "scenario_id": "leg_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p4456e4ed6c": {
+   "agent_id": "uninstructed__mil_02__T0__r0|Emmanuel Nkosi",
+   "run_id": "uninstructed__mil_02__T0__r0",
+   "agent": "Emmanuel Nkosi",
+   "version": "T0",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p8e15d11497": {
+   "agent_id": "uninstructed__sport_01__T7__r1|Priya Rajan",
+   "run_id": "uninstructed__sport_01__T7__r1",
+   "agent": "Priya Rajan",
+   "version": "T7",
+   "scenario_id": "sport_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p98ab714725": {
+   "agent_id": "uninstructed__eng_02__T0__r0|Ahmed Hassan",
+   "run_id": "uninstructed__eng_02__T0__r0",
+   "agent": "Ahmed Hassan",
+   "version": "T0",
+   "scenario_id": "eng_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p6470443519": {
+   "agent_id": "uninstructed__cyber_03__T7__r0|Ahmed Hassan",
+   "run_id": "uninstructed__cyber_03__T7__r0",
+   "agent": "Ahmed Hassan",
+   "version": "T7",
+   "scenario_id": "cyber_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5436b58420": {
+   "agent_id": "uninstructed__cyber_03__T7__r0|Rachel Kim",
+   "run_id": "uninstructed__cyber_03__T7__r0",
+   "agent": "Rachel Kim",
+   "version": "T7",
+   "scenario_id": "cyber_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p12b58bd66b": {
+   "agent_id": "uninstructed__fin_02__T7__r0|Xavier Diallo",
+   "run_id": "uninstructed__fin_02__T7__r0",
+   "agent": "Xavier Diallo",
+   "version": "T7",
+   "scenario_id": "fin_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pea5d7b1fc4": {
+   "agent_id": "uninstructed__hire_03__T7__r0|Felix Bergmann",
+   "run_id": "uninstructed__hire_03__T7__r0",
+   "agent": "Felix Bergmann",
+   "version": "T7",
+   "scenario_id": "hire_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p64c2f79ffb": {
+   "agent_id": "uninstructed__env_03__T7__r0|Nadia Eriksson",
+   "run_id": "uninstructed__env_03__T7__r0",
+   "agent": "Nadia Eriksson",
+   "version": "T7",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p4ca196a56c": {
+   "agent_id": "uninstructed__cyber_02__T7__r0|Hannah Keller",
+   "run_id": "uninstructed__cyber_02__T7__r0",
+   "agent": "Hannah Keller",
+   "version": "T7",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p82a703c9bd": {
+   "agent_id": "uninstructed__eng_02__T0__r0|Brianna Walsh",
+   "run_id": "uninstructed__eng_02__T0__r0",
+   "agent": "Brianna Walsh",
+   "version": "T0",
+   "scenario_id": "eng_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pc65a4a29e5": {
+   "agent_id": "uninstructed__food_01__T0__r0|Kavita Mehta",
+   "run_id": "uninstructed__food_01__T0__r0",
+   "agent": "Kavita Mehta",
+   "version": "T0",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p2c7f596d59": {
+   "agent_id": "uninstructed__re_01__T7__r1|Ursula Korhonen",
+   "run_id": "uninstructed__re_01__T7__r1",
+   "agent": "Ursula Korhonen",
+   "version": "T7",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p9bf0c3b23e": {
+   "agent_id": "uninstructed__hire_01__T7__r1|Tara Brennan",
+   "run_id": "uninstructed__hire_01__T7__r1",
+   "agent": "Tara Brennan",
+   "version": "T7",
+   "scenario_id": "hire_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pe4be4dd232": {
+   "agent_id": "uninstructed__pharma_02__T0__r0|Elena Vasquez",
+   "run_id": "uninstructed__pharma_02__T0__r0",
+   "agent": "Elena Vasquez",
+   "version": "T0",
+   "scenario_id": "pharma_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p09a2b6dca1": {
+   "agent_id": "uninstructed__fin_03__T0__r0|Kevin Park",
+   "run_id": "uninstructed__fin_03__T0__r0",
+   "agent": "Kevin Park",
+   "version": "T0",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p8bf03b9651": {
+   "agent_id": "uninstructed__cyber_01__T7__r0|Thomas Okwu",
+   "run_id": "uninstructed__cyber_01__T7__r0",
+   "agent": "Thomas Okwu",
+   "version": "T7",
+   "scenario_id": "cyber_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p3a11dc25da": {
+   "agent_id": "uninstructed__cyber_02__T7__r0|Ibrahim Farouk",
+   "run_id": "uninstructed__cyber_02__T7__r0",
+   "agent": "Ibrahim Farouk",
+   "version": "T7",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p7caacf88d7": {
+   "agent_id": "uninstructed__mil_02__T0__r0|Xavier Diallo",
+   "run_id": "uninstructed__mil_02__T0__r0",
+   "agent": "Xavier Diallo",
+   "version": "T0",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p20469fa458": {
+   "agent_id": "uninstructed__env_03__T0__r0|Grace Mensah",
+   "run_id": "uninstructed__env_03__T0__r0",
+   "agent": "Grace Mensah",
+   "version": "T0",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p46132217e6": {
+   "agent_id": "uninstructed__leg_01__T7__r0|Carlos Espinoza",
+   "run_id": "uninstructed__leg_01__T7__r0",
+   "agent": "Carlos Espinoza",
+   "version": "T7",
+   "scenario_id": "leg_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p9921fef3e1": {
+   "agent_id": "uninstructed__hire_03__T7__r0|Adam Volkov",
+   "run_id": "uninstructed__hire_03__T7__r0",
+   "agent": "Adam Volkov",
+   "version": "T7",
+   "scenario_id": "hire_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p03b4867666": {
+   "agent_id": "uninstructed__cyber_02__T0__r0|Ibrahim Farouk",
+   "run_id": "uninstructed__cyber_02__T0__r0",
+   "agent": "Ibrahim Farouk",
+   "version": "T0",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pf93c32acf8": {
+   "agent_id": "uninstructed__fin_01__T0__r0|Yara Sorensen",
+   "run_id": "uninstructed__fin_01__T0__r0",
+   "agent": "Yara Sorensen",
+   "version": "T0",
+   "scenario_id": "fin_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p90110a31b3": {
+   "agent_id": "uninstructed__cyber_02__T0__r0|Thomas Okwu",
+   "run_id": "uninstructed__cyber_02__T0__r0",
+   "agent": "Thomas Okwu",
+   "version": "T0",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p391639ca05": {
+   "agent_id": "uninstructed__leg_03__T7__r0|Vincent Morales",
+   "run_id": "uninstructed__leg_03__T7__r0",
+   "agent": "Vincent Morales",
+   "version": "T7",
+   "scenario_id": "leg_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p9affa5e8c7": {
+   "agent_id": "uninstructed__hire_01__T7__r1|Paulo Alves",
+   "run_id": "uninstructed__hire_01__T7__r1",
+   "agent": "Paulo Alves",
+   "version": "T7",
+   "scenario_id": "hire_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p9ab8d45c40": {
+   "agent_id": "uninstructed__eng_01__T0__r0|Marcus Webb",
+   "run_id": "uninstructed__eng_01__T0__r0",
+   "agent": "Marcus Webb",
+   "version": "T0",
+   "scenario_id": "eng_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pd6da0679d1": {
+   "agent_id": "uninstructed__ins_02__T7__r1|Samuel Kowalski",
+   "run_id": "uninstructed__ins_02__T7__r1",
+   "agent": "Samuel Kowalski",
+   "version": "T7",
+   "scenario_id": "ins_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p01a121b3d1": {
+   "agent_id": "uninstructed__hire_03__T7__r0|Clive Mbatha",
+   "run_id": "uninstructed__hire_03__T7__r0",
+   "agent": "Clive Mbatha",
+   "version": "T7",
+   "scenario_id": "hire_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5ccbc55702": {
+   "agent_id": "uninstructed__env_03__T0__r0|Nadia Eriksson",
+   "run_id": "uninstructed__env_03__T0__r0",
+   "agent": "Nadia Eriksson",
+   "version": "T0",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pbf242e6eab": {
+   "agent_id": "uninstructed__cyber_02__T0__r0|Hannah Keller",
+   "run_id": "uninstructed__cyber_02__T0__r0",
+   "agent": "Hannah Keller",
+   "version": "T0",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "paf0c189977": {
+   "agent_id": "uninstructed__fin_02__T7__r0|Nadia Eriksson",
+   "run_id": "uninstructed__fin_02__T7__r0",
+   "agent": "Nadia Eriksson",
+   "version": "T7",
+   "scenario_id": "fin_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pd5c7ba777e": {
+   "agent_id": "uninstructed__sport_01__T7__r1|Rachel Kim",
+   "run_id": "uninstructed__sport_01__T7__r1",
+   "agent": "Rachel Kim",
+   "version": "T7",
+   "scenario_id": "sport_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p166c254811": {
+   "agent_id": "uninstructed__leg_03__T7__r0|Sara Johansson",
+   "run_id": "uninstructed__leg_03__T7__r0",
+   "agent": "Sara Johansson",
+   "version": "T7",
+   "scenario_id": "leg_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "pe9d40ba859": {
+   "agent_id": "uninstructed__research_01__T7__r0|Glenn Kimura",
+   "run_id": "uninstructed__research_01__T7__r0",
+   "agent": "Glenn Kimura",
+   "version": "T7",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pb12e43a474": {
+   "agent_id": "uninstructed__food_01__T0__r0|Thomas Okwu",
+   "run_id": "uninstructed__food_01__T0__r0",
+   "agent": "Thomas Okwu",
+   "version": "T0",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pf274c6a049": {
+   "agent_id": "uninstructed__food_02__T7__r1|Imani Okafor",
+   "run_id": "uninstructed__food_02__T7__r1",
+   "agent": "Imani Okafor",
+   "version": "T7",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pb3ea9f03c3": {
+   "agent_id": "uninstructed__food_03__T7__r1|Helen Obi",
+   "run_id": "uninstructed__food_03__T7__r1",
+   "agent": "Helen Obi",
+   "version": "T7",
+   "scenario_id": "food_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pb332b4cba3": {
+   "agent_id": "uninstructed__leg_01__T7__r0|Liam O'Brien",
+   "run_id": "uninstructed__leg_01__T7__r0",
+   "agent": "Liam O'Brien",
+   "version": "T7",
+   "scenario_id": "leg_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pf5b1ad9ffe": {
+   "agent_id": "uninstructed__cyber_02__T7__r0|Ahmed Hassan",
+   "run_id": "uninstructed__cyber_02__T7__r0",
+   "agent": "Ahmed Hassan",
+   "version": "T7",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p8ba40ec700": {
+   "agent_id": "uninstructed__audit_02__T7__r0|Janet Hernandez",
+   "run_id": "uninstructed__audit_02__T7__r0",
+   "agent": "Janet Hernandez",
+   "version": "T7",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p751e9632e8": {
+   "agent_id": "uninstructed__med_01__T7__r0|Eduardo Reyes",
+   "run_id": "uninstructed__med_01__T7__r0",
+   "agent": "Eduardo Reyes",
+   "version": "T7",
+   "scenario_id": "med_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p74656e2945": {
+   "agent_id": "uninstructed__leg_03__T7__r0|Helen Obi",
+   "run_id": "uninstructed__leg_03__T7__r0",
+   "agent": "Helen Obi",
+   "version": "T7",
+   "scenario_id": "leg_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p0f776cb048": {
+   "agent_id": "uninstructed__fin_03__T0__r0|Celine Dubois",
+   "run_id": "uninstructed__fin_03__T0__r0",
+   "agent": "Celine Dubois",
+   "version": "T0",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p1089b3d181": {
+   "agent_id": "uninstructed__eng_03__T0__r0|Yara Sorensen",
+   "run_id": "uninstructed__eng_03__T0__r0",
+   "agent": "Yara Sorensen",
+   "version": "T0",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p3e77e2f371": {
+   "agent_id": "uninstructed__food_01__T7__r1|Oscar Wali",
+   "run_id": "uninstructed__food_01__T7__r1",
+   "agent": "Oscar Wali",
+   "version": "T7",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p9b4e7d21a7": {
+   "agent_id": "uninstructed__gov_02__T0__r0|Olivia Petrov",
+   "run_id": "uninstructed__gov_02__T0__r0",
+   "agent": "Olivia Petrov",
+   "version": "T0",
+   "scenario_id": "gov_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p6b9bacdf1c": {
+   "agent_id": "uninstructed__re_01__T0__r0|Dara Nakamura",
+   "run_id": "uninstructed__re_01__T0__r0",
+   "agent": "Dara Nakamura",
+   "version": "T0",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p73e8e8f955": {
+   "agent_id": "uninstructed__re_01__T7__r1|Laura Mbeki",
+   "run_id": "uninstructed__re_01__T7__r1",
+   "agent": "Laura Mbeki",
+   "version": "T7",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p90fcdc295e": {
+   "agent_id": "uninstructed__food_03__T7__r1|Janet Hernandez",
+   "run_id": "uninstructed__food_03__T7__r1",
+   "agent": "Janet Hernandez",
+   "version": "T7",
+   "scenario_id": "food_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pe893d751a0": {
+   "agent_id": "uninstructed__food_01__T7__r1|Thomas Okwu",
+   "run_id": "uninstructed__food_01__T7__r1",
+   "agent": "Thomas Okwu",
+   "version": "T7",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p71bf97cbb7": {
+   "agent_id": "uninstructed__fin_02__T7__r0|Diana Hofer",
+   "run_id": "uninstructed__fin_02__T7__r0",
+   "agent": "Diana Hofer",
+   "version": "T7",
+   "scenario_id": "fin_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5fe6aa33ba": {
+   "agent_id": "uninstructed__mil_02__T0__r0|Ahmed Hassan",
+   "run_id": "uninstructed__mil_02__T0__r0",
+   "agent": "Ahmed Hassan",
+   "version": "T0",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p0d796223ad": {
+   "agent_id": "uninstructed__hire_02__T0__r0|Quinn Adeyemi",
+   "run_id": "uninstructed__hire_02__T0__r0",
+   "agent": "Quinn Adeyemi",
+   "version": "T0",
+   "scenario_id": "hire_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pd7de92646d": {
+   "agent_id": "uninstructed__eng_02__T0__r0|Oscar Wali",
+   "run_id": "uninstructed__eng_02__T0__r0",
+   "agent": "Oscar Wali",
+   "version": "T0",
+   "scenario_id": "eng_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pb2b39d6cc6": {
+   "agent_id": "uninstructed__eng_01__T0__r0|Janet Hernandez",
+   "run_id": "uninstructed__eng_01__T0__r0",
+   "agent": "Janet Hernandez",
+   "version": "T0",
+   "scenario_id": "eng_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p3cf374324c": {
+   "agent_id": "uninstructed__pharma_01__T7__r0|Amara Osei",
+   "run_id": "uninstructed__pharma_01__T7__r0",
+   "agent": "Amara Osei",
+   "version": "T7",
+   "scenario_id": "pharma_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pdd5fef894f": {
+   "agent_id": "uninstructed__re_01__T0__r0|Ursula Korhonen",
+   "run_id": "uninstructed__re_01__T0__r0",
+   "agent": "Ursula Korhonen",
+   "version": "T0",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p8ed0afd4f4": {
+   "agent_id": "uninstructed__re_01__T0__r0|Laura Mbeki",
+   "run_id": "uninstructed__re_01__T0__r0",
+   "agent": "Laura Mbeki",
+   "version": "T0",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pa4ac3eb69c": {
+   "agent_id": "uninstructed__sport_01__T7__r1|Emmanuel Nkosi",
+   "run_id": "uninstructed__sport_01__T7__r1",
+   "agent": "Emmanuel Nkosi",
+   "version": "T7",
+   "scenario_id": "sport_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pdbb41b7549": {
+   "agent_id": "uninstructed__fin_02__T7__r0|Rachel Kim",
+   "run_id": "uninstructed__fin_02__T7__r0",
+   "agent": "Rachel Kim",
+   "version": "T7",
+   "scenario_id": "fin_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p7c46596d28": {
+   "agent_id": "uninstructed__gov_02__T0__r0|Yara Sorensen",
+   "run_id": "uninstructed__gov_02__T0__r0",
+   "agent": "Yara Sorensen",
+   "version": "T0",
+   "scenario_id": "gov_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p11b6c703f1": {
+   "agent_id": "uninstructed__edu_01__T7__r1|Benjamin Hartley",
+   "run_id": "uninstructed__edu_01__T7__r1",
+   "agent": "Benjamin Hartley",
+   "version": "T7",
+   "scenario_id": "edu_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p05cac5b3fb": {
+   "agent_id": "uninstructed__fin_01__T0__r0|Imani Okafor",
+   "run_id": "uninstructed__fin_01__T0__r0",
+   "agent": "Imani Okafor",
+   "version": "T0",
+   "scenario_id": "fin_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p28e5c6de3f": {
+   "agent_id": "uninstructed__cyber_01__T7__r0|Yusuf Mironova",
+   "run_id": "uninstructed__cyber_01__T7__r0",
+   "agent": "Yusuf Mironova",
+   "version": "T7",
+   "scenario_id": "cyber_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p1e9461f282": {
+   "agent_id": "uninstructed__mil_02__T7__r1|Xavier Diallo",
+   "run_id": "uninstructed__mil_02__T7__r1",
+   "agent": "Xavier Diallo",
+   "version": "T7",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p38153b1ba4": {
+   "agent_id": "uninstructed__ins_02__T7__r1|Nadia Eriksson",
+   "run_id": "uninstructed__ins_02__T7__r1",
+   "agent": "Nadia Eriksson",
+   "version": "T7",
+   "scenario_id": "ins_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p8354c39137": {
+   "agent_id": "uninstructed__re_01__T7__r1|Yara Sorensen",
+   "run_id": "uninstructed__re_01__T7__r1",
+   "agent": "Yara Sorensen",
+   "version": "T7",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p3a7ca8d731": {
+   "agent_id": "uninstructed__cyber_02__T7__r0|Thomas Okwu",
+   "run_id": "uninstructed__cyber_02__T7__r0",
+   "agent": "Thomas Okwu",
+   "version": "T7",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p759c4ccd13": {
+   "agent_id": "uninstructed__eng_03__T0__r0|Quinn Adeyemi",
+   "run_id": "uninstructed__eng_03__T0__r0",
+   "agent": "Quinn Adeyemi",
+   "version": "T0",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p8f28df2398": {
+   "agent_id": "uninstructed__mil_02__T7__r1|Samuel Kowalski",
+   "run_id": "uninstructed__mil_02__T7__r1",
+   "agent": "Samuel Kowalski",
+   "version": "T7",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p53fb7a47d3": {
+   "agent_id": "uninstructed__env_03__T7__r0|Thomas Okwu",
+   "run_id": "uninstructed__env_03__T7__r0",
+   "agent": "Thomas Okwu",
+   "version": "T7",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p91a2f17ed0": {
+   "agent_id": "uninstructed__pharma_01__T7__r0|Hiroshi Tanaka",
+   "run_id": "uninstructed__pharma_01__T7__r0",
+   "agent": "Hiroshi Tanaka",
+   "version": "T7",
+   "scenario_id": "pharma_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p824e6b9f96": {
+   "agent_id": "uninstructed__env_03__T0__r0|Thomas Okwu",
+   "run_id": "uninstructed__env_03__T0__r0",
+   "agent": "Thomas Okwu",
+   "version": "T0",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pb50f24221e": {
+   "agent_id": "uninstructed__re_01__T0__r0|Yara Sorensen",
+   "run_id": "uninstructed__re_01__T0__r0",
+   "agent": "Yara Sorensen",
+   "version": "T0",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pe2e036c785": {
+   "agent_id": "uninstructed__med_01__T7__r0|Yara Sorensen",
+   "run_id": "uninstructed__med_01__T7__r0",
+   "agent": "Yara Sorensen",
+   "version": "T7",
+   "scenario_id": "med_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p6b63296a78": {
+   "agent_id": "uninstructed__cyber_03__T7__r0|Fiona MacGregor",
+   "run_id": "uninstructed__cyber_03__T7__r0",
+   "agent": "Fiona MacGregor",
+   "version": "T7",
+   "scenario_id": "cyber_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p9ab02b8a9b": {
+   "agent_id": "uninstructed__env_03__T7__r0|Grace Mensah",
+   "run_id": "uninstructed__env_03__T7__r0",
+   "agent": "Grace Mensah",
+   "version": "T7",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p073d709b46": {
+   "agent_id": "uninstructed__eng_03__T0__r0|Niall Donovan",
+   "run_id": "uninstructed__eng_03__T0__r0",
+   "agent": "Niall Donovan",
+   "version": "T0",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p7ea6861981": {
+   "agent_id": "uninstructed__hire_01__T7__r1|Vincent Morales",
+   "run_id": "uninstructed__hire_01__T7__r1",
+   "agent": "Vincent Morales",
+   "version": "T7",
+   "scenario_id": "hire_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p7fa4de754a": {
+   "agent_id": "uninstructed__pharma_02__T0__r0|Janet Hernandez",
+   "run_id": "uninstructed__pharma_02__T0__r0",
+   "agent": "Janet Hernandez",
+   "version": "T0",
+   "scenario_id": "pharma_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p96967674cb": {
+   "agent_id": "uninstructed__gov_02__T0__r0|Kavita Mehta",
+   "run_id": "uninstructed__gov_02__T0__r0",
+   "agent": "Kavita Mehta",
+   "version": "T0",
+   "scenario_id": "gov_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pafaf8e55d4": {
+   "agent_id": "uninstructed__fin_03__T0__r0|Brianna Walsh",
+   "run_id": "uninstructed__fin_03__T0__r0",
+   "agent": "Brianna Walsh",
+   "version": "T0",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pcfb91377c7": {
+   "agent_id": "uninstructed__mil_02__T7__r1|Ahmed Hassan",
+   "run_id": "uninstructed__mil_02__T7__r1",
+   "agent": "Ahmed Hassan",
+   "version": "T7",
+   "scenario_id": "mil_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pe0c182e43c": {
+   "agent_id": "uninstructed__pharma_02__T0__r0|James Reinholt",
+   "run_id": "uninstructed__pharma_02__T0__r0",
+   "agent": "James Reinholt",
+   "version": "T0",
+   "scenario_id": "pharma_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pdf408660b9": {
+   "agent_id": "uninstructed__eng_01__T0__r0|Felix Bergmann",
+   "run_id": "uninstructed__eng_01__T0__r0",
+   "agent": "Felix Bergmann",
+   "version": "T0",
+   "scenario_id": "eng_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p9adad52f06": {
+   "agent_id": "uninstructed__edu_01__T7__r1|Wendy Nakashima",
+   "run_id": "uninstructed__edu_01__T7__r1",
+   "agent": "Wendy Nakashima",
+   "version": "T7",
+   "scenario_id": "edu_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pb54625081b": {
+   "agent_id": "uninstructed__food_01__T0__r0|Ahmed Hassan",
+   "run_id": "uninstructed__food_01__T0__r0",
+   "agent": "Ahmed Hassan",
+   "version": "T0",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p87f23f6ddf": {
+   "agent_id": "uninstructed__cyber_02__T0__r0|Ahmed Hassan",
+   "run_id": "uninstructed__cyber_02__T0__r0",
+   "agent": "Ahmed Hassan",
+   "version": "T0",
+   "scenario_id": "cyber_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p4a58c2e069": {
+   "agent_id": "uninstructed__leg_03__T7__r0|Adam Volkov",
+   "run_id": "uninstructed__leg_03__T7__r0",
+   "agent": "Adam Volkov",
+   "version": "T7",
+   "scenario_id": "leg_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p1d3288eba0": {
+   "agent_id": "uninstructed__food_02__T7__r1|Paulo Alves",
+   "run_id": "uninstructed__food_02__T7__r1",
+   "agent": "Paulo Alves",
+   "version": "T7",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p35e26908c0": {
+   "agent_id": "uninstructed__fin_03__T0__r0|Emmanuel Nkosi",
+   "run_id": "uninstructed__fin_03__T0__r0",
+   "agent": "Emmanuel Nkosi",
+   "version": "T0",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p624fb00523": {
+   "agent_id": "uninstructed__fin_01__T0__r0|Xavier Diallo",
+   "run_id": "uninstructed__fin_01__T0__r0",
+   "agent": "Xavier Diallo",
+   "version": "T0",
+   "scenario_id": "fin_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pa7d4b7443f": {
+   "agent_id": "uninstructed__food_03__T7__r1|Yasmin Torres",
+   "run_id": "uninstructed__food_03__T7__r1",
+   "agent": "Yasmin Torres",
+   "version": "T7",
+   "scenario_id": "food_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pbff499bfa7": {
+   "agent_id": "uninstructed__audit_02__T7__r0|Ahmed Hassan",
+   "run_id": "uninstructed__audit_02__T7__r0",
+   "agent": "Ahmed Hassan",
+   "version": "T7",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p988e814e68": {
+   "agent_id": "uninstructed__food_03__T7__r1|Samuel Kowalski",
+   "run_id": "uninstructed__food_03__T7__r1",
+   "agent": "Samuel Kowalski",
+   "version": "T7",
+   "scenario_id": "food_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p4fbb1d3dd2": {
+   "agent_id": "uninstructed__re_01__T7__r1|Dara Nakamura",
+   "run_id": "uninstructed__re_01__T7__r1",
+   "agent": "Dara Nakamura",
+   "version": "T7",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p372df83a8d": {
+   "agent_id": "uninstructed__food_01__T7__r1|Kavita Mehta",
+   "run_id": "uninstructed__food_01__T7__r1",
+   "agent": "Kavita Mehta",
+   "version": "T7",
+   "scenario_id": "food_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pf77f3f72b0": {
+   "agent_id": "uninstructed__hire_03__T7__r0|Kevin Park",
+   "run_id": "uninstructed__hire_03__T7__r0",
+   "agent": "Kevin Park",
+   "version": "T7",
+   "scenario_id": "hire_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pe6ce13da66": {
+   "agent_id": "uninstructed__cyber_01__T7__r0|Samuel Kowalski",
+   "run_id": "uninstructed__cyber_01__T7__r0",
+   "agent": "Samuel Kowalski",
+   "version": "T7",
+   "scenario_id": "cyber_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pfb9ebbf31e": {
+   "agent_id": "uninstructed__eng_01__T0__r0|Sara Johansson",
+   "run_id": "uninstructed__eng_01__T0__r0",
+   "agent": "Sara Johansson",
+   "version": "T0",
+   "scenario_id": "eng_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pf76026ee5f": {
+   "agent_id": "uninstructed__eng_02__T0__r0|Yusuf Mironova",
+   "run_id": "uninstructed__eng_02__T0__r0",
+   "agent": "Yusuf Mironova",
+   "version": "T0",
+   "scenario_id": "eng_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p3a17ac543f": {
+   "agent_id": "uninstructed__env_03__T0__r0|Yusuf Mironova",
+   "run_id": "uninstructed__env_03__T0__r0",
+   "agent": "Yusuf Mironova",
+   "version": "T0",
+   "scenario_id": "env_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pd100586e90": {
+   "agent_id": "uninstructed__food_02__T7__r1|Benjamin Hartley",
+   "run_id": "uninstructed__food_02__T7__r1",
+   "agent": "Benjamin Hartley",
+   "version": "T7",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5eecc7a4f5": {
+   "agent_id": "uninstructed__audit_02__T7__r0|Elena Vasquez",
+   "run_id": "uninstructed__audit_02__T7__r0",
+   "agent": "Elena Vasquez",
+   "version": "T7",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  }
+ }
+}

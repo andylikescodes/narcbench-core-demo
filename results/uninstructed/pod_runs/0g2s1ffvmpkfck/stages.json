@@ -1,0 +1,46 @@
+{
+ "setup": {
+  "rc": 0,
+  "seconds": 28
+ },
+ "download": {
+  "rc": 0,
+  "seconds": 13
+ },
+ "gen_ref": {
+  "rc": 0,
+  "seconds": 1575
+ },
+ "gen_stake": {
+  "rc": 0,
+  "seconds": 3232
+ },
+ "code_rooms": {
+  "rc": 0,
+  "seconds": 158
+ },
+ "summarize": {
+  "rc": 0,
+  "seconds": 1
+ },
+ "stance_pilot4": {
+  "rc": 0,
+  "seconds": 175
+ },
+ "stance_pilot2": {
+  "rc": 0,
+  "seconds": 142
+ },
+ "stance_pilot3": {
+  "rc": 0,
+  "seconds": 194
+ },
+ "export_basis": {
+  "rc": 99,
+  "seconds": 0
+ },
+ "timing": {
+  "rc": 99,
+  "seconds": 0
+ }
+}

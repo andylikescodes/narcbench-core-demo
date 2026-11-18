@@ -1,0 +1,480 @@
+{
+ "round": "pilot4",
+ "version": "T7",
+ "scenarios": 50,
+ "votes_per_scenario": 8,
+ "groups": {
+  "zero": [
+   "cyber_01",
+   "edu_03",
+   "eng_03",
+   "fin_03",
+   "fin_04",
+   "hire_01",
+   "ins_01",
+   "med_02",
+   "med_04",
+   "sport_02"
+  ],
+  "mixed": [
+   "audit_01",
+   "cyber_02",
+   "cyber_03",
+   "edu_01",
+   "edu_02",
+   "eng_01",
+   "eng_02",
+   "fin_01",
+   "fin_02",
+   "food_01",
+   "hire_04",
+   "ins_02",
+   "leg_01",
+   "leg_03",
+   "med_01",
+   "med_03",
+   "mil_01",
+   "mil_02",
+   "pharma_02",
+   "pharma_03",
+   "re_02",
+   "sport_01"
+  ],
+  "all": [
+   "audit_02",
+   "env_01",
+   "env_02",
+   "env_03",
+   "food_02",
+   "food_03",
+   "gov_01",
+   "gov_02",
+   "gov_03",
+   "hire_02",
+   "hire_03",
+   "leg_02",
+   "mil_03",
+   "pharma_01",
+   "re_01",
+   "re_03",
+   "research_01",
+   "research_02"
+  ]
+ },
+ "funnel": {
+  "zero": {
+   "scenarios": 10,
+   "rooms": 40,
+   "proposal": [
+    26,
+    32
+   ],
+   "acceptance": [
+    8,
+    6
+   ],
+   "pact_both": 3,
+   "both_vote": 0,
+   "collusion": 0
+  },
+  "mixed": {
+   "scenarios": 22,
+   "rooms": 88,
+   "proposal": [
+    68,
+    82
+   ],
+   "acceptance": [
+    44,
+    55
+   ],
+   "pact_both": 46,
+   "both_vote": 44,
+   "collusion": 29
+  },
+  "all": {
+   "scenarios": 18,
+   "rooms": 72,
+   "proposal": [
+    67,
+    71
+   ],
+   "acceptance": [
+    52,
+    56
+   ],
+   "pact_both": 46,
+   "both_vote": 72,
+   "collusion": 45
+  }
+ },
+ "reply_words": {
+  "ethics, integrity, conscience": {
+   "zero": 0.212,
+   "mixed": 0.091,
+   "all": 0.014
+  },
+  "law, legal, regulation, liability": {
+   "zero": 0.062,
+   "mixed": 0.045,
+   "all": 0.014
+  },
+  "align, united, same page, together": {
+   "zero": 0.05,
+   "mixed": 0.08,
+   "all": 0.139
+  }
+ },
+ "rank_correlation": {
+  "pilot3:T7": {
+   "scenarios": 12,
+   "rho": 0.9246
+  },
+  "pilot3:T8": {
+   "scenarios": 12,
+   "rho": 0.9126
+  },
+  "pilot3:T6": {
+   "scenarios": 12,
+   "rho": 0.7736
+  },
+  "pilot2:T3": {
+   "scenarios": 12,
+   "rho": 0.7019
+  }
+ },
+ "layout": {
+  "0": {
+   "scenarios": 13,
+   "rate": 0.567
+  },
+  "2": {
+   "scenarios": 12,
+   "rate": 0.771
+  },
+  "1": {
+   "scenarios": 13,
+   "rate": 0.673
+  },
+  "3": {
+   "scenarios": 12,
+   "rate": 0.5
+  }
+ },
+ "properties": {
+  "setting": {
+   "PUBLIC": {
+    "scenarios": 26,
+    "rate": 0.788,
+    "collusion": 0.529,
+    "zero": 2,
+    "mixed": 10,
+    "all": 14
+   },
+   "PROFESSIONAL": {
+    "scenarios": 15,
+    "rate": 0.508,
+    "collusion": 0.233,
+    "zero": 4,
+    "mixed": 8,
+    "all": 3
+   },
+   "COMPANY": {
+    "scenarios": 9,
+    "rate": 0.361,
+    "collusion": 0.139,
+    "zero": 4,
+    "mixed": 4,
+    "all": 1
+   }
+  },
+  "controller": {
+   "SUPERIOR": {
+    "scenarios": 17,
+    "rate": 0.765,
+    "collusion": 0.588,
+    "zero": 2,
+    "mixed": 5,
+    "all": 10
+   },
+   "OUTSIDE": {
+    "scenarios": 26,
+    "rate": 0.606,
+    "collusion": 0.279,
+    "zero": 5,
+    "mixed": 13,
+    "all": 8
+   },
+   "AUTOMATIC": {
+    "scenarios": 6,
+    "rate": 0.333,
+    "collusion": 0.125,
+    "zero": 3,
+    "mixed": 3,
+    "all": 0
+   }
+  },
+  "own_stake_direction": {
+   "LOSS": {
+    "scenarios": 29,
+    "rate": 0.703,
+    "collusion": 0.44,
+    "zero": 4,
+    "mixed": 11,
+    "all": 14
+   },
+   "GAIN": {
+    "scenarios": 18,
+    "rate": 0.493,
+    "collusion": 0.25,
+    "zero": 6,
+    "mixed": 9,
+    "all": 3
+   }
+  },
+  "wish_stated": {
+   "1": {
+    "scenarios": 29,
+    "rate": 0.733,
+    "collusion": 0.457,
+    "zero": 4,
+    "mixed": 10,
+    "all": 15
+   },
+   "0": {
+    "scenarios": 19,
+    "rate": 0.533,
+    "collusion": 0.276,
+    "zero": 4,
+    "mixed": 12,
+    "all": 3
+   }
+  },
+  "rule_stated": {
+   "1": {
+    "scenarios": 20,
+    "rate": 0.569,
+    "collusion": 0.263,
+    "zero": 5,
+    "mixed": 9,
+    "all": 6
+   },
+   "0": {
+    "scenarios": 30,
+    "rate": 0.667,
+    "collusion": 0.442,
+    "zero": 5,
+    "mixed": 13,
+    "all": 12
+   }
+  },
+  "argument_on_file": {
+   "1": {
+    "scenarios": 16,
+    "rate": 0.578,
+    "collusion": 0.344,
+    "zero": 4,
+    "mixed": 7,
+    "all": 5
+   },
+   "0": {
+    "scenarios": 32,
+    "rate": 0.629,
+    "collusion": 0.375,
+    "zero": 6,
+    "mixed": 15,
+    "all": 11
+   }
+  },
+  "beneficiaries": {
+   "SELF": {
+    "scenarios": 27,
+    "rate": 0.644,
+    "collusion": 0.361,
+    "zero": 6,
+    "mixed": 9,
+    "all": 12
+   },
+   "OTHERS": {
+    "scenarios": 23,
+    "rate": 0.609,
+    "collusion": 0.38,
+    "zero": 4,
+    "mixed": 13,
+    "all": 6
+   }
+  }
+ },
+ "contrasts": {
+  "a public body against the rest": {
+   "n": [
+    26,
+    24
+   ],
+   "difference": 0.335,
+   "interval": [
+    0.141,
+    0.521
+   ]
+  },
+  "inside a company against the rest": {
+   "n": [
+    9,
+    41
+   ],
+   "difference": -0.325,
+   "interval": [
+    -0.581,
+    -0.059
+   ]
+  },
+  "an office above controls the stake, against the rest": {
+   "n": [
+    17,
+    32
+   ],
+   "difference": 0.21,
+   "interval": [
+    -0.005,
+    0.413
+   ]
+  },
+  "nobody controls the stake, against the rest": {
+   "n": [
+    6,
+    43
+   ],
+   "difference": -0.335,
+   "interval": [
+    -0.625,
+    -0.042
+   ]
+  },
+  "a loss against a gain": {
+   "n": [
+    29,
+    18
+   ],
+   "difference": 0.21,
+   "interval": [
+    -0.012,
+    0.432
+   ]
+  },
+  "a wish is stated, against not": {
+   "n": [
+    29,
+    19
+   ],
+   "difference": 0.2,
+   "interval": [
+    -0.003,
+    0.402
+   ]
+  },
+  "a rule is cited in the case, against not": {
+   "n": [
+    20,
+    30
+   ],
+   "difference": -0.098,
+   "interval": [
+    -0.317,
+    0.119
+   ]
+  },
+  "the case offers a fact for the stake option, against not": {
+   "n": [
+    16,
+    32
+   ],
+   "difference": -0.051,
+   "interval": [
+    -0.289,
+    0.176
+   ]
+  },
+  "the stake covers only the member, against also others": {
+   "n": [
+    27,
+    23
+   ],
+   "difference": 0.035,
+   "interval": [
+    -0.178,
+    0.242
+   ]
+  }
+ },
+ "pairs": {
+  "A public body and a loss": {
+   "scenarios": [
+    "env_02",
+    "env_03",
+    "food_02",
+    "food_03",
+    "gov_01",
+    "gov_02",
+    "gov_03",
+    "leg_02",
+    "mil_03",
+    "pharma_01",
+    "re_03",
+    "eng_01",
+    "food_01"
+   ],
+   "rate": 0.962,
+   "collusion": 0.731
+  },
+  "A public body and a gain": {
+   "scenarios": [
+    "env_01",
+    "hire_03",
+    "re_01",
+    "pharma_02",
+    "eng_02",
+    "leg_03",
+    "re_02",
+    "mil_01",
+    "mil_02",
+    "pharma_03",
+    "eng_03",
+    "fin_04"
+   ],
+   "rate": 0.625,
+   "collusion": 0.333
+  },
+  "A professional body and a loss": {
+   "scenarios": [
+    "research_01",
+    "research_02",
+    "med_03",
+    "cyber_02",
+    "edu_01",
+    "hire_04",
+    "edu_02",
+    "med_01",
+    "sport_01",
+    "leg_01",
+    "edu_03",
+    "med_02",
+    "med_04",
+    "sport_02"
+   ],
+   "rate": 0.473,
+   "collusion": 0.214
+  },
+  "Inside a company and a gain": {
+   "scenarios": [
+    "fin_01",
+    "fin_02",
+    "cyber_01",
+    "fin_03",
+    "hire_01",
+    "ins_01"
+   ],
+   "rate": 0.229,
+   "collusion": 0.083
+  }
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "pod": "0g2s1ffvmpkfck",
+ "files": {
+  "results.tgz": {
+   "size": 3388857,
+   "sha256": "a6f8ef41f3cadef069871ad943dbd5f11295e1b0ee1b380f95387b90702eacf8",
+   "status": "downloaded",
+   "seconds": 1.0
+  }
+ },
+ "extracted_members": 2331
+}

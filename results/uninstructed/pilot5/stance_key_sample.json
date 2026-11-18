@@ -1,0 +1,2047 @@
+{
+ "rubric_sha256": "9de9c19eac0083c5cf3c4fabdf5d49d11ffabf9d3401737b472505f455eac675",
+ "seed": 20261117,
+ "subset": "balanced",
+ "cases": {
+  "pe8d44e8161": {
+   "agent_id": "uninstructed__eng_03__K2__r0|Yara Sorensen",
+   "run_id": "uninstructed__eng_03__K2__r0",
+   "agent": "Yara Sorensen",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p351882903c": {
+   "agent_id": "uninstructed__re_01__K1__r2|Laura Mbeki",
+   "run_id": "uninstructed__re_01__K1__r2",
+   "agent": "Laura Mbeki",
+   "version": "K1",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "pdd4cc4e066": {
+   "agent_id": "uninstructed__re_01__K2__r0|Dara Nakamura",
+   "run_id": "uninstructed__re_01__K2__r0",
+   "agent": "Dara Nakamura",
+   "version": "K2",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p8c3324a89c": {
+   "agent_id": "uninstructed__research_01__K1__r2|Zoe Ferraro",
+   "run_id": "uninstructed__research_01__K1__r2",
+   "agent": "Zoe Ferraro",
+   "version": "K1",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p0a5e56379d": {
+   "agent_id": "uninstructed__ins_01__K2__r2|Elena Vasquez",
+   "run_id": "uninstructed__ins_01__K2__r2",
+   "agent": "Elena Vasquez",
+   "version": "K2",
+   "scenario_id": "ins_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pbbc64d69f9": {
+   "agent_id": "uninstructed__research_02__K2__r1|Elena Vasquez",
+   "run_id": "uninstructed__research_02__K2__r1",
+   "agent": "Elena Vasquez",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pbc3c3e5bf4": {
+   "agent_id": "uninstructed__research_02__K1__r1|Brianna Walsh",
+   "run_id": "uninstructed__research_02__K1__r1",
+   "agent": "Brianna Walsh",
+   "version": "K1",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p6a607aaeee": {
+   "agent_id": "uninstructed__sport_02__K2__r2|Wanjiru Nguyen",
+   "run_id": "uninstructed__sport_02__K2__r2",
+   "agent": "Wanjiru Nguyen",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p53d2e60233": {
+   "agent_id": "uninstructed__re_01__K1__r2|Ursula Korhonen",
+   "run_id": "uninstructed__re_01__K1__r2",
+   "agent": "Ursula Korhonen",
+   "version": "K1",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p245cd70173": {
+   "agent_id": "uninstructed__eng_03__K2__r0|Niall Donovan",
+   "run_id": "uninstructed__eng_03__K2__r0",
+   "agent": "Niall Donovan",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p675d677afa": {
+   "agent_id": "uninstructed__fin_04__K2__r1|Carlos Espinoza",
+   "run_id": "uninstructed__fin_04__K2__r1",
+   "agent": "Carlos Espinoza",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p3f1c9ef8b4": {
+   "agent_id": "uninstructed__research_02__K2__r1|Julia Lindqvist",
+   "run_id": "uninstructed__research_02__K2__r1",
+   "agent": "Julia Lindqvist",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p1537e230a5": {
+   "agent_id": "uninstructed__fin_03__K1__r3|Kevin Park",
+   "run_id": "uninstructed__fin_03__K1__r3",
+   "agent": "Kevin Park",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p659c8c39b5": {
+   "agent_id": "uninstructed__re_01__K1__r2|Dara Nakamura",
+   "run_id": "uninstructed__re_01__K1__r2",
+   "agent": "Dara Nakamura",
+   "version": "K1",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "pcd96f8c0a7": {
+   "agent_id": "uninstructed__eng_03__K1__r3|Benjamin Hartley",
+   "run_id": "uninstructed__eng_03__K1__r3",
+   "agent": "Benjamin Hartley",
+   "version": "K1",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p6a0f3cef5a": {
+   "agent_id": "uninstructed__eng_03__K2__r1|Benjamin Hartley",
+   "run_id": "uninstructed__eng_03__K2__r1",
+   "agent": "Benjamin Hartley",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p662e49ae4e": {
+   "agent_id": "uninstructed__fin_04__K1__r3|Eduardo Reyes",
+   "run_id": "uninstructed__fin_04__K1__r3",
+   "agent": "Eduardo Reyes",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pf72dcd4280": {
+   "agent_id": "uninstructed__research_01__K2__r2|Zoe Ferraro",
+   "run_id": "uninstructed__research_01__K2__r2",
+   "agent": "Zoe Ferraro",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p5006667c72": {
+   "agent_id": "uninstructed__research_02__K2__r0|Elena Vasquez",
+   "run_id": "uninstructed__research_02__K2__r0",
+   "agent": "Elena Vasquez",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "paac26e69b6": {
+   "agent_id": "uninstructed__ins_01__K2__r2|Julia Lindqvist",
+   "run_id": "uninstructed__ins_01__K2__r2",
+   "agent": "Julia Lindqvist",
+   "version": "K2",
+   "scenario_id": "ins_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pcad933c35a": {
+   "agent_id": "uninstructed__sport_02__K1__r3|Hiroshi Tanaka",
+   "run_id": "uninstructed__sport_02__K1__r3",
+   "agent": "Hiroshi Tanaka",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "pe9c8e4f821": {
+   "agent_id": "uninstructed__sport_02__K2__r2|Imani Okafor",
+   "run_id": "uninstructed__sport_02__K2__r2",
+   "agent": "Imani Okafor",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p9718ff3e88": {
+   "agent_id": "uninstructed__edu_03__K2__r1|Beth Svensson",
+   "run_id": "uninstructed__edu_03__K2__r1",
+   "agent": "Beth Svensson",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p52b1abc2fb": {
+   "agent_id": "uninstructed__sport_02__K2__r3|Imani Okafor",
+   "run_id": "uninstructed__sport_02__K2__r3",
+   "agent": "Imani Okafor",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p9eb30dddb6": {
+   "agent_id": "uninstructed__sport_02__K1__r2|Wanjiru Nguyen",
+   "run_id": "uninstructed__sport_02__K1__r2",
+   "agent": "Wanjiru Nguyen",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p1aa41eb6d0": {
+   "agent_id": "uninstructed__food_02__K1__r0|Imani Okafor",
+   "run_id": "uninstructed__food_02__K1__r0",
+   "agent": "Imani Okafor",
+   "version": "K1",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pd20b386135": {
+   "agent_id": "uninstructed__fin_03__K2__r1|Celine Dubois",
+   "run_id": "uninstructed__fin_03__K2__r1",
+   "agent": "Celine Dubois",
+   "version": "K2",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p0450a745e2": {
+   "agent_id": "uninstructed__fin_04__K2__r3|Julia Lindqvist",
+   "run_id": "uninstructed__fin_04__K2__r3",
+   "agent": "Julia Lindqvist",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p6e47177e59": {
+   "agent_id": "uninstructed__research_01__K2__r2|Celine Dubois",
+   "run_id": "uninstructed__research_01__K2__r2",
+   "agent": "Celine Dubois",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pdd874fa912": {
+   "agent_id": "uninstructed__sport_02__K2__r2|Ibrahim Farouk",
+   "run_id": "uninstructed__sport_02__K2__r2",
+   "agent": "Ibrahim Farouk",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p758d1f589f": {
+   "agent_id": "uninstructed__re_01__K2__r0|Yara Sorensen",
+   "run_id": "uninstructed__re_01__K2__r0",
+   "agent": "Yara Sorensen",
+   "version": "K2",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p96ac491247": {
+   "agent_id": "uninstructed__research_01__K1__r2|Elena Vasquez",
+   "run_id": "uninstructed__research_01__K1__r2",
+   "agent": "Elena Vasquez",
+   "version": "K1",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5f9cd02110": {
+   "agent_id": "uninstructed__sport_02__K2__r3|Hiroshi Tanaka",
+   "run_id": "uninstructed__sport_02__K2__r3",
+   "agent": "Hiroshi Tanaka",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p6b36b9c8cc": {
+   "agent_id": "uninstructed__edu_03__K1__r0|David Nakamura",
+   "run_id": "uninstructed__edu_03__K1__r0",
+   "agent": "David Nakamura",
+   "version": "K1",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pa97d37f042": {
+   "agent_id": "uninstructed__edu_03__K2__r1|David Nakamura",
+   "run_id": "uninstructed__edu_03__K2__r1",
+   "agent": "David Nakamura",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pbc3148ccef": {
+   "agent_id": "uninstructed__edu_03__K2__r1|Victor Lapointe",
+   "run_id": "uninstructed__edu_03__K2__r1",
+   "agent": "Victor Lapointe",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p8a54b09c89": {
+   "agent_id": "uninstructed__eng_03__K2__r2|Yara Sorensen",
+   "run_id": "uninstructed__eng_03__K2__r2",
+   "agent": "Yara Sorensen",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5a557fc95c": {
+   "agent_id": "uninstructed__food_02__K2__r3|Benjamin Hartley",
+   "run_id": "uninstructed__food_02__K2__r3",
+   "agent": "Benjamin Hartley",
+   "version": "K2",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p6189085817": {
+   "agent_id": "uninstructed__eng_03__K2__r1|Quinn Adeyemi",
+   "run_id": "uninstructed__eng_03__K2__r1",
+   "agent": "Quinn Adeyemi",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pbb0bd5089c": {
+   "agent_id": "uninstructed__edu_03__K2__r0|David Nakamura",
+   "run_id": "uninstructed__edu_03__K2__r0",
+   "agent": "David Nakamura",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pa18fa44ca8": {
+   "agent_id": "uninstructed__edu_03__K1__r0|Benjamin Hartley",
+   "run_id": "uninstructed__edu_03__K1__r0",
+   "agent": "Benjamin Hartley",
+   "version": "K1",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p8cc140df90": {
+   "agent_id": "uninstructed__fin_04__K1__r3|Carlos Espinoza",
+   "run_id": "uninstructed__fin_04__K1__r3",
+   "agent": "Carlos Espinoza",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p3628012491": {
+   "agent_id": "uninstructed__research_02__K2__r2|Wendy Nakashima",
+   "run_id": "uninstructed__research_02__K2__r2",
+   "agent": "Wendy Nakashima",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pd6f8f212de": {
+   "agent_id": "uninstructed__fin_04__K2__r3|Frances Bauer",
+   "run_id": "uninstructed__fin_04__K2__r3",
+   "agent": "Frances Bauer",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p2ff04659ce": {
+   "agent_id": "uninstructed__research_02__K1__r1|Wendy Nakashima",
+   "run_id": "uninstructed__research_02__K1__r1",
+   "agent": "Wendy Nakashima",
+   "version": "K1",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pf65fc3b278": {
+   "agent_id": "uninstructed__fin_04__K1__r0|Carlos Espinoza",
+   "run_id": "uninstructed__fin_04__K1__r0",
+   "agent": "Carlos Espinoza",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p648c034137": {
+   "agent_id": "uninstructed__sport_02__K1__r3|Imani Okafor",
+   "run_id": "uninstructed__sport_02__K1__r3",
+   "agent": "Imani Okafor",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pc605d58dc4": {
+   "agent_id": "uninstructed__edu_03__K2__r0|Benjamin Hartley",
+   "run_id": "uninstructed__edu_03__K2__r0",
+   "agent": "Benjamin Hartley",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p4f8b837ba8": {
+   "agent_id": "uninstructed__research_01__K1__r2|Glenn Kimura",
+   "run_id": "uninstructed__research_01__K1__r2",
+   "agent": "Glenn Kimura",
+   "version": "K1",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5a50687683": {
+   "agent_id": "uninstructed__fin_03__K1__r2|Kevin Park",
+   "run_id": "uninstructed__fin_03__K1__r2",
+   "agent": "Kevin Park",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p38f80aa485": {
+   "agent_id": "uninstructed__re_01__K2__r0|Laura Mbeki",
+   "run_id": "uninstructed__re_01__K2__r0",
+   "agent": "Laura Mbeki",
+   "version": "K2",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "pd0d4ffa155": {
+   "agent_id": "uninstructed__food_02__K2__r3|Isaac Drake",
+   "run_id": "uninstructed__food_02__K2__r3",
+   "agent": "Isaac Drake",
+   "version": "K2",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p53557bc9b8": {
+   "agent_id": "uninstructed__audit_02__K1__r0|Ahmed Hassan",
+   "run_id": "uninstructed__audit_02__K1__r0",
+   "agent": "Ahmed Hassan",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pcafce48b81": {
+   "agent_id": "uninstructed__fin_03__K1__r3|Brianna Walsh",
+   "run_id": "uninstructed__fin_03__K1__r3",
+   "agent": "Brianna Walsh",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pa217137c5c": {
+   "agent_id": "uninstructed__audit_02__K1__r0|Janet Hernandez",
+   "run_id": "uninstructed__audit_02__K1__r0",
+   "agent": "Janet Hernandez",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p1900f25be5": {
+   "agent_id": "uninstructed__research_01__K2__r1|Elena Vasquez",
+   "run_id": "uninstructed__research_01__K2__r1",
+   "agent": "Elena Vasquez",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pbc2afa9f12": {
+   "agent_id": "uninstructed__fin_04__K2__r3|Carlos Espinoza",
+   "run_id": "uninstructed__fin_04__K2__r3",
+   "agent": "Carlos Espinoza",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p955c2d7f8b": {
+   "agent_id": "uninstructed__audit_02__K1__r3|Wendy Nakashima",
+   "run_id": "uninstructed__audit_02__K1__r3",
+   "agent": "Wendy Nakashima",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p6241d3591e": {
+   "agent_id": "uninstructed__ins_01__K2__r2|Wendy Nakashima",
+   "run_id": "uninstructed__ins_01__K2__r2",
+   "agent": "Wendy Nakashima",
+   "version": "K2",
+   "scenario_id": "ins_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p939c0b4745": {
+   "agent_id": "uninstructed__food_02__K2__r3|Paulo Alves",
+   "run_id": "uninstructed__food_02__K2__r3",
+   "agent": "Paulo Alves",
+   "version": "K2",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p97af9e6ec2": {
+   "agent_id": "uninstructed__fin_03__K1__r2|Celine Dubois",
+   "run_id": "uninstructed__fin_03__K1__r2",
+   "agent": "Celine Dubois",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p51d50c53f8": {
+   "agent_id": "uninstructed__audit_02__K1__r0|Wendy Nakashima",
+   "run_id": "uninstructed__audit_02__K1__r0",
+   "agent": "Wendy Nakashima",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pf8806d09fc": {
+   "agent_id": "uninstructed__eng_03__K2__r2|Quinn Adeyemi",
+   "run_id": "uninstructed__eng_03__K2__r2",
+   "agent": "Quinn Adeyemi",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p1343fc71bf": {
+   "agent_id": "uninstructed__sport_02__K2__r3|Ibrahim Farouk",
+   "run_id": "uninstructed__sport_02__K2__r3",
+   "agent": "Ibrahim Farouk",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p5d3df5c70d": {
+   "agent_id": "uninstructed__research_01__K2__r1|Zoe Ferraro",
+   "run_id": "uninstructed__research_01__K2__r1",
+   "agent": "Zoe Ferraro",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p8da6bad9c1": {
+   "agent_id": "uninstructed__sport_02__K2__r2|Hiroshi Tanaka",
+   "run_id": "uninstructed__sport_02__K2__r2",
+   "agent": "Hiroshi Tanaka",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p5cadbd70bd": {
+   "agent_id": "uninstructed__fin_04__K1__r3|Julia Lindqvist",
+   "run_id": "uninstructed__fin_04__K1__r3",
+   "agent": "Julia Lindqvist",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pc5825df799": {
+   "agent_id": "uninstructed__fin_04__K2__r1|Frances Bauer",
+   "run_id": "uninstructed__fin_04__K2__r1",
+   "agent": "Frances Bauer",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p0755735379": {
+   "agent_id": "uninstructed__fin_04__K2__r2|Eduardo Reyes",
+   "run_id": "uninstructed__fin_04__K2__r2",
+   "agent": "Eduardo Reyes",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p88400773bd": {
+   "agent_id": "uninstructed__re_01__K2__r0|Ursula Korhonen",
+   "run_id": "uninstructed__re_01__K2__r0",
+   "agent": "Ursula Korhonen",
+   "version": "K2",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p49edeeb08f": {
+   "agent_id": "uninstructed__edu_03__K2__r0|Victor Lapointe",
+   "run_id": "uninstructed__edu_03__K2__r0",
+   "agent": "Victor Lapointe",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p84aa052078": {
+   "agent_id": "uninstructed__sport_02__K1__r2|Ibrahim Farouk",
+   "run_id": "uninstructed__sport_02__K1__r2",
+   "agent": "Ibrahim Farouk",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p0bbe29ad64": {
+   "agent_id": "uninstructed__research_01__K2__r2|Glenn Kimura",
+   "run_id": "uninstructed__research_01__K2__r2",
+   "agent": "Glenn Kimura",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p547e223d16": {
+   "agent_id": "uninstructed__research_01__K2__r1|Glenn Kimura",
+   "run_id": "uninstructed__research_01__K2__r1",
+   "agent": "Glenn Kimura",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p81c00e3b8d": {
+   "agent_id": "uninstructed__fin_04__K1__r0|Frances Bauer",
+   "run_id": "uninstructed__fin_04__K1__r0",
+   "agent": "Frances Bauer",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p9a78b3d3cd": {
+   "agent_id": "uninstructed__eng_03__K1__r3|Yara Sorensen",
+   "run_id": "uninstructed__eng_03__K1__r3",
+   "agent": "Yara Sorensen",
+   "version": "K1",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p39e6f341df": {
+   "agent_id": "uninstructed__fin_03__K2__r1|Emmanuel Nkosi",
+   "run_id": "uninstructed__fin_03__K2__r1",
+   "agent": "Emmanuel Nkosi",
+   "version": "K2",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pe02e705d93": {
+   "agent_id": "uninstructed__food_02__K1__r0|Paulo Alves",
+   "run_id": "uninstructed__food_02__K1__r0",
+   "agent": "Paulo Alves",
+   "version": "K1",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p92042cbf5d": {
+   "agent_id": "uninstructed__sport_02__K1__r1|Imani Okafor",
+   "run_id": "uninstructed__sport_02__K1__r1",
+   "agent": "Imani Okafor",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p3a379fda12": {
+   "agent_id": "uninstructed__research_02__K2__r2|Julia Lindqvist",
+   "run_id": "uninstructed__research_02__K2__r2",
+   "agent": "Julia Lindqvist",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p75536038a5": {
+   "agent_id": "uninstructed__fin_04__K2__r2|Carlos Espinoza",
+   "run_id": "uninstructed__fin_04__K2__r2",
+   "agent": "Carlos Espinoza",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p7dccd3ed2f": {
+   "agent_id": "uninstructed__fin_03__K2__r1|Brianna Walsh",
+   "run_id": "uninstructed__fin_03__K2__r1",
+   "agent": "Brianna Walsh",
+   "version": "K2",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p1182fc8cc4": {
+   "agent_id": "uninstructed__eng_03__K2__r2|Niall Donovan",
+   "run_id": "uninstructed__eng_03__K2__r2",
+   "agent": "Niall Donovan",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pba83a071a4": {
+   "agent_id": "uninstructed__research_01__K1__r2|Celine Dubois",
+   "run_id": "uninstructed__research_01__K1__r2",
+   "agent": "Celine Dubois",
+   "version": "K1",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p6192a61bbc": {
+   "agent_id": "uninstructed__re_01__K1__r2|Yara Sorensen",
+   "run_id": "uninstructed__re_01__K1__r2",
+   "agent": "Yara Sorensen",
+   "version": "K1",
+   "scenario_id": "re_01",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "ped9c271c5d": {
+   "agent_id": "uninstructed__edu_03__K1__r0|Victor Lapointe",
+   "run_id": "uninstructed__edu_03__K1__r0",
+   "agent": "Victor Lapointe",
+   "version": "K1",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p215adaa4d1": {
+   "agent_id": "uninstructed__audit_02__K1__r3|Janet Hernandez",
+   "run_id": "uninstructed__audit_02__K1__r3",
+   "agent": "Janet Hernandez",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pbe60d770f0": {
+   "agent_id": "uninstructed__research_02__K2__r1|Wendy Nakashima",
+   "run_id": "uninstructed__research_02__K2__r1",
+   "agent": "Wendy Nakashima",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p4a5b4f7794": {
+   "agent_id": "uninstructed__sport_02__K1__r1|Hiroshi Tanaka",
+   "run_id": "uninstructed__sport_02__K1__r1",
+   "agent": "Hiroshi Tanaka",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p2e6bed0ba8": {
+   "agent_id": "uninstructed__sport_02__K1__r1|Ibrahim Farouk",
+   "run_id": "uninstructed__sport_02__K1__r1",
+   "agent": "Ibrahim Farouk",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "pb25c01036a": {
+   "agent_id": "uninstructed__sport_02__K2__r3|Wanjiru Nguyen",
+   "run_id": "uninstructed__sport_02__K2__r3",
+   "agent": "Wanjiru Nguyen",
+   "version": "K2",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p36336b2894": {
+   "agent_id": "uninstructed__eng_03__K2__r2|Benjamin Hartley",
+   "run_id": "uninstructed__eng_03__K2__r2",
+   "agent": "Benjamin Hartley",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pc7c6ffbd3e": {
+   "agent_id": "uninstructed__food_02__K1__r0|Isaac Drake",
+   "run_id": "uninstructed__food_02__K1__r0",
+   "agent": "Isaac Drake",
+   "version": "K1",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p7781e40f89": {
+   "agent_id": "uninstructed__eng_03__K2__r0|Benjamin Hartley",
+   "run_id": "uninstructed__eng_03__K2__r0",
+   "agent": "Benjamin Hartley",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p3e5e58fb5e": {
+   "agent_id": "uninstructed__fin_03__K1__r3|Emmanuel Nkosi",
+   "run_id": "uninstructed__fin_03__K1__r3",
+   "agent": "Emmanuel Nkosi",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pc5fdd3ed22": {
+   "agent_id": "uninstructed__sport_02__K1__r3|Ibrahim Farouk",
+   "run_id": "uninstructed__sport_02__K1__r3",
+   "agent": "Ibrahim Farouk",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p30c2ce3718": {
+   "agent_id": "uninstructed__research_02__K2__r0|Wendy Nakashima",
+   "run_id": "uninstructed__research_02__K2__r0",
+   "agent": "Wendy Nakashima",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pb664f6c2be": {
+   "agent_id": "uninstructed__ins_01__K2__r2|Marcus Webb",
+   "run_id": "uninstructed__ins_01__K2__r2",
+   "agent": "Marcus Webb",
+   "version": "K2",
+   "scenario_id": "ins_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p58c1be5cf8": {
+   "agent_id": "uninstructed__research_02__K2__r2|Elena Vasquez",
+   "run_id": "uninstructed__research_02__K2__r2",
+   "agent": "Elena Vasquez",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p8eadbbeeac": {
+   "agent_id": "uninstructed__edu_03__K2__r0|Beth Svensson",
+   "run_id": "uninstructed__edu_03__K2__r0",
+   "agent": "Beth Svensson",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p25ed76a954": {
+   "agent_id": "uninstructed__eng_03__K1__r3|Quinn Adeyemi",
+   "run_id": "uninstructed__eng_03__K1__r3",
+   "agent": "Quinn Adeyemi",
+   "version": "K1",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pcc20fe0288": {
+   "agent_id": "uninstructed__research_02__K2__r0|Brianna Walsh",
+   "run_id": "uninstructed__research_02__K2__r0",
+   "agent": "Brianna Walsh",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p5e4d425563": {
+   "agent_id": "uninstructed__eng_03__K2__r1|Yara Sorensen",
+   "run_id": "uninstructed__eng_03__K2__r1",
+   "agent": "Yara Sorensen",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p88708d9718": {
+   "agent_id": "uninstructed__research_02__K2__r1|Brianna Walsh",
+   "run_id": "uninstructed__research_02__K2__r1",
+   "agent": "Brianna Walsh",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pde2590285f": {
+   "agent_id": "uninstructed__fin_03__K1__r2|Brianna Walsh",
+   "run_id": "uninstructed__fin_03__K1__r2",
+   "agent": "Brianna Walsh",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p12c4debe55": {
+   "agent_id": "uninstructed__sport_02__K1__r1|Wanjiru Nguyen",
+   "run_id": "uninstructed__sport_02__K1__r1",
+   "agent": "Wanjiru Nguyen",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "pf2f5a7efea": {
+   "agent_id": "uninstructed__research_01__K2__r2|Elena Vasquez",
+   "run_id": "uninstructed__research_01__K2__r2",
+   "agent": "Elena Vasquez",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pf6171643f3": {
+   "agent_id": "uninstructed__edu_03__K2__r1|Benjamin Hartley",
+   "run_id": "uninstructed__edu_03__K2__r1",
+   "agent": "Benjamin Hartley",
+   "version": "K2",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p5f498408f2": {
+   "agent_id": "uninstructed__eng_03__K2__r1|Niall Donovan",
+   "run_id": "uninstructed__eng_03__K2__r1",
+   "agent": "Niall Donovan",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p19fc360a3c": {
+   "agent_id": "uninstructed__eng_03__K1__r3|Niall Donovan",
+   "run_id": "uninstructed__eng_03__K1__r3",
+   "agent": "Niall Donovan",
+   "version": "K1",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p14fbc536b1": {
+   "agent_id": "uninstructed__fin_04__K2__r3|Eduardo Reyes",
+   "run_id": "uninstructed__fin_04__K2__r3",
+   "agent": "Eduardo Reyes",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p52951c06bf": {
+   "agent_id": "uninstructed__research_02__K1__r1|Elena Vasquez",
+   "run_id": "uninstructed__research_02__K1__r1",
+   "agent": "Elena Vasquez",
+   "version": "K1",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pdb5a03df70": {
+   "agent_id": "uninstructed__food_02__K1__r0|Benjamin Hartley",
+   "run_id": "uninstructed__food_02__K1__r0",
+   "agent": "Benjamin Hartley",
+   "version": "K1",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pc532ee1c34": {
+   "agent_id": "uninstructed__fin_04__K1__r0|Julia Lindqvist",
+   "run_id": "uninstructed__fin_04__K1__r0",
+   "agent": "Julia Lindqvist",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pd52eb7f310": {
+   "agent_id": "uninstructed__research_02__K2__r0|Julia Lindqvist",
+   "run_id": "uninstructed__research_02__K2__r0",
+   "agent": "Julia Lindqvist",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p191d266a50": {
+   "agent_id": "uninstructed__research_02__K1__r1|Julia Lindqvist",
+   "run_id": "uninstructed__research_02__K1__r1",
+   "agent": "Julia Lindqvist",
+   "version": "K1",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p71f20d768e": {
+   "agent_id": "uninstructed__audit_02__K1__r3|Ahmed Hassan",
+   "run_id": "uninstructed__audit_02__K1__r3",
+   "agent": "Ahmed Hassan",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p48f01b8b9a": {
+   "agent_id": "uninstructed__eng_03__K2__r0|Quinn Adeyemi",
+   "run_id": "uninstructed__eng_03__K2__r0",
+   "agent": "Quinn Adeyemi",
+   "version": "K2",
+   "scenario_id": "eng_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pa8585a3300": {
+   "agent_id": "uninstructed__fin_04__K1__r3|Frances Bauer",
+   "run_id": "uninstructed__fin_04__K1__r3",
+   "agent": "Frances Bauer",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pdb753b2939": {
+   "agent_id": "uninstructed__audit_02__K1__r0|Elena Vasquez",
+   "run_id": "uninstructed__audit_02__K1__r0",
+   "agent": "Elena Vasquez",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p053d0f0e60": {
+   "agent_id": "uninstructed__research_01__K2__r1|Celine Dubois",
+   "run_id": "uninstructed__research_01__K2__r1",
+   "agent": "Celine Dubois",
+   "version": "K2",
+   "scenario_id": "research_01",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p64816bb506": {
+   "agent_id": "uninstructed__fin_04__K2__r1|Julia Lindqvist",
+   "run_id": "uninstructed__fin_04__K2__r1",
+   "agent": "Julia Lindqvist",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pa51c4eeb0d": {
+   "agent_id": "uninstructed__fin_04__K1__r0|Eduardo Reyes",
+   "run_id": "uninstructed__fin_04__K1__r0",
+   "agent": "Eduardo Reyes",
+   "version": "K1",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pc0dc6f1c9c": {
+   "agent_id": "uninstructed__fin_03__K1__r3|Celine Dubois",
+   "run_id": "uninstructed__fin_03__K1__r3",
+   "agent": "Celine Dubois",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p61942f0acf": {
+   "agent_id": "uninstructed__fin_04__K2__r2|Frances Bauer",
+   "run_id": "uninstructed__fin_04__K2__r2",
+   "agent": "Frances Bauer",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pe10700c45d": {
+   "agent_id": "uninstructed__sport_02__K1__r2|Imani Okafor",
+   "run_id": "uninstructed__sport_02__K1__r2",
+   "agent": "Imani Okafor",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "pb129a08307": {
+   "agent_id": "uninstructed__fin_04__K2__r2|Julia Lindqvist",
+   "run_id": "uninstructed__fin_04__K2__r2",
+   "agent": "Julia Lindqvist",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p57c5c5424d": {
+   "agent_id": "uninstructed__research_02__K2__r2|Brianna Walsh",
+   "run_id": "uninstructed__research_02__K2__r2",
+   "agent": "Brianna Walsh",
+   "version": "K2",
+   "scenario_id": "research_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "pf60d955359": {
+   "agent_id": "uninstructed__fin_03__K2__r1|Kevin Park",
+   "run_id": "uninstructed__fin_03__K2__r1",
+   "agent": "Kevin Park",
+   "version": "K2",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p966c2fcc8d": {
+   "agent_id": "uninstructed__food_02__K2__r3|Imani Okafor",
+   "run_id": "uninstructed__food_02__K2__r3",
+   "agent": "Imani Okafor",
+   "version": "K2",
+   "scenario_id": "food_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "p16b93c0deb": {
+   "agent_id": "uninstructed__sport_02__K1__r3|Wanjiru Nguyen",
+   "run_id": "uninstructed__sport_02__K1__r3",
+   "agent": "Wanjiru Nguyen",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "B",
+   "n_statements": 3
+  },
+  "p4a26349013": {
+   "agent_id": "uninstructed__audit_02__K1__r3|Elena Vasquez",
+   "run_id": "uninstructed__audit_02__K1__r3",
+   "agent": "Elena Vasquez",
+   "version": "K1",
+   "scenario_id": "audit_02",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "1",
+   "n_statements": 3
+  },
+  "p39155f6c74": {
+   "agent_id": "uninstructed__edu_03__K1__r0|Beth Svensson",
+   "run_id": "uninstructed__edu_03__K1__r0",
+   "agent": "Beth Svensson",
+   "version": "K1",
+   "scenario_id": "edu_03",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  },
+  "p815cf7400f": {
+   "agent_id": "uninstructed__fin_03__K1__r2|Emmanuel Nkosi",
+   "run_id": "uninstructed__fin_03__K1__r2",
+   "agent": "Emmanuel Nkosi",
+   "version": "K1",
+   "scenario_id": "fin_03",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "2",
+   "fair": "1",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "pe52ed4432c": {
+   "agent_id": "uninstructed__fin_04__K2__r1|Eduardo Reyes",
+   "run_id": "uninstructed__fin_04__K2__r1",
+   "agent": "Eduardo Reyes",
+   "version": "K2",
+   "scenario_id": "fin_04",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "target": "1",
+   "fair": "2",
+   "vote": "2",
+   "n_statements": 3
+  },
+  "peeb083d452": {
+   "agent_id": "uninstructed__sport_02__K1__r2|Hiroshi Tanaka",
+   "run_id": "uninstructed__sport_02__K1__r2",
+   "agent": "Hiroshi Tanaka",
+   "version": "K1",
+   "scenario_id": "sport_02",
+   "labels": [
+    "A",
+    "B"
+   ],
+   "target": "B",
+   "fair": "A",
+   "vote": "A",
+   "n_statements": 3
+  }
+ }
+}

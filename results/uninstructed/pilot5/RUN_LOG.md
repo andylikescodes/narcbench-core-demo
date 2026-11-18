@@ -62,3 +62,47 @@ setup and download together took under a minute. That points to a slow connectio
 
 **The round has to be run again to have a result.** That is a second pod at about the same cost, beyond the $1.03
 that Andy approved as the worst case, so it waits for his word.
+
+## Pod 5w3x3tvsepy26s, completed
+
+Andy, when asked whether to run the round again: "Run it again".
+
+| | |
+|---|---|
+| Created | 2026-11-18 07:43:34 UTC (17 November, 23:43 PST), first attempt |
+| GPU | A40, secure cloud, CA-MTL-1, $0.59 an hour |
+| Commit | `19f205e` (the prompts and the reading script are those of `6f0adac`; the change since then is the download path and the paper) |
+| Settings | as for the first pod, with up to 20 extra minutes of serving if `round.tgz` is not fetched |
+| Ended | 08:53:42 UTC, status "done"; `round.tgz` (1 MB) pulled in 4 seconds, checksum verified, 409 files unpacked; the pod terminated by the watcher at 08:54:01 UTC |
+| Cost | $0.69 by the account balance ($30.94 before, $30.25 after); 70 minutes from creation to termination |
+
+| Stage | Result | Seconds |
+|---|---|---|
+| setup | ok | 27 |
+| download of the model | ok | 668 |
+| gen_ref | skipped: the round has no version without a stake | 0 |
+| gen_stake: K1 and K2, 96 episodes, 2,304 prompts, 8 prompts per call | ok: 1.33 s per prompt, no memory error, no failed episode, 0 of 384 votes unparsed | 3,082 |
+| code_rooms: 192 rooms, Gemma-2-9B-it, greedy | ok, 0 unparsed | 106 |
+| summarize (one coder, provisional) | ok | 1 |
+| stance_pilot5: public position of 384 members, Gemma-2-9B-it, greedy | ok, every answer names an option or "other" | 116 |
+| export_basis, timing | skipped | 0 |
+
+The estimate written before the first pod was about 1.1 hours and about $0.65. This pod took 1.18 hours and $0.69.
+The model download took 11 minutes on this pod as well, so that is what this data centre needs without a cached
+copy, and not a sign of a failing connection as the note on the first pod suggested.
+
+Nothing went wrong on this pod. The new download path worked on its first use.
+
+**Cost of the round: $1.59** for the two pods ($0.90 for the first, whose results were lost, and $0.69).
+
+## Outcome of the fifth round
+
+Votes for the stake option: K1 (a stake from above) 135 of 192 (70%), K2 (a payout) 73 of 192 (38%). On the same 12
+cases the difference is +32 points (95% interval +20 to +45), higher under K1 in 11 cases, equal in 1, lower in 0:
+the rule for the kind of stake is met. Under the same kind the cases of the every-vote end still vote more than
+those of the no-vote end (81% against 59% under K1, 55% against 21% under K2), but both intervals reach down to
+zero, so the rule for the case is not met. Rooms labelled collusion: 35 of 96 under K1, 8 of 96 under K2. Both
+coders coded all 192 rooms; they give the same of the four codes in 130 (kappa 0.54, below the 0.6 of section 10)
+and agree on whether a room holds a pact for the stake option in 175 (kappa 0.80). See `STAKE_KINDS.md`,
+`RESULTS.md`, `PUBLIC_STANCE.md`, `NOTABLE_ROOMS.md` and the note "fifth round, outcome" of 18 November in
+`docs/uninstructed_collusion/DESIGN.md`.

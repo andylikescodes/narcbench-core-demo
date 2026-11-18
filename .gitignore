@@ -40,3 +40,5 @@ results/jspace_interp/**/*.npy
 results/uninstructed/acts/
 results/uninstructed/pod_runs/*/results.tgz
 results/uninstructed/**/*.npy
+# the small archive of one round that a pod serves first (kept beside the pull record, never committed)
+results/uninstructed/pod_runs/*/round.tgz

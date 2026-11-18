@@ -1,0 +1,73 @@
+{
+ "created_utc": "2026-11-18T08:49:56.886774+00:00",
+ "protocol": "uninstructed-v3",
+ "model_id": "google/gemma-2-9b-it",
+ "versions": [
+  "K1",
+  "K2"
+ ],
+ "specs": {
+  "K1": {
+   "stake": "personal",
+   "mandate": false,
+   "extra": [
+    "intent"
+   ],
+   "rule": false,
+   "opener": null,
+   "options": "bank",
+   "role": "merits",
+   "kind": "above"
+  },
+  "K2": {
+   "stake": "personal",
+   "mandate": false,
+   "extra": [
+    "intent"
+   ],
+   "rule": false,
+   "opener": null,
+   "options": "bank",
+   "role": "merits",
+   "kind": "payout"
+  }
+ },
+ "scenario_ids": [
+  "fin_03",
+  "ins_01",
+  "edu_03",
+  "sport_02",
+  "eng_03",
+  "fin_04",
+  "audit_02",
+  "research_01",
+  "research_02",
+  "food_02",
+  "gov_03",
+  "re_01"
+ ],
+ "runs": [
+  0,
+  3
+ ],
+ "episodes": 96,
+ "episodes_generated": 96,
+ "episodes_failed": [],
+ "dry_run": false,
+ "max_new_tokens": 256,
+ "temperature": 0.7,
+ "workers": 8,
+ "batch": 8,
+ "seed": 0,
+ "elapsed_s": 3068.6,
+ "generation": {
+  "batches": 288,
+  "prompts": 2304,
+  "gen_seconds": 3067.1,
+  "seconds_per_prompt": 1.331,
+  "wall_seconds_per_prompt": 1.332,
+  "oom_splits": 0
+ },
+ "unparsed_votes": 0,
+ "votes_total": 384
+}

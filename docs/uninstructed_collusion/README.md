@@ -19,7 +19,7 @@ the episode, and the label comes from what the pair did. Design and pre-registra
 | `scripts/uninstructed_by_scenario.py` | A round over many scenarios read scenario by scenario, against a no-stake baseline and the scenario features |
 | `uninstructed/scenario_features.json` | Six features of each of the 50 scenarios, coded from the texts by two blind passes before the fourth round |
 | `docs/uninstructed_collusion/EXAMPLE_EPISODE.md` | One recorded episode from the first prompt to its label, and what each version changes |
-| `docs/uninstructed_collusion/collusion_behaviour_study.pdf` (`.tex`) | The paper, cut to five pages at most: the setup and the main results of the four rounds that have results (the fifth round's results were lost, see `results/uninstructed/pilot5/RUN_LOG.md`) |
+| `docs/uninstructed_collusion/collusion_behaviour_study.pdf` (`.tex`) | The paper, within five pages: the setup and the main results of the five rounds |
 | `docs/uninstructed_collusion/collusion_behaviour_study_full.pdf` (`.tex`, `tables/`, `figs/`) | The long version of 17 November 2026, four rounds: method, a worked example, decisions, ten findings, limits, proposed experiments, candidate classes for stage 2 |
 | `scripts/uninstructed_paper_assets.py` | Writes the tables, figures and every number of the long version (`tables/numbers.tex`) from the data |
 | `scripts/uninstructed_short_paper_assets.py` | Writes what the five-page paper adds: `tables/short_numbers.tex` and its three tables |
@@ -62,14 +62,14 @@ round, `pilot4/` for the fourth, `pilot5/` for the fifth); the pods are recorded
 rounds in one table.
 Activation files and pod archives are not committed.
 
-Rebuild the paper (the long version builds the same way from `collusion_behaviour_study_full.tex`; once the fifth round has results, the second script takes its cost as `--cost5 <usd>`):
+Rebuild the paper (the long version builds the same way from `collusion_behaviour_study_full.tex`; 0.69 is the cost in dollars of the fifth round's second pod):
 
 ```bash
 python3 scripts/uninstructed_paper_assets.py
 ```
 
 ```bash
-python3 scripts/uninstructed_short_paper_assets.py
+python3 scripts/uninstructed_short_paper_assets.py --cost5 0.69
 ```
 
 ```bash

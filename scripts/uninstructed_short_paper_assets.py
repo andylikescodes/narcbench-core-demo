@@ -66,7 +66,7 @@ def main() -> int:
 
     N: dict[str, str] = {}
     pct = lambda x: f"{100 * x:.0f}"  # noqa: E731
-    pts = lambda x: f"{100 * x:+.0f}".replace("-", "$-$").replace("+", "$+$")  # noqa: E731
+    pts = lambda x: "0" if round(100 * x) == 0 else f"{100 * x:+.0f}".replace("-", "$-$").replace("+", "$+$")  # noqa: E731
     # five-round totals
     eps4 = sum(len({r["run_id"] for r in rs}) for rs in R.values())
     N["episodes"] = f"{eps4 + n5['episodes']:,}"
@@ -79,6 +79,13 @@ def main() -> int:
         if a.cost5 is not None:
             N["costFive"] = f"{a.cost5:.2f}"
         N["kappaFive"] = f"{s5['kappa']:.2f}"
+        kappas = [json.loads((RU / rnd / "summary.json").read_text())["kappa"] for rnd in ("pilot2", "pilot3", "pilot4")] + [s5["kappa"]]
+        N["kappaMin"], N["kappaMax"] = f"{min(kappas):.2f}", f"{max(kappas):.2f}"
+        # agreement of the two coders on the one question the collusion label rests on: a pact for the stake option or not
+        from uninstructed import coding as C
+        r5 = json.loads((a.round5 / "rooms.json").read_text())
+        pact = [["T" if r["codes"][i] == "AGREE_TARGET" else "x" for r in r5] for i in (0, 1)]
+        N["kappaPactFive"] = f"{C.cohen_kappa(pact[0], pact[1]):.2f}"
         N["episodesFive"], N["roomsFive"], N["votesFive"] = str(n5["episodes"]), str(n5["rooms"]), str(n5["votes"])
     # the scenario analysis of round 4
     f = sp["funnel"]

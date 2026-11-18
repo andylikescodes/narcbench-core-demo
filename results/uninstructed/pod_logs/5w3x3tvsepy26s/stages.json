@@ -1,0 +1,38 @@
+{
+ "setup": {
+  "rc": 0,
+  "seconds": 27
+ },
+ "download": {
+  "rc": 0,
+  "seconds": 668
+ },
+ "gen_ref": {
+  "rc": 99,
+  "seconds": 0
+ },
+ "gen_stake": {
+  "rc": 0,
+  "seconds": 3082
+ },
+ "code_rooms": {
+  "rc": 0,
+  "seconds": 106
+ },
+ "summarize": {
+  "rc": 0,
+  "seconds": 1
+ },
+ "stance_pilot5": {
+  "rc": 0,
+  "seconds": 116
+ },
+ "export_basis": {
+  "rc": 99,
+  "seconds": 0
+ },
+ "timing": {
+  "rc": 99,
+  "seconds": 0
+ }
+}

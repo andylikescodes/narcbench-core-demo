@@ -12,12 +12,11 @@
 \renewcommand\section{\@startsection{section}{1}{\z@}{-2.2ex \@plus -.6ex \@minus -.3ex}{1.0ex \@plus .2ex}{\normalfont\large\bfseries}}
 \makeatother
 
-% The short paper: setup and main results of the four rounds that have results; a fifth was run on the night of 17 November
-% 2026 and its results were lost (results/uninstructed/pilot5/RUN_LOG.md). Every number comes from tables/numbers.tex (written by
+% The short paper: setup and main results of five rounds. Every number comes from tables/numbers.tex (written by
 % scripts/uninstructed_paper_assets.py) and tables/short_numbers.tex (scripts/uninstructed_short_paper_assets.py), and the
 % tables from tables/short_*.tex. The long version of 17 November 2026 (design decisions, a worked example, ten
 % findings, proposed experiments) is collusion_behaviour_study_full.tex.
-% Rebuild: python3 scripts/uninstructed_paper_assets.py && python3 scripts/uninstructed_short_paper_assets.py
+% Rebuild: python3 scripts/uninstructed_paper_assets.py && python3 scripts/uninstructed_short_paper_assets.py --cost5 0.69
 %          && (cd docs/uninstructed_collusion && tectonic collusion_behaviour_study.tex)
 \input{tables/numbers.tex}
 \input{tables/short_numbers.tex}
@@ -26,9 +25,9 @@
 
 \title{\vspace{-1.4cm}When Does an LLM Committee Member Collude?\\[4pt]
 \large A behavioural study of stake, wish and intention in Gemma-2-9B-it}
-\author{Andy Liang, with Claude\\[2pt] \small Setup and main results of four rounds. The long version, with the design
+\author{Andy Liang, with Claude\\[2pt] \small Setup and main results of five rounds. The long version, with the design
 decisions,\\ \small a worked example and proposed experiments, is \texttt{collusion\_behaviour\_study\_full.pdf}.}
-\date{November 17, 2026}
+\date{November 18, 2026}
 
 \begin{document}
 \maketitle
@@ -36,15 +35,16 @@ decisions,\\ \small a worked example and proposed experiments, is \texttt{collus
 \begin{abstract}
 \noindent We put four copies of Gemma-2-9B-it on a review committee, give all four the same system prompt, and do not
 tell them to collude. Each pair talks in private, the committee discusses in the open, and each member records a vote.
-One of the two options is the one the members privately gain from. In four rounds (\SN{episodes} episodes) we vary what
+One of the two options is the one the members privately gain from. In five rounds (\SN{episodes} episodes) we vary what
 the prompt says about that gain. \textbf{A stake stated as a fact never moves a vote} (\V{FACT}{tv} of \V{FACT}{n}).
 A wish or a heavier loss moves some votes, mostly of members who act alone and argue for the other option in public.
 \textbf{One sentence that states an intention is the step}: \V{T7}{pct}\% of votes and collusion in
 \V{T7}{colpct}\% of rooms, repeated on all 50 scenarios (\V{T7b}{pct}\% and \V{T7b}{colpct}\%).
 \textbf{The scenario matters as much as the prompt}: under the intention every vote goes to the stake option in
 \N{scenAll} scenarios and none in \N{scenZero}. The idea of backing the stake option comes up in private almost
-everywhere; what differs is whether the partner goes along. Which property of a scenario decides that is described here
-but not yet tested: the round built to test it ran, and its results were lost in the download.
+everywhere; what differs is whether the partner goes along. \textbf{Much of that difference is the kind of stake}: given
+to the same twelve cases, a stake that an office above the member controls draws \SN{kOnePct}\% of votes to the stake
+option, and a plain payout \SN{kTwoPct}\%.
 \end{abstract}
 
 \section{Setup}
@@ -64,15 +64,17 @@ that interest.''). No type except the control says what to do, argue or hide, an
 
 \paragraph{What is measured.} The \emph{vote} is read from the recommendation line. Each \emph{private room} is coded
 by two coders, Gemma-2-9B-it and Claude, who see neither the type nor the votes: a pact for the stake option, a pact
-on the merits, a split, or no pact (kappa \N{kappaTwo}, \N{kappaThree} and \N{kappaFour} in rounds 2 to 4). A room is \emph{collusion} when both coders read a pact for the stake option, both members vote for it and neither
+on the merits, a split, or no pact (kappa \N{kappaTwo}, \N{kappaThree}, \N{kappaFour} and \SN{kappaFive} in rounds 2
+to 5). A room is \emph{collusion} when both coders read a pact for the stake option, both members vote for it and neither
 tells the committee; it is \emph{clean} when both read a pact on the merits or no pact and both vote for the other
 option. The \emph{public position}, the option a member argues for in the open rounds, is coded the same way and set
 against the vote.
 
 \paragraph{Rounds.} Rounds 1 to 3 try 16 prompt types on 12 scenarios with two runs each. Round 4 runs the intention
-on all 50 scenarios, with a no-stake baseline. In all: \SN{episodes} episodes, \SN{calls} calls, \SN{votes} votes, all
-of them readable, \$\SN{costAll} on one A40. The prompts, the readings and the decision rules of each round were written
-down before it ran. A fifth round is described under Result~5.
+on all 50 scenarios, with a no-stake baseline. Round 5 gives 12 scenarios a stake of each of two kinds, four runs each.
+In all: \SN{episodes} episodes, \SN{calls} calls, \SN{votes} votes, all of them readable, \$\SN{costAll} on one A40; a
+first pod of round 5 cost another \$0.90, and its results were lost in the download. The prompts, the readings and the
+decision rules of each round were written down before it ran.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -152,12 +154,37 @@ In words: the model goes along where the committee is a public body and an offic
 wants the outcome, and it declines where the member would simply be paid. But these properties come together, and the
 stake sentences are ours, written case by case, so part of what looks like the scenario may be our wording.
 
-\qa{The test, and its status.} A fifth round was built to separate the two: twelve cases, six from each end of
-round~4, each run four times with a stake of each of two kinds, one where an office above the member wants the outcome
-and decides on the member's post, one where the member is simply paid if the outcome occurs. The texts, the cases and
-the two decision rules were fixed in advance. The round ran on the night of 17 November 2026: the pod generated and
-coded its 96 episodes, and then the download of its results broke off and the pod shut itself down (\$0.90). Nothing was
-retrieved. The round has no result and has to be run again; until then, this result describes and does not explain.
+\paragraph{6. On the same cases, the kind of stake moves a third of the votes.} Round 5 tests this. Twelve cases, six
+from each end of round~4, are each run four times with the stake written in each of two kinds, on one sentence pattern
+per kind. \emph{From above}: ``\dots that [an office] wants [the outcome]. [The office] decides whether your post is
+renewed, and the renewal comes up this year.'' \emph{Payout}: ``\dots that [the value of a party] depends on [the
+outcome]. You hold [a holding] that pays you about \$100,000 if [the outcome].'' Everything else is the intention prompt.
+The cases, the 24 texts and two decision rules were fixed before the run.
+
+\begin{table}[t]
+\centering\footnotesize
+\input{tables/short_kinds.tex}
+\caption{Round 5: votes for the stake option when the same case is given a stake of each kind (16 votes per cell),
+next to round 4, where each scenario had its own stake text (8 votes).}
+\label{tab:kinds}
+\end{table}
+
+\qa{The kind of stake matters.} Under a stake from above \SN{kOnePct}\% of votes go to the stake option, under a payout
+\SN{kTwoPct}\%: \SN{kDiff} points on the same cases (95\% interval \SN{kLo} to \SN{kHi}), higher in \SN{kHigher} of the
+12 cases and lower in \SN{kLower} (Table~\ref{tab:kinds}). The six cases in which nobody voted for the stake option in
+round 4 give \SN{kEndZeroOne}\% under a stake from above. The six in which everybody did give \SN{kEndAllTwo}\% under a
+payout. Rooms labelled collusion are \SN{kOneCol} of \SN{kOneRooms} against \SN{kTwoCol} of \SN{kTwoRooms}. As in
+Result~4, the difference is made where the other member answers a proposal: it goes along in \SN{kOneAcc} rooms under
+a stake from above and in \SN{kTwoAcc} under a payout. Under a payout the vote is also hidden throughout:
+\SN{kTwoHidden} of the \SN{kTwoStakeVotes} votes for the stake option come from members who argued for the other
+option in public.
+
+\qa{The case seems to matter too, and the rule for it is not met.} Under the same kind of stake the two groups of
+cases still differ: \SN{kCaseOneAll}\% against \SN{kCaseOneZero}\% from above, \SN{kCaseTwoAll}\% against
+\SN{kCaseTwoZero}\% for a payout. The rule fixed in advance asked for an interval that excludes zero under both kinds,
+and with six cases per group both intervals reach down to zero (\SN{kCaseOneLo} to \SN{kCaseOneHi} and \SN{kCaseTwoLo}
+to \SN{kCaseTwoHi} points). So a large part of what Result~4 showed as a difference between scenarios was the kind of
+stake that we had written into each of them. How much the case adds is not settled.
 
 \section{Limits}
 
@@ -167,19 +194,22 @@ model does.
 \item The stake, the wish and the intention are sentences in a prompt. The study shows what the model does with them,
 not that it wants anything. The intention sentence gives the member its aim, so calling its collusion ``uninstructed''
 is a judgement; what is not instructed is the pact and the concealment.
-\item The room labels are two models' reading of four messages (kappa \N{kappaThree} to \N{kappaFour}). No human has
-checked them.
-\item Numbers per scenario are small: 8 votes in round 4. The scenario properties of Result~5 were chosen after the
-results were known, and the round that would test them has no result yet.
+\item The room labels are two models' reading of four messages (kappa \SN{kappaMin} to \SN{kappaMax} from round 2
+on). No human has checked them. In round 5 the coders agree least on what a room without a pact is
+(\SN{kappaFive}) and well on whether a room holds a pact for the stake option (\SN{kappaPactFive}), which is what
+the collusion label rests on.
+\item Numbers per scenario are small: 8 votes in round 4, 16 per kind in round 5. Round 5 tests a bundle, an office
+above that wants the outcome and a loss, against a payout that nobody asks for and a gain, with one wording per kind.
+It cannot say which part of the bundle does the work.
 \end{itemize}
 
 \section{Status}
 
-Stage 1, the behaviour, rests here, with one thing open: the fifth round has to be repeated. Stage 2 is not started: probes that ask when members with the same prompt begin to
-differ, and steering tests of whether a direction makes a colluding member honest or the reverse. Two things from
-stage 1 shape it. Members can only be compared inside one scenario, because the scenario decides much of the outcome.
-And the place to look is the other member's reply to a proposal and the vote, because the proposal itself comes up
-almost everywhere. Every prompt, reply, coding and number of this report is in the repository under
+Stage 1, the behaviour, rests here. Stage 2 is not started: probes that ask when members with the same prompt begin to
+differ, and steering tests of whether a direction makes a colluding member honest or the reverse. Three things from
+stage 1 shape it. Members can only be compared inside one case with one stake text, because both decide much of the
+outcome. The place to look is the other member's reply to a proposal and the vote, because the proposal itself comes
+up almost everywhere. And round 5 gives a controlled contrast: the same case with two stake texts. Every prompt, reply, coding and number of this report is in the repository under
 \texttt{results/uninstructed/}; the design notes, written before each round, are in
 \texttt{docs/uninstructed\_collusion/DESIGN.md}.
 

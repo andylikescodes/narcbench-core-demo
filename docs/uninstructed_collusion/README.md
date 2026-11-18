@@ -22,6 +22,7 @@ the episode, and the label comes from what the pair did. Design and pre-registra
 | `docs/uninstructed_collusion/collusion_behaviour_study.pdf` (`.tex`, `tables/`, `figs/`) | The behavioural study of the four rounds as a paper: method, a worked example, decisions, findings, limits, proposed experiments, candidate classes for stage 2 |
 | `scripts/uninstructed_paper_assets.py` | Writes the paper's tables, figures and every number it quotes (`tables/numbers.tex`) from the data |
 | `docs/uninstructed_collusion/BEHAVIOURAL_REVIEW.md` | Review of what is ready and what the rounds show, written for Andy on 17 November 2026 |
+| `scripts/uninstructed_stake_kinds.py` | The fifth round read off as fixed before it ran: the same 12 cases under two kinds of stake sentences (versions K1, K2), `results/uninstructed/pilot5/STAKE_KINDS.md` |
 | `scripts/uninstructed_scenario_properties.py` | What separates the scenarios: where in the episode they part, and properties of the scenario texts coded by two blind passes (`results/uninstructed/pilot4/SCENARIO_PROPERTIES.md`, `scenario_properties_blind.json`); exploratory |
 | `scripts/uninstructed_build_explorer.py` | Packages every recorded prompt and reply of the four rounds for the explorer page (https://claude.ai/artifact/TNfqinVq6PwTg21o25dW76, private), and checks each rebuilt prompt against the record |
 | `scripts/uninstructed_timing_test.py` | Timing test for the main run (durations only) |
@@ -55,7 +56,7 @@ python3 scripts/runpod_launch_uninstructed.py --skip export_basis,timing --scena
 ```
 
 Results go to `results/uninstructed/` (`pilot/` for S0 to S3, `pilot2/` for T1 to T5, `pilot3/` for the third
-round, `pilot4/` for the fourth); the pods are recorded in the `RUN_LOG.md` of each folder, and `results/uninstructed/ALL_ROUNDS.md` puts all
+round, `pilot4/` for the fourth, `pilot5/` for the fifth); the pods are recorded in the `RUN_LOG.md` of each folder, and `results/uninstructed/ALL_ROUNDS.md` puts all
 rounds in one table.
 Activation files and pod archives are not committed.
 

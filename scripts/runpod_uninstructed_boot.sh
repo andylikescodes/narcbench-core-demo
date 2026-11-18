@@ -16,7 +16,8 @@
 # Env: HF_TOKEN, RUNPOD_API_KEY (self-termination), RUNPOD_POD_ID, JOB_MAX_MINUTES, JOB_GRACE_MINUTES, JOB_PILOT_N,
 #      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_CODER_BATCH, JOB_TIMING_EPISODES, JOB_SKIP, JOB_VERSIONS,
 #      JOB_PILOT_DIR, JOB_THREADS, JOB_SCENARIOS (pilot | all), JOB_STANCE_ROUNDS (comma list of earlier round folders),
-#      JOB_REF_VERSIONS and JOB_REF_RUNS (the no-stake versions of gen_ref and their runs; default S0 and JOB_PILOT_RUNS).
+#      JOB_REF_VERSIONS and JOB_REF_RUNS (the no-stake versions of gen_ref and their runs; default S0 and JOB_PILOT_RUNS),
+#      JOB_SCENARIO_IDS (comma list of scenario ids; when set it replaces JOB_SCENARIOS: the fifth round's twelve).
 set -uo pipefail
 cd "$(dirname "$0")/.."
 REPO=$(pwd)
@@ -39,7 +40,9 @@ REF_VERSIONS=${JOB_REF_VERSIONS:-S0}               # the versions of the gen_ref
 REF_RUNS=${JOB_REF_RUNS:-$PILOT_RUNS}
 SCENARIOS=${JOB_SCENARIOS:-pilot}                  # pilot: the PILOT_N pilot scenarios; all: every scenario of the bank
 STANCE_ROUNDS=${JOB_STANCE_ROUNDS:-}               # earlier round folders whose public positions are coded as well
-if [ "$SCENARIOS" = all ]; then SCEN_ARGS=(--all); else SCEN_ARGS=(--pilot --pilot-n "$PILOT_N"); fi
+SCENARIO_IDS=${JOB_SCENARIO_IDS:-}                 # a comma list of scenario ids; when set it replaces SCENARIOS
+if [ -n "$SCENARIO_IDS" ]; then SCEN_ARGS=(--ids ${SCENARIO_IDS//,/ })
+elif [ "$SCENARIOS" = all ]; then SCEN_ARGS=(--all); else SCEN_ARGS=(--pilot --pilot-n "$PILOT_N"); fi
 P=$OUT/$PILOT_DIR
 TIMING_VERSION=${VERSIONS%%,*}
 # Threads of the numerical libraries. A pod shows every CPU of its host (96 on the second pod) to a container that may
@@ -141,7 +144,7 @@ finish() {  # finish PHASE DETAIL
 pkill -f "http.server 8765" 2>/dev/null || true
 nohup python3 scripts/runpod_range_server.py "$RUN" 8765 > /tmp/http.log 2>&1 &
 ELAPSED_MIN=0 st running boot "repo $(git rev-parse --short HEAD); gpu $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1); mode $MODE"
-log "config: mode=$MODE model=$MODEL scenarios=$SCENARIOS pilot_n=$PILOT_N pilot_runs=$PILOT_RUNS ref=$REF_VERSIONS x$REF_RUNS versions=$VERSIONS stance_rounds=$STANCE_ROUNDS batch=$BATCH workers=$WORKERS max=$MAX_MIN min grace=$GRACE_MIN min skip=$SKIP"
+log "config: mode=$MODE model=$MODEL scenarios=${SCENARIO_IDS:-$SCENARIOS} pilot_n=$PILOT_N pilot_runs=$PILOT_RUNS ref=$REF_VERSIONS x$REF_RUNS versions=$VERSIONS stance_rounds=$STANCE_ROUNDS batch=$BATCH workers=$WORKERS max=$MAX_MIN min grace=$GRACE_MIN min skip=$SKIP"
 log "config: versions=$VERSIONS results=$P threads=$THREADS (cpu quota $QUOTA, RUNPOD_CPU_COUNT=${RUNPOD_CPU_COUNT:-unset}, nproc $(nproc))"
 if [ "$MODE" != pilot ]; then log "unknown JOB_MODE $MODE"; finish failed "unknown mode $MODE"; fi
 

@@ -62,7 +62,18 @@ def estimate(a) -> dict:
     unknown = [v for v in versions if v not in P.VERSIONS]
     if unknown:
         raise SystemExit(f"unknown versions: {unknown}")
-    n_scenarios = len(P.load_scenarios()[1]) if a.scenarios == "all" else a.pilot_n
+    ids = [x for x in a.scenario_ids.split(",") if x]
+    known = P.load_scenarios()[2]
+    stakes = P.load_stakes()
+    for sid in ids:
+        if sid not in known:
+            raise SystemExit(f"unknown scenario {sid}")
+        for v in versions:                           # a version with a kind of stake sentences runs only where they exist
+            if P.spec_of(v)["kind"] and sid not in stakes["kinds"][P.spec_of(v)["kind"]]:
+                raise SystemExit(f"version {v} has no stake sentences for scenario {sid}")
+    if not ids and any(P.spec_of(v)["kind"] for v in versions):
+        raise SystemExit("a version with a kind of stake sentences needs --scenario-ids")
+    n_scenarios = len(ids) if ids else len(P.load_scenarios()[1]) if a.scenarios == "all" else a.pilot_n
     per_version = {v: n_scenarios * ((a.ref_runs or a.pilot_runs) if v in ref else a.pilot_runs) for v in versions}
     episodes = sum(per_version.values())
     # public positions, coded by Gemma for this round and for the earlier rounds named in --stance-rounds
@@ -150,6 +161,8 @@ def create_pod(a) -> dict:
            "JOB_BATCH": str(a.batch), "JOB_WORKERS": str(a.workers), "JOB_TIMING_EPISODES": str(a.timing_episodes),
            "JOB_VERSIONS": a.versions, "JOB_PILOT_DIR": a.pilot_dir, "JOB_SCENARIOS": a.scenarios, "JOB_STANCE_ROUNDS": a.stance_rounds,
            "JOB_REF_VERSIONS": a.ref_versions, "JOB_REF_RUNS": str(a.ref_runs or a.pilot_runs)}
+    if a.scenario_ids:
+        env["JOB_SCENARIO_IDS"] = a.scenario_ids
     if a.skip:
         env["JOB_SKIP"] = a.skip
     docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
@@ -266,6 +279,7 @@ def main() -> int:
     ap.add_argument("--versions", default="S1,S2,S3", help="versions of the gen_stake stage (S0 is the gen_ref stage)")
     ap.add_argument("--pilot-dir", default="pilot", help="folder under results/uninstructed/ that receives the runs and codings")
     ap.add_argument("--scenarios", choices=["pilot", "all"], default="pilot", help="the --pilot-n pilot scenarios, or all scenarios of the bank")
+    ap.add_argument("--scenario-ids", default="", help="comma list of scenario ids; replaces --scenarios (the fifth round's twelve)")
     ap.add_argument("--ref-versions", default="S0", help="the no-stake versions of the gen_ref stage")
     ap.add_argument("--ref-runs", type=int, default=0, help="runs per scenario of the gen_ref versions (default: --pilot-runs)")
     ap.add_argument("--stance-rounds", default="", help="comma list of earlier round folders whose public positions Gemma codes as well")
@@ -327,7 +341,7 @@ def main() -> int:
         return 3
     pod = res["created"]["id"]
     rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "branch": GIT_BRANCH, "image": base.IMAGE,
-           "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir", "scenarios", "stance_rounds", "ref_versions", "ref_runs",
+           "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir", "scenarios", "scenario_ids", "stance_rounds", "ref_versions", "ref_runs",
                                                      "batch", "workers", "timing_episodes", "skip", "min_balance", "reserve")},
            "estimate": est, "balance_before": rep["balance_usd"], "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
     (RUNS_DIR / pod).mkdir(parents=True, exist_ok=True)

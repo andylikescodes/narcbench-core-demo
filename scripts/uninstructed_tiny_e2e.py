@@ -10,6 +10,8 @@ the design relies on hold:
   C. alignment: the saved token ids of every room message decode back to the recorded message;
   D. the out-of-memory fallback retries outside the except block and keeps the order of the prompts;
   E. the second pilot's versions: system prompts as specified, the scripted first message in place and not generated;
+     E2 the third and fourth rounds' versions; E3 the fifth round's: T7's prompt with only the two stake sentences of
+     a kind exchanged, the coders shown those sentences, the round read off by the script fixed before it ran;
   F. the first pilot's recorded episodes are rebuilt prompt for prompt by the current code.
 
   python scripts/uninstructed_tiny_e2e.py --work /path/to/scratch/u_tiny
@@ -245,6 +247,58 @@ def main() -> int:
     bys = json.loads((w / "bys/by_scenario_T7.json").read_text())
     assert bys["scenarios"] == len(ids3) and (w / "bys/BY_SCENARIO_T7.md").read_text().startswith("# Scenario by scenario: T7"), bys
     print(f"E2. third round's versions: plain option texts, bare role line, the instructed control and the added sentences as specified in {len(pv) * len(ids3)} episodes")
+    # E3. fifth round: the stated intention with the stake sentences of a kind (K1 from above, K2 payout)
+    runs5 = w / "runs5"
+    ids5 = ["fin_03", "gov_03", "re_01"]          # in the kinds' list; no vote, every vote and every vote for the stake option in round 4
+    kv = ["K1", "K2"]
+    run([py, "scripts/uninstructed_generate.py", "--dry-run", "--versions", ",".join(kv), "--ids", *ids5, "--runs", "2", "--out", runs5], log)
+    for v in kv:
+        kind = P.spec_of(v)["kind"]
+        for sid in ids5:
+            sc, own, t5 = scenarios[idx[sid]], stakes["scenarios"][sid], stakes["kinds"][kind][sid]
+            assert t5["interest"] != own["interest"] and t5["personal"] != own["personal"], (v, sid)
+            for r in (0, 1):
+                rd = runs5 / v / P.run_id(sid, v, r)
+                cfg = json.loads((rd / "run_config.json").read_text())
+                log_ = json.loads((rd / "agent_prompts.json").read_text())
+                assert cfg["spec"]["kind"] == kind and cfg["protocol"] == P.PROTOCOL, (v, sid)
+                assert cfg["stake_text"] == " ".join([t5["interest"], t5["personal"], stakes["extras"]["intent"], stakes["closing"]]), (v, sid)
+                assert len(log_) == 24 and not any(e.get("scripted") for e in log_), (v, sid)
+                for e in log_:
+                    name, sp = e["agent_name"], e["system_prompt"]
+                    assert sp == P.ROLE_LINE.format(agent_name=name) + "\n\n" + cfg["stake_text"], (v, sid)
+                    # the prompt of T7 with only the two stake sentences exchanged
+                    t7 = P.system_prompt(name, sc, "T7", stakes, idx[sid])
+                    assert sp == t7.replace(own["interest"], t5["interest"]).replace(own["personal"], t5["personal"]) and sp != t7, (v, sid)
+    # nothing but the system prompt differs from T7: the first room prompt of a scenario is the one T7 gave
+    u7 = json.loads((runs3 / "T7" / P.run_id("fin_03", "T7", 0) / "agent_prompts.json").read_text())[0]["user_prompt"]
+    assert all(json.loads((runs5 / v / P.run_id("fin_03", v, 0) / "agent_prompts.json").read_text())[0]["user_prompt"] == u7 for v in kv)
+    # a scenario without sentences of the kind is refused before anything is generated
+    bad = subprocess.run([py, "scripts/uninstructed_generate.py", "--dry-run", "--versions", "K1", "--ids", "med_01", "--runs", "1", "--out", str(w / "runs5_bad")],
+                         cwd=ROOT, capture_output=True, text=True)
+    assert bad.returncode != 0 and "no stake sentences of the kind" in bad.stderr and not (w / "runs5_bad").exists(), bad.stderr[-300:]
+    # the coders' case shows the stake sentences the members were given; an earlier round keeps the scenario's own
+    for r in C.load_rooms(runs5, stakes):
+        t5, own = stakes["kinds"][P.spec_of(r["version"])["kind"]][r["scenario_id"]], stakes["scenarios"][r["scenario_id"]]
+        assert r["stake_full"] == f"{t5['interest']} {t5['personal']}", r["room_id"]
+        case = C.case_text(r, scenarios[idx[r["scenario_id"]]]["context"])
+        assert t5["personal"] in case and own["personal"] not in case, r["room_id"]
+    for r in C.load_rooms(runs3 / "T7", stakes):
+        own = stakes["scenarios"][r["scenario_id"]]
+        assert r["stake_full"] == f"{own['interest']} {own['personal']}", r["room_id"]
+    run([py, "scripts/uninstructed_code_rooms.py", "--runs", runs5, "--dry-run", "--out", w / "coding5_a.json"], log)
+    run([py, "scripts/uninstructed_summarize.py", "--runs", runs5, "--coding", w / "coding5_a.json", "--out", w / "summary5"], log)
+    assert list(json.loads((w / "summary5/summary.json").read_text())["versions"]) == kv
+    # the round read off as fixed before it ran, against the ends of the fourth round
+    run([py, "scripts/uninstructed_stake_kinds.py", "--round", w / "summary5", "--earlier", "results/uninstructed/pilot4:T7",
+         "--properties", "results/uninstructed/pilot4/scenario_properties_blind.json", "--out", w / "kinds"], log)
+    sk = json.loads((w / "kinds/stake_kinds.json").read_text())
+    assert sk["scenarios"] == sorted(ids5) and sk["ends"] == {"fin_03": "zero", "gov_03": "all", "re_01": "all"}, sk["ends"]
+    assert set(sk["cells"]) == {f"{s}|{v}" for s in ids5 for v in kv} and all(c["votes"] == 8 and c["rooms"] == 4 for c in sk["cells"].values())
+    assert isinstance(sk["stake_matters"], bool) and isinstance(sk["case_matters"], bool) and len(sk["pattern_check"]) == 2, sk["pattern_check"]
+    assert (w / "kinds/STAKE_KINDS.md").read_text().startswith("# The kind of stake on the same cases")
+    print(f"E3. fifth round's versions: T7's prompt with only the two stake sentences of a kind exchanged in {len(kv) * len(ids5) * 2} episodes; "
+          "the coders see those sentences; the reading script runs")
     # F. the first pilot's recorded episodes, replayed through the current code: every prompt must be found verbatim
     import tempfile
     n_ep = n_pr = 0
@@ -363,6 +417,11 @@ def main() -> int:
     est = json.loads(run([py, "scripts/runpod_launch_uninstructed.py", "--skip", "export_basis,timing", "--ref-versions", "T0", "--ref-runs", "1",
                           "--versions", "T7", "--scenarios", "all", "--pilot-dir", "pilot4", "--stance-rounds", "pilot2,pilot3"], log).stdout)
     assert est["scenarios"] == 50 and est["versions"] == ["T0", "T7"] and est["episodes"] == 150 and est["prompts"] == 3600, est
+    ids12 = "fin_03,ins_01,edu_03,sport_02,eng_03,fin_04,audit_02,research_01,research_02,food_02,gov_03,re_01"
+    assert sorted(ids12.split(",")) == sorted(stakes["kinds"]["above"]) == sorted(stakes["kinds"]["payout"])
+    est = json.loads(run([py, "scripts/runpod_launch_uninstructed.py", "--skip", "gen_ref,export_basis,timing", "--versions", "K1,K2",
+                          "--scenario-ids", ids12, "--pilot-runs", "4", "--pilot-dir", "pilot5"], log).stdout)
+    assert est["scenarios"] == 12 and est["episodes"] == 96 and est["prompts"] == 2304 and est["results_dir"].endswith("pilot5"), est
     (w / "tiny_e2e_log.json").write_text(json.dumps({"log": log, "replay": info, "summary_versions": summ["versions"], "timing": tim}, indent=1) + "\n")
     print("ALL PASS")
     return 0

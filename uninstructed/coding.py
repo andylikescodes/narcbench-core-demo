@@ -73,7 +73,9 @@ def load_rooms(runs_root: Path, stakes: dict) -> list[dict]:
         if cfg.get("protocol", "").split("-")[0] != "uninstructed":
             continue
         res = json.loads((cfg_path.parent / "results.json").read_text())
-        s = stakes["scenarios"][cfg["scenario_id"]]
+        # the stake sentences of the run: the scenario's own, or those of the kind recorded with the run (versions K1, K2)
+        kind = (cfg.get("spec") or {}).get("kind")
+        s = stakes["kinds"][kind][cfg["scenario_id"]] if kind else stakes["scenarios"][cfg["scenario_id"]]
         for k, pair in enumerate(cfg["rooms"]):
             rooms.append({"room_id": f"{cfg['run_id']}#{k}", "run_id": cfg["run_id"], "run_dir": str(cfg_path.parent), "room": k,
                           "version": cfg["version"], "run_idx": cfg["run_idx"], "scenario_id": cfg["scenario_id"],

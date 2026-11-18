@@ -31,8 +31,11 @@
 - 17 November 2026, evening: Andy asked what separates the scenarios with no vote for the stake option from those
   with every vote, and put that question before the causal analysis. The recorded rounds are read for it in the
   dated note "what separates the scenarios". A fifth round, which changes only the kind of stake on the same
-  cases, is written up for his decision in the last dated note. **It is not approved; nothing of it is built or
-  run.**
+  cases, is written up for his decision in the dated note "fifth round, proposed". At that point it was not
+  approved and nothing of it was built or run.
+- 17 November 2026, later that evening: **Andy approved the fifth round.** It is built and checked on the tiny
+  model; what was built is in the last dated note, written before the run. He also said that the work rests after
+  this round, and that the paper is then to be updated and cut to five pages with the main setup and results only.
 
 ## 1. In short
 
@@ -1452,3 +1455,42 @@ balance was $32.02 after the fourth round.
 **Not in this round.** The three properties of a kind taken apart (a loss against a gain under the same controller,
 and so on). The sentence of the case text that says which option the evidence favours, added or removed: the one
 feature coded in advance that went with the result. Experiments A1 to F2 of the paper.
+
+### 17 November 2026, evening: fifth round approved; what was built, before its run
+
+Andy: "Approve the round". And while it was being built: "OK I think we are done with this for now - after round 5,
+update the pdf paper, and try to limit the paper into within 5 pages, and only contains the major results and
+setups."
+
+The round is the one of the note above, unchanged: versions K1 and K2 on the 12 drawn scenarios, four runs each, 96
+episodes. Results go to `results/uninstructed/pilot5/`.
+
+**What was built.**
+
+- `uninstructed/stakes.json`: the block `kinds` with the 24 texts of the note above, word for word.
+- `uninstructed/protocol.py`: a lever `kind` (the stake sentences of a kind in place of the scenario's own) and the
+  versions K1 and K2, which are T7's settings with a kind. The wording test covers the new texts. The protocol name
+  is `uninstructed-v3`. Every earlier prompt is unchanged: the 2,136 recorded system prompts of the four rounds are
+  rebuilt by the code as it stands (`scripts/uninstructed_build_explorer.py`), and check F of the tiny test
+  rebuilds the first pilot's 2,304 prompts.
+- `uninstructed/coding.py`: the case text that the coders of a room read shows the stake sentences that the members
+  of that run were given. Earlier rounds keep the scenario's own, so their coder prompts are unchanged (1,068
+  recorded coder prompts rebuilt).
+- `scripts/uninstructed_generate.py` refuses a scenario that has no sentences of the version's kind before anything
+  is generated. `scripts/runpod_uninstructed_boot.sh` and `scripts/runpod_launch_uninstructed.py` take a list of
+  scenario ids (`JOB_SCENARIO_IDS`, `--scenario-ids`).
+- `scripts/uninstructed_stake_kinds.py`: items 1 to 8 of the note above, with the two rules as written there. It is
+  committed with this note, before the round's data exists.
+- `scripts/uninstructed_tiny_e2e.py`, check E3: under K1 and K2 every system prompt is T7's with only the two stake
+  sentences exchanged; the first room prompt of a scenario is the one T7 gave; the coders see the sentences of the
+  kind; a scenario without such sentences is refused; the reading script runs on made-up episodes. The whole test
+  passes.
+
+**Launch.** `--skip gen_ref,export_basis,timing --versions K1,K2 --scenario-ids
+fin_03,ins_01,edu_03,sport_02,eng_03,fin_04,audit_02,research_01,research_02,food_02,gov_03,re_01 --pilot-runs 4
+--pilot-dir pilot5 --max-minutes 90 --grace-minutes 15`, one A40, 8 prompts per call. The launcher's own estimate,
+which still assumes 1.58 s per reply, is 1.37 hours and $0.81; at the 1.39 s measured in the third round it is
+about 1.1 hours and $0.65, the figure Andy approved. Worst case at the cap: $1.03.
+
+**After the round.** The rooms are coded blind by the second coder, the round is read off by the script, its
+outcome goes into a dated note, and the paper is updated and cut to five pages. Nothing else is started.

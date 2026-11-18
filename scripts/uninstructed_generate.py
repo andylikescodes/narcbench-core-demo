@@ -92,6 +92,13 @@ def main() -> int:
     for sid in ids:
         if sid not in idx:
             ap.error(f"unknown scenario {sid}")
+    for v in versions:                              # a version with a kind of stake sentences runs only where they exist
+        if P.spec_of(v)["kind"]:
+            for sid in ids:
+                try:
+                    P.stake_sentences(sid, v, stakes)
+                except KeyError as e:
+                    ap.error(str(e.args[0]))
 
     batched = None
     if a.dry_run:

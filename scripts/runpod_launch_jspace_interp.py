@@ -283,7 +283,7 @@ def sha256_of(p: Path) -> str:
     return h.hexdigest()
 
 
-def download(url: str, dest: Path, size: int, sha: str) -> dict:
+def download(url: str, dest: Path, size: int, sha: str, max_tries: int = 40) -> dict:
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists() and dest.stat().st_size == size and sha256_of(dest) == sha:
         print(f"  {dest.name}: already present and verified", flush=True)
@@ -314,9 +314,10 @@ def download(url: str, dest: Path, size: int, sha: str) -> dict:
                         last = time.time()
         except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
             tries += 1
-            if tries > 40:
+            if tries > max_tries:
                 raise SystemExit(f"{dest.name}: giving up after {tries} attempts: {e}")
-            print(f"  {dest.name}: {type(e).__name__} after {have/1e6:,.0f} MB; retry {tries} in 10 s", flush=True)
+            what = f"HTTP {e.code}" if isinstance(e, urllib.error.HTTPError) else type(e).__name__
+            print(f"  {dest.name}: {what} after {have/1e6:,.1f} MB at {time.strftime('%H:%M:%S', time.gmtime())} UTC; retry {tries} in 10 s", flush=True)
             time.sleep(10)
             have = part.stat().st_size if part.exists() else 0
     got = sha256_of(part)

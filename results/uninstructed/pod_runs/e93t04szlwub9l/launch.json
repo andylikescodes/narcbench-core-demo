@@ -1,0 +1,74 @@
+{
+ "created_utc": "20261118T055714Z",
+ "pod": {
+  "id": "e93t04szlwub9l",
+  "desiredStatus": "RUNNING",
+  "costPerHr": 0.59,
+  "machine": {
+   "podHostId": "e93t04szlwub9l-644128ed",
+   "gpuDisplayName": "A40",
+   "dataCenterId": "CA-MTL-1",
+   "cpuCount": 2
+  },
+  "gpu": "NVIDIA A40",
+  "cloud": "SECURE",
+  "min_vcpu": 8,
+  "min_memory_gb": 40
+ },
+ "attempts_before": [],
+ "sha": "6f0adac56bf9b79498f477221ff829074821b3a3",
+ "branch": "uninstructed-collusion",
+ "image": "runpod/pytorch:1.2.0-rc.162-cu1281-torch280-ubuntu2404",
+ "settings": {
+  "mode": "pilot",
+  "gpu": "NVIDIA A40",
+  "max_minutes": 90,
+  "grace_minutes": 15,
+  "pilot_n": 12,
+  "pilot_runs": 4,
+  "versions": "K1,K2",
+  "pilot_dir": "pilot5",
+  "scenarios": "pilot",
+  "scenario_ids": "fin_03,ins_01,edu_03,sport_02,eng_03,fin_04,audit_02,research_01,research_02,food_02,gov_03,re_01",
+  "stance_rounds": "",
+  "ref_versions": "S0",
+  "ref_runs": 0,
+  "batch": 8,
+  "workers": 8,
+  "timing_episodes": 10,
+  "skip": "gen_ref,export_basis,timing",
+  "min_balance": 20.0,
+  "reserve": 5.0
+ },
+ "estimate": {
+  "mode": "pilot",
+  "gpu": "NVIDIA A40",
+  "versions": [
+   "K1",
+   "K2"
+  ],
+  "scenarios": 12,
+  "results_dir": "results/uninstructed/pilot5",
+  "episodes": 96,
+  "prompts": 2304,
+  "stages_minutes": {
+   "boot, setup, downloads": 6,
+   "generation (96 episodes, 2304 prompts at 1.58 s)": 61,
+   "model loads": 3,
+   "room codes by Gemma (192 new rooms)": 5,
+   "timing test (basis export, replay, decomposition, probes)": 0,
+   "public positions by Gemma (384 members at 0.6 s)": 5,
+   "package": 2
+  },
+  "expected_hours": 1.37,
+  "expected_usd": {
+   "SECURE": 0.81,
+   "COMMUNITY": 0.48
+  },
+  "time_cap_minutes": 90,
+  "grace_minutes": 15,
+  "worst_case_usd": 1.03
+ },
+ "balance_before": 31.84,
+ "status_url": "https://e93t04szlwub9l-8765.proxy.runpod.net/status.json"
+}

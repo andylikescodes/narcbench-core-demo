@@ -17,7 +17,12 @@
 #      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_CODER_BATCH, JOB_TIMING_EPISODES, JOB_SKIP, JOB_VERSIONS,
 #      JOB_PILOT_DIR, JOB_THREADS, JOB_SCENARIOS (pilot | all), JOB_STANCE_ROUNDS (comma list of earlier round folders),
 #      JOB_REF_VERSIONS and JOB_REF_RUNS (the no-stake versions of gen_ref and their runs; default S0 and JOB_PILOT_RUNS),
-#      JOB_SCENARIO_IDS (comma list of scenario ids; when set it replaces JOB_SCENARIOS: the fifth round's twelve).
+#      JOB_SCENARIO_IDS (comma list of scenario ids; when set it replaces JOB_SCENARIOS: the fifth round's twelve),
+#      JOB_EXTRA_MINUTES (how much longer than the grace period the pod serves its results when the round's archive
+#      has not been fetched; default 20).
+# Packaging: round.tgz holds this round's folder and this pod's logs and is small; the watcher takes it first.
+# results.tgz is the whole results folder as before. On 18 November 2026 a pod's results were lost because the one
+# large archive stopped downloading after 1.4 MB and the pod terminated itself after its grace period.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 REPO=$(pwd)
@@ -27,6 +32,7 @@ MODE=${JOB_MODE:-pilot}
 MODEL=${JOB_MODEL:-google/gemma-2-9b-it}
 MAX_MIN=${JOB_MAX_MINUTES:-150}
 GRACE_MIN=${JOB_GRACE_MINUTES:-30}
+EXTRA_MIN=${JOB_EXTRA_MINUTES:-20}
 SKIP=",${JOB_SKIP:-},"
 PILOT_N=${JOB_PILOT_N:-12}
 PILOT_RUNS=${JOB_PILOT_RUNS:-2}
@@ -119,16 +125,20 @@ package() {
   PL="$OUT/pod_logs/${RUNPOD_POD_ID:-pod}"
   mkdir -p "$PL"; cp -a "$LOGS"/. "$PL/" 2>/dev/null; cp "$RUN"/job.log "$RUN"/stages.json "$RUN"/status.json "$PL/" 2>/dev/null
   nvidia-smi --query-gpu=name,memory.total --format=csv,noheader > "$PL/gpu.txt" 2>/dev/null || true
+  cp "$P/provisional/summary.json" "$RUN/provisional_summary.json" 2>/dev/null || true
+  rm -f "$RUN/fetched.round"
+  (cd "$REPO" && tar -czf "$RUN/round.tgz" "results/uninstructed/$PILOT_DIR" "results/uninstructed/pod_logs/${RUNPOD_POD_ID:-pod}") 2>>"$RUN/job.log"
   (cd "$REPO" && tar --exclude='results/uninstructed/acts' -czf "$RUN/results.tgz" results/uninstructed) 2>>"$RUN/job.log"
   python3 - <<'PY'
 import hashlib, json, os
 m = {}
-p = "/tmp/run/results.tgz"
-if os.path.exists(p):
-    h = hashlib.sha256()
-    with open(p, "rb") as f:
-        for b in iter(lambda: f.read(1 << 24), b""): h.update(b)
-    m["results.tgz"] = {"size": os.path.getsize(p), "sha256": h.hexdigest()}
+for name in ("round.tgz", "results.tgz"):          # the small archive of this round first
+    p = "/tmp/run/" + name
+    if os.path.exists(p):
+        h = hashlib.sha256()
+        with open(p, "rb") as f:
+            for b in iter(lambda: f.read(1 << 24), b""): h.update(b)
+        m[name] = {"size": os.path.getsize(p), "sha256": h.hexdigest()}
 json.dump(m, open("/tmp/run/manifest.json", "w"), indent=1)
 print(m)
 PY
@@ -136,8 +146,16 @@ PY
 finish() {  # finish PHASE DETAIL
   package
   ELAPSED_MIN=$(elapsed_min) st "$1" done "$2"
-  log "finished: $1 ($2); serving results for $GRACE_MIN min, then terminating"
-  sleep "${GRACE_MIN}m"; term; exit 0
+  log "finished: $1 ($2); serving results for $GRACE_MIN min (up to $EXTRA_MIN more if round.tgz is not fetched), then terminating"
+  local t_end=$(( $(date +%s) + GRACE_MIN * 60 ))
+  while [ "$(date +%s)" -lt "$t_end" ]; do sleep 15; done
+  if [ ! -f "$RUN/fetched.round" ] && [ "$EXTRA_MIN" -gt 0 ]; then
+    log "round.tgz has not been fetched; serving for up to $EXTRA_MIN more minutes"
+    t_end=$(( $(date +%s) + EXTRA_MIN * 60 ))
+    while [ "$(date +%s)" -lt "$t_end" ] && [ ! -f "$RUN/fetched.round" ]; do sleep 15; done
+    [ -f "$RUN/fetched.round" ] && { log "round.tgz fetched; terminating in two minutes"; sleep 120; }
+  fi
+  term; exit 0
 }
 
 # ---- status server (Range-capable; replaces the bootstrap's plain server) ----

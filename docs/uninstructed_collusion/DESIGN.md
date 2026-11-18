@@ -36,6 +36,10 @@
 - 17 November 2026, later that evening: **Andy approved the fifth round.** It is built and checked on the tiny
   model; what was built is in the last dated note, written before the run. He also said that the work rests after
   this round, and that the paper is then to be updated and cut to five pages with the main setup and results only.
+- 17 November 2026, about 23:30 PST: **the fifth round ran to the end on its pod, and its results were lost.** The
+  download of the pod's archive broke off, and the pod terminated itself when its grace period was over. The round
+  has no result. The download path is changed and tested (last dated note). A second run costs about as much again,
+  which is more than Andy approved, so it waits for his word.
 
 ## 1. In short
 
@@ -1494,3 +1498,43 @@ about 1.1 hours and $0.65, the figure Andy approved. Worst case at the cap: $1.0
 
 **After the round.** The rooms are coded blind by the second coder, the round is read off by the script, its
 outcome goes into a dated note, and the paper is updated and cut to five pages. Nothing else is started.
+
+### 17 November 2026, about 23:30 PST: fifth round, generated on the pod and not retrieved
+
+Pod `e93t04szlwub9l` (A40, commit `6f0adac`) generated the 96 episodes in 53 minutes, coded the rooms and the
+public positions and reported "done" 68 minutes after its start. The watcher then began to download the pod's one
+archive. The transfer broke off after 1.4 of about 4 MB, 41 further requests failed with HTTP errors, and when the
+pod's 15 minutes of grace were over it terminated itself with the results on it. The record is
+`results/uninstructed/pilot5/RUN_LOG.md`. Cost: $0.90.
+
+**What this means for the round.** Nothing of it was retrieved: no transcript, no vote, no code. Nothing is known
+about K1 against K2, and nothing was seen that could bias a second run. The texts, the scenarios, the readings and
+the two rules of the notes above stand as they are.
+
+**What was changed, so that a transfer that breaks does not lose a round again.**
+
+- `scripts/runpod_uninstructed_boot.sh`: besides the archive of the whole results folder, the pod packs
+  `round.tgz`, this round's folder and this pod's logs alone. It also copies the provisional rates next to its
+  status file.
+- `scripts/runpod_range_server.py`, the pod's file server: it leaves a marker when `round.tgz` has gone out to its
+  last byte. Without that marker the pod serves for up to 20 more minutes after its grace period
+  (`JOB_EXTRA_MINUTES`, `--extra-minutes`) before it terminates.
+- `scripts/runpod_launch_uninstructed.py`: the watcher fetches the status, the stage times, the log and the
+  provisional rates first, then `round.tgz`, which it unpacks at once; the large archive only with `--full-archive`
+  or when earlier rounds were coded on the pod. After a failed download it no longer terminates the pod: the pod is
+  left to its own timer, and the watcher says how to try again.
+- `scripts/runpod_launch_jspace_interp.py`, the shared download helper: a retry logs the HTTP status code and the
+  time.
+- `scripts/uninstructed_tiny_e2e.py`, check G: the new path against the pod's file server on this machine, with a
+  transfer that broke off after a third. The whole test passes; checks E3 and F show that no prompt has changed.
+
+**What the cause was** is not known. The same download worked for the five pods of the four earlier rounds. The
+model download on this pod was slow as well (11 minutes), which points to the host's connection and proves nothing.
+
+**A second run** is the same round from the same texts: one A40, about 1.1 hours and about $0.65 expected (this
+pod: 87 minutes and $0.90, with its slow download). The worst case is now $1.23, of which $0.20 are the extra
+minutes that run only if the results are not fetched. With the $0.90 already spent, that is more than the $1.03
+Andy approved as the worst case for this round. It is not started without his word.
+
+**The paper** is cut to five pages on the four rounds that have results. It describes the fifth round as designed,
+run and lost.

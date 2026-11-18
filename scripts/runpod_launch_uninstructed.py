@@ -88,13 +88,13 @@ def estimate(a) -> dict:
                   0 if not stance_members else 1 + len([rd for rd in a.stance_rounds.split(",") if rd]) + round(stance_members * STANCE_S_PER_MEMBER / 60)),
               "package": 2}
     exp_h = sum(stages.values()) / 60
-    cap_h = (a.max_minutes + a.grace_minutes) / 60
+    cap_h = (a.max_minutes + a.grace_minutes + a.extra_minutes) / 60     # the extra minutes run only if the results are not fetched
     rate = GPU_RATES[a.gpu]
     return {"mode": a.mode, "gpu": a.gpu, "versions": versions, "scenarios": n_scenarios, "results_dir": f"results/uninstructed/{a.pilot_dir}",
             "episodes": episodes,
             "prompts": prompts, "stages_minutes": stages, "expected_hours": round(exp_h, 2),
             "expected_usd": {c: round(exp_h * r, 2) for c, r in rate.items()}, "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes,
-            "worst_case_usd": round(cap_h * rate["SECURE"], 2)}
+            "extra_minutes_if_not_fetched": a.extra_minutes, "worst_case_usd": round(cap_h * rate["SECURE"], 2)}
 
 
 def sha_on_branch(sha: str) -> bool:
@@ -157,7 +157,7 @@ exec bash {BOOT}
 def create_pod(a) -> dict:
     env = {"JOB_BOOT_B64": base64.b64encode(bootstrap_script(a).encode()).decode(), "RUNPOD_API_KEY": os.environ["RUNPOD_API_KEY"],
            "HF_TOKEN": os.environ["HF_TOKEN"], "GIT_SHA": a.sha, "JOB_MODE": a.mode, "JOB_MAX_MINUTES": str(a.max_minutes),
-           "JOB_GRACE_MINUTES": str(a.grace_minutes), "JOB_PILOT_N": str(a.pilot_n), "JOB_PILOT_RUNS": str(a.pilot_runs),
+           "JOB_GRACE_MINUTES": str(a.grace_minutes), "JOB_EXTRA_MINUTES": str(a.extra_minutes), "JOB_PILOT_N": str(a.pilot_n), "JOB_PILOT_RUNS": str(a.pilot_runs),
            "JOB_BATCH": str(a.batch), "JOB_WORKERS": str(a.workers), "JOB_TIMING_EPISODES": str(a.timing_episodes),
            "JOB_VERSIONS": a.versions, "JOB_PILOT_DIR": a.pilot_dir, "JOB_SCENARIOS": a.scenarios, "JOB_STANCE_ROUNDS": a.stance_rounds,
            "JOB_REF_VERSIONS": a.ref_versions, "JOB_REF_RUNS": str(a.ref_runs or a.pilot_runs)}
@@ -199,23 +199,29 @@ def safe_extract(tgz: Path) -> int:
     return len(members)
 
 
-def pull(pod: str) -> dict:
-    url = f"https://{pod}-8765.proxy.runpod.net"
+def pull(pod: str, full: bool = False, url: str | None = None) -> dict:
+    """Fetch a pod's results. The small files come first (status, stages, log, provisional rates), then round.tgz, the
+    archive of this round's folder and this pod's logs, which is extracted at once. results.tgz, the whole results
+    folder, is fetched only with `full` or when the pod has no round.tgz (pods before 18 November 2026)."""
+    url = url or f"https://{pod}-8765.proxy.runpod.net"
     dest = RUNS_DIR / pod
-    man = base.fetch_json(f"{url}/manifest.json", 60)
-    if man is None:
-        raise SystemExit("no manifest.json on the pod yet (status.json says what phase it is in)")
     dest.mkdir(parents=True, exist_ok=True)
-    rec = {"pod": pod, "files": {}}
-    for name, info in man.items():
-        r = base.download(f"{url}/{name}", dest / name, int(info["size"]), info["sha256"])
-        rec["files"][name] = {**info, **r}
-    if (dest / "results.tgz").exists():
-        rec["extracted_members"] = safe_extract(dest / "results.tgz")
-    for name in ("status.json", "stages.json", "job.log"):
+    for name in ("status.json", "stages.json", "job.log", "provisional_summary.json"):
         b = base.fetch(f"{url}/{name}", 60)
         if b:
             (dest / name).write_bytes(b)
+    man = base.fetch_json(f"{url}/manifest.json", 60)
+    if man is None:
+        raise SystemExit("no manifest.json on the pod yet (status.json says what phase it is in)")
+    rec = {"pod": pod, "files": {}}
+    names = [n for n in ("round.tgz",) if n in man]
+    names += [n for n in man if n != "round.tgz" and (full or "round.tgz" not in man)]
+    for name in names:
+        info = man[name]
+        r = base.download(f"{url}/{name}", dest / name, int(info["size"]), info["sha256"], max_tries=90 if name == "round.tgz" else 40)
+        rec["files"][name] = {**info, **r}
+        if name in ("round.tgz", "results.tgz"):
+            rec[f"extracted_members_{name}"] = safe_extract(dest / name)
     (dest / "pull.json").write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps(rec, indent=1))
     return rec
@@ -230,7 +236,7 @@ def terminate_checked(pod: str) -> None:
         print("pod state unavailable:", type(e).__name__, flush=True)
 
 
-def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60) -> int:
+def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60, full: bool = False) -> int:
     t0, last, missing = time.time(), None, 0
     while time.time() - t0 < hours * 3600:
         st = base.fetch_json(f"https://{pod}-8765.proxy.runpod.net/status.json", 20)
@@ -242,10 +248,11 @@ def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60) -> int:
             print(f"pod reports {st.get('phase')}; pulling", flush=True)
             rc = 0 if st.get("phase") == "done" else 4
             try:
-                pull(pod)
+                pull(pod, full)
             except SystemExit as e:
-                print(f"pull failed: {e}", file=sys.stderr)
-                rc = 5
+                # the results are still on the pod and nowhere else: it is left to its own timer, not terminated here
+                print(f"pull failed: {e}\nThe pod is left running until its own timer ends it; try again with --pull {pod}", file=sys.stderr, flush=True)
+                return 5
             if do_terminate:
                 terminate_checked(pod)
             return rc
@@ -274,6 +281,8 @@ def main() -> int:
     ap.add_argument("--sha", default=None, help="commit the pod checks out (default: local HEAD; must be on origin)")
     ap.add_argument("--max-minutes", type=int, default=150, help="time cap on the pod; what is unfinished is packaged as is")
     ap.add_argument("--grace-minutes", type=int, default=30, help="how long the pod serves results before terminating itself")
+    ap.add_argument("--extra-minutes", type=int, default=20, help="how much longer it serves them when round.tgz has not been fetched")
+    ap.add_argument("--full-archive", action="store_true", help="also fetch results.tgz, the whole results folder (needed with --stance-rounds)")
     ap.add_argument("--pilot-n", type=int, default=12)
     ap.add_argument("--pilot-runs", type=int, default=2)
     ap.add_argument("--versions", default="S1,S2,S3", help="versions of the gen_stake stage (S0 is the gen_ref stage)")
@@ -313,12 +322,12 @@ def main() -> int:
         terminate_checked(a.terminate)
         return 0
     if a.pull:
-        pull(a.pull)
+        pull(a.pull, a.full_archive)
         if not a.no_terminate:
             terminate_checked(a.pull)
         return 0
     if a.watch_pod:
-        return watch(a.watch_pod, a.watch_hours, not a.no_terminate)
+        return watch(a.watch_pod, a.watch_hours, not a.no_terminate, full=a.full_archive)
 
     est = estimate(a)
     print(json.dumps(est, indent=1))
@@ -341,14 +350,14 @@ def main() -> int:
         return 3
     pod = res["created"]["id"]
     rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "branch": GIT_BRANCH, "image": base.IMAGE,
-           "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir", "scenarios", "scenario_ids", "stance_rounds", "ref_versions", "ref_runs",
+           "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "extra_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir", "scenarios", "scenario_ids", "stance_rounds", "ref_versions", "ref_runs",
                                                      "batch", "workers", "timing_episodes", "skip", "min_balance", "reserve")},
            "estimate": est, "balance_before": rep["balance_usd"], "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
     (RUNS_DIR / pod).mkdir(parents=True, exist_ok=True)
     (RUNS_DIR / pod / "launch.json").write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps(rec, indent=1), flush=True)
     if a.watch:
-        return watch(pod, a.watch_hours, not a.no_terminate)
+        return watch(pod, a.watch_hours, not a.no_terminate, full=a.full_archive or bool(a.stance_rounds))
     return 0
 
 

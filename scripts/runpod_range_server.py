@@ -4,6 +4,8 @@
 python3 scripts/runpod_range_server.py <directory> [port]
 Serves <directory> on the port (default 8765). Paths given to /sha256 and /ls are relative to the directory.
 Used by the RunPod boot scripts so that multi-GB result archives download with resume and are verified.
+When a request for round.tgz has been written out to the file's last byte, the empty file fetched.round is left in the
+served directory: the boot script waits longer before it terminates the pod if that marker is missing.
 """
 from __future__ import annotations
 
@@ -94,6 +96,7 @@ class H(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         f.seek(start)
         self._left = end - start + 1
+        self._marker = os.path.join(ROOT_DIR, "fetched.round") if os.path.basename(path) == "round.tgz" and end == size - 1 else None
         return f
 
     def copyfile(self, src, dst):
@@ -107,6 +110,13 @@ class H(http.server.SimpleHTTPRequestHandler):
             dst.write(b)
             n -= len(b)
         self._left = None
+        marker = getattr(self, "_marker", None)
+        if marker and n == 0:                        # written out to the last byte without an error
+            try:
+                dst.flush()
+                open(marker, "w").close()
+            except OSError:
+                pass
 
     def log_message(self, *a):
         pass

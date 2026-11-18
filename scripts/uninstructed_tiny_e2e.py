@@ -12,7 +12,9 @@ the design relies on hold:
   E. the second pilot's versions: system prompts as specified, the scripted first message in place and not generated;
      E2 the third and fourth rounds' versions; E3 the fifth round's: T7's prompt with only the two stake sentences of
      a kind exchanged, the coders shown those sentences, the round read off by the script fixed before it ran;
-  F. the first pilot's recorded episodes are rebuilt prompt for prompt by the current code.
+  F. the first pilot's recorded episodes are rebuilt prompt for prompt by the current code;
+  G. the pull of a pod's results: the round's small archive first, resumed with Range after a broken transfer, the
+     pod-side marker that it went out, the whole-folder archive only on request.
 
   python scripts/uninstructed_tiny_e2e.py --work /path/to/scratch/u_tiny
 """
@@ -422,6 +424,61 @@ def main() -> int:
     est = json.loads(run([py, "scripts/runpod_launch_uninstructed.py", "--skip", "gen_ref,export_basis,timing", "--versions", "K1,K2",
                           "--scenario-ids", ids12, "--pilot-runs", "4", "--pilot-dir", "pilot5"], log).stdout)
     assert est["scenarios"] == 12 and est["episodes"] == 96 and est["prompts"] == 2304 and est["results_dir"].endswith("pilot5"), est
+    # G. the pull, against the pod-side file server on this machine
+    import hashlib
+    import socket
+    import tarfile
+
+    import runpod_launch_uninstructed as L
+    srv, home = w / "pull_srv", w / "pull_home"
+    for d in (srv, home):
+        if d.exists():
+            subprocess.run(["rm", "-rf", str(d)], check=True)
+        d.mkdir(parents=True)
+    payload = srv / "payload/results/uninstructed"
+    (payload / "pilotX/runs").mkdir(parents=True)
+    (payload / "pilotX/runs/episode.json").write_text(json.dumps({"x": list(range(60000))}))
+    (payload / "pilotOld").mkdir()
+    (payload / "pilotOld/old.json").write_text("{}")
+    with tarfile.open(srv / "round.tgz", "w:gz") as tf:
+        tf.add(payload / "pilotX", arcname="results/uninstructed/pilotX")
+    with tarfile.open(srv / "results.tgz", "w:gz") as tf:
+        tf.add(payload, arcname="results/uninstructed")
+    man = {n: {"size": (srv / n).stat().st_size, "sha256": hashlib.sha256((srv / n).read_bytes()).hexdigest()} for n in ("round.tgz", "results.tgz")}
+    (srv / "manifest.json").write_text(json.dumps(man))
+    (srv / "status.json").write_text(json.dumps({"phase": "done"}))
+    (srv / "provisional_summary.json").write_text(json.dumps({"n_rooms": 0}))
+    with socket.socket() as s0:
+        s0.bind(("127.0.0.1", 0)); port = s0.getsockname()[1]
+    server = subprocess.Popen([py, "scripts/runpod_range_server.py", str(srv), str(port)], cwd=ROOT)
+    try:
+        for _ in range(50):
+            try:
+                socket.create_connection(("127.0.0.1", port), timeout=0.2).close(); break
+            except OSError:
+                time.sleep(0.1)
+        old_root, old_runs = L.ROOT, L.RUNS_DIR
+        L.ROOT, L.RUNS_DIR = home, home / "pod_runs"
+        try:
+            # a transfer that broke off: the first third of the round's archive is already here
+            (L.RUNS_DIR / "podA").mkdir(parents=True)
+            (L.RUNS_DIR / "podA/round.tgz.part").write_bytes((srv / "round.tgz").read_bytes()[: man["round.tgz"]["size"] // 3])
+            rec = L.pull("podA", url=f"http://127.0.0.1:{port}")
+            assert list(rec["files"]) == ["round.tgz"] and rec["files"]["round.tgz"]["status"] == "downloaded", rec
+            assert (home / "results/uninstructed/pilotX/runs/episode.json").exists() and not (home / "results/uninstructed/pilotOld").exists()
+            assert (L.RUNS_DIR / "podA/status.json").exists() and (L.RUNS_DIR / "podA/provisional_summary.json").exists()
+            assert not (L.RUNS_DIR / "podA/results.tgz").exists() and (srv / "fetched.round").exists(), "marker of the fetched round archive"
+            rec = L.pull("podB", full=True, url=f"http://127.0.0.1:{port}")
+            assert list(rec["files"]) == ["round.tgz", "results.tgz"] and (home / "results/uninstructed/pilotOld/old.json").exists(), rec
+            # a pod of the earlier kind, with the one large archive only
+            (srv / "manifest.json").write_text(json.dumps({"results.tgz": man["results.tgz"]}))
+            rec = L.pull("podC", url=f"http://127.0.0.1:{port}")
+            assert list(rec["files"]) == ["results.tgz"], rec
+        finally:
+            L.ROOT, L.RUNS_DIR = old_root, old_runs
+    finally:
+        server.terminate()
+    print("G. pull: the round's archive first and resumed with Range, the marker left on the pod, the large archive only on request")
     (w / "tiny_e2e_log.json").write_text(json.dumps({"log": log, "replay": info, "summary_versions": summ["versions"], "timing": tim}, indent=1) + "\n")
     print("ALL PASS")
     return 0

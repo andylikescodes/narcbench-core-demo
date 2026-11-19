@@ -1,0 +1,17 @@
+[probe] 1185 jobs on 9 processes; 976 members, 488 rooms, layers [19, 20, 21, 22, 23]
+[Parallel(n_jobs=9)]: Using backend LokyBackend with 9 concurrent workers.
+[Parallel(n_jobs=9)]: Done  54 tasks      | elapsed:  6.9min
+[Parallel(n_jobs=9)]: Done 144 tasks      | elapsed: 20.5min
+/usr/local/lib/python3.12/dist-packages/joblib/externals/loky/process_executor.py:787: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
+  warnings.warn(
+[Parallel(n_jobs=9)]: Done 270 tasks      | elapsed: 27.3min
+[Parallel(n_jobs=9)]: Done 432 tasks      | elapsed: 34.1min
+[Parallel(n_jobs=9)]: Done 630 tasks      | elapsed: 41.0min
+[Parallel(n_jobs=9)]: Done 864 tasks      | elapsed: 42.1min
+[Parallel(n_jobs=9)]: Done 1134 tasks      | elapsed: 43.6min
+[Parallel(n_jobs=9)]: Done 1185 out of 1185 | elapsed: 43.7min finished
+/workspace/nb/repo/scripts/uninstructed_probe.py:373: RuntimeWarning: Mean of empty slice
+  row["apply"] = {k: (float(np.nanmean([g["apply"][k] for g in got if g.get("apply")])) if k not in ("n1", "n0") else got[0]["apply"][k])
+/workspace/nb/repo/scripts/uninstructed_probe.py:309: RuntimeWarning: Mean of empty slice
+  b = np.nanmean(np.stack([bb for _, bb in per_layer]), axis=0)
+{"seconds": 2621.0, "contrasts": {"vote": 32, "hidden": 32, "collusion_clean": 24, "collusion_rest": 24}, "causal_choice": {"layer": 19, "anchor": "m1.q3", "score_there": 0.7338129496402878, "vote_layer": 19, "vote_signal": true}}

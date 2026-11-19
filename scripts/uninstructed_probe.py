@@ -504,11 +504,11 @@ def write_md(res: dict, path: Path) -> None:
             L.append(f"- **Q4, more than the words?** Above both text baselines at: {', '.join('`' + p + '`' for p in q4['more_than_words_at']) or 'no position'}. "
                      f"Above the bag of words only: {', '.join('`' + p + '`' for p in q4['above_bag_of_words_only']) or 'no position'}. "
                      f"The bag of words' own onset: {('`' + q4['onset_of_the_words'] + '`') if q4['onset_of_the_words'] else 'none'}.")
-            for phase, word in (("room", "over the 24 room positions"), ("public", "over the 8 positions after the room")):
+            for phase, word in (("room", "room positions"), ("public", "positions after the room")):
                 bp = q4.get("by_phase", {}).get(phase)
                 pm = res.get("phases", {}).get(contrast, {}).get(f"{phase}_mean")
-                if bp and pm:
-                    L.append(f"  - In one number, the mean {word}: activation {fmt(pm)}; activation minus words {fmt_d(bp['minus_words'])}; "
+                if bp and pm:                # the count is that of the positions in this sweep (--points can leave some out)
+                    L.append(f"  - In one number, the mean over the {pm['positions']} {word}: activation {fmt(pm)}; activation minus words {fmt_d(bp['minus_words'])}; "
                              f"minus words by speaker {fmt_d(bp.get('minus_words_by_speaker'))}; minus neutral reader {fmt_d(bp['minus_neutral_reader'])}. "
                              f"{'More than the words in this phase.' if bp['more_than_words'] else 'Not more than the words in this phase.'}")
             if "Q5" in ru:
@@ -581,6 +581,14 @@ def summarize_nulls(folder: Path) -> int:
                                                                               if r.get("phases", {}).get(contrast, {}).get(f"{phase}_mean")),
                                         "passes_more_than_words": sum(bool(r["rules"][contrast]["Q4"].get("by_phase", {}).get(phase, {}).get("more_than_words"))
                                                                       for r in runs if contrast in r["rules"])}
+        # the two scores the note of 18 November 2026 ties a reading to: the end of the room, and the best room position
+        spread = lambda v: {"median": float(np.median(v)), "p95": float(np.percentile(v, 95)), "max": float(max(v))}   # noqa: E731
+        ends = [t["m4.end"]["mean"]["full"]["auroc"] for t in tabs if t.get("m4.end", {}).get("mean", {}).get("full")]
+        if ends:
+            rec["end_of_room_auroc"] = spread(ends)
+        in_room = [[t[p]["mean"]["full"]["auroc"] for p in S.ROOM_POINTS if p in t and t[p]["mean"].get("full")] for t in tabs]
+        if any(in_room):
+            rec["best_room_position_auroc"] = spread([max(v) for v in in_room if v])
         rec["Q1_signal"] = sum(bool(r.get("Q1", {}).get("signal")) for r in rul)
         rec["Q2_onset"] = sum(r["Q2"]["onset"] is not None for r in rul)
         rec["anchor_inside_the_room"] = sum(r["causal_choice"].get("anchor") is not None for r in rul)
@@ -592,17 +600,21 @@ def summarize_nulls(folder: Path) -> int:
          "everywhere, so whatever fires here fires by chance. The same activations, folds, score and intervals as the real sweep.", "",
          "| Contrast | Passes | Signal at the end of the room (Q1) | An onset somewhere (Q2) | An anchor inside the room (15.2) | "
          "More than words at some position (Q4) | Positions with an interval above 0.5 | Best position of a timeline: median, 95th percentile, highest | "
-         "Mean over the room positions: 95th percentile; passes with its interval above 0.5; passes 'more than words' in the room |",
-         "|---|---|---|---|---|---|---|---|---|"]
+         "Mean over the room positions: 95th percentile; passes with its interval above 0.5; passes 'more than words' in the room | "
+         "Score at the end of the room: median, 95th percentile, highest | Best position inside the room: median, 95th percentile, highest |",
+         "|---|---|---|---|---|---|---|---|---|---|---|"]
+    three = lambda d: f" {d['median']:.3f}, {d['p95']:.3f}, {d['max']:.3f} |" if d else " – |"   # noqa: E731
     for contrast, rec in out["contrasts"].items():
         f = rec.get("full")
         L.append(f"| {contrast} | {rec['passes']} | {rec['Q1_signal']} | {rec['Q2_onset']} | {rec['anchor_inside_the_room']} | {rec['more_than_words_somewhere']} | "
                  + (f"{f['positions_with_interval_above_0.5']} of {f['positions']} | {f['best_position_auroc']['median']:.3f}, {f['best_position_auroc']['p95']:.3f}, {f['best_position_auroc']['max']:.3f} |"
                     if f else "– | – |")
                  + (f" {rec['room_mean']['p95']:.3f}; {rec['room_mean']['passes_with_interval_above_0.5']}; {rec['room_mean']['passes_more_than_words']} |"
-                    if rec.get("room_mean") else " – |"))
-    L += ["", "Reading: a rule that fires in more than about one pass in twenty is not evidence by itself; the best position of the real "
-          "timeline means something only above the 95th percentile of the last column."]
+                    if rec.get("room_mean") else " – |")
+                 + three(rec.get("end_of_room_auroc")) + three(rec.get("best_room_position_auroc")))
+    L += ["", "Reading: a rule that fires in more than about one pass in twenty is not evidence by itself. The real score at the end of the room "
+          "counts as a signal only above the 95th percentile of the column 'Score at the end of the room', and an onset counts only if the best "
+          "position of the real timeline is above the 95th percentile of the column 'Best position of a timeline'."]
     (folder / "NULLS.md").write_text("\n".join(L) + "\n")
     print(json.dumps(out["contrasts"], indent=1))
     return 0

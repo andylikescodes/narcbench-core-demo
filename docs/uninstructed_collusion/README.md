@@ -34,6 +34,10 @@ the episode, and the label comes from what the pair did. Design and pre-registra
 | `scripts/uninstructed_probe.py` | Stage 2, step 3 (CPU): the probe sweep over contrasts, positions, layers and inputs, read off by the rules fixed in advance (`results/uninstructed/stage2/probe/PROBE.md`) |
 | `uninstructed/causal.py`, `scripts/uninstructed_causal.py` | Stage 2, causal phase (GPU): the direction at the anchor, interventions while rooms and votes are generated again, and their summary (`results/uninstructed/stage2/causal/CAUSAL.md`); `--plan` counts the regenerated rooms, votes and prompts without a model |
 | `scripts/uninstructed_causal_check.py` | The checks of the causal phase on the tiny model (run by the tiny end-to-end test) |
+| `scripts/uninstructed_nulls_local.sh` | Stage 2: passes of the probe sweep with shuffled labels on a laptop, from the tables a probe pod served, and their summary (`results/uninstructed/stage2/nulls/NULLS.md`) |
+| `scripts/uninstructed_stage2_recheck.py` | Stage 2: checks of a probe pod's results that share no code with the sweep: identical prompts give the same activation up to rounding, ten cells computed again, the size of the J-space part (`results/uninstructed/stage2/explore/RECHECK.md`) |
+| `scripts/uninstructed_stage2_readers.py` | Stage 2, exploratory, added after the probe results: the probe against stronger readers of the words, namely Claude's codes of the room and of the public position (`results/uninstructed/stage2/explore/READERS.md`) |
+| `scripts/uninstructed_stage2_figure.py` | Stage 2: the probe's score along the conversation next to what the words give, one figure per contrast (`results/uninstructed/stage2/figures/`) |
 | `scripts/uninstructed_timing_test.py` | Timing test for the main run (durations only) |
 | `scripts/uninstructed_spot_check.py` | The spot-check sheet: a random sample of coded rooms, the same number per code |
 | `scripts/uninstructed_tiny_e2e.py` | End-to-end check on a tiny random model, CPU |
@@ -87,8 +91,10 @@ python3 scripts/uninstructed_short_paper_assets.py --basis claude --cost5 0.69
 cd docs/uninstructed_collusion && tectonic collusion_behaviour_study.tex
 ```
 
-Stage 2 (probes and causal tests). Nothing of it has run on a pod yet. The estimate of the probe pod (creates
-nothing), and the same steps by hand on a machine with a GPU:
+Stage 2 (probes and causal tests). The probe pod ran on 19 November 2026 (DESIGN.md, note "stage 2, the probes:
+outcome"); its results are in `results/uninstructed/stage2/` and the tables it served (2.2 GB, never committed) in
+`results/uninstructed/acts/stage2/`. The estimate of the probe pod (creates nothing), and the same steps by hand on a
+machine with a GPU:
 
 ```bash
 python3 scripts/runpod_launch_uninstructed.py --mode probe --max-minutes 180 --grace-minutes 40
@@ -106,7 +112,32 @@ python3 scripts/uninstructed_decompose.py --acts results/uninstructed/acts/stage
 python3 scripts/uninstructed_probe.py --acts results/uninstructed/acts/stage2 --out results/uninstructed/stage2/probe --jobs 8 --grid
 ```
 
-The last step needs no GPU: with the tables fetched from the pod (`--pull-acts`) it runs on the Mac.
+The last step needs no GPU: with the tables fetched from the pod (`--pull-acts`) it runs on the Mac. So do the passes
+with shuffled labels (seeds 11 to 100 of the vote contrast here; the pod ran 1 to 10), the checks, the exploratory
+reader check and the figures. The first three need numpy, scikit-learn and joblib, the figures matplotlib:
+
+```bash
+bash scripts/uninstructed_nulls_local.sh python3 11 100 4 vote results/uninstructed/stage2/nulls
+```
+
+```bash
+python3 scripts/uninstructed_stage2_recheck.py
+```
+
+```bash
+python3 scripts/uninstructed_stage2_readers.py
+```
+
+```bash
+python3 scripts/uninstructed_stage2_figure.py
+```
+
+The causal pod as approved on 19 November 2026 (estimate only; `--launch --watch` creates it): layer and anchor by the
+rule of section 15.2, five of the ten conditions.
+
+```bash
+python3 scripts/runpod_launch_uninstructed.py --mode causal --s2-layer 19 --s2-anchor m1.q3 --max-minutes 440 --grace-minutes 40 --s2-args "--conditions base,own1,own4,rand4,inst4 --vote-conditions base,own1,own4,rand4,inst4"
+```
 
 Rebuild the explorer's data (the page itself is kept in the artifact; `<folder>` is any scratch folder):
 

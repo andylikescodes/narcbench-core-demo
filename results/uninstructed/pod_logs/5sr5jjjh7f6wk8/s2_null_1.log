@@ -1,0 +1,7 @@
+[probe] 160 jobs on 9 processes; 976 members, 488 rooms, layers [19, 20, 21, 22, 23]
+[Parallel(n_jobs=9)]: Using backend LokyBackend with 9 concurrent workers.
+[Parallel(n_jobs=9)]: Done  54 tasks      | elapsed:   29.7s
+/usr/local/lib/python3.12/dist-packages/joblib/externals/loky/process_executor.py:787: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
+  warnings.warn(
+[Parallel(n_jobs=9)]: Done 160 out of 160 | elapsed:  2.3min finished
+{"seconds": 135.6, "contrasts": {"vote": 32}, "causal_choice": {"layer": null, "anchor": null, "note": "no onset inside the room at any layer: the room interventions of section 15 have no anchor", "vote_layer": 23, "vote_signal": false}}

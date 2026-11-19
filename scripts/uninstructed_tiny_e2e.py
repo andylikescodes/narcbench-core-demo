@@ -588,6 +588,12 @@ def main() -> int:
     nl = json.loads((s2 / "nulls/nulls.json").read_text())
     shuffled = json.loads((s2 / "nulls/seed1/probe.json").read_text())
     assert nl["passes"] == 2 and shuffled["labels_shuffled_inside_matched_sets"] == 1 and shuffled["contrasts"]["vote"]["m1.pre"]["mean"]["full"]["auroc"] == 0.5
+    # the two scores a reading is tied to: the end of the room and the best room position, over the shuffled passes
+    nv = nl["contrasts"]["vote"]
+    two = [json.loads((s2 / f"nulls/seed{sd}/probe.json").read_text())["contrasts"]["vote"] for sd in ("1", "2")]
+    assert nv["end_of_room_auroc"]["max"] == max(t["m4.end"]["mean"]["full"]["auroc"] for t in two)
+    assert nv["best_room_position_auroc"]["max"] == max(t[p]["mean"]["full"]["auroc"] for t in two for p in S2.ROOM_POINTS if p in t)
+    assert "Score at the end of the room" in (s2 / "nulls/NULLS.md").read_text()
     assert shuffled["contrasts"]["vote"]["m1.end"]["n1"] == vt["m1.end"]["n1"] and shuffled["contrasts"]["vote"]["m1.end"]["pairs"] == vt["m1.end"]["pairs"]
     assert shuffled["contrasts"]["vote"]["m1.end"]["mean"]["full"]["auroc"] < 0.95 and "Dry run" in (s2 / "nulls/seed1/PROBE.md").read_text()
     # I. stage 2, the causal path

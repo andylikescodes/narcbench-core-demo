@@ -439,6 +439,7 @@ def main() -> int:
     assert got_room == plan["room"]["regenerated_rooms_by_condition"] and got_vote == plan["vote"]["regenerated_votes_by_condition"]
     assert set(got_room) == set(Z.ROOM_CONDITIONS) and set(got_vote) == set(Z.VOTE_CONDITIONS)
     run = json.loads((out / "run.json").read_text())
+    assert list(run["phases"]) == ["vote", "room"], "the short vote phase runs first, so that a run stopped in the room phase keeps it"
     gen = [run["phases"][ph]["generation"] for ph in ("room", "vote")]
     rows_run, reused = sum(g["rows_generated"] for g in gen), sum(g["rows_reused"] for g in gen)
     print(f"      model rows generated {rows_run} (room phase {gen[0]['rows_generated']}, vote phase {gen[1]['rows_generated']}); reused because "

@@ -1,0 +1,30 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/464 [00:00<?, ?it/s]Loading weights:   0%|          | 1/464 [00:00<01:30,  5.14it/s]Loading weights:   3%|▎         | 15/464 [00:00<00:07, 60.92it/s]Loading weights:   6%|▌         | 27/464 [00:00<00:05, 75.54it/s]Loading weights:   8%|▊         | 38/464 [00:00<00:04, 85.67it/s]Loading weights:  11%|█         | 49/464 [00:00<00:04, 92.29it/s]Loading weights:  13%|█▎        | 60/464 [00:00<00:04, 97.04it/s]Loading weights:  15%|█▌        | 71/464 [00:00<00:03, 99.85it/s]Loading weights:  18%|█▊        | 82/464 [00:00<00:03, 102.59it/s]Loading weights:  20%|██        | 93/464 [00:01<00:03, 103.07it/s]Loading weights:  22%|██▏       | 104/464 [00:01<00:03, 104.62it/s]Loading weights:  25%|██▍       | 115/464 [00:01<00:03, 105.39it/s]Loading weights:  27%|██▋       | 126/464 [00:01<00:03, 106.17it/s]Loading weights:  30%|██▉       | 137/464 [00:01<00:03, 106.00it/s]Loading weights:  32%|███▏      | 148/464 [00:01<00:02, 105.74it/s]Loading weights:  35%|███▌      | 164/464 [00:01<00:02, 120.19it/s]Loading weights:  39%|███▉      | 180/464 [00:01<00:02, 122.98it/s]Loading weights:  42%|████▏     | 193/464 [00:01<00:02, 114.92it/s]Loading weights:  44%|████▍     | 205/464 [00:02<00:02, 115.90it/s]Loading weights:  47%|████▋     | 218/464 [00:02<00:02, 115.49it/s]Loading weights:  50%|████▉     | 230/464 [00:02<00:02, 111.99it/s]Loading weights:  52%|█████▏    | 242/464 [00:02<00:01, 113.40it/s]Loading weights:  55%|█████▍    | 254/464 [00:02<00:01, 112.74it/s]Loading weights:  57%|█████▋    | 266/464 [00:02<00:01, 113.24it/s]Loading weights:  60%|█████▉    | 278/464 [00:02<00:01, 107.64it/s]Loading weights:  62%|██████▏   | 289/464 [00:02<00:01, 106.87it/s]Loading weights:  65%|██████▍   | 300/464 [00:02<00:01, 106.18it/s]Loading weights:  67%|██████▋   | 311/464 [00:03<00:01, 105.97it/s]Loading weights:  69%|██████▉   | 322/464 [00:03<00:01, 104.00it/s]Loading weights:  72%|███████▏  | 333/464 [00:03<00:01, 104.01it/s]Loading weights:  74%|███████▍  | 344/464 [00:03<00:01, 105.04it/s]Loading weights:  77%|███████▋  | 355/464 [00:03<00:01, 106.23it/s]Loading weights:  79%|███████▉  | 366/464 [00:03<00:00, 105.85it/s]Loading weights:  82%|████████▏ | 379/464 [00:03<00:00, 110.40it/s]Loading weights:  86%|████████▌ | 399/464 [00:03<00:00, 132.69it/s]Loading weights:  89%|████████▉ | 413/464 [00:03<00:00, 118.58it/s]Loading weights:  92%|█████████▏| 429/464 [00:03<00:00, 129.51it/s]Loading weights:  95%|█████████▌| 443/464 [00:04<00:00, 124.79it/s]Loading weights:  99%|█████████▉| 461/464 [00:04<00:00, 138.95it/s]Loading weights: 100%|██████████| 464/464 [00:04<00:00, 109.59it/s]
+[capture] rooms of pilot3_T7: 48 rooms, 192 contexts, 0.127 s per context
+[capture] rooms of pilot4_T7: 200 rooms, 800 contexts, 0.126 s per context
+[capture] rooms of pilot5_K1: 96 rooms, 384 contexts, 0.122 s per context
+[capture] rooms of pilot5_K2: 96 rooms, 384 contexts, 0.127 s per context
+[capture] rooms of pilot3_I1: 48 rooms, 192 contexts, 0.154 s per context
+[capture] step rooms: 250s
+[capture] public turns of pilot3_T7: 384 contexts, 0.437 s per context
+[capture] public turns of pilot4_T7: 1600 contexts, 0.434 s per context
+[capture] public turns of pilot5_K1: 768 contexts, 0.433 s per context
+[capture] public turns of pilot5_K2: 768 contexts, 0.441 s per context
+[capture] public turns of pilot3_I1: 384 contexts, 0.501 s per context
+[capture] step public: 1726s
+[capture] neutral reader of pilot3_T7: 72 contexts, 0.187 s per context
+[capture] neutral reader of pilot4_T7: 300 contexts, 0.185 s per context
+[capture] neutral reader of pilot5_K1: 144 contexts, 0.187 s per context
+[capture] neutral reader of pilot5_K2: 144 contexts, 0.188 s per context
+[capture] neutral reader of pilot3_I1: 72 contexts, 0.205 s per context
+[capture] step neutral: 138s
+[load] 100 dirs → 1700 samples from /workspace/nb/repo/upstream/scenarios/gemma2_9b/core/20261001T012639Z
+[capture] instructed benchmark: 600 public statements of 50 collusion episodes, 0.403 s per context
+[capture] step core: 242s
+[tables] pilot3_T7: 48 rooms, 96 members
+[tables] pilot4_T7: 200 rooms, 400 members
+[tables] pilot5_K1: 96 rooms, 192 members
+[tables] pilot5_K2: 96 rooms, 192 members
+[tables] pilot3_I1: 48 rooms, 96 members
+[capture] step tables: 298s
+{"rooms": 250.3, "public": 1726.0, "neutral": 137.7, "core": 241.7, "tables": 297.8}

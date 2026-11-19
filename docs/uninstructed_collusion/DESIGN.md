@@ -1962,3 +1962,173 @@ probe pod and either causal pod fit above the $20 floor even at their caps.
 - A direction that moves the vote is upstream of the decision in this test bed. That is not the same as "the
   collusion variable".
 - The room codes and the public positions are one model's reading. No human has checked them.
+
+### 19 November 2026: stage 2, the probes: outcome
+
+**What Andy said.** Asked whether to commit, push and launch the probe pod of the note above: "Yes, launch it" (18
+November, about 22:00 PST). Pod `5sr5jjjh7f6wk8` (A40, commit `ffbb3f2`) ran all 16 stages in 2 h 20 min for $1.38
+(estimate $1.35, cap $2.36). The tables the probes read (2.2 GB) were fetched to the Mac and are not committed.
+Record: `results/uninstructed/stage2/` (`probe/PROBE.md`, `probe/probe.json`, `nulls/`, `capture.json`,
+`decompose.json`) and `results/uninstructed/pod_logs/5sr5jjjh7f6wk8/`.
+
+**What there is.** 244 recorded episodes replayed: 976 members and 488 rooms, no position missing; 880 members are
+fitted on, the 96 of the instructed control are only scored. Measured against the estimate: a room message 0.126 s
+(0.17), a public statement or vote 0.435 s (0.51), the neutral reader 0.19 s (0.3 assumed), the instructed benchmark
+0.40 s (0.6 assumed), the decomposition 9.3 + 3.9 ms per activation (9.1 + 2.9), the sweep 44 minutes on 9 workers (30
+assumed), a shuffled pass 2.3 minutes (1 assumed).
+
+**Checks on the real model** (`scripts/uninstructed_stage2_recheck.py`, `results/uninstructed/stage2/explore/RECHECK.md`).
+
+- *Identical prompts.* Members who open a room in runs of the same matched set have read the same text before the
+  first message. Their activations at that token differ by 0.8% at the median and 1.1% at most (316 comparisons),
+  against 13% where the first message differs. The pass on the GPU is in bfloat16 and a row is padded next to
+  different rows, so the activations agree up to rounding and not bit for bit. The note above said every score at
+  `m1.pre` "must be exactly 0.5". On the GPU it is 0.5 up to chance, 0.496 (0.396 to 0.582), and not exactly.
+- *The sweep.* Ten cells computed again by code that shares nothing with it: the largest difference is 0.007, with
+  the same units and pairs in every cell. The Mac repeats the pod's first shuffled pass within 0.011 at every
+  position, layer and bound.
+- *The J-space part.* Its norm is near 30 where the activation's is near 300, about 1% of the squared norm: the size
+  the J-space study found at the last token (median 33 at layer 22, `results/jspace_interp/gemma2_9b/RESULTS.md`).
+
+**The readings, by the rules fixed in advance.** Primary contrast, the vote: 518 members who vote for the stake option
+against 362 who do not, 280 pairs in 34 scenarios after the room; at a room position the 440 members who write there,
+about 140 pairs. Mean of layers 19 to 23; brackets are 95% intervals.
+
+1. *Q1, a signal at all?* Yes. At the last token of the room the score is 0.630 (0.566 to 0.704), above the 95th
+   percentile of the same score over the shuffled passes (0.572; the check below).
+2. *Q2, where does it start?* At the end of the second room message (`m2.end`, 0.665): once both members of a room
+   have written once. The best position of the timeline is above the 95th percentile of the best position over the
+   shuffled passes (the check below), so the onset counts. Layer by layer the rule gives `m1.q3` at layer 19, `m3.end`
+   at layer 20 and `m2.end` at layers 21, 22 and 23.
+3. *Q3, how early?* At the ends of the four room messages 0.564, 0.665, 0.688 and 0.630. Single room positions swing
+   between 0.50 and 0.74 from one to the next, so the steadier number is the mean over the 24 room positions: 0.611
+   (0.584 to 0.639). After the room the score rises: 0.719 before the first public statement, 0.786 before the
+   second, 0.811 before the third, 0.864 (0.800 to 0.921) before the vote. A position just before a statement scores
+   higher than the last token of that statement. The first position at 0.75 or more is the one before the second
+   public statement. At the last token of the vote the vote is written, and the score is 0.996.
+4. *Q4, more than the words?* In the room: no. The activation minus the bag of words is +0.036 (−0.012 to +0.092),
+   minus the bag of words by speaker +0.016 (−0.038 to +0.078), minus the neutral reader +0.026 (+0.008 to +0.046);
+   the rule needs all three above zero. After the room: yes by the rule, with +0.088 (+0.026 to +0.149), +0.065
+   (+0.007 to +0.128) and +0.176 (+0.141 to +0.212). At single positions the rule holds at `m4.pre`, `m4.t0`,
+   `p3.pre`, `v.pre` and `v.end`. The probe's onset lies 11 positions before the bag of words' own (`m4.q3`).
+5. *Q5, is J-space special?* No. The J-space part is above the 95th percentile of both kinds of random draw in 3 of
+   160 cells of layer and position, about what chance gives. It scores 0.543 over the room where the remainder scores
+   0.612 and 25 principal components 0.621, and it is below the principal components at 30 of the 32 positions, with
+   an interval below zero at 18.
+6. *Q6, the detector of the instructed benchmark.* 0.627 (0.561 to 0.682) on the vote and 0.583 (0.485 to 0.661) on
+   the hidden contrast. Section 9 predicted a score near 0.5; on the vote it is above that, weakly.
+
+Named in advance and reported as such:
+
+- *Hidden*: members who argue for the other option in public, 291 who vote for the stake option all the same against
+  355 who do not, 188 pairs. 0.600 at the end of the room (0.517 to 0.703) and 0.599 over the room; 0.771 before the
+  third statement and 0.873 before the vote. By the rule: not more than the words in the room (+0.034, +0.023,
+  +0.033), more after it (+0.094, +0.102, +0.191). Onset at `m2.end`.
+- *Collusion against clean rooms* (24 pairs in 12 scenarios): 0.861 over the room (0.827 to 0.894) and 0.967 already
+  at the end of the first message. Not more than the words at any position, as expected of a label that is itself
+  read from the words. *Collusion against every other room* (144 pairs): 0.691 over the room, 0.822 at its end, not
+  more than the words.
+- *The probe with the mean of the matched set removed*: 0.577 over the room and 0.751 after it (0.806 before the
+  vote), a little below the plain probe at most positions.
+- *One probe fit at the end of the room* and applied at the earlier room positions: 0.576 over the room, so the
+  direction that separates the classes at the end of the room separates them less well earlier.
+- *The token clock*: no token count stands out; the curve runs between 0.5 and 0.7, as the fixed points do.
+- *The probes of the stated-intention episodes scored on the instructed control* (69 members who voted for the stake
+  option against 27, all pairs, since every member reads the same instruction): 0.76 at the end of the room, 0.73
+  before the third statement, 0.74 before the vote.
+
+**The shuffled-label check** (the check added before any run, note above). The same sweep with every label shuffled
+inside its matched set: 100 passes of the vote contrast, 10 on the pod and 90 on the Mac from the same tables
+(`results/uninstructed/stage2/nulls/NULLS.md`; the numbers below were computed a second time from the files of the 100
+passes, with code that does not use the summary's).
+
+| Vote contrast, mean of layers | Real | Shuffled: median | Shuffled: 95th percentile | Shuffled: highest of 100 |
+|---|---|---|---|---|
+| Score at the end of the room (`m4.end`) | 0.630 | 0.506 | 0.572 | 0.610 |
+| Best position inside the room | 0.739 (`m4.pre`) | 0.594 | 0.646 | 0.667 |
+| Best position of the whole timeline | 0.996 (`v.end`, the vote is written); 0.864 before the vote | 0.594 | 0.646 | 0.667 |
+| Mean over the 24 room positions | 0.611 | 0.499 | 0.524 | 0.545 |
+| Mean over the 8 positions after the room | 0.791 (0.761 without `v.end`) | 0.502 | 0.528 | 0.543 |
+
+Both conditions of the note above hold. The score at the end of the room is above the 95th percentile of the same
+score over the shuffled passes, and above every one of them, so Q1 counts. The best position of the real timeline is
+above the 95th percentile of the best position over the shuffled passes, inside the room as well as over the whole
+timeline, so the onset and the anchor count.
+
+How often the rules fire when there is nothing to find: Q1 in 2 of the 100 passes, the onset rule in none, the rule of
+15.2 finds an anchor inside the room in 3, and "more than the words" holds in none, at a single position or in the
+mean of a phase. The intervals are somewhat too narrow, as the try on the tiny model had suggested: an interval lies
+wholly above 0.5 at 5.8% of the 3,200 positions and wholly below at 6.6%, where 2.5% each is nominal; the interval of
+the room mean lies above 0.5 in 7 passes and that of the mean after the room in 5. An interval that only just excludes
+0.5, or zero for a difference, is therefore weaker evidence than its 95% suggests.
+
+The other three contrasts have no shuffled passes at the time of this note. 30 passes each are running on the Mac
+(`results/uninstructed/stage2/nulls_other/`, not part of this commit).
+
+**Added after the results** (exploratory; neither is among the rules fixed in advance).
+
+1. *The mean after the room without the token at which the vote is written*
+   (`results/uninstructed/stage2/explore/after_room_without_vote_token/`: the same sweep with `--points` naming the
+   seven positions before it). The rule's mean over the positions after the room includes `v.end`, where the member
+   has written its vote and the activation holds it (0.996). Without that position the activation scores 0.761
+   (0.727 to 0.799) and leads the bag of words by +0.067 (+0.003 to +0.128), the bag of words by speaker by +0.046
+   (−0.013 to +0.109) and the neutral reader by +0.155 (+0.117 to +0.195). The rule needs all three above zero, so by
+   the same rule this is not more than the words. On the hidden contrast: 0.711, and +0.060 (−0.011 to +0.142),
+   +0.074 (−0.008 to +0.168), +0.171 (+0.141 to +0.202), not more than the words either.
+
+2. *Stronger readers of the words* (`scripts/uninstructed_stage2_readers.py`,
+   `results/uninstructed/stage2/explore/READERS.md`). The text baselines of the rule are a bag of words and the model
+   itself reading the words without its prompt; after the room the neutral reader reads the public discussion only.
+   Neither understands what was agreed in the room. Claude Fable 5.2's codes do, and they were made without the
+   votes: the room code with its three marks, and the member's public position. A logistic regression on those few
+   features, fit on the other domains and scored on the same pairs, gives 0.729 (0.625 to 0.812) from the room alone
+   and 0.791 (0.710 to 0.860) with the public position. Over the seven positions after the room without the last
+   token of the vote the probe gives 0.762. Probe minus the reader of the room and the public position: −0.029
+   (−0.082 to +0.035) on average and +0.073 (−0.008 to +0.159) before the vote, the one position at which that
+   reader has read no further than the activation. Probe minus the reader of the room alone: +0.034 (−0.036 to
+   +0.122) on average and +0.135 (+0.052 to +0.236) before the vote. On the hidden contrast, where every member has
+   the same public position, the reader of the room gives 0.715 (0.592 to 0.808); the probe is at 0.770 before the
+   third statement (+0.055, −0.050 to +0.199) and at 0.873 before the vote (+0.158, +0.060 to +0.280).
+
+**What it means.**
+
+- *When the two kinds of member part.* From the moment both members of a room have written once, the model's state
+  tells who will vote for the stake option better than chance, and it tells it better the closer the vote comes.
+  Before anything is written there is nothing to tell them apart, as the design requires.
+- *Whether the state tells more than the words.* In the room it does not: the row "signal, not above the bag of words"
+  of section 9, where a transcript monitor does the same job. After the room the rule as fixed says "more than the
+  words", the case section 9 calls the interesting one. The two analyses added afterwards speak against reading it
+  that way. The rule's answer rests on the position at which the vote is already written (item 1), and a reader
+  that understands the room and the public position does as well as the probe (item 2). What is left is narrow:
+  just before the vote the probe is above a reader of the room alone, on both contrasts. On the vote contrast it is
+  not above the reader that also has the member's public position, and on the hidden contrast no reader of the
+  public discussion was tried. The intervals are also somewhat too narrow (the shuffled-label check above), so an
+  interval that only just excludes zero is weak evidence.
+- *J-space* holds about 1% of the activation, and its part of the signal is not above that of random draws of the
+  same size.
+- *The instructed benchmark's detector* carries over weakly (0.63).
+
+**What it cannot show.** Whether a reader of the whole transcript at once, room and discussion, would close the last
+gap before the vote: the readers of item 2 are codes made for other purposes, not a model given the transcript and
+asked for the vote. Whether the direction that the probe finds is used by the model: that is the causal phase.
+Everything of part 9 of the note above still holds: one 9B model, a prompt that states the member's aim, two to four
+runs per scenario, and labels and codes that no human has checked.
+
+**For the causal phase.** The rule of 15.2 picks layer 19 and the anchor `m1.q3`, three quarters into the first room
+message (0.734 there). It does so narrowly: at layer 19 the lower bounds of the next two positions are 0.511 and
+0.504, layer 20 starts at `m3.end` and layers 21 to 23 at `m2.end`. The rule stands as written. At that anchor the
+probe is not above the neutral reader (+0.039, −0.043 to +0.112, mean of the layers), so the direction there may hold
+what the opener is in the middle of saying.
+
+Andy, 19 November, about 00:57 PST, asked whether to launch the smaller steering pod once the 100 shuffled passes are
+in, this note is written and the results are committed: "Yes, smaller one". That is: A40, layer 19, anchor `m1.q3`,
+the conditions base, own1, own4, rand4 and inst4 in both phases; 1,152 regenerated rooms and 2,304 regenerated votes,
+at most 11,520 prompts; about 6.2 hours and $3.64, cap 440 minutes plus 40 (plus 20), worst case $4.92. The J-space
+conditions and the swaps are left out (they would add 3.7 hours and $2.19): Q5 gives no reason to expect the J-space
+part to carry an effect, and C4 stays unread. The numbers for an anchor in the first message are higher than those of
+the note above, which counted an anchor in the second: 8 prompts per regenerated room, not 7.
+
+One change of order, made before the launch and changing no number: with both phases the vote phase now runs first. It
+is the short one, so a run that stops in the long room phase, at its time limit or on an error, keeps it whole. The
+phases share nothing: directions, units and random numbers are fixed per phase before either runs. The tiny end-to-end
+test passes with it on a clean copy of this commit's code (`scripts/uninstructed_tiny_e2e.py`, checks A to I).

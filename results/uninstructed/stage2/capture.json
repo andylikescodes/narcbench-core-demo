@@ -1,0 +1,173 @@
+{
+ "model": "google/gemma-2-9b-it",
+ "groups": [
+  [
+   "pilot3",
+   "T7"
+  ],
+  [
+   "pilot4",
+   "T7"
+  ],
+  [
+   "pilot5",
+   "K1"
+  ],
+  [
+   "pilot5",
+   "K2"
+  ],
+  [
+   "pilot3",
+   "I1"
+  ]
+ ],
+ "apply_only": [
+  [
+   "pilot3",
+   "I1"
+  ]
+ ],
+ "layers": [
+  19,
+  20,
+  21,
+  22,
+  23
+ ],
+ "gpu": "NVIDIA A40",
+ "steps": {
+  "rooms": {
+   "seconds": 250.3,
+   "info": {
+    "pilot3_T7": {
+     "rooms": 48,
+     "contexts": 192,
+     "seconds": 24.4,
+     "seconds_per_context": 0.127,
+     "context_tokens_mean": 390,
+     "bytes": 282935416,
+     "bytes_per_room": 5894488,
+     "positions_per_room_mean": 164.4
+    },
+    "pilot4_T7": {
+     "rooms": 200,
+     "contexts": 800,
+     "seconds": 100.5,
+     "seconds_per_context": 0.126,
+     "context_tokens_mean": 391,
+     "bytes": 1174804920,
+     "bytes_per_room": 5874025,
+     "positions_per_room_mean": 163.8
+    },
+    "pilot5_K1": {
+     "rooms": 96,
+     "contexts": 384,
+     "seconds": 47.0,
+     "seconds_per_context": 0.122,
+     "context_tokens_mean": 376,
+     "bytes": 574546048,
+     "bytes_per_room": 5984855,
+     "positions_per_room_mean": 166.9
+    },
+    "pilot5_K2": {
+     "rooms": 96,
+     "contexts": 384,
+     "seconds": 48.8,
+     "seconds_per_context": 0.127,
+     "context_tokens_mean": 395,
+     "bytes": 591573848,
+     "bytes_per_room": 6162228,
+     "positions_per_room_mean": 171.9
+    },
+    "pilot3_I1": {
+     "rooms": 48,
+     "contexts": 192,
+     "seconds": 29.6,
+     "seconds_per_context": 0.154,
+     "context_tokens_mean": 473,
+     "bytes": 365206576,
+     "bytes_per_room": 7608470,
+     "positions_per_room_mean": 212.2
+    }
+   }
+  },
+  "public": {
+   "seconds": 1726.0,
+   "info": {
+    "pilot3_T7": {
+     "contexts": 384,
+     "seconds": 167.8,
+     "seconds_per_context": 0.437
+    },
+    "pilot4_T7": {
+     "contexts": 1600,
+     "seconds": 694.6,
+     "seconds_per_context": 0.434
+    },
+    "pilot5_K1": {
+     "contexts": 768,
+     "seconds": 332.5,
+     "seconds_per_context": 0.433
+    },
+    "pilot5_K2": {
+     "contexts": 768,
+     "seconds": 338.5,
+     "seconds_per_context": 0.441
+    },
+    "pilot3_I1": {
+     "contexts": 384,
+     "seconds": 192.5,
+     "seconds_per_context": 0.501
+    }
+   }
+  },
+  "neutral": {
+   "seconds": 137.7,
+   "info": {
+    "pilot3_T7": {
+     "contexts": 72,
+     "seconds": 13.4,
+     "seconds_per_context": 0.187
+    },
+    "pilot4_T7": {
+     "contexts": 300,
+     "seconds": 55.4,
+     "seconds_per_context": 0.185
+    },
+    "pilot5_K1": {
+     "contexts": 144,
+     "seconds": 26.9,
+     "seconds_per_context": 0.187
+    },
+    "pilot5_K2": {
+     "contexts": 144,
+     "seconds": 27.1,
+     "seconds_per_context": 0.188
+    },
+    "pilot3_I1": {
+     "contexts": 72,
+     "seconds": 14.8,
+     "seconds_per_context": 0.205
+    }
+   }
+  },
+  "core": {
+   "seconds": 241.7,
+   "info": {
+    "contexts": 600,
+    "seconds": 241.6,
+    "seconds_per_context": 0.403
+   }
+  },
+  "tables": {
+   "seconds": 297.8,
+   "info": {
+    "members": 976,
+    "rooms": 488,
+    "files": 25,
+    "missing_points": 0
+   }
+  }
+ }
+}

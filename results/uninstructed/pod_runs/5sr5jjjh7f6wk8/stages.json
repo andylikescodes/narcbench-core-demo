@@ -1,0 +1,66 @@
+{
+ "setup": {
+  "rc": 0,
+  "seconds": 28
+ },
+ "download": {
+  "rc": 0,
+  "seconds": 12
+ },
+ "export_basis": {
+  "rc": 0,
+  "seconds": 26
+ },
+ "s2_capture": {
+  "rc": 0,
+  "seconds": 2666
+ },
+ "s2_decompose": {
+  "rc": 0,
+  "seconds": 1309
+ },
+ "s2_probe": {
+  "rc": 0,
+  "seconds": 2621
+ },
+ "s2_null_1": {
+  "rc": 0,
+  "seconds": 136
+ },
+ "s2_null_2": {
+  "rc": 0,
+  "seconds": 137
+ },
+ "s2_null_3": {
+  "rc": 0,
+  "seconds": 138
+ },
+ "s2_null_4": {
+  "rc": 0,
+  "seconds": 140
+ },
+ "s2_null_5": {
+  "rc": 0,
+  "seconds": 138
+ },
+ "s2_null_6": {
+  "rc": 0,
+  "seconds": 138
+ },
+ "s2_null_7": {
+  "rc": 0,
+  "seconds": 133
+ },
+ "s2_null_8": {
+  "rc": 0,
+  "seconds": 129
+ },
+ "s2_null_9": {
+  "rc": 0,
+  "seconds": 144
+ },
+ "s2_null_10": {
+  "rc": 0,
+  "seconds": 141
+ }
+}

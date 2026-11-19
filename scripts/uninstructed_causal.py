@@ -11,6 +11,8 @@ Takes the direction that separates members who vote for the stake option from me
   vote phase   the recorded episode is kept whole and only the member's vote is generated again, with the direction
                taken at the token before the vote (v.pre). Outcome: the vote.
 
+With --phase both the vote phase runs first (it is the short one), then the room phase.
+
 Conditions (uninstructed/causal.py, ABOUT): base, own1, own4, rand4, inst4, j4, r4, and in the room phase swap, swapJ,
 swapR. inst4 needs the reads of the instructed benchmark in the capture folder (<acts>/core; captured here when absent
 unless --core skip); j4, r4, swapJ, swapR need the J-space parts (<acts>/tables/memberJ_L<L>.npy, or --lens and
@@ -230,7 +232,9 @@ def main() -> int:
 
     if a.layer is None:
         ap.error("--layer")
-    phases = ["room", "vote"] if a.phase == "both" else [a.phase]
+    # the vote phase first: it is short, so a run that stops in the long room phase (time limit, or an error) keeps
+    # it whole. The phases share nothing: directions, units and random numbers are fixed per phase before either runs
+    phases = ["vote", "room"] if a.phase == "both" else [a.phase]
     if "room" in phases and (a.anchor is None or a.anchor not in S.ROOM_POINTS):
         ap.error(f"--anchor must be a room point ({S.ROOM_POINTS[0]} .. {S.ROOM_POINTS[-1]})")
     L, tdir = a.layer, a.acts / "tables"

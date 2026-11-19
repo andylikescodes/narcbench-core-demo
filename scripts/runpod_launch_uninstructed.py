@@ -8,6 +8,14 @@ first pilot was S0 plus S1,S2,S3 into results/uninstructed/pilot; the second is
 `--skip gen_ref --versions T1,T2,T3,T4,T5 --pilot-dir pilot2`. Results are served on port 8765 until they are pulled;
 the watcher pulls them, verifies the checksum and terminates the pod.
 
+Modes `probe` and `causal` are stage 2 (DESIGN.md, dated note "stage 2"). `probe` generates nothing: it replays the
+recorded stated-intention episodes, saves activations, runs the probe sweep and serves the tables the probes read
+(`--pull-acts` fetches them after the results, into results/uninstructed/acts/stage2/, which is never committed).
+`causal` regenerates rooms and votes under interventions at `--s2-layer` and `--s2-anchor`.
+
+    python3 scripts/runpod_launch_uninstructed.py --mode probe --max-minutes 180 --grace-minutes 40        # estimate
+    python3 scripts/runpod_launch_uninstructed.py --mode probe --max-minutes 180 --grace-minutes 40 --pull-acts --launch --watch --watch-hours 4.5
+
 Keys come from the environment only: RUNPOD_API_KEY (to spend, watch, pull, terminate) and HF_TOKEN (gated Gemma).
 Default is estimate-only; nothing is created without --launch.
 
@@ -51,11 +59,62 @@ GEN_S_PER_PROMPT = 1.58                            # measured on an A40 on 17 No
 STANCE_S_PER_MEMBER = 0.6                          # assumed: the room codes took 0.45 s per room on the A40 (336 rooms in 177 s with the model load)
 PROMPTS_PER_EPISODE = 24                           # 8 room messages, 12 public turns, 4 votes; 2 fewer with a scripted first message
 CODE_PATHS = ["uninstructed", "generation", "jspace_interp", "scripts"]
+# Stage 2. Measured on an A40 in the pilots (DESIGN.md, note "timings measured in the pilot" and the second pilot's log):
+ROOM_REPLAY_S, PUBLIC_REPLAY_S = 0.17, 0.51        # seconds per replayed room message / public statement or vote
+PURSUIT_MS, REFIT_MS = 9.1, 2.9                    # J-space decomposition, per activation
+ACTS_DIR = ROOT / "results/uninstructed/acts/stage2"
+
+
+def estimate_stage2(a) -> dict:
+    from uninstructed import stage2 as S
+
+    rate = GPU_RATES[a.gpu]
+    cap_h = (a.max_minutes + a.grace_minutes + a.extra_minutes) / 60
+    if a.mode == "probe":
+        groups = S.ANALYSIS + S.APPLY_ONLY
+        eps = sum(len(S.run_dirs(S.RU, r, v)) for r, v in groups)
+        rooms, members = 2 * eps, 4 * eps
+        acts = members * len(S.MEMBER_POINTS) * 5
+        stages = {"boot, setup, downloads (model 5 to 11 min)": 11, "unembedding export (model load)": 4, "model load": 2,
+                  f"replay of {rooms} rooms ({4 * rooms} messages at {ROOM_REPLAY_S} s)": round(4 * rooms * ROOM_REPLAY_S / 60),
+                  f"replay of {16 * eps} public statements and votes at {PUBLIC_REPLAY_S} s": round(16 * eps * PUBLIC_REPLAY_S / 60),
+                  f"neutral reader ({rooms + eps} passes, assumed 0.3 s)": round((rooms + eps) * 0.3 / 60),
+                  "instructed benchmark (600 public statements, assumed 0.6 s)": 6, "tables": 3,
+                  f"J-space part of {acts:,} activations at {PURSUIT_MS} + {REFIT_MS} ms, and the lens vectors' norms": round(acts * (PURSUIT_MS + REFIT_MS) / 60000) + 5,
+                  "probe sweep on the pod's CPUs (assumed: about 2 CPU-hours, added up from single cells timed on the Mac; 8 workers, slower cores)": 30,
+                  "10 passes with shuffled labels (primary contrast, activation and words; assumed 1 min each)": 10,
+                  "package, checksums": 3}
+        extra = {"episodes_replayed": eps, "rooms": rooms, "members": members, "episodes_generated": 0,
+                 "tables_served_gb": round(members * (len(S.MEMBER_POINTS) * 2 + len(S.ROOM_POINTS) // 2 + len(S.PUBLIC_POINTS) + 1) * 5 * 3584 * 2 / 2**30, 2)}
+    else:
+        import shlex
+
+        cmd = [sys.executable, str(ROOT / "scripts/uninstructed_causal.py"), "--plan", "--layer", a.s2_layer or "21", "--phase", a.s2_phase,
+               "--anchor", a.s2_anchor or "m2.pre", "--lens", "on-the-pod", "--basis-dir", "on-the-pod"] + shlex.split(a.s2_args)
+        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+        if p.returncode != 0:
+            raise SystemExit(f"the causal plan failed: {p.stderr[-500:]}")
+        plan = json.loads(p.stdout)
+        eps = sum(len(S.run_dirs(S.RU, r, v)) for r, v in S.ANALYSIS)
+        replay_min = round((8 * eps * ROOM_REPLAY_S + 16 * eps * PUBLIC_REPLAY_S + 3 * eps * 0.3 + 600 * 0.6) / 60)
+        stages = {"boot, setup, downloads (model 5 to 11 min)": 11, "unembedding export (model load)": 4, "model load": 2,
+                  f"replay for the directions ({eps} episodes: rooms, public statements and votes, neutral reader, instructed benchmark)": replay_min,
+                  f"regeneration: at most {plan['prompts']:,} prompts at {GEN_S_PER_PROMPT} s (the rate measured on full episodes; not measured for these prompts)":
+                      round(plan["prompts"] * GEN_S_PER_PROMPT / 60),
+                  "decomposition for the J-space conditions, summary, package": 6}
+        extra = {"layer": a.s2_layer or "(not given: 21 assumed for the count)", "anchor": a.s2_anchor or "(not given: m2.pre assumed for the count)", "plan": plan}
+    exp_h = sum(stages.values()) / 60
+    return {"mode": a.mode, "gpu": a.gpu, "results_dir": "results/uninstructed/stage2", "stages_minutes": stages, **extra,
+            "expected_hours": round(exp_h, 2), "expected_usd": {c: round(exp_h * r, 2) for c, r in rate.items()},
+            "time_cap_minutes": a.max_minutes, "grace_minutes": a.grace_minutes, "extra_minutes_if_not_fetched": a.extra_minutes,
+            "worst_case_usd": round(cap_h * rate["SECURE"], 2)}
 
 
 def estimate(a) -> dict:
     from uninstructed import protocol as P
 
+    if a.mode in ("probe", "causal"):
+        return estimate_stage2(a)
     skip = {x for x in a.skip.split(",") if x}
     ref = [] if "gen_ref" in skip else [v for v in a.ref_versions.split(",") if v]
     versions = ref + ([] if "gen_stake" in skip else [v for v in a.versions.split(",") if v])
@@ -163,6 +222,10 @@ def create_pod(a) -> dict:
            "JOB_REF_VERSIONS": a.ref_versions, "JOB_REF_RUNS": str(a.ref_runs or a.pilot_runs)}
     if a.scenario_ids:
         env["JOB_SCENARIO_IDS"] = a.scenario_ids
+    if a.mode != "pilot":                            # stage 2: its own results folder; the pilot settings are not used
+        env["JOB_PILOT_DIR"] = "stage2"
+        env.update({k: v for k, v in (("JOB_S2_LAYER", a.s2_layer), ("JOB_S2_ANCHOR", a.s2_anchor), ("JOB_S2_PHASE", a.s2_phase),
+                                      ("JOB_S2_ARGS", a.s2_args)) if v})
     if a.skip:
         env["JOB_SKIP"] = a.skip
     docker_args = "bash -c 'echo $JOB_BOOT_B64 | base64 -d > /tmp/boot.sh; exec bash /tmp/boot.sh'"
@@ -199,7 +262,27 @@ def safe_extract(tgz: Path) -> int:
     return len(members)
 
 
-def pull(pod: str, full: bool = False, url: str | None = None) -> dict:
+def pull_acts(url: str, rec: dict) -> None:
+    """The tables a probe pod serves, one file at a time with resume and checksum, most useful first. They go to
+    results/uninstructed/acts/stage2/ (ignored by git). A file that fails is reported and the others are still tried."""
+    man = base.fetch_json(f"{url}/acts_manifest.json", 60)
+    if not man:
+        print("no acts_manifest.json on the pod: no tables to fetch", flush=True)
+        rec["acts"] = None
+        return
+    order = lambda n: (0 if n.startswith(("index", "texts", "grid_seat", "decompose")) else 1 if n.startswith("member_L") else   # noqa: E731
+                       2 if n.startswith("member_last") else 3 if n.startswith("neutral") else 4 if n.startswith("core_") else 5, n)
+    rec["acts"] = {}
+    for name in sorted(man, key=order):
+        dest = (ACTS_DIR / "core" / name[len("core_"):]) if name.startswith("core_") else (ACTS_DIR / "tables" / name)
+        try:
+            rec["acts"][name] = {**man[name], **base.download(f"{url}/acts/{name}", dest, int(man[name]["size"]), man[name]["sha256"], max_tries=30)}
+        except SystemExit as e:
+            rec["acts"][name] = {**man[name], "status": f"failed: {e}"}
+            print(f"  {name}: not fetched ({e})", flush=True)
+
+
+def pull(pod: str, full: bool = False, url: str | None = None, acts: bool = False) -> dict:
     """Fetch a pod's results. The small files come first (status, stages, log, provisional rates), then round.tgz, the
     archive of this round's folder and this pod's logs, which is extracted at once. results.tgz, the whole results
     folder, is fetched only with `full` or when the pod has no round.tgz (pods before 18 November 2026)."""
@@ -222,6 +305,8 @@ def pull(pod: str, full: bool = False, url: str | None = None) -> dict:
         rec["files"][name] = {**info, **r}
         if name in ("round.tgz", "results.tgz"):
             rec[f"extracted_members_{name}"] = safe_extract(dest / name)
+    if acts:
+        pull_acts(url, rec)
     (dest / "pull.json").write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps(rec, indent=1))
     return rec
@@ -236,7 +321,7 @@ def terminate_checked(pod: str) -> None:
         print("pod state unavailable:", type(e).__name__, flush=True)
 
 
-def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60, full: bool = False) -> int:
+def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60, full: bool = False, acts: bool = False) -> int:
     t0, last, missing = time.time(), None, 0
     while time.time() - t0 < hours * 3600:
         st = base.fetch_json(f"https://{pod}-8765.proxy.runpod.net/status.json", 20)
@@ -248,7 +333,7 @@ def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60, full: bool
             print(f"pod reports {st.get('phase')}; pulling", flush=True)
             rc = 0 if st.get("phase") == "done" else 4
             try:
-                pull(pod, full)
+                pull(pod, full, acts=acts)
             except SystemExit as e:
                 # the results are still on the pod and nowhere else: it is left to its own timer, not terminated here
                 print(f"pull failed: {e}\nThe pod is left running until its own timer ends it; try again with --pull {pod}", file=sys.stderr, flush=True)
@@ -276,7 +361,13 @@ def watch(pod: str, hours: float, do_terminate: bool, poll: int = 60, full: bool
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--mode", choices=["pilot"], default="pilot")
+    ap.add_argument("--mode", choices=["pilot", "probe", "causal"], default="pilot",
+                    help="pilot: generate a round; probe, causal: stage 2 on recorded episodes")
+    ap.add_argument("--pull-acts", action="store_true", help="probe mode: after the results, also fetch the tables the probes read")
+    ap.add_argument("--s2-layer", default="", help="causal mode: the layer of the interventions (from the probe results, rule of 15.2)")
+    ap.add_argument("--s2-anchor", default="", help="causal mode: the anchor of the room interventions, e.g. m2.pre")
+    ap.add_argument("--s2-phase", default="both", choices=["room", "vote", "both"])
+    ap.add_argument("--s2-args", default="", help="causal mode: further arguments for scripts/uninstructed_causal.py")
     ap.add_argument("--gpu", choices=sorted(GPU_RATES), default=GPU, help="GPU type (default: the A40 of the approved plan)")
     ap.add_argument("--sha", default=None, help="commit the pod checks out (default: local HEAD; must be on origin)")
     ap.add_argument("--max-minutes", type=int, default=150, help="time cap on the pod; what is unfinished is packaged as is")
@@ -322,12 +413,12 @@ def main() -> int:
         terminate_checked(a.terminate)
         return 0
     if a.pull:
-        pull(a.pull, a.full_archive)
+        pull(a.pull, a.full_archive, acts=a.pull_acts)
         if not a.no_terminate:
             terminate_checked(a.pull)
         return 0
     if a.watch_pod:
-        return watch(a.watch_pod, a.watch_hours, not a.no_terminate, full=a.full_archive)
+        return watch(a.watch_pod, a.watch_hours, not a.no_terminate, full=a.full_archive, acts=a.pull_acts)
 
     est = estimate(a)
     print(json.dumps(est, indent=1))
@@ -351,13 +442,14 @@ def main() -> int:
     pod = res["created"]["id"]
     rec = {"created_utc": stamp, "pod": res["created"], "attempts_before": res["attempts"], "sha": a.sha, "branch": GIT_BRANCH, "image": base.IMAGE,
            "settings": {k: getattr(a, k) for k in ("mode", "gpu", "max_minutes", "grace_minutes", "extra_minutes", "pilot_n", "pilot_runs", "versions", "pilot_dir", "scenarios", "scenario_ids", "stance_rounds", "ref_versions", "ref_runs",
-                                                     "batch", "workers", "timing_episodes", "skip", "min_balance", "reserve")},
+                                                     "batch", "workers", "timing_episodes", "skip", "min_balance", "reserve",
+                                                     "pull_acts", "s2_layer", "s2_anchor", "s2_phase", "s2_args")},
            "estimate": est, "balance_before": rep["balance_usd"], "status_url": f"https://{pod}-8765.proxy.runpod.net/status.json"}
     (RUNS_DIR / pod).mkdir(parents=True, exist_ok=True)
     (RUNS_DIR / pod / "launch.json").write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps(rec, indent=1), flush=True)
     if a.watch:
-        return watch(pod, a.watch_hours, not a.no_terminate, full=a.full_archive or bool(a.stance_rounds))
+        return watch(pod, a.watch_hours, not a.no_terminate, full=a.full_archive or bool(a.stance_rounds), acts=a.pull_acts)
     return 0
 
 

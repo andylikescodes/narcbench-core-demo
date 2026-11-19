@@ -13,6 +13,20 @@
 #   summarize  provisional rates from the votes and coder A
 #   export_basis, timing   the timing test for the main run (durations only; its activations are deleted)
 #   package
+# JOB_MODE=probe (stage 2, DESIGN.md sections 7 to 9 and the dated note "stage 2"): no episode is generated. Stages:
+#   setup, download, export_basis (the unembedding, for the J-space step),
+#   s2_capture    replay of the recorded stated-intention episodes and of the instructed control: activations at
+#                 layers 19 to 23
+#   s2_decompose  the J-space part of every fixed-point activation (left out without the lens)
+#   s2_probe      the probe sweep, read off by the rules fixed in advance
+#   s2_null_<n>   the primary contrast again with every label shuffled inside its matched set (JOB_S2_NULLS passes,
+#                 default 10): how often the rules fire when there is nothing to find
+#   package       round.tgz = results/uninstructed/stage2 and this pod's logs; the tables the probes read are served as
+#                 single files with checksums under acts/ (acts_manifest.json), for analysis off the pod
+# JOB_MODE=causal (stage 2, section 15): s2_causal with JOB_S2_LAYER, JOB_S2_ANCHOR, JOB_S2_PHASE and JOB_S2_ARGS
+#   (scripts/uninstructed_causal.py reads the activations it needs itself). It starts only with its own approval.
+# The setup installs the transformers version of the recorded runs (5.23.0, all six pods): "the same sampling" of the
+# causal mode rests on that version's defaults.
 # Env: HF_TOKEN, RUNPOD_API_KEY (self-termination), RUNPOD_POD_ID, JOB_MAX_MINUTES, JOB_GRACE_MINUTES, JOB_PILOT_N,
 #      JOB_PILOT_RUNS, JOB_BATCH, JOB_WORKERS, JOB_CODER_BATCH, JOB_TIMING_EPISODES, JOB_SKIP, JOB_VERSIONS,
 #      JOB_PILOT_DIR, JOB_THREADS, JOB_SCENARIOS (pilot | all), JOB_STANCE_ROUNDS (comma list of earlier round folders),
@@ -42,6 +56,7 @@ CODER_BATCH=${JOB_CODER_BATCH:-8}
 TIMING_EPISODES=${JOB_TIMING_EPISODES:-10}
 VERSIONS=${JOB_VERSIONS:-S1,S2,S3}
 PILOT_DIR=${JOB_PILOT_DIR:-pilot}
+[ "$MODE" = pilot ] || PILOT_DIR=${JOB_PILOT_DIR:-stage2}       # a stage-2 pod writes results/uninstructed/stage2
 REF_VERSIONS=${JOB_REF_VERSIONS:-S0}               # the versions of the gen_ref stage (no stake), with their own number of runs
 REF_RUNS=${JOB_REF_RUNS:-$PILOT_RUNS}
 SCENARIOS=${JOB_SCENARIOS:-pilot}                  # pilot: the PILOT_N pilot scenarios; all: every scenario of the bank
@@ -164,10 +179,10 @@ nohup python3 scripts/runpod_range_server.py "$RUN" 8765 > /tmp/http.log 2>&1 &
 ELAPSED_MIN=0 st running boot "repo $(git rev-parse --short HEAD); gpu $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1); mode $MODE"
 log "config: mode=$MODE model=$MODEL scenarios=${SCENARIO_IDS:-$SCENARIOS} pilot_n=$PILOT_N pilot_runs=$PILOT_RUNS ref=$REF_VERSIONS x$REF_RUNS versions=$VERSIONS stance_rounds=$STANCE_ROUNDS batch=$BATCH workers=$WORKERS max=$MAX_MIN min grace=$GRACE_MIN min skip=$SKIP"
 log "config: versions=$VERSIONS results=$P threads=$THREADS (cpu quota $QUOTA, RUNPOD_CPU_COUNT=${RUNPOD_CPU_COUNT:-unset}, nproc $(nproc))"
-if [ "$MODE" != pilot ]; then log "unknown JOB_MODE $MODE"; finish failed "unknown mode $MODE"; fi
+case "$MODE" in pilot|probe|causal) ;; *) log "unknown JOB_MODE $MODE"; finish failed "unknown mode $MODE";; esac
 
 # ---- 1. setup ----
-stage setup bash -c "python3 -m pip install -q 'transformers>=4.56' accelerate 'scikit-learn>=1.5' scipy 'huggingface_hub>=0.26' sentencepiece protobuf && python3 -c 'import torch,transformers,sklearn; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0), transformers.__version__, sklearn.__version__)' && nvidia-smi && nproc && free -g && df -h /workspace /tmp" || finish failed setup
+stage setup bash -c "python3 -m pip install -q 'transformers==5.23.0' accelerate 'scikit-learn>=1.5' scipy 'huggingface_hub>=0.26' sentencepiece protobuf && python3 -c 'import torch,transformers,sklearn; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0), transformers.__version__, sklearn.__version__)' && nvidia-smi && nproc && free -g && df -h /workspace /tmp" || finish failed setup
 
 # ---- 2. downloads: public lens (for the timing test), gated Gemma ----
 stage download python3 - <<PY || finish failed download
@@ -184,6 +199,73 @@ try:
 except Exception as e:  # the lens is only needed by the timing test
     print("lens download failed:", type(e).__name__, str(e)[:200], flush=True)
 PY
+
+# ---- stage 2: probes (JOB_MODE=probe) or interventions (JOB_MODE=causal) on recorded episodes ----
+serve_acts() {  # the tables the probes read, as single files with checksums; they are never part of an archive
+  mkdir -p "$RUN/acts"
+  for f in "$ACTS"/tables/index.json "$ACTS"/tables/texts.json.gz "$ACTS"/tables/grid_seat.npy "$ACTS"/tables/decompose.json \
+           "$ACTS"/tables/member_L*.npy "$ACTS"/tables/member_last_L*.npy "$ACTS"/tables/neutral_room_L*.npy \
+           "$ACTS"/tables/neutral_pub_L*.npy "$ACTS"/tables/memberJ_L*.npy; do
+    [ -f "$f" ] && { ln -f "$f" "$RUN/acts/$(basename "$f")" 2>/dev/null || cp "$f" "$RUN/acts/"; }
+  done
+  for n in activations.npz metadata.json; do
+    [ -f "$ACTS/core/$n" ] && { ln -f "$ACTS/core/$n" "$RUN/acts/core_$n" 2>/dev/null || cp "$ACTS/core/$n" "$RUN/acts/core_$n"; }
+  done
+  python3 - <<'PYM'
+import hashlib, json, os
+d, m = "/tmp/run/acts", {}
+for name in sorted(os.listdir(d)):
+    h = hashlib.sha256()
+    with open(os.path.join(d, name), "rb") as f:
+        for b in iter(lambda: f.read(1 << 24), b""): h.update(b)
+    m[name] = {"size": os.path.getsize(os.path.join(d, name)), "sha256": h.hexdigest()}
+json.dump(m, open("/tmp/run/acts_manifest.json", "w"), indent=1)
+print(len(m), "table files served,", sum(v["size"] for v in m.values()) // 2**20, "MiB")
+PYM
+}
+if [ "$MODE" = probe ] || [ "$MODE" = causal ]; then
+  ACTS=$OUT/acts/stage2
+  S2=$OUT/stage2; mkdir -p "$S2"
+  if [ ! -f "$BASIS/unembed_fp16.npy" ] && [ -f "$LENS" ]; then
+    stage export_basis python3 scripts/jspace_interp_extract.py --model "$MODEL" --splits core --conditions original \
+      --max-rows 4 --layers 19 --export-basis "$BASIS" --out /tmp/basis_probe
+    rc=$?; [ $rc -eq 0 ] || [ $rc -eq 99 ] || log "export_basis failed; the J-space inputs are left out"
+  fi
+  JARGS=()
+  [ -f "$LENS" ] && [ -f "$BASIS/unembed_fp16.npy" ] && JARGS=(--lens "$LENS" --basis-dir "$BASIS")
+  if [ "$MODE" = probe ]; then
+    stage s2_capture python3 scripts/uninstructed_capture.py --model "$MODEL" --out "$ACTS" || finish failed s2_capture
+    cp "$ACTS/capture.json" "$S2/capture.json" 2>/dev/null
+    if [ ${#JARGS[@]} -gt 0 ]; then
+      stage s2_decompose python3 scripts/uninstructed_decompose.py --acts "$ACTS" "${JARGS[@]}" --device cuda \
+        || log "the decomposition failed; the probes run without the J-space inputs"
+      cp "$ACTS/tables/decompose.json" "$S2/decompose.json" 2>/dev/null
+    else
+      log "no lens or no unembedding: the probes run without the J-space inputs"
+    fi
+    serve_acts >> "$RUN/job.log" 2>&1          # before the sweep: the tables can be fetched even if the sweep fails
+    stage s2_probe env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 python3 scripts/uninstructed_probe.py \
+      --acts "$ACTS" --out "$S2/probe" --jobs "$THREADS" --grid || log "the probe sweep failed; the tables are served for a run off the pod"
+    # what the rules do when there is nothing to find: the same sweep with every label shuffled inside its matched set
+    for sd in $(seq 1 "${JOB_S2_NULLS:-10}"); do
+      if [ "$(remaining_min)" -lt 12 ]; then log "shuffled-label passes stopped before seed $sd: under 12 min left"; break; fi
+      stage "s2_null_$sd" env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 python3 scripts/uninstructed_probe.py \
+        --acts "$ACTS" --out "$S2/nulls/seed$sd" --jobs "$THREADS" --contrasts vote --inputs full,bow --shuffle-labels "$sd" || break
+    done
+    ls "$S2"/nulls/seed*/probe.json > /dev/null 2>&1 && python3 scripts/uninstructed_probe.py --summarize-nulls "$S2/nulls" >> "$RUN/job.log" 2>&1
+  else
+    S2_LAYER=${JOB_S2_LAYER:-}; S2_ANCHOR=${JOB_S2_ANCHOR:-}; S2_PHASE=${JOB_S2_PHASE:-both}
+    [ -n "$S2_LAYER" ] || finish failed "causal mode needs JOB_S2_LAYER (and JOB_S2_ANCHOR for the room phase)"
+    # the script reads the activations it needs at its one layer itself, writes its records after every few rooms and
+    # stops before a new chunk when its time is up, so that the summary is written before the pod's cap
+    # shellcheck disable=SC2086
+    stage s2_causal python3 scripts/uninstructed_causal.py --model "$MODEL" --acts "$ACTS" --layer "$S2_LAYER" \
+      ${S2_ANCHOR:+--anchor "$S2_ANCHOR"} --phase "$S2_PHASE" --out "$S2/causal" "${JARGS[@]}" \
+      --max-minutes "$(( $(remaining_min) > 25 ? $(remaining_min) - 15 : 10 ))" ${JOB_S2_ARGS:-} \
+      || log "the causal run failed or ran out of time; what it wrote is packaged"
+  fi
+  finish done "stages $(python3 -c "import json;d=json.load(open('/tmp/run/stages.json'));print(sum(1 for v in d.values() if v['rc']==0),'ok of',len(d))")"
+fi
 
 # ---- 3. generation: S0 at the reference batch size, then the other versions ----
 stage gen_ref python3 scripts/uninstructed_generate.py --model "$MODEL" --versions "$REF_VERSIONS" "${SCEN_ARGS[@]}" --runs "$REF_RUNS" \

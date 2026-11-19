@@ -27,7 +27,13 @@ the episode, and the label comes from what the pair did. Design and pre-registra
 | `docs/uninstructed_collusion/BEHAVIOURAL_REVIEW.md` | Review of what is ready and what the rounds show, written for Andy on 17 November 2026 |
 | `scripts/uninstructed_stake_kinds.py` | The fifth round read off as fixed before it ran: the same 12 cases under two kinds of stake sentences (versions K1, K2), `results/uninstructed/pilot5/STAKE_KINDS.md` |
 | `scripts/uninstructed_scenario_properties.py` | What separates the scenarios: where in the episode they part, and properties of the scenario texts coded by two blind passes (`results/uninstructed/pilot4/SCENARIO_PROPERTIES.md`, `scenario_properties_blind.json`); exploratory |
-| `scripts/uninstructed_build_explorer.py` | Packages every recorded prompt and reply of the four rounds for the explorer page (https://claude.ai/artifact/TNfqinVq6PwTg21o25dW76, private), and checks each rebuilt prompt against the record |
+| `scripts/uninstructed_build_explorer.py` | Packages every recorded prompt and reply of the five rounds for the explorer page (https://claude.ai/artifact/TNfqinVq6PwTg21o25dW76, private), and checks each rebuilt prompt against the record. Since 18 November 2026 the page follows Claude's reading for room labels and public positions and shows the both-coders label and Gemma's reading next to it |
+| `uninstructed/stage2.py` | Stage 2 (probes and causal tests on recorded episodes; DESIGN.md, note of 18 November 2026 "stage 2"): units and labels from the record, matched sets of identical prompts, the matched-prompt AUROC with its interval, the probe fit, the direction |
+| `uninstructed/capture.py`, `scripts/uninstructed_capture.py` | Stage 2, step 1 (GPU): replay of the recorded stated-intention episodes (T7, K1, K2) and the instructed control; activations of the rooms token by token, of the public statements and votes, of the neutral reader and of the instructed benchmark; the tables the probes read |
+| `scripts/uninstructed_decompose.py` | Stage 2, step 2: the J-space part of every fixed-point activation and the random sets of J-lens vectors |
+| `scripts/uninstructed_probe.py` | Stage 2, step 3 (CPU): the probe sweep over contrasts, positions, layers and inputs, read off by the rules fixed in advance (`results/uninstructed/stage2/probe/PROBE.md`) |
+| `uninstructed/causal.py`, `scripts/uninstructed_causal.py` | Stage 2, causal phase (GPU): the direction at the anchor, interventions while rooms and votes are generated again, and their summary (`results/uninstructed/stage2/causal/CAUSAL.md`); `--plan` counts the regenerated rooms, votes and prompts without a model |
+| `scripts/uninstructed_causal_check.py` | The checks of the causal phase on the tiny model (run by the tiny end-to-end test) |
 | `scripts/uninstructed_timing_test.py` | Timing test for the main run (durations only) |
 | `scripts/uninstructed_spot_check.py` | The spot-check sheet: a random sample of coded rooms, the same number per code |
 | `scripts/uninstructed_tiny_e2e.py` | End-to-end check on a tiny random model, CPU |
@@ -80,6 +86,27 @@ python3 scripts/uninstructed_short_paper_assets.py --basis claude --cost5 0.69
 ```bash
 cd docs/uninstructed_collusion && tectonic collusion_behaviour_study.tex
 ```
+
+Stage 2 (probes and causal tests). Nothing of it has run on a pod yet. The estimate of the probe pod (creates
+nothing), and the same steps by hand on a machine with a GPU:
+
+```bash
+python3 scripts/runpod_launch_uninstructed.py --mode probe --max-minutes 180 --grace-minutes 40
+```
+
+```bash
+python3 scripts/uninstructed_capture.py --model google/gemma-2-9b-it --out results/uninstructed/acts/stage2
+```
+
+```bash
+python3 scripts/uninstructed_decompose.py --acts results/uninstructed/acts/stage2 --lens <lens.pt> --basis-dir data/j_basis/gemma2_9b --device cuda
+```
+
+```bash
+python3 scripts/uninstructed_probe.py --acts results/uninstructed/acts/stage2 --out results/uninstructed/stage2/probe --jobs 8 --grid
+```
+
+The last step needs no GPU: with the tables fetched from the pod (`--pull-acts`) it runs on the Mac.
 
 Rebuild the explorer's data (the page itself is kept in the artifact; `<folder>` is any scratch folder):
 

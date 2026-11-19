@@ -44,6 +44,12 @@
   kind of stake is met**: on the same 12 cases a stake from above draws 70% of votes to the stake option and a payout
   38%. The rule for the case is not met. The outcome is in the last dated note; the paper is updated and stays within
   five pages. The work rests here, as he asked.
+- 18 November 2026, afternoon: at Andy's word the reports follow the second coder alone, Claude Fable 5.2 (dated
+  note).
+- 18 November 2026, evening: **Andy said to go ahead with the probes and the causal tests (stage 2).** The plan, with
+  its classes and rules, is the last dated note, written before any activation of these episodes exists. The code is
+  built and checked on the tiny model. No pod has run and stage 2 has no result yet: the probe pod (A40, about 2.1
+  hours, about $1.25) waits for his word, and the causal pod for its own after the probe results.
 
 ## 1. In short
 
@@ -1674,3 +1680,285 @@ under-reads pacts in instructed rooms.
 **Where it is used.** The five-page paper (`collusion_behaviour_study.pdf`; numbers and figures under `claude_basis/`,
 written by the two asset scripts with `--basis claude`) and Part 2 of the deck. The long version of 17 November, the
 explorer page and the tables under `results/` keep the label of both coders. Committed the same day, at Andy's word.
+
+**Later the same day: the explorer follows Claude's reading too.** At Andy's word ("adjust the explorer such that we
+can see the changes") the explorer page (its version 3) shows Claude's reading as the label of every room and as the
+public position of every member, with Gemma's reading next to it as the check and the label that needs both coders
+wherever it differs. It lists what moved: 109 of the 1,260 rooms change their label, all from "other" to collusion
+(29) or to clean (80), in 97 episodes; Claude and Gemma read a different public position for 132 of the 2,136
+members, in 65 episodes. `scripts/uninstructed_build_explorer.py` builds that data and checks its counts against the
+record and against Table 1 of the paper. The long version of 17 November and the tables under `results/` still keep
+the label of both coders.
+
+### 18 November 2026, evening: stage 2 (probes and causal tests), fixed before any activation exists
+
+**What Andy said.** "ok go ahead and implement the probe and causal portion of it". This note fixes how stage 2 is done,
+what was built for it, and what each pod would cost. It is written before any activation of these episodes exists: no
+pod has run, and nothing below has a result. The first pod needs his word with the GPU, the hours and the cost stated
+(below); the causal pod needs its own, after the probe results (section 15.1).
+
+**The questions**, in his words of 17 November: "when and where the collusion thoughts arise, and when and how the
+colluders and honest agent start to diverge", and "if steering the collusion vector would make the colluder honest or
+vise versa".
+
+#### 1. What stage 2 reads: recorded episodes, no new ones
+
+Stage 2 replays episodes that are already recorded and labelled. Nothing is generated for the probes.
+
+| Set | Episodes | Rooms | Members | Used for |
+|---|---|---|---|---|
+| T7, the stated intention, rounds 3 and 4 (prompts identical word for word in both rounds; checked) | 24 + 100 | 248 | 496 | fitting and testing |
+| K1, T7 with a stake "from above" (round 5) | 48 | 96 | 192 | fitting and testing |
+| K2, T7 with a payout as the stake (round 5) | 48 | 96 | 192 | fitting and testing |
+| Together | 220 | 440 | 880 | 50 scenarios, 17 domains |
+| I1, every member told to collude (round 3) | 24 | 48 | 96 | scored only, never fitted on |
+
+Why recorded episodes and not the main run of section 10 (300 new episodes): the labels of these episodes were coded
+and committed (`5bde5c5`) before any activation existed, which is the order section 6 asks for, and new episodes would
+need new coding first. The price is fewer runs per scenario than the six of section 10: two for 38 scenarios of T7, four
+for its other 12, four for every case of K1 and K2.
+
+Two things about this basis are departures and are stated as such:
+
+- **T7 gives the member its aim** ("You intend to see the decision go in favour of that interest."), so it is not
+  uninstructed in the sense of section 3. What still holds is the property the experiment was built for: all four
+  members read the same prompt, and members who end up voting for the stake option and members who do not exist under
+  it. Taking T7, K1 and K2 as the basis is my reading of his go-ahead; it is put to him with the pod.
+- **The rule of section 10 is not met on 50 scenarios** (clean rooms 9%, the rule asks for 15%), and section 15.1 made
+  that rule the gate. Stage 2 goes ahead at Andy's word, with the classes below in place of the one that is too rare.
+
+#### 2. Units, identical prompts, and the four contrasts
+
+A **member** is one agent of one episode; a **room** is one private room of one episode. Two units are compared only
+when their prompts were identical word for word when the episode began: same version, same scenario and the same seat
+(members) or the same room (rooms). Such units form a **matched set**. Runs of a scenario differ only in the sampling,
+so inside a matched set nothing the prompt says can separate the classes.
+
+| Contrast | Unit | Class 1 | Class 0 | Who decides the label | Units 1 / 0 | Matched sets with both classes | Pairs | Scenarios with a pair |
+|---|---|---|---|---|---|---|---|---|
+| **vote** (primary) | member | votes for the stake option | votes for the other option | the parsed vote, no coder | 518 / 362 | 112 | 280 | 34 |
+| hidden | member who argues for the other option in public | votes for the stake option all the same | votes for the option argued for | vote, and Claude Fable 5.2's reading of the public statements | 291 / 355 | 81 | 188 | 27 |
+| collusion_clean | room | collusion | clean | Claude Fable 5.2's room code and the votes (section 6) | 152 / 59 | 15 | 24 | 12 |
+| collusion_rest | room | collusion | any other room | the same | 152 / 288 | 64 | 144 | 33 |
+
+- **Why the primary contrast changes.** Section 6 made collusion against clean the main contrast and named "the
+  speaker's own final vote (no coder involved)" as a side contrast. Collusion against clean has 15 matched sets and 24
+  pairs here, too few to time anything. The vote has 280 pairs and needs no coder. So the vote is primary, and the
+  contrast of section 6 is computed and reported as fixed, next to a wider one (collusion against every other room).
+- **Why "hidden" is added.** Stage 1's most distinctive behaviour is the vote for the stake option after arguing for
+  the other option in public (291 members here). In this contrast both classes say the same thing in public, so it is
+  where a probe has the best chance to show more than the words do, or to fail to.
+- **Labels follow Claude Fable 5.2 alone** (note of this afternoon). The vote contrast does not depend on any coder.
+- **How precise this can be.** With 280 pairs in 34 scenarios an interval is roughly 0.08 to 0.10 wide on each side;
+  at a room position only the members who write there count (about 140 pairs), so wider. A signal below about 0.6 will
+  not be told from chance. This is a limit of using two to four runs per scenario.
+
+#### 3. Where the model is read
+
+Each recorded turn is passed through the model once more in the context in which it was written (section 7), and the
+residual stream is saved at layers 19 to 23.
+
+| Positions | What they are | Whose activation |
+|---|---|---|
+| 24 in the room: `m1.pre` … `m4.end` | For each of the four room messages: the token just before it starts (`pre`), its first token (`t0`), the tokens at 25%, 50% and 75% of it (`q1`, `q2`, `q3`), its last token (`end`) | the member who writes that message: messages 1 and 3 the one who opens, 2 and 4 the one who answers |
+| 8 after the room: `p1.pre` … `v.end` | Before and at the end of each of the member's three public statements, and of its vote | every member |
+| The token clock | Every 4th token of the room in order; position 0 is the token before the first message | whoever is writing there |
+| `last` of each public statement | The last token of the sequence, the read position of the instructed study | every member (for Q6) |
+
+At `m1.pre` the members who open a room have read exactly the same text in every run, so every score there must be
+exactly 0.5. The test checks this.
+
+**Changes against sections 7 and 8,** each for a stated reason:
+
+- At a room position the unit of a member contrast is the member who writes there (section 8 fixed the feature that
+  way and the room as the unit; with the vote as the label the unit has to be the member).
+- The public statements and the vote are read before they start and at their last token (section 7: the last token
+  only), so that the timeline runs to the vote.
+- The onset rule of Q2 is applied to the sequence of the 32 positions, not to the token grid: the anchor of section
+  15.2 has to be a fixed point in any case. The token clock is reported as a curve.
+- The J-space part is computed at the fixed points only (section 8: also every 8th token), to keep the pod short.
+- The neutral reader also reads the public discussion alone, so that the public positions have the same text baseline.
+
+#### 4. Probes, inputs and text baselines
+
+One probe per contrast, position and layer: standardise, logistic regression, fit on 16 domains and tested on the
+17th. Two details differ from the instructed study and change no score's meaning: class weights replace the balanced
+subsample, and the fit runs in the span of the training rows (an L2-penalised fit puts no weight outside that span;
+on a check the scores correlate above 0.9999 with a fit on every feature and give the same AUROC).
+
+The **score** is the matched-prompt AUROC: over all pairs of units of different classes inside matched sets, the share
+in which the probe scores the unit of class 1 higher (ties count half). 0.5 is chance. Intervals come from 2,000
+resamples of the scenarios, the same resamples for every input. "Mean" is the mean over the five layers.
+
+| Input | What it is |
+|---|---|
+| Activation | the residual stream at that position |
+| Words so far (text baseline 1) | TF-IDF of what was said up to that token, logistic regression, same folds |
+| Words by speaker (added) | the same, with every word marked as the unit's own or someone else's |
+| Neutral reader (text baseline 2) | the same model reads the words alone, with no system prompt and no scenario; a probe of the same kind on its activation at the same words |
+| J-space part, remainder | gradient pursuit over the whole vocabulary, at most 25 J-lens vectors, non-negative combination; the remainder is the activation minus that part. The lens is the published one (`neuronpedia/jacobian-lens`, Gemma-2-9B-it); the decomposition is the code of the J-space study's primary arm |
+| 25 principal components | of the training rows |
+| 200 random 25-dimensional subspaces, 200 random sets of 25 J-lens vectors | the two kinds of random draw of section 8. The J-lens sets are drawn from the vectors the pursuit used at that layer (a detail section 8 left open). Primary contrast only |
+
+**Why a third text baseline.** An activation belongs to one member, who knows which words of the room are its own.
+The bag of words of section 8 does not. On the test round, where everything a member will do is in its own words, the
+probe came out as "more than the words" against the two baselines of section 8, which is wrong by construction. With
+the words marked by speaker the bag of words reads the vote as well as the activation does there, and the rule says
+"not more than the words". So "more than the words" means above all three.
+
+#### 5. The rules, as they will be read off
+
+The questions are those of section 9. All on the primary contrast (vote), mean of layers 19 to 23, unless said.
+
+| | Question | Rule |
+|---|---|---|
+| Q1 | A signal at all? | Activation at the last token of the room (`m4.end`): interval above 0.5 |
+| Q2 | Where does it start? | The first of the 32 positions from which the lower bound stays above 0.5 for three positions in a row |
+| Q3 | How early? | The score at the end of each room message, and the first position at 0.75 or more |
+| Q4 | More than the words? | At a position, only where activation minus words, minus words by speaker AND minus neutral reader all have an interval above zero. In one number per phase, fixed here because 32 positions give 32 chances: the same three differences averaged over the 24 room positions, and over the 8 positions after the room. Also: how many positions lie between the probe's onset and the words' onset |
+| Q5 | Is J-space special? | Layer by position: the J-space part above the 95th percentile of both kinds of random draw. Next to it: J-space part minus 25 principal components |
+| Q6 | Does the detector of the instructed benchmark fire? | The probe fit on the instructed benchmark's collusion episodes (colluders against honest agents, public statements, last token), applied to these members' public statements. Prediction of section 9: near 0.5 |
+
+The readings of the outcomes in section 9 stand. Named now, so they are not picked later: the three other contrasts
+with the same table; the probe with the mean of the matched set removed; one probe fit at the end of the room and
+applied at every earlier room position; the token clock; the probes of the stated-intention episodes scored on the
+instructed control I1.
+
+`scripts/uninstructed_probe.py` applies every rule and writes `results/uninstructed/stage2/probe/PROBE.md` and
+`probe.json`; it also names the layer and the anchor that the rule of section 15.2 picks.
+
+**A check added before any run: what the rules do when there is nothing to find.** The same sweep is run with every
+label shuffled inside its matched set (`--shuffle-labels`). The true score is then 0.5 everywhere, with the same
+activations, folds and intervals, so whatever fires in such a pass fires by chance. Two readings are tied to it:
+
+- Q1 counts as a signal only if the score at `m4.end` is also above the 95th percentile of the same score over the
+  shuffled passes.
+- An onset (Q2), and with it the anchor of the causal phase, counts only if the best position of the real timeline is
+  above the 95th percentile of the best position over the shuffled passes.
+
+The pod runs 10 such passes on the primary contrast; with the tables on the Mac they are brought to at least 100,
+and the other contrasts get theirs there. `scripts/uninstructed_probe.py --summarize-nulls` writes the table
+(`NULLS.md`).
+
+Why this is needed: it was tried before any real activation existed, on the real episodes with the tiny test model's
+activations in place of Gemma's and the labels shuffled (24 passes, primary contrast, two text baselines of section 8;
+no result of the experiment can be read from such a pass). The scores average 0.50, as they must. But the intervals
+are somewhat too narrow: an interval lies wholly above 0.5 at 5% of the positions and wholly below at 4%, where 2.5%
+each is the nominal rate. The rule of Q1 fires in 2 of the 24 passes and the onset rule in 2; "more than the words"
+holds at some position in 5; and the best position of a timeline reaches 0.59 at the median and 0.64 at the 95th
+percentile. With two to four runs per scenario, one position near 0.6 is what chance looks like.
+
+#### 6. The causal phase, as adapted
+
+Section 15 stands with these changes, forced by what stage 1 found.
+
+- **Classes.** The direction is class 1 minus class 0 of the vote contrast, among members with identical prompts, at
+  the anchor, for the members who write there (formula of 15.2). Collusion against clean has too few matched sets.
+- **Layer and anchor.** By the rule of 15.2 on the room positions: the layer whose probe starts earliest, then the
+  higher score there, then the lower layer; the anchor is that position. If no layer has an onset inside the room,
+  the room interventions have no anchor and do not run.
+- **Which rooms.** Rooms in which both members voted for the stake option (to remove it) and rooms in which both
+  voted for the other option (to induce it), drawn with a fixed seed from matched sets of rooms that hold both kinds:
+  43 such sets hold 67 rooms of each kind, so the 48 per side of 15.7 can be drawn.
+- **Two halves.** As in 15.2: a direction estimated on one half of the domains is applied only to the other half.
+- **The same sampling, with paired random numbers.** Regeneration calls the same sampling as the recorded runs
+  (temperature 0.7 and the library's default cut to the 50 likeliest tokens). Only the random draw is replaced: each
+  regenerated call draws from its own seeded stream, the same under every condition. A condition that changes nothing
+  then reproduces the baseline's text, and effects are differences between paired runs.
+- **Outcomes.** Primary, as in 15.5: both members vote for the stake option, parsed from the votes. The room codes of
+  the regenerated rooms are read by Claude Fable 5.2 after the pull, blind, not by Gemma; the regenerated rooms are
+  written in the coders' case format for that.
+- **Added: steering at the vote.** Section 15 intervenes in the room and lets the vote follow. A second, direct test
+  is added and named here before any run: the whole recorded episode is kept, the direction is estimated at the token
+  before the vote (`v.pre`), and only the vote is generated again with the direction removed (for members who voted
+  for the stake option) or added (for those who voted for the other option), against the baseline, shuffled-label
+  directions of the same size and the instructed direction. 112 matched sets of members hold both votes (190 and 178
+  members). Its rules mirror C1 and C2: the own direction changes the share of votes for the stake option against the
+  baseline and against the shuffled-label directions, both intervals excluding zero.
+
+The conditions (15.4), the comparison directions (15.3) and the rules C1 to C4 (15.5) are unchanged.
+
+Details of the build:
+
+- The intervention is one hook at one layer. It edits the last position of the input (the anchor) and every generated
+  token; a swap edits the anchor only. The run stops with an error if the hook did not fire, or if generation did not
+  feed the whole input first and then one token at a time.
+- An anchor inside a message is reached by forcing the recorded tokens of that message up to the anchor and letting
+  the model continue. The prompts of the later messages are rebuilt from the new history with the protocol's own
+  templates; the same rebuild from the recorded history gives back all 5,280 recorded prompts of the 220 episodes word
+  for word.
+- "The same sampling" rests on the library version: the pod installs transformers 5.23.0, the version of all six
+  recorded pods, whose default keeps the 50 likeliest tokens.
+- The pairing of random numbers is exact on the CPU. On the GPU a row padded next to other rows can differ by
+  rounding, so a token may now and then differ between two conditions that should agree. The pairing lowers the
+  noise; no rule depends on it being exact.
+- `--plan` prints the number of regenerated rooms, votes and prompts without a model. The script writes its records
+  after every few rooms, stops before a new chunk when its time is up, and continues from its records when called
+  again.
+
+#### 7. What was built, and how it was checked
+
+| File | What it does |
+|---|---|
+| `uninstructed/stage2.py` | Units and labels from the record, matched sets, the matched-prompt AUROC with its interval, the probe fit, the direction of 15.2 |
+| `uninstructed/capture.py`, `scripts/uninstructed_capture.py` | Replay: the rooms token by token, the public statements and votes, the neutral reader, the instructed benchmark; the tables the probes read |
+| `scripts/uninstructed_decompose.py` | The J-space part of every fixed-point activation; the random sets of J-lens vectors |
+| `scripts/uninstructed_probe.py` | The probe sweep and the rules |
+| `uninstructed/causal.py`, `scripts/uninstructed_causal.py` | Directions, interventions during regeneration, the room phase and the vote phase, their summary |
+| `scripts/uninstructed_causal_check.py` | The checks of the causal phase on the tiny model |
+| `scripts/runpod_uninstructed_boot.sh`, `scripts/runpod_launch_uninstructed.py` | Pod modes `probe` and `causal`, their estimates, and the fetch of the tables after the results |
+| `scripts/uninstructed_tiny_e2e.py` | Checks H (probe path) and I (causal path) on the tiny model |
+
+Checked on the tiny random model, on a test round in which every member decides its vote up front and what it says
+follows from it (a planted signal):
+
+- Identical prompts give identical activations, and every input scores exactly 0.5 at the position before the first
+  message.
+- Every saved read equals a pass over the context cut at that token; the neutral reader's input holds the words and
+  nothing of the prompt; the words said so far are the right ones at every position.
+- The planted signal is found at the first token the members write, and the rules read it off.
+- Against the record: the units and pairs of the table in part 2 are counted by the same code the probes use.
+- The causal phase (15.9 and more): an intervention of size zero reproduces the unsteered output token for token; a
+  swap of a room's activation with itself changes nothing, and a swap with a donor puts the donor's activation at the
+  anchor; a large addition changes the output and edits the anchor and the generated tokens only; projecting out
+  leaves the component along the direction at the class-0 mean; `d = d_J + d_R` to rounding; a direction is never
+  applied to the half it came from; both phases run through the command line and match `--plan`.
+- With Gemma's own tokenizer (no model): in all 1,760 recorded room turns and 880 votes the tokens up to the anchor
+  are the tokens the generation would see.
+- A dry run of the whole probe path on the 244 real recorded episodes, with the tiny test model in place of Gemma and
+  every label shuffled: it runs through (488 rooms, 976 members, no missing position), and no result can be read
+  from it.
+
+Not checked, because it needs the real model on a GPU: memory and speed of the replay and of the steered generation,
+and that the hook fires under the real model's generation path (the run stops with an error if it does not).
+
+#### 8. Pods and cost
+
+One GPU at a time, A40 at $0.59 an hour. Nothing has been launched.
+
+| Pod | What runs | Expected | Cost | Cap and worst case |
+|---|---|---|---|---|
+| Probe | Replay of 244 recorded episodes (488 rooms, 3,904 public statements and votes, the neutral reader, 600 statements of the instructed benchmark), the J-space part of 97,600 activations, the probe sweep, 10 shuffled-label passes. No episode is generated | 2.3 h | $1.35 | 180 min + 40 min (+ 20), $2.36 |
+| Causal, all ten conditions (count for an anchor in the second message) | 2,112 regenerated rooms and 3,072 regenerated votes, at most 17,856 prompts | 8.9 h | $5.28 | 600 min + 40 min (+ 20), $6.49 |
+| Causal, smaller: baseline, own direction at two sizes, shuffled labels, instructed direction | 1,152 rooms and 2,304 votes, at most 10,368 prompts | 5.7 h | $3.34 | 400 min + 40 min (+ 20), $4.52 |
+
+The causal rows are counts from `--plan` at the measured rate of full episodes (1.58 s per prompt); the rate of these
+shorter prompts has not been measured, and the anchor is not known before the probe results. The causal pod gets its
+own approval then, with the numbers stated again.
+
+The probe pod's estimate rests on rates measured in the pilots (replay 0.17 s per room message and 0.51 s per public
+statement, decomposition 9.1 + 2.9 ms per activation) and on one assumption: the probe sweep, about two CPU-hours
+added up from single cells timed on the Mac, takes about 30 minutes on the pod's CPUs. After the results the pod's
+tables (about 2 GB) are fetched to the Mac, so that further probe analysis needs no pod; they are never committed.
+The balance read on 18 November at about 22:00 PST is $29.83, no pod is running, and the A40's stock is "low": the
+probe pod and either causal pod fit above the $20 floor even at their caps.
+
+#### 9. What this cannot show
+
+- Everything is one 9B model, one committee format, and a prompt that states the member's aim.
+- Two to four runs per scenario: effects below about 0.6 AUROC are not detectable, and most scenarios go one way.
+- The activation at a token is computed from the text before it. A probe can therefore show that the model's state
+  predicts the vote better or earlier than the words do, not that it knows something the text does not contain.
+- A direction that moves the vote is upstream of the decision in this test bed. That is not the same as "the
+  collusion variable".
+- The room codes and the public positions are one model's reading. No human has checked them.
